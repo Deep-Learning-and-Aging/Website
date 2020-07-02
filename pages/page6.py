@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -166,6 +166,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df_organ[df_organ.organ_2 != organ]
         matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
+
+        colorscale = get_colorscale(matrix_organ)
         d = {}
         d['data'] = go.Heatmap(z=matrix_organ.T,
                    x=matrix_organ.T.columns,
@@ -189,6 +191,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df_env = df[df.env_dataset == env_dataset]
         matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'])
+        colorscale =  get_colorscale(matrix_env)
 
         d = {}
         d['data'] = go.Heatmap(z=matrix_env,
