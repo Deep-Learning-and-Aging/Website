@@ -21,7 +21,7 @@ path_inputs = '/Users/samuel/Desktop/dash_app/final_inputs'
 path_biomarkers = '/Users/samuel/Desktop/dash_app/Biomarkers_raw.csv'
 path_linear = '/Users/samuel/Desktop/dash_app/LinearOutput/'
 
-df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/sex_age_eid_ethnicity.csv').set_index('id')
+df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
 biomarkers_groups = [os.path.basename(elem).replace('.csv', '') for elem in glob.glob(path_inputs + '/*.csv')]
 
 

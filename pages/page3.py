@@ -12,14 +12,14 @@ import os
 import numpy as np
 from scipy.stats import pearsonr
 import dash_table
-path_feat_imps = '/Users/samuel/Desktop/dash_app/feature_importances_final/'
-path_inputs = '/Users/samuel/Desktop/dash_app/final_inputs'
+path_feat_imps = '/Users/samuel/Desktop/dash_app/data/feature_importances_final/'
+path_inputs = '/Users/samuel/Desktop/dash_app/data/final_inputs'
 list_models = ['Correlation', 'ElasticNet', 'LightGbm', 'NeuralNetwork']
 targets = ['Sex', 'Age']
 list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
 list_organs = sorted(list(set(list_organs)))
 
-df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/sex_age_eid_ethnicity.csv').set_index('id')
+df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
 
 controls = dbc.Card([
     dbc.FormGroup([

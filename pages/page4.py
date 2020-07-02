@@ -16,7 +16,7 @@ import copy
 
 
 
-path_performance = '/Users/samuel/Desktop/dash_app/for_Samuel/'
+path_performance = '/Users/samuel/Desktop/dash_app/data/for_Samuel/'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
 

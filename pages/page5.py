@@ -15,7 +15,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_linear_ewas = '/Users/samuel/Desktop/dash_app/linear_output_v2/'
+path_linear_ewas = '/Users/samuel/Desktop/dash_app/data/linear_output_v2/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
