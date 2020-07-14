@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 import time
 import numpy as np
 from scipy.stats import pearsonr, linregress
-
+import re
 from .tools import get_dataset_options, ETHNICITY_COLS
 
 from app import app
@@ -21,7 +21,7 @@ path_inputs = '/Users/samuel/Desktop/dash_app/data/final_inputs'
 path_biomarkers = '/Users/samuel/Desktop/dash_app/data/Biomarkers_raw.csv'
 path_linear = '/Users/samuel/Desktop/dash_app/data/LinearOutput/'
 
-df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/data/sex_age_eid_ethnicity.csv').set_index('id')
+df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
 biomarkers_groups = [os.path.basename(elem).replace('.csv', '') for elem in glob.glob(path_inputs + '/*.csv')]
 
 
@@ -65,6 +65,18 @@ controls = dbc.Card([
             ),
         html.Br()
     ]),
+    dbc.FormGroup([
+        html.P("Limit the Sample Size (in thousands) : "),
+        dcc.Slider(
+            id='limit_sample_size',
+            min = 0,
+            max = 600000,
+            value = 600000,
+            step = 100000,
+            marks = dict(zip(range(0, 600000 + 1, 100000 ), [str(elem//1000)for elem in range(0, 600000 + 1, 100000)]))
+            ),
+        html.Br()
+    ])
 ])
 
 table_df = pd.DataFrame(data = {'Sex' : ['All', 'Male', 'Female'], 'corr' : [0, 0, 0], 'coef' : [0, 0, 0], 'p_value': [0, 0, 0]})
@@ -114,14 +126,14 @@ def generate_list_features_given_group_pf_biomarkers(value):
         return [{'value' : '', 'label' : ''}]
     else :
         cols = pd.read_csv(path_inputs + '/' + value + '.csv', nrows = 10).set_index('id').columns
-        cols = [ elem for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex']]
+        cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex']]
         return get_dataset_options(cols)
 
 # small test :
 @app.callback([Output('Plot Distribution feature', 'figure'),Output('Plot Reglin_all', 'figure'), Output('table', 'data'), Output('Plot Volcano', 'figure')],
-              [Input('select_group_biomarkers', 'value'), Input('select_biomarkers_of_group', 'value'), Input('Age filter', 'value'), Input('Ethnicity filter', 'value')])
-def plot_distribution_of_feature(value_group, value_feature, value_age_filter, value_ethnicity):
-    print(value_group, value_feature, value_age_filter)
+              [Input('select_group_biomarkers', 'value'), Input('select_biomarkers_of_group', 'value'), Input('Age filter', 'value'), Input('Ethnicity filter', 'value'), Input('limit_sample_size', 'value')])
+def plot_distribution_of_feature(value_group, value_feature, value_age_filter, value_ethnicity, sample_size_limit):
+    print(value_group, value_feature, value_age_filter, sample_size_limit)
 
     fig = {'layout' : dict(title='Distribution of the feature', # title of plot
                            xaxis={'title' : 'Value'}, # xaxis label
@@ -183,9 +195,10 @@ def plot_distribution_of_feature(value_group, value_feature, value_age_filter, v
 
     if value_group is not None and value_feature is not None:
         ## Load Data :
-        df_bio = pd.read_csv(path_inputs + '/%s.csv' % value_group).set_index('id').dropna()
+        df_bio = pd.read_csv(path_inputs + '/%s.csv' % value_group, nrows = sample_size_limit).set_index('id').dropna()
         df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
         df = df[df.columns[~df.columns.str.contains('_r')]]
+        df.columns = df.columns.str.replace('.0$', '')
         df = df[(df['Age when attended assessment centre'] < value_age_filter[1]) & (df['Age when attended assessment centre'] > value_age_filter[0]) ]
         if value_ethnicity is not None:
             df = df[df[value_ethnicity] == 1]

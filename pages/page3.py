@@ -74,6 +74,7 @@ table = dbc.Card([
 
 layout =  html.Div([
     dcc.Store(id='memory'),
+    dcc.Store(id = 'memory_no_str'),
     dcc.Loading([
         dbc.Container([
             dbc.Row([
@@ -151,13 +152,14 @@ layout =  html.Div([
 
 
 
-@app.callback([Output("Loading Data", "children"), Output("memory", "data")],
+@app.callback([Output("Loading Data", "children"), Output("memory", "data"), Output("memory_no_str", "data")],
               [Input('select_target', 'value'), Input('Select_organ_1', 'value')])
 def _plot_r2_scores(value_target, value_organ):
 
     list_models = []
     list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_*.csv' % (value_target, value_organ))
-    print(list_df)
+    list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_*.csv' % (value_target, value_organ))
+
     for idx, elem in enumerate(list_df):
         df_new = pd.read_csv(elem).set_index('features')
         _, _, _, model = os.path.basename(elem).split('_')
@@ -168,11 +170,34 @@ def _plot_r2_scores(value_target, value_organ):
             df = df_new
         else :
             df = df.join(df_new)
+
     df['mean'] = df.mean(axis = 1)
     df = df.sort_values('mean', ascending = True).drop(columns = ['mean'])
     df = df/df.sum()
     features = df.index
-    print(df)
+
+    list_models_sd = []
+    for idx, elem in enumerate(list_df_sd):
+        df_new_sd = pd.read_csv(elem).set_index('features')
+        _, _, _, _, model = os.path.basename(elem).split('_')
+        model = model.replace('.csv', '')
+        list_models_sd.append(model)
+        df_new_sd.columns = [model]
+        if idx == 0:
+            df_sd = df_new_sd
+        else :
+            df_sd = df_sd.join(df_new_sd)
+
+    df_sd['mean'] = df_sd.mean(axis = 1)
+    df_sd = df_sd.sort_values('mean', ascending = True).drop(columns = ['mean'])
+    df_sd = df_sd/df_sd.sum()
+    features_sd = df_sd.index
+
+    df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
+    df.index = df.index.str.replace('.0$', '', regex = True)
+    df_str.index = df_str.index.str.replace('.0$', '', regex = True)
+    print(df_str)
+
 
     # Add Corr plot
     # df_bio = pd.read_csv(path_inputs + '/%s.csv' % value_organ).set_index('id').dropna()
@@ -185,7 +210,7 @@ def _plot_r2_scores(value_target, value_organ):
     # corr_with_age.name = 'Correlation'
     # df = df.join(corr_with_age).dropna()
 
-    print(df)
+
     ## Plot
     d = {'data' : [go.Bar(name = model, x = df[model], y = df.index, orientation='h') for model in sorted(df.columns)],
          'layout' : dict(height = len(df.index) * 20,
@@ -258,7 +283,8 @@ def _plot_r2_scores(value_target, value_organ):
         style={"height": "100vh"},
         fluid = True)
     print([{"name": i, "id": i} for i in df.reset_index().columns])
-    return output, df.to_dict()
+
+    return output, df_str.to_dict(), df.to_dict()
 
 
 
@@ -280,7 +306,7 @@ def _sort_table(sort_by_col, data):
 
 
 @app.callback(Output('table_corr', 'data'),
-              [Input('select correlation type', 'value'), Input('memory', 'data')])
+              [Input('select correlation type', 'value'), Input('memory_no_str', 'data')])
 def _change_corr_method(value, data):
     df = pd.DataFrame(data = data)
     df = df[sorted(df.columns)]

@@ -36,6 +36,8 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
 All = sorted(Environmental + Biomarkers + Pathologies)
+
+## Old just to test : 
 organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',

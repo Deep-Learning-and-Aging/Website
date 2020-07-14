@@ -5,6 +5,8 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS
 import pandas as pd
 import plotly.graph_objs as go
+from scipy.cluster import hierarchy
+import plotly.figure_factory as ff
 
 from app import app
 import glob
@@ -74,11 +76,21 @@ layout = dbc.Container([
                         [dcc.Loading([
                             dcc.Graph(
                              id='Plot Corr Heatmap'
-                             ),
-                         ])],
-                        style={'overflowY': 'scroll', 'height': 1000, 'overflowX': 'scroll', 'width' : 1000},
+                             )]
+                            )],
+                        style={'overflowX': 'scroll', 'width' : 1000},
                         md=9)
-                        ])
+                    ]),
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Loading([
+                            dcc.Graph(
+                                id = 'plot HC'
+                            )
+                            ])
+                         ],
+                            style={'overflowX': 'scroll', 'width' : 1000})
+                    ])
             ], fluid = True)
 
 
@@ -188,7 +200,7 @@ def _hide_organ_dropdown(value_aggregate):
 
 
 
-@app.callback(Output('Plot Corr Heatmap', 'figure'),
+@app.callback([Output('Plot Corr Heatmap', 'figure'), Output('plot HC', 'figure')],
               [Input('select_eid_or_instances_res', 'value'), Input('select_aggregate_type_res', 'value'), Input('Select_organ_res', 'value'), Input('Select_step_res', 'value')])
 def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
@@ -196,9 +208,9 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
         customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
         print("customdata_score_x : ", customdata_score_x.shape)
         d = {}
-        d['layout'] = dict(height = 1000,
-                           width = 1000,
-                           margin = {'l': 0, 'b': 110, 't': 0, 'r': 0},
+        d['layout'] = dict(height = 700,
+                           width = 700,
+                           margin = {'l': 0, 'b': 0, 't': 0, 'r': 0},
                            xaxis = dict(titlefont=dict(size=8)),
                            yaxis = dict(titlefont=dict(size=8)),
                            plot_bgcolor='rgba(0,0,0,0)')
@@ -415,7 +427,10 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             df_miror = 1*df.isna()
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
+            cols = df.columns
+            linkage = hierarchy.linkage(df.fillna(0), method='complete')
             df = df.values
+
             np.fill_diagonal(df, np.nan)
             #print("x ", x.shape, "Total shape : ", df.shape, 'y ', y.shape)
 
@@ -441,6 +456,10 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                    colorscale = [[0, 'rgba(128,128,128, 0.7)'], [1, 'rgba(128,128,128, 0.7)']]
                                   )
                          ]
+            #pdist = hierarchy.distance.pdist(df)
+
+            d2 = ff.create_dendrogram(linkage, labels=cols)
+            n_cols = len(cols)
 
 
         else:
@@ -503,7 +522,10 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             df_miror = 1*df.isna()
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
+            cols = df.columns
+            linkage = hierarchy.linkage(df.fillna(0), method='complete')
             df = df.values
+
             np.fill_diagonal(df, np.nan)
 
             d['data'] = [
@@ -522,7 +544,14 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                            colorscale = [[0, 'rgba(128,128,128, 0.7)'], [1, 'rgba(128,128,128, 0.7)']]
                            )
                 ]
+            #pdist = hierarchy.distance.pdist(df)
 
-        return go.Figure(d)
+            d2 = ff.create_dendrogram(linkage, labels=cols)
+            n_cols = len(cols)
+
+        print(n_cols)
+        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
+
+        return go.Figure(d), d2
     else :
-        return go.Figure()
+        return go.Figure(), go.Figure()
