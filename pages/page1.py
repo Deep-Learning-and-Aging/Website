@@ -23,7 +23,7 @@ path_linear = '/Users/samuel/Desktop/dash_app/data/LinearOutput/'
 
 df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
 biomarkers_groups = [os.path.basename(elem).replace('.csv', '') for elem in glob.glob(path_inputs + '/*.csv')]
-
+print(biomarkers_groups)
 
 controls = dbc.Card([
     dbc.FormGroup([

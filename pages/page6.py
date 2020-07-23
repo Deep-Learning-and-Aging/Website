@@ -192,6 +192,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'])
         colorscale =  get_colorscale(matrix_env)
+        print(colorscale)
 
         d = {}
         d['data'] = go.Heatmap(z=matrix_env,

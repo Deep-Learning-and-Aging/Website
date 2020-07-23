@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 from scipy.cluster import hierarchy
 import plotly.figure_factory as ff
+from plotly.subplots import make_subplots
 
 from app import app
 import glob
@@ -62,6 +63,15 @@ controls = dbc.Card([
             ),
         html.Br()
     ]),
+    dbc.FormGroup([
+        html.P("Order by: "),
+        dcc.Dropdown(
+            id='Select_ordering',
+            options = get_dataset_options(['Score', 'Custom', 'Clustering']),
+            value = 'Score'
+            ),
+        html.Br()
+    ], id = 'Select_ordering_full')
 ])
 
 layout = dbc.Container([
@@ -196,17 +206,24 @@ def _hide_organ_dropdown(value_aggregate):
     else :
         return {}
 
-
+@app.callback(Output('Select_ordering_full', 'style'),
+              [Input('select_aggregate_type_res', 'value')])
+def _hide_organ_dropdown(value_aggregate):
+    #if value_aggregate is not None and value_aggregate == 'All':
+    #    return {'display': 'none'}
+    #else :
+    #    return {}
+    return {}
 
 
 
 @app.callback([Output('Plot Corr Heatmap', 'figure'), Output('plot HC', 'figure')],
-              [Input('select_eid_or_instances_res', 'value'), Input('select_aggregate_type_res', 'value'), Input('Select_organ_res', 'value'), Input('Select_step_res', 'value')])
-def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step):
+              [Input('select_eid_or_instances_res', 'value'), Input('select_aggregate_type_res', 'value'), Input('Select_organ_res', 'value'), Input('Select_step_res', 'value'), Input('Select_ordering', 'value')])
+def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step, value_ordering):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
         customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
-        print("customdata_score_x : ", customdata_score_x.shape)
+        organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
         d = {}
         d['layout'] = dict(height = 700,
                            width = 700,
@@ -222,16 +239,38 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                 return 'rgba(%s, %s, %s, 0.85)' % (255*(1 - x), 255*(1 - x), 255)
 
         if value_organ == 'All':
+            #Color Scale
             min = df.min().min()
             max = df.max().max()
             abs = np.abs(min/(min - max))
             colorscale =  [[0, f(min)],
                            [abs, 'rgba(255, 255, 255, 0.85)'],
                            [1, f(max)]]
+
+            df_miror = 1*df.isna()
+            df_miror = df_miror.replace(0, np.nan).values
+            np.fill_diagonal(df_miror, 1)
+            cols = df.columns
+            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+
+            dendro_leaves = d2['layout']['xaxis']['ticktext']
+            n_cols = len(cols)
+            if value_ordering == 'Score':
+                df = df.loc[organ_sorted_by_score, organ_sorted_by_score]
+                std = std.loc[organ_sorted_by_score, organ_sorted_by_score]
+                customdata_score_x = customdata_score_x.loc[organ_sorted_by_score, organ_sorted_by_score]
+                customdata_score_y = customdata_score_y.loc[organ_sorted_by_score, organ_sorted_by_score]
+            elif value_ordering == 'Clustering':
+                df = df.loc[dendro_leaves, dendro_leaves]
+                customdata_score_x = customdata_score_x.loc[dendro_leaves, dendro_leaves]
+                customdata_score_y = customdata_score_y.loc[dendro_leaves, dendro_leaves]
+                std = std.loc[dendro_leaves, dendro_leaves]
+
             if value_aggregate == 'All':
-                ## REmove ticks labels :
-                d['layout']['yaxis'] = dict(showticklabels=False)
-                d['layout']['xaxis'] = dict(showticklabels=False)
+                ## Remove ticks labels :
+                d['layout']['yaxis'] = dict(showticklabels = False)
+                d['layout']['xaxis'] = dict(showticklabels = False)
+
                 distincts_organs = list(set([elem.split('-')[0] for elem in df.index.values]))
                 distincts_views = list(set([elem.split('-')[1] for elem in df.index.values]))
                 list_elem_0 = np.char.array([elem.split('-') for elem in df.index])[:, 0]
@@ -239,8 +278,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                 list_elem_2 = np.char.array([elem.split('-') for elem in df.index])[:, 2]
                 list_elem_3 = np.char.array([elem.split('-') for elem in df.index])[:, 3]
 
-                x = df.index
-                y = df.index
+                x, y = df.index, df.index
 
                 ## Custom data & hovertemplate
                 # 4 different values
@@ -404,13 +442,14 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                    )
                               )
                 colorbar = dict(len = 1000 - 250, lenmode = 'pixels', y = 0.58)
-                d['layout']['shapes'] = shapes
-                d['layout']['annotations'] = annotations
-
+                if value_ordering not in ['Score', 'Clustering']:
+                    d['layout']['shapes'] = shapes
+                    d['layout']['annotations'] = annotations
+                df = df.values
+                np.fill_diagonal(df, np.nan)
             else :
                 x = df.index
                 y = df.index
-
 
                 hovertemplate = 'Organ_x : %{x}\
                                  <br>Score x : %{customdata[1]:.3f}\
@@ -419,19 +458,17 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                  <br>Score y : %{customdata[2]:.3f}\
                                  <br>\
                                  <br>Correlation : %{z:.3f} ± %{customdata[0]:.3f}'
-                print(std.values.shape, customdata_score_x)
 
                 customdata = np.dstack([std.values, customdata_score_x, customdata_score_y])
                 colorbar = None
+                df = df.values
+                np.fill_diagonal(df, np.nan)
+            #linkage = hierarchy.linkage(df.fillna(0), method='complete')
+            #leaves = hierarchy.leaves_list(linkage)
+            #leaves = df.index.values[leaves]
 
-            df_miror = 1*df.isna()
-            df_miror = df_miror.replace(0, np.nan).values
-            np.fill_diagonal(df_miror, 1)
-            cols = df.columns
-            linkage = hierarchy.linkage(df.fillna(0), method='complete')
-            df = df.values
 
-            np.fill_diagonal(df, np.nan)
+
             #print("x ", x.shape, "Total shape : ", df.shape, 'y ', y.shape)
 
             d['data'] = [
@@ -458,27 +495,43 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                          ]
             #pdist = hierarchy.distance.pdist(df)
 
-            d2 = ff.create_dendrogram(linkage, labels=cols)
-            n_cols = len(cols)
+
 
 
         else:
             mask = df.columns.str.contains(value_organ)
             customdata_score_x = customdata_score_x.iloc[mask, mask]
             customdata_score_y = customdata_score_y.iloc[mask, mask]
-
+            organ_ordered_by_score = customdata_score_x.index
             df = df[df.columns[df.columns.str.contains(value_organ)]]
             df = df.loc[df.index.str.contains(value_organ)]
             std = std[std.columns[std.columns.str.contains(value_organ)]]
             std = std.loc[std.index.str.contains(value_organ)]
-            if value_aggregate == 'All':
+
+            organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
+            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+            dendro_leaves = d2['layout']['xaxis']['ticktext']
+
+            if value_ordering == 'Score':
+                df = df.loc[organ_sorted_by_score, organ_sorted_by_score]
+                std = std.loc[organ_sorted_by_score, organ_sorted_by_score]
+                customdata_score_x = customdata_score_x.loc[organ_sorted_by_score, organ_sorted_by_score]
+                customdata_score_y = customdata_score_y.loc[organ_sorted_by_score, organ_sorted_by_score]
+            elif value_ordering == 'Clustering':
+                df = df.loc[dendro_leaves, dendro_leaves]
+                customdata_score_x = customdata_score_x.loc[dendro_leaves, dendro_leaves]
+                customdata_score_y = customdata_score_y.loc[dendro_leaves, dendro_leaves]
+                std = std.loc[dendro_leaves, dendro_leaves]
+
+            if value_aggregate == 'All' and value_ordering != 'Clustering':
                 list_elem_0 = np.char.array([elem.split('-') for elem in df.index])[:, 1]
                 list_elem_1 = np.char.array([elem.split('-') for elem in df.index])[:, 2] + '_' + np.char.array([elem.split('-') for elem in df.index])[:, 3]
                 x = [list_elem_0, list_elem_1]
                 y = [list_elem_0, list_elem_1]
-            else :
+            else :#value_aggregate != 'All' :
                 x = df.index
                 y = df.index
+
 
             list_elem_1 = np.char.array([elem.split('-') for elem in df.index])[:, 1]
             list_elem_2 = np.char.array([elem.split('-') for elem in df.index])[:, 2]
@@ -523,7 +576,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
             cols = df.columns
-            linkage = hierarchy.linkage(df.fillna(0), method='complete')
+            d2 = ff.create_dendrogram(df.fillna(0), labels=df.index)
             df = df.values
 
             np.fill_diagonal(df, np.nan)
@@ -544,14 +597,34 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                            colorscale = [[0, 'rgba(128,128,128, 0.7)'], [1, 'rgba(128,128,128, 0.7)']]
                            )
                 ]
-            #pdist = hierarchy.distance.pdist(df)
 
-            d2 = ff.create_dendrogram(linkage, labels=cols)
             n_cols = len(cols)
 
-        print(n_cols)
-        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
+        if value_ordering == 'Clustering':
+            fig = make_subplots(rows=2, cols=1,
+                                shared_xaxes=True,
+                                vertical_spacing=0.02)
+            for elem in d['data']:
+                fig.add_trace(elem, row = 2, col = 1)
+            for elem in d2['data']:
+                elem['showlegend'] = False
+                fig.add_trace(elem, row = 1, col = 1)
 
-        return go.Figure(d), d2
+            fig['layout']['xaxis']['range'] = [0, 100]
+            fig['layout']['xaxis']['showgrid'] = False
+            fig['layout']['yaxis']['domain'] = [0.7, 1.0]
+            fig['layout']['yaxis']['showticklabels'] = False
+            fig['layout']['yaxis']['showgrid'] = False
+            fig['layout']['yaxis2']['domain'] = [0, 0.7]
+            fig['layout']['yaxis2']['showgrid'] = False
+            if value_aggregate == 'All':
+                fig['layout']['xaxis2']['showticklabels'] = False
+                fig['layout']['xaxis']['autorange'] =  True
+                fig['layout']['yaxis2']['showticklabels'] = False
+            print(fig)
+        else :
+            fig = go.Figure(d)
+        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
+        return fig, d2
     else :
         return go.Figure(), go.Figure()

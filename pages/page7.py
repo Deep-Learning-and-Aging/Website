@@ -5,6 +5,7 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS
 import pandas as pd
 import plotly.graph_objs as go
+from .tools import get_colorscale
 
 from app import app
 import glob
@@ -15,7 +16,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_linear_ewas = '/Users/samuel/Desktop/dash_app/data/linear_output_v2/'
+path_scores_ewas = '/Users/samuel/Desktop/dash_app/data/Scores/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
@@ -36,7 +37,7 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
 All = sorted(Environmental + Biomarkers + Pathologies)
-
+dict_step_to_proper = dict(zip(['training', 'validation', 'test'], ['train', 'val', 'test']))
 ## Old just to test :
 organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
@@ -71,17 +72,25 @@ controls = dbc.Card([
         dcc.Dropdown(
             id='Select_step_scores_ewas',
             options = get_dataset_options(['training', 'validation', 'test']),
-            placeholder = 'test',
-            value = 'HeartImages'
+            value = 'test'
             ),
         html.Br()
     ], id = 'Select_step_ewas_scores'),
+    dbc.FormGroup([
+        html.P("View Scores by : "),
+        dcc.RadioItems(
+            id = 'Select_view_type',
+            options = get_dataset_options(['Organ', 'X']),
+            value = 'Organ',
+            labelStyle = {'display': 'inline-block', 'margin': '5px'}
+        )
+    ])
 
 ])
 
 
 layout = dbc.Container([
-                html.H1('Scores Multivariate XWAS'),
+                html.H1('Multivariate XWAS'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
@@ -103,13 +112,50 @@ layout = dbc.Container([
                                 id = 'Plot Bar Plot'
                             )
                          ],
-                            style={'overflowX': 'scroll', 'width' : 1000})
+                        style={'overflowX': 'scroll', 'width' : 1000})
                     ])
             ], fluid = True)
 
 
 
 @app.callback([Output('Plot R2 Heatmap', 'figure'), Output('Plot Bar Plot', 'figure')],
-             [Input('Select_algorithm', 'value'), Input('Select_step_scores_ewas', 'value'), Input('Select_data_type_scores', 'value')])
-def _compute_plots(algo, step, group):
-    return go.Figure(), go.Figure()
+             [Input('Select_algorithm', 'value'), Input('Select_step_scores_ewas', 'value'), Input('Select_data_type_scores', 'value'), Input('Select_view_type', 'value')])
+def _compute_plots(algo, step, group, view_type):
+    if algo is not None and step is not None:
+
+        df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]))
+        if group is not None and group != 'All':
+            df  = df[df.subset == group]
+        df_pivot = pd.pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ')
+        df_pivot_without_negative = df_pivot.clip(lower = 0)
+        d = dict()
+        print(get_colorscale(df_pivot_without_negative))
+
+        hovertemplate = 'X dataset : %{x}\
+                         <br>Organ : %{y}\
+                         <br>R2 Score : %{customdata}'
+        d['data'] = [
+            go.Heatmap(z=df_pivot_without_negative,
+                   x=df_pivot_without_negative.columns,
+                   y=df_pivot_without_negative.index,
+                    #hoverongaps = False,
+                    colorscale=get_colorscale(df_pivot_without_negative),
+                    customdata = df_pivot.round(4),
+                    hovertemplate = hovertemplate,
+                    )
+            ]
+
+        d2 = dict()
+        if view_type == 'Organ':
+            d2['data'] = [
+                go.Bar(name = organ, x = df[df.organ == organ].env_dataset, y = df[df.organ == organ].r2, error_y = dict(type = 'data', array = df[df.organ == organ]['std'])) for organ in df.organ.drop_duplicates()
+            ]
+        elif view_type == 'X':
+            d2['data'] = [
+                go.Bar(name = x_dataset, x = df[df.env_dataset == x_dataset].organ, y = df[df.env_dataset == x_dataset].r2, error_y = dict(type = 'data', array = df[df.env_dataset == x_dataset]['std'])) for x_dataset in df.env_dataset.drop_duplicates()
+            ]
+
+
+        return go.Figure(d), go.Figure(d2)
+    else :
+        return go.Figure(), go.Figure()

@@ -161,7 +161,7 @@ def _plot_r2_scores(value_target, value_organ):
     list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_*.csv' % (value_target, value_organ))
 
     for idx, elem in enumerate(list_df):
-        df_new = pd.read_csv(elem).set_index('features')
+        df_new = pd.read_csv(elem, na_filter = False).set_index('features')
         _, _, _, model = os.path.basename(elem).split('_')
         model = model.replace('.csv', '')
         list_models.append(model)
@@ -172,13 +172,15 @@ def _plot_r2_scores(value_target, value_organ):
             df = df.join(df_new)
 
     df['mean'] = df.mean(axis = 1)
+
     df = df.sort_values('mean', ascending = True).drop(columns = ['mean'])
     df = df/df.sum()
+
     features = df.index
 
     list_models_sd = []
     for idx, elem in enumerate(list_df_sd):
-        df_new_sd = pd.read_csv(elem).set_index('features')
+        df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
         _, _, _, _, model = os.path.basename(elem).split('_')
         model = model.replace('.csv', '')
         list_models_sd.append(model)
@@ -188,15 +190,26 @@ def _plot_r2_scores(value_target, value_organ):
         else :
             df_sd = df_sd.join(df_new_sd)
 
-    df_sd['mean'] = df_sd.mean(axis = 1)
-    df_sd = df_sd.sort_values('mean', ascending = True).drop(columns = ['mean'])
-    df_sd = df_sd/df_sd.sum()
-    features_sd = df_sd.index
+
+    list_models_mean = []
+    for idx, elem in enumerate(list_models_mean):
+        df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
+        _, _, _, _, model = os.path.basename(elem).split('_')
+        model = model.replace('.csv', '')
+        list_models_sd.append(model)
+        df_new_mean.columns = [model]
+        if idx == 0:
+            df_mean = df_new_mean
+        else :
+            df_mean = df_mean.join(df_new_mean)
+    df_sd = df_sd.loc[features]
+    df_mean = df_sd.loc[features]
+
 
     df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
     df.index = df.index.str.replace('.0$', '', regex = True)
     df_str.index = df_str.index.str.replace('.0$', '', regex = True)
-    print(df_str)
+
 
 
     # Add Corr plot
