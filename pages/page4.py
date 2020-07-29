@@ -74,34 +74,97 @@ controls = dbc.Card([
     ], id = 'Select_ordering_full')
 ])
 
-layout = dbc.Container([
-                html.H1('Correlations between accelerated aging'),
-                html.Br(),
-                html.Br(),
-                dbc.Row([
-                    dbc.Col([controls,
-                             html.Br(),
-                             html.Br()], md=3),
-                    dbc.Col(
-                        [dcc.Loading([
-                            dcc.Graph(
-                             id='Plot Corr Heatmap'
-                             )]
-                            )],
-                        style={'overflowX': 'scroll', 'width' : 1000},
-                        md=9)
-                    ]),
-                dbc.Row([
-                    dbc.Col([
-                        dcc.Loading([
-                            dcc.Graph(
-                                id = 'plot HC'
-                            )
+controls2 = dbc.Card([
+    dbc.FormGroup([
+        html.P("Select eid vs instances : "),
+        dcc.RadioItems(
+            id = 'select_eid_or_instances_res_2',
+            options = get_dataset_options(['*', 'instances', 'eids']),
+            value = '*',
+            labelStyle = {'display': 'inline-block', 'margin': '5px'}
+            ),
+        html.Br()
+    ]),
+    dbc.FormGroup([
+        html.P("Select aggregate type : "),
+        dcc.RadioItems(
+            id ='select_aggregate_type_res_2',
+            options = get_dataset_options(['bestmodels', 'All']),
+            value = 'bestmodels',
+            labelStyle = {'display': 'inline-block', 'margin': '5px'}
+            ),
+        html.Br()
+    ]),
+    dbc.FormGroup([
+        html.P("Select an Organ : "),
+        dcc.Dropdown(
+            id='Select_organ_res_2',
+            options = get_dataset_options(organs + ['All']),
+            placeholder = 'All',
+            value = 'All'
+            ),
+        html.Br()
+    ], id = 'select_organ_res_full_2'),
+    dbc.FormGroup([
+        html.P("Select step : "),
+        dcc.Dropdown(
+            id='Select_step_res_2',
+            options = get_dataset_options(['Test', 'Validation', 'Train']),
+            value = 'Test'
+            ),
+        html.Br()
+    ])
+])
+
+layout = html.Div([
+    dbc.Tabs([
+        dbc.Tab(label = 'Correlations between accelerated aging - Heatmap', tab_id='tab_corr'),
+        dbc.Tab(label = 'Correlations between accelerated aging - Clustering', tab_id = 'tab_HC'),
+    ], id = 'tab_manager_corr', active_tab = 'tab_corr'),
+    html.Div(id="tab_content_corr")
+])
+
+@app.callback(Output('tab_content_corr', 'children'),
+             [Input('tab_manager_corr', 'active_tab')])
+def _plot(ac_tab):
+    if ac_tab == 'tab_corr':
+        return dbc.Container([
+                        html.H1('Correlations between accelerated aging'),
+                        html.Br(),
+                        html.Br(),
+                        dbc.Row([
+                            dbc.Col([controls,
+                                     html.Br(),
+                                     html.Br()], md=3),
+                            dbc.Col(
+                                [dcc.Loading([
+                                    dcc.Graph(
+                                     id='Plot Corr Heatmap'
+                                     )]
+                                    )],
+                                style={'overflowX': 'scroll', 'width' : 1000},
+                                md=9)
                             ])
-                         ],
-                            style={'overflowX': 'scroll', 'width' : 1000})
-                    ])
-            ], fluid = True)
+                    ], fluid = True)
+    elif ac_tab == 'tab_HC' :
+        return dbc.Container([
+                        html.H1('Correlations between accelerated aging'),
+                        html.Br(),
+                        html.Br(),
+                        dbc.Row([
+                            dbc.Col([controls2,
+                                     html.Br(),
+                                     html.Br()], md=3),
+                            dbc.Col(
+                                [dcc.Loading([
+                                    dcc.Graph(
+                                        id = 'plot HC'
+                                    )]
+                                    )],
+                                style={'overflowX': 'scroll', 'width' : 1000},
+                                md=9)
+                            ])
+                    ], fluid = True)
 
 
 def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
@@ -197,7 +260,7 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
 
 
 
-
+## Hide if value_aggreate not All :
 @app.callback(Output('select_organ_res_full', 'style'),
               [Input('select_aggregate_type_res', 'value')])
 def _hide_organ_dropdown(value_aggregate):
@@ -205,19 +268,34 @@ def _hide_organ_dropdown(value_aggregate):
         return {'display': 'none'}
     else :
         return {}
-
-@app.callback(Output('Select_ordering_full', 'style'),
-              [Input('select_aggregate_type_res', 'value')])
+@app.callback(Output('select_organ_res_full_2', 'style'),
+              [Input('select_aggregate_type_res_2', 'value')])
 def _hide_organ_dropdown(value_aggregate):
-    #if value_aggregate is not None and value_aggregate == 'All':
-    #    return {'display': 'none'}
-    #else :
-    #    return {}
-    return {}
+    if value_aggregate is not None and value_aggregate != 'All':
+        return {'display': 'none'}
+    else :
+        return {}
+
+@app.callback(Output('plot HC', 'figure'),
+              [Input('select_eid_or_instances_res_2', 'value'), Input('select_aggregate_type_res_2', 'value'), Input('Select_organ_res_2', 'value'), Input('Select_step_res_2', 'value')])
+def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step):
+    if value_aggregate is not None and value_organ is not None and value_step is not None:
+        ## Load Data :
+        customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
+
+        if value_organ != 'All':
+            mask = df.columns.str.contains(value_organ)
+            df = df[df.columns[mask]]
+            df = df.loc[mask]
+        n_cols = len(df.columns)
+        d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
+        return d2
+    else :
+        return go.Figure()
 
 
-
-@app.callback([Output('Plot Corr Heatmap', 'figure'), Output('plot HC', 'figure')],
+@app.callback(Output('Plot Corr Heatmap', 'figure'),
               [Input('select_eid_or_instances_res', 'value'), Input('select_aggregate_type_res', 'value'), Input('Select_organ_res', 'value'), Input('Select_step_res', 'value'), Input('Select_ordering', 'value')])
 def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step, value_ordering):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
@@ -625,6 +703,6 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
         else :
             fig = go.Figure(d)
         d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
-        return fig, d2
+        return fig#, d2
     else :
-        return go.Figure(), go.Figure()
+        return go.Figure()#, go.Figure()
