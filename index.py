@@ -5,9 +5,9 @@ from dash.dependencies import Input, Output
 from collections import OrderedDict
 
 from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10
 
-num_pages = 5
+num_pages = 10
 top_bar = html.Div([
     dbc.Nav(
         [
@@ -16,6 +16,9 @@ top_bar = html.Div([
             dbc.NavItem(dbc.NavLink("Age Prediction Scores", href="/pages/page2", id="page2-link")),
             dbc.NavItem(dbc.NavLink("Feature Importances", href="/pages/page3", id="page3-link")),
             dbc.NavItem(dbc.NavLink("Correlations between accelerated aging", href="/pages/page4", id="page4-link")),
+
+            dbc.NavItem(dbc.NavLink("Images", href="/pages/page9", id="page9-link")),
+            dbc.NavItem(dbc.NavLink("GWAS", href="/pages/page10", id="page10-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Linear XWAS - Results", href="/pages/page5", id="page5-link"),
                               dbc.DropdownMenuItem("Linear XWAS - Correlations", href="/pages/page6", id="page6-link")],
                               label="Linear XWAS",
@@ -25,7 +28,8 @@ top_bar = html.Div([
                               dbc.DropdownMenuItem("Multivariate XWAS - Correlations", href="/pages/page8", id="page8-link")],
                               label="Multivariate XWAS",
                               nav=True
-                             )
+                             ),
+
         ],
     fill=True,
     pills=True),
@@ -69,6 +73,10 @@ def display_page(pathname):
         return page7.layout
     elif pathname == '/pages/page8':
         return page8.layout
+    elif pathname == '/pages/page9':
+        return page9.layout
+    elif pathname == '/pages/page10':
+        return page10.layout
     elif pathname == '/':
         return menu.layout
     else:
