@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -27,6 +27,12 @@ dict_chr_to_colors = {'1': '#b9b8b5', '2': '#222222', '3': '#f3c300', '4': '#875
                       '22': '#232f00', '23': '#e68fac'}
 
 #layout = html.Div([], id = 'id_menu')
+if MODE != 'All' :
+    style = {'display' : 'None'}
+    value = MODE
+else :
+    style = {}
+    value = organs_gwas[0]
 
 controls1 = dbc.Card([
     dbc.FormGroup([
@@ -34,11 +40,11 @@ controls1 = dbc.Card([
         dcc.Dropdown(
             id='select_organ',
             options = get_dataset_options(organs_gwas),
-            value = organs_gwas[0]
+            value = value
             ),
         html.Br()
     ])
-])
+], style = style)
 
 controls2 = dbc.Card([
     dbc.FormGroup([
@@ -46,11 +52,11 @@ controls2 = dbc.Card([
         dcc.Dropdown(
             id='select_organ2',
             options = get_dataset_options(organs_gwas),
-            value = organs_gwas[0]
+            value = value
             ),
         html.Br()
     ])
-])
+], style = style)
 
 
 

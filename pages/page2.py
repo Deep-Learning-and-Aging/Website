@@ -6,65 +6,122 @@ from .tools import get_dataset_options, ETHNICITY_COLS
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from app import app
+from app import app, MODE, filename
 import numpy as np
 
 distinct_colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000']
 
-path_performance = '/Users/samuel/Desktop/dash_app/data/for_Samuel/'
+path_performance = filename + 'page2_predictions/Performances/'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-controls = dbc.Card([
-    dbc.FormGroup([
-        html.P("Select eid vs instances : "),
-        dcc.RadioItems(
-            id = 'select_eid_or_instances',
-            options = get_dataset_options(['eids', 'instances']),
-            value = 'instances',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select aggregate type : "),
-        dcc.RadioItems(
-            id ='select_aggregate_type',
-            options = get_dataset_options(['bestmodels', 'withEnsembles', 'tuned']),
-            value = 'bestmodels',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select an Organ : "),
-        dcc.Dropdown(
-            id='Select_organ',
-            options = get_dataset_options(organs + ['All']),
-            placeholder = 'All',
-            value = 'All'
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select step : "),
-        dcc.Dropdown(
-            id='Select_step',
-            options = get_dataset_options(['Train', 'Test', 'Validation']),
-            value = 'Test'
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select a scoring metric : "),
-        dcc.RadioItems(
-            id='Select_metric',
-            options = get_dataset_options(['RMSE', 'R2']),
-            value = 'R2',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
+
+
+if MODE != 'All' :
+    controls = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select eid vs instances : "),
+            dcc.RadioItems(
+                id = 'select_eid_or_instances',
+                options = get_dataset_options(['eids', 'instances']),
+                value = 'instances',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select aggregate type : "),
+            dcc.RadioItems(
+                id ='select_aggregate_type',
+                options = get_dataset_options(['withEnsembles', 'tuned']),
+                value = 'withEnsembles',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ',
+                options = get_dataset_options([MODE]),
+                value = MODE
+                ),
+            html.Br()
+        ],
+        style = {'display': 'none'}),
+        dbc.FormGroup([
+            html.P("Select step : "),
+            dcc.Dropdown(
+                id='Select_step',
+                options = get_dataset_options(['Train', 'Test', 'Validation']),
+                value = 'Test'
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select a scoring metric : "),
+            dcc.RadioItems(
+                id='Select_metric',
+                options = get_dataset_options(['RMSE', 'R2']),
+                value = 'R2',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ])
     ])
-])
+
+else :
+    controls = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select eid vs instances : "),
+            dcc.RadioItems(
+                id = 'select_eid_or_instances',
+                options = get_dataset_options(['eids', 'instances']),
+                value = 'instances',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select aggregate type : "),
+            dcc.RadioItems(
+                id ='select_aggregate_type',
+                options = get_dataset_options(['bestmodels', 'withEnsembles', 'tuned']),
+                value = 'bestmodels',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ',
+                options = get_dataset_options(organs + ['All']),
+                placeholder = 'All',
+                value = 'All'
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select step : "),
+            dcc.Dropdown(
+                id='Select_step',
+                options = get_dataset_options(['Train', 'Test', 'Validation']),
+                value = 'Test'
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select a scoring metric : "),
+            dcc.RadioItems(
+                id='Select_metric',
+                options = get_dataset_options(['RMSE', 'R2']),
+                value = 'R2',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ])
+    ])
+
 
 
 layout = dbc.Container([

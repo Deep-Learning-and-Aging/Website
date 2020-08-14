@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 from .tools import get_colorscale
 
-from app import app
+from app import app, MODE, filename
 import glob
 import os
 import numpy as np
@@ -16,7 +16,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_scores_ewas = '/Users/samuel/Desktop/dash_app/data/Scores/'
+path_scores_ewas = filename + 'page7_MultivariateXWASResults/Scores/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
@@ -46,7 +46,8 @@ organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcortical
               'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
               'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
               'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
-
+if MODE != 'All':
+    organs = [MODE]
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select data type: "),
@@ -126,13 +127,16 @@ def _compute_plots(algo, step, group, view_type):
         df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]))
         if group is not None and group != 'All':
             df  = df[df.subset == group]
+
+        if MODE != 'All':
+            df = df[df.organ == MODE]
         df_pivot = pd.pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ')
         df_pivot_without_negative = df_pivot.clip(lower = 0)
         d = dict()
         print(get_colorscale(df_pivot_without_negative))
 
-        hovertemplate = 'X dataset : %{x}\
-                         <br>Organ : %{y}\
+        hovertemplate = 'X dataset : %{y}\
+                         <br>Organ : %{x}\
                          <br>R2 Score : %{customdata}'
         d['data'] = [
             go.Heatmap(z=df_pivot_without_negative,

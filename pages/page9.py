@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app
+from app import app, MODE, filename
 import glob
 import os
 import numpy as np
@@ -18,7 +18,15 @@ from PIL import Image
 import base64
 
 organs_gwas = ['Heart', 'Liver']
-filename = '/Users/samuel/Desktop/dash_app/data/attention_maps/AttentionMap_'
+if MODE != 'All':
+    style = {'display' : 'None'}
+    value = MODE
+    organs_gwas = [MODE]
+else :
+    style = {}
+    value = organs_gwas[0]
+
+path_attention_maps = filename + 'page9_AttentionMaps/AttentionMaps/AttentionMap_'
 
 
 controls = dbc.Card([
@@ -27,11 +35,11 @@ controls = dbc.Card([
         dcc.Dropdown(
             id='select_organ_map',
             options = get_dataset_options(organs_gwas),
-            value = organs_gwas[0]
+            value = value
             ),
         html.Br()
     ])
-])
+], style = style)
 
 
 layout =  html.Div([
@@ -60,7 +68,7 @@ layout =  html.Div([
              [Input('select_organ_map', 'value')])
 def _plot_manhattan_plot(organ):
     if organ is not None:
-        path_png = filename + organ + '.png'
+        path_png = path_attention_maps + organ + '.png'
         img_base64 = base64.b64encode(open(path_png, 'rb').read()).decode('ascii')
         src = 'data:image/png;base64,{}'.format(img_base64)
         return src

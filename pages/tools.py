@@ -1,11 +1,78 @@
 import numpy as np
-
+import pandas as pd
 ETHNICITY_COLS = ['Do_not_know', 'Prefer_not_to_answer', 'NA', 'White', 'British',
        'Irish', 'White_Other', 'Mixed', 'White_and_Black_Caribbean',
        'White_and_Black_African', 'White_and_Asian', 'Mixed_Other', 'Asian',
        'Indian', 'Pakistani', 'Bangladeshi', 'Asian_Other', 'Black',
        'Caribbean', 'African', 'Black_Other', 'Chinese', 'Other_ethnicity',
        'Other']
+
+
+dict_dataset_to_organ_and_view = {
+    ## Brain
+    'BrainGreyMatterVolumes' : ('Brain', 'MRI', 'GreyMatterVolumes'),
+    'BrainSubcorticalVolumes': ('Brain', 'MRI', 'SubcorticalVolumes'),
+    'BraindMRIWeightedMeans' : ('Brain', 'MRI', 'dMRIWeightedMeans'),
+    'BrainMRIAllBiomarkers' : ('Brain', 'MRI', 'AllBiomarkers'),
+    'CognitiveReactionTime' : ('Brain', 'Cognitive', 'ReactionTime'),
+    'CognitiveMatrixPatternCompletion' : ('Brain', 'Cognitive', 'MatrixPatternCompletion'),
+    'CognitiveTowerRearranging' : ('Brain', 'Cognitive', 'TowerRearranging'),
+    'CognitiveSymbolDigitSubstitution' : ('Brain', 'Cognitive', 'SymbolDigitSubstitution'),
+    'CognitivePairedAssociativeLearning' : ('Brain', 'Cognitive', 'PairedAssociativeLearning'),
+    'CognitiveProspectiveMemory' : ('Brain', 'Cognitive', 'ProspectiveMemory'),
+    'CognitiveNumericMemory' : ('Brain', 'Cognitive', 'NumericMemory'),
+    'CognitiveFluidIntelligence' : ('Brain', 'Cognitive', 'FluidIntelligence'),
+    'CognitiveTrailMaking' : ('Brain', 'Cognitive', 'TrailMaking'),
+    'CognitivePairsMatching' : ('Brain', 'Cognitive', 'PairsMatching'),
+    'CognitiveAllBiomarkers' : ('Brain', 'Cognitive', 'AllScalars'),
+    'BrainAndCognitive' : ('Brain', 'All', 'Scalars'),
+    ## Eyes
+    'EyeAutorefraction' : ('Eyes', 'Autorefraction', 'Scalars'),
+    'EyeAcuity' : ('Eyes', 'Acuity', 'Scalars'),
+    'EyeIntraocularPressure' : ('Eyes', 'IntraocularPressure', 'Scalars'),
+    'EyesAllBiomarkers' : ('Eyes', 'All', 'Scalars'),
+    # Hearing
+    'HearingTest' : ('Hearing', 'HearingTest', 'Scalars'),
+    # Lungs
+    'Spirometry' :  ('Lungs', 'Spirometry', 'Scalars'),
+    # Vascular
+    'BloodPressure' : ('Vascular', 'BloodPressure', 'Scalars'),
+    'CarotidUltrasound' : ('Vascular', 'Carotids', 'Scalars'),
+    'ArterialStiffness' : ('Vascular', 'PWA', 'Scalars'),
+    'VascularAllBiomarkers' : ('Vascular', 'All', 'Scalars'),
+    # Heart
+    'HeartAllBiomarkers' : ('Heart', 'All', 'Scalars'),
+    'HeartSize' : ('Heart', 'MRI', 'Size'),
+    'HeartPWA' : ('Heart', 'MRI', 'PWA'),
+    'HeartMRIAll' : ('Heart', 'MRI', 'AllScalars'),
+    'ECGAtRest' : ('Heart', 'ECG', 'Scalars'),
+
+    # Musculoskeletal
+    'AnthropometryImpedance' : ('Musculoskeletal', 'Scalars', 'Impedance'),
+    'AnthropometryBodySize' : ('Musculoskeletal', 'Scalars', 'BodySize'),
+    'BoneDensitometryOfHeel' : ('Musculoskeletal', 'Scalars', 'HeelBoneDensitometry'),
+    'HandGripStrength' : ('Musculoskeletal', 'Scalars', 'HandGripStrength'),
+    'MusculoskeletalAllBiomarkers' : ('Musculoskeletal', 'Scalars', 'AllBiomarkers'),
+
+    #Biochemistry
+    'BloodBiochemestry' : ('Biochemistry', 'Blood', 'Biomarkers'),
+    'UrineBiochemestry' : ('Biochemistry', 'Urine', 'Biomarkers'),
+    'Biochemistry' : ('Biochemistry', 'All', 'Biomarkers'),
+    #ImmuneSystem
+    'BloodCount' : ('ImmuneSystem', 'BloodCount', 'Scalars'),  # Need to do blood infection
+    'PhysicalActivity' : ('PhysicalActivity', 'FullWeek', 'Scalars'),
+    'Demographics' : ('Demographics', 'All', 'Scalars')
+}
+
+dict_organ_view_transf_to_id = { v : k for k, v in dict_dataset_to_organ_and_view.items()}
+print(dict_organ_view_transf_to_id)
+hierarchy_biomarkers = dict()
+for key1, key2, value in dict_dataset_to_organ_and_view.values():
+    if key1 not in hierarchy_biomarkers.keys():
+        hierarchy_biomarkers[key1] = {}
+    if key2 not in hierarchy_biomarkers[key1].keys():
+        hierarchy_biomarkers[key1][key2] = []
+    hierarchy_biomarkers[key1][key2].append(value)
 
 def get_dataset_options(list_):
     list_label_value = []

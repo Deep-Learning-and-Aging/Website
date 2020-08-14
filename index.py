@@ -5,9 +5,9 @@ from dash.dependencies import Input, Output
 from collections import OrderedDict
 
 from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10
-
-num_pages = 10
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11
+filename = '/Users/samuel/Desktop/dash_app/data_final/' 
+num_pages = 11
 top_bar = html.Div([
     dbc.Nav(
         [
@@ -16,9 +16,13 @@ top_bar = html.Div([
             dbc.NavItem(dbc.NavLink("Age Prediction Scores", href="/pages/page2", id="page2-link")),
             dbc.NavItem(dbc.NavLink("Feature Importances", href="/pages/page3", id="page3-link")),
             dbc.NavItem(dbc.NavLink("Correlations between accelerated aging", href="/pages/page4", id="page4-link")),
-
             dbc.NavItem(dbc.NavLink("Images", href="/pages/page9", id="page9-link")),
-            dbc.NavItem(dbc.NavLink("GWAS", href="/pages/page10", id="page10-link")),
+            dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS - Results", href="/pages/page10", id="page10-link"),
+                              dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link")],
+                              label="GWAS",
+                              nav=True
+                             ),
+            #dbc.NavItem(dbc.NavLink("GWAS", href="/pages/page10", id="page10-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Linear XWAS - Results", href="/pages/page5", id="page5-link"),
                               dbc.DropdownMenuItem("Linear XWAS - Correlations", href="/pages/page6", id="page6-link")],
                               label="Linear XWAS",
@@ -29,7 +33,6 @@ top_bar = html.Div([
                               label="Multivariate XWAS",
                               nav=True
                              ),
-
         ],
     fill=True,
     pills=True),
@@ -77,6 +80,8 @@ def display_page(pathname):
         return page9.layout
     elif pathname == '/pages/page10':
         return page10.layout
+    elif pathname == '/pages/page11':
+        return page11.layout
     elif pathname == '/':
         return menu.layout
     else:

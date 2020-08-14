@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS
 import pandas as pd
 import plotly.graph_objs as go
 
-from app import app
+from app import app, MODE, filename
 import glob
 import os
 import numpy as np
@@ -15,7 +15,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_linear_ewas = '/Users/samuel/Desktop/dash_app/data/linear_output_v2/'
+path_linear_ewas = filename + 'page5_LinearXWASResults/LinearOutput/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
@@ -37,7 +37,7 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
 All = sorted(Environmental + Biomarkers + Pathologies)
 
-## Old just to test : 
+## Old just to test :
 organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
@@ -45,7 +45,6 @@ organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcortical
               'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
               'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
               'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
-
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select data type: "),
@@ -73,13 +72,49 @@ controls = dbc.Card([
         dcc.Dropdown(
             id='Select_organ_ewas',
             options = get_dataset_options(organs),
-            placeholder = 'HeartImages',
             value = 'HeartImages'
             ),
         html.Br()
     ], id = 'Select_organ_ewas_full'),
-
 ])
+
+
+if MODE != 'All':
+    organs = [MODE]
+    controls = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select data type: "),
+            dcc.RadioItems(
+                id='Select_data_type',
+                options = get_dataset_options(['All', 'Biomarkers', 'Pathologies', 'Environmental']),
+                value = 'All',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ], id = 'Select_data_type_full'),
+        dbc.FormGroup([
+            html.P("Select an Environmental Dataset : "),
+            dcc.Dropdown(
+                id='Select_dataset_ewas',
+                options = [{'value' : '', 'label' : ''}],
+                placeholder = 'All',
+                value = 'All',
+                multi=True
+                ),
+            html.Br()
+        ], id = 'Select_dataset_ewas_full'),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ_ewas',
+                options = get_dataset_options([MODE]),
+                value = MODE
+                ),
+            html.Br()
+        ], id = 'Select_organ_ewas_full', style = {'display' : 'None'}),
+
+    ])
+
 
 @app.callback(Output('Select_dataset_ewas', 'options'),
               [Input('Select_data_type', 'value')])

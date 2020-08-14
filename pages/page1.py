@@ -10,31 +10,64 @@ import time
 import numpy as np
 from scipy.stats import pearsonr, linregress
 import re
-from .tools import get_dataset_options, ETHNICITY_COLS
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id
 
-from app import app
+
+from app import app, MODE, filename
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-path_inputs = '/Users/samuel/Desktop/dash_app/data/final_inputs'
-path_biomarkers = '/Users/samuel/Desktop/dash_app/data/Biomarkers_raw.csv'
-path_linear = '/Users/samuel/Desktop/dash_app/data/LinearOutput/'
+path_inputs = filename + 'page1_biomarkers/BiomarkerDatasets'
+path_biomarkers = filename + 'Biomarkers_raw.csv'
+path_linear = filename + 'page1_biomarkers/LinearOutput/'
 
 df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
-biomarkers_groups = [os.path.basename(elem).replace('.csv', '') for elem in glob.glob(path_inputs + '/*.csv')]
-print(biomarkers_groups)
-
-controls = dbc.Card([
-    dbc.FormGroup([
-        html.P("Select Dataset : "),
+dict_data = pd.read_csv('/Users/samuel/Desktop/dash_app/data_final/Data_Dictionary_Showcase.csv')
+dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
+#print(dict_feature_to_unit)
+if MODE != 'All':
+    organ_select = dbc.FormGroup([
+        html.P("Select Organ : "),
         dcc.Dropdown(
             id = 'select_group_biomarkers',
-            options = get_dataset_options(biomarkers_groups),
-            placeholder ="Select a dataset"
+            options = get_dataset_options([MODE]),
+            placeholder ="Select an organ",
+            value = MODE
+            ),
+            html.Br()
+        ], style = {'display' : 'None'})
+else :
+    organ_select = dbc.FormGroup([
+        html.P("Select Organ : "),
+        dcc.Dropdown(
+            id = 'select_group_biomarkers',
+            options = get_dataset_options(hierarchy_biomarkers.keys()),
+            placeholder ="Select an organ"
+            ),
+            html.Br()
+        ])
+
+controls = dbc.Card([
+    organ_select,
+    dbc.FormGroup([
+        html.P("Select View : "),
+        dcc.Dropdown(
+            id = 'select_view_biomarkers',
+            options = get_dataset_options([]),
+            placeholder ="Select a view"
             ),
         html.Br()
     ]),
+    dbc.FormGroup([
+        html.P("Select Transformation : "),
+        dcc.Dropdown(
+            id = 'select_transformation_biomarkers',
+            options = get_dataset_options([]),
+            placeholder ="Select a transformation"
+            ),
+        html.Br()
+        ]),
     dbc.FormGroup([
         html.P("Select Feature : "),
         dcc.Dropdown(
@@ -79,6 +112,24 @@ controls = dbc.Card([
     ])
 ])
 
+@app.callback(Output('select_transformation_biomarkers', 'options'),
+              [Input('select_group_biomarkers', 'value'), Input('select_view_biomarkers', 'value')])
+def generate_list_view_list(value_organ, value_view):
+    if value_view is None:
+        return [{'value' : '', 'label' : ''}]
+    else :
+        return get_dataset_options(hierarchy_biomarkers[value_organ][value_view])
+
+
+@app.callback(Output('select_view_biomarkers', 'options'),
+              [Input('select_group_biomarkers', 'value')])
+def generate_list_view_list(value):
+    if value is None:
+        return [{'value' : '', 'label' : ''}]
+    else :
+        return get_dataset_options(hierarchy_biomarkers[value])
+
+
 table_df = pd.DataFrame(data = {'Sex' : ['All', 'Male', 'Female'], 'corr' : [0, 0, 0], 'coef' : [0, 0, 0], 'p_value': [0, 0, 0]})
 table = dbc.Card([
     dbc.FormGroup([
@@ -120,21 +171,27 @@ layout = dbc.Container([
 
 
 @app.callback(Output('select_biomarkers_of_group', 'options'),
-              [Input('select_group_biomarkers', 'value')])
-def generate_list_features_given_group_pf_biomarkers(value):
-    if value is None:
+              [Input('select_group_biomarkers', 'value'), Input('select_view_biomarkers', 'value'), Input('select_transformation_biomarkers', 'value')])
+def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, value_transformation):
+    if value_transformation is None :
         return [{'value' : '', 'label' : ''}]
     else :
-        cols = pd.read_csv(path_inputs + '/' + value + '.csv', nrows = 10).set_index('id').columns
+        key = (value_organ, value_view, value_transformation)
+        df = dict_organ_view_transf_to_id[key]
+        cols = pd.read_csv(path_inputs + '/' + df + '.csv', nrows = 10).set_index('id').columns
         cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex']]
         return get_dataset_options(cols)
 
 # small test :
-@app.callback([Output('Plot Distribution feature', 'figure'),Output('Plot Reglin_all', 'figure'), Output('table', 'data'), Output('Plot Volcano', 'figure')],
-              [Input('select_group_biomarkers', 'value'), Input('select_biomarkers_of_group', 'value'), Input('Age filter', 'value'), Input('Ethnicity filter', 'value'), Input('limit_sample_size', 'value')])
-def plot_distribution_of_feature(value_group, value_feature, value_age_filter, value_ethnicity, sample_size_limit):
-    print(value_group, value_feature, value_age_filter, sample_size_limit)
-
+@app.callback([Output('Plot Distribution feature', 'figure'), Output('Plot Reglin_all', 'figure'), Output('table', 'data'), Output('Plot Volcano', 'figure')],
+              [Input('select_group_biomarkers', 'value'),
+               Input('select_view_biomarkers', 'value'),
+               Input('select_transformation_biomarkers', 'value') ,
+               Input('select_biomarkers_of_group', 'value'),
+               Input('Age filter', 'value'),
+               Input('Ethnicity filter', 'value'),
+               Input('limit_sample_size', 'value')])
+def plot_distribution_of_feature(value_group, value_view, value_transformation, value_feature, value_age_filter, value_ethnicity, sample_size_limit):
     fig = {'layout' : dict(title='Distribution of the feature', # title of plot
                            xaxis={'title' : 'Value'}, # xaxis label
                            yaxis={'title' : 'Count'}, # yaxis label
@@ -155,16 +212,18 @@ def plot_distribution_of_feature(value_group, value_feature, value_age_filter, v
                             yaxis={'title' :'-log(p_value)'}
                             )}
 
-    if value_group is not None :
-        features_p_val = pd.read_csv(path_linear + 'linear_correlations_%s.csv' % value_group)
+    if value_transformation is not None :
+
+        id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
+        features_p_val = pd.read_csv(path_linear + 'linear_correlations_%s.csv' % id_dataset)
         features_p_val['p_val'] = features_p_val['p_val'].replace(0, 1e-323)
-        print(features_p_val)
+        #print(features_p_val)
         hovertemplate = 'Feature : %{customdata[0]}\
                          <br>p_value : %{customdata[1]:.3E}\
                          <br>Correlation : %{customdata[2]:.3f}\
                          <br>Sample Size : %{customdata[3]}'
         customdata = np.stack([features_p_val['feature_name'], features_p_val['p_val'], features_p_val['corr_value'], features_p_val['size_na_dropped']], axis=-1)
-        print(customdata)
+        #print(customdata)
         fig3['data'] = [go.Scatter(x = features_p_val['corr_value'],
                                    y = -np.log10(features_p_val['p_val']),
                                    mode='markers',
@@ -193,9 +252,19 @@ def plot_distribution_of_feature(value_group, value_feature, value_age_filter, v
 
 
 
-    if value_group is not None and value_feature is not None:
+    if value_transformation is not None and value_feature is not None:
+        try :
+            unit = dict_feature_to_unit[value_feature]
+            if pd.isna(unit):
+                unit = ''
+            else :
+                unit = ' ( ' + unit + ' )'
+        except KeyError :
+            unit = ''
+        print(unit)
         ## Load Data :
-        df_bio = pd.read_csv(path_inputs + '/%s.csv' % value_group, nrows = sample_size_limit).set_index('id').dropna()
+        id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
+        df_bio = pd.read_csv(path_inputs + '/%s.csv' % id_dataset, nrows = sample_size_limit).set_index('id').dropna()
         df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
         df = df[df.columns[~df.columns.str.contains('_r')]]
         df.columns = df.columns.str.replace('.0$', '')
@@ -203,7 +272,7 @@ def plot_distribution_of_feature(value_group, value_feature, value_age_filter, v
         if value_ethnicity is not None:
             df = df[df[value_ethnicity] == 1]
         ## Generate histogram
-        fig['layout']['title'] = ' %s ' % value_feature
+        fig['layout']['title'] = ' %s ' % value_feature + unit
 
         fig['data'] = [] # [go.Histogram(x = df[value_feature], name = value_feature, histnorm='percent')]
 
@@ -273,9 +342,9 @@ def plot_distribution_of_feature(value_group, value_feature, value_age_filter, v
                                         histnorm='percent',
                                         marker=dict(color = '#ff93ac')))
         fig2 = {'data' : [lin_all, lin_male, lin_female, plot_points],
-                'layout' : dict(title='%s = f(Age)' % value_feature,#, p_val=%.3f, corr=%.3f, slope=%.3f, Ethnicity=%s' % (p_val, corr, slope, value_ethnicity), # title of plot
+                'layout' : dict(title='%s = f(Age)' % value_feature + unit,#, p_val=%.3f, corr=%.3f, slope=%.3f, Ethnicity=%s' % (p_val, corr, slope, value_ethnicity), # title of plot
                                 xaxis={'title' : 'Age'}, # xaxis label
-                                yaxis={'title' : value_feature},
+                                yaxis={'title' : value_feature + unit},
                                 legend=dict(orientation='h')
                                 )}
         table_df_up = pd.DataFrame(data = {'Sex' : ['All', 'Male', 'Female'],

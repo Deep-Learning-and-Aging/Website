@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
 import pandas as pd
 import plotly.graph_objs as go
 
-from app import app
+from app import app, filename
 import glob
 import os
 import numpy as np
@@ -15,7 +15,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_correlations_ewas = '/Users/samuel/Desktop/dash_app/data/Correlations/'
+path_correlations_ewas = filename + 'page8_MultivariateXWASCorrelations/CorrelationsMultivariate/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',

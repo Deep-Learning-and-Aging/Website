@@ -8,8 +8,8 @@ import plotly.graph_objs as go
 from scipy.cluster import hierarchy
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
-
-from app import app
+import base64
+from app import app, MODE, filename
 import glob
 import os
 import numpy as np
@@ -19,102 +19,196 @@ import copy
 
 
 
-path_performance = '/Users/samuel/Desktop/dash_app/data/for_Samuel/'
+path_performance = filename + 'page4_correlations/Performances/'
+path_residualscorr = filename + 'page4_correlations/ResidualsCorrelations/'
+path_clustering = filename + 'page4_correlations/HC_final.png'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-
-controls = dbc.Card([
-    dbc.FormGroup([
-        html.P("Select eid vs instances : "),
-        dcc.RadioItems(
-            id = 'select_eid_or_instances_res',
-            options = get_dataset_options(['*', 'instances', 'eids']),
-            value = '*',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select aggregate type : "),
-        dcc.RadioItems(
-            id ='select_aggregate_type_res',
-            options = get_dataset_options(['bestmodels', 'All']),
-            value = 'bestmodels',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select an Organ : "),
-        dcc.Dropdown(
-            id='Select_organ_res',
-            options = get_dataset_options(organs + ['All']),
-            placeholder = 'All',
-            value = 'All'
-            ),
-        html.Br()
-    ], id = 'select_organ_res_full'),
-    dbc.FormGroup([
-        html.P("Select step : "),
-        dcc.Dropdown(
-            id='Select_step_res',
-            options = get_dataset_options(['Test', 'Validation', 'Train']),
-            value = 'Test'
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Order by: "),
-        dcc.Dropdown(
-            id='Select_ordering',
-            options = get_dataset_options(['Score', 'Custom', 'Clustering']),
-            value = 'Score'
-            ),
-        html.Br()
-    ], id = 'Select_ordering_full')
-])
-
-controls2 = dbc.Card([
-    dbc.FormGroup([
-        html.P("Select eid vs instances : "),
-        dcc.RadioItems(
-            id = 'select_eid_or_instances_res_2',
-            options = get_dataset_options(['*', 'instances', 'eids']),
-            value = '*',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select aggregate type : "),
-        dcc.RadioItems(
-            id ='select_aggregate_type_res_2',
-            options = get_dataset_options(['bestmodels', 'All']),
-            value = 'bestmodels',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-            ),
-        html.Br()
-    ]),
-    dbc.FormGroup([
-        html.P("Select an Organ : "),
-        dcc.Dropdown(
-            id='Select_organ_res_2',
-            options = get_dataset_options(organs + ['All']),
-            placeholder = 'All',
-            value = 'All'
-            ),
-        html.Br()
-    ], id = 'select_organ_res_full_2'),
-    dbc.FormGroup([
-        html.P("Select step : "),
-        dcc.Dropdown(
-            id='Select_step_res_2',
-            options = get_dataset_options(['Test', 'Validation', 'Train']),
-            value = 'Test'
-            ),
-        html.Br()
+if MODE == 'All':
+    controls = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select eid vs instances : "),
+            dcc.RadioItems(
+                id = 'select_eid_or_instances_res',
+                options = get_dataset_options(['*', 'instances', 'eids']),
+                value = '*',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select aggregate type : "),
+            dcc.RadioItems(
+                id ='select_aggregate_type_res',
+                options = get_dataset_options(['bestmodels', 'All']),
+                value = 'bestmodels',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ_res',
+                options = get_dataset_options(organs + ['All']),
+                placeholder = 'All',
+                value = 'All'
+                ),
+            html.Br()
+        ], id = 'select_organ_res_full'),
+        dbc.FormGroup([
+            html.P("Select step : "),
+            dcc.Dropdown(
+                id='Select_step_res',
+                options = get_dataset_options(['Test', 'Validation', 'Train']),
+                value = 'Test'
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Order by: "),
+            dcc.Dropdown(
+                id='Select_ordering',
+                options = get_dataset_options(['Score', 'Custom', 'Clustering']),
+                value = 'Score'
+                ),
+            html.Br()
+        ], id = 'Select_ordering_full')
     ])
-])
+
+    controls2 = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select eid vs instances : "),
+            dcc.RadioItems(
+                id = 'select_eid_or_instances_res_2',
+                options = get_dataset_options(['*', 'instances', 'eids']),
+                value = '*',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select aggregate type : "),
+            dcc.RadioItems(
+                id ='select_aggregate_type_res_2',
+                options = get_dataset_options(['bestmodels', 'All']),
+                value = 'bestmodels',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ_res_2',
+                options = get_dataset_options(organs + ['All']),
+                placeholder = 'All',
+                value = 'All'
+                ),
+            html.Br()
+        ], id = 'select_organ_res_full_2'),
+        dbc.FormGroup([
+            html.P("Select step : "),
+            dcc.Dropdown(
+                id='Select_step_res_2',
+                options = get_dataset_options(['Test', 'Validation', 'Train']),
+                value = 'Test'
+                ),
+            html.Br()
+        ])
+    ])
+else :
+    controls = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select eid vs instances : "),
+            dcc.RadioItems(
+                id = 'select_eid_or_instances_res',
+                options = get_dataset_options(['*', 'instances', 'eids']),
+                value = '*',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select aggregate type : "),
+            dcc.RadioItems(
+                id ='select_aggregate_type_res',
+                options = get_dataset_options(['All']),
+                value = 'ALL',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ], style = {'display': 'none'}),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ_res',
+                options = get_dataset_options([MODE]),
+                value = MODE
+                ),
+            html.Br()
+        ], id = 'select_organ_res_full', style = {'display': 'none'}),
+        dbc.FormGroup([
+            html.P("Select step : "),
+            dcc.Dropdown(
+                id='Select_step_res',
+                options = get_dataset_options(['Test', 'Validation', 'Train']),
+                value = 'Test'
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Order by: "),
+            dcc.Dropdown(
+                id='Select_ordering',
+                options = get_dataset_options(['Score', 'Custom', 'Clustering']),
+                value = 'Score'
+                ),
+            html.Br()
+        ], id = 'Select_ordering_full')
+    ])
+
+    controls2 = dbc.Card([
+        dbc.FormGroup([
+            html.P("Select eid vs instances : "),
+            dcc.RadioItems(
+                id = 'select_eid_or_instances_res_2',
+                options = get_dataset_options(['*', 'instances', 'eids']),
+                value = '*',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ]),
+        dbc.FormGroup([
+            html.P("Select aggregate type : "),
+            dcc.RadioItems(
+                id ='select_aggregate_type_res_2',
+                options = get_dataset_options([MODE]),
+                value = MODE,
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+                ),
+            html.Br()
+        ], style = {'display': 'none'}),
+        dbc.FormGroup([
+            html.P("Select an Organ : "),
+            dcc.Dropdown(
+                id='Select_organ_res_2',
+                options = get_dataset_options([MODE]),
+                value = MODE
+                ),
+            html.Br()
+        ], id = 'select_organ_res_full_2', style = {'display': 'none'}),
+        dbc.FormGroup([
+            html.P("Select step : "),
+            dcc.Dropdown(
+                id='Select_step_res_2',
+                options = get_dataset_options(['Test', 'Validation', 'Train']),
+                value = 'Test'
+                ),
+            html.Br()
+        ])
+    ])
+
 
 layout = html.Div([
     dbc.Tabs([
@@ -156,11 +250,8 @@ def _plot(ac_tab):
                                      html.Br(),
                                      html.Br()], md=3),
                             dbc.Col(
-                                [dcc.Loading([
-                                    dcc.Graph(
-                                        id = 'plot HC'
-                                    )]
-                                    )],
+                                [dcc.Loading([], id = 'loading_plot_hc'
+                                )],
                                 style={'overflowX': 'scroll', 'width' : 1000},
                                 md=9)
                             ])
@@ -170,15 +261,15 @@ def _plot(ac_tab):
 def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     dict_value_step_value = dict(zip(['Validation', 'Train', 'Test'], ['val', 'train', 'test']))
     if value_aggregate == 'bestmodels':
-        df = pd.read_csv(path_performance + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
-        std = pd.read_csv(path_performance + 'ResidualsCorrelations_bestmodels_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        df = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        std = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
         if value_eid_vs_instances == '*':
-            df_instances = pd.read_csv(path_performance + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
+            df_instances = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
     else :
-        df = pd.read_csv(path_performance + 'ResidualsCorrelations_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
-        std = pd.read_csv(path_performance + 'ResidualsCorrelations_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        df = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        std = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
         if value_eid_vs_instances == '*':
-            df_instances = pd.read_csv(path_performance + 'ResidualsCorrelations_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
+            df_instances = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
 
     index_std = std.columns[0]
     index = df.columns[0]
@@ -276,23 +367,38 @@ def _hide_organ_dropdown(value_aggregate):
     else :
         return {}
 
-@app.callback(Output('plot HC', 'figure'),
+
+
+@app.callback(Output('loading_plot_hc', 'children'),
               [Input('select_eid_or_instances_res_2', 'value'), Input('select_aggregate_type_res_2', 'value'), Input('Select_organ_res_2', 'value'), Input('Select_step_res_2', 'value')])
 def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
         customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
 
-        if value_organ != 'All':
-            mask = df.columns.str.contains(value_organ)
-            df = df[df.columns[mask]]
-            df = df.loc[mask]
-        n_cols = len(df.columns)
-        d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
-        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
-        return d2
+        if value_aggregate == 'bestmodels':
+            img_base64 = base64.b64encode(open(path_clustering, 'rb').read()).decode('ascii')
+            src = 'data:image/png;base64,{}'.format(img_base64)
+            return html.Img(id = 'attentionmap', style={'height':'50%', 'width':'50%'}, src = src)
+
+        else :
+            if value_organ != 'All':
+                mask = df.columns.str.contains(value_organ)
+                df = df[df.columns[mask]]
+                df = df.loc[mask]
+            n_cols = len(df.columns)
+            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+            d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
+            return dcc.Graph(
+                id = 'plot HC',
+                figure = d2
+            )
+
     else :
-        return go.Figure()
+        return dcc.Graph(
+            id = 'plot HC',
+            figure = go.Figure()
+        )
 
 
 @app.callback(Output('Plot Corr Heatmap', 'figure'),
