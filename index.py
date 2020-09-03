@@ -6,17 +6,16 @@ from collections import OrderedDict
 
 from app import app
 from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11
-filename = '/Users/samuel/Desktop/dash_app/data_final/' 
+filename = '/Users/samuel/Desktop/dash_app/data_final/'
 num_pages = 11
 top_bar = html.Div([
     dbc.Nav(
         [
             dbc.NavItem(dbc.NavLink("Menu", href="/", active=True, id="menu-link")),
             dbc.NavItem(dbc.NavLink("Biomarkers", href="/pages/page1", id="page1-link")),
-            dbc.NavItem(dbc.NavLink("Age Prediction Scores", href="/pages/page2", id="page2-link")),
-            dbc.NavItem(dbc.NavLink("Feature Importances", href="/pages/page3", id="page3-link")),
-            dbc.NavItem(dbc.NavLink("Correlations between accelerated aging", href="/pages/page4", id="page4-link")),
-            dbc.NavItem(dbc.NavLink("Images", href="/pages/page9", id="page9-link")),
+            dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
+            dbc.NavItem(dbc.NavLink("Features importances", href="/pages/page3", id="page3-link")),
+            dbc.NavItem(dbc.NavLink("Attention Maps", href="/pages/page9", id="page9-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS - Results", href="/pages/page10", id="page10-link"),
                               dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link")],
                               label="GWAS",
@@ -33,6 +32,7 @@ top_bar = html.Div([
                               label="Multivariate XWAS",
                               nav=True
                              ),
+            dbc.NavItem(dbc.NavLink("Correlation between accelerated aging dimensions", href="/pages/page4", id="page4-link")),
         ],
     fill=True,
     pills=True),

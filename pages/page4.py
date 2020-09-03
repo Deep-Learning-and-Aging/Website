@@ -223,7 +223,7 @@ layout = html.Div([
 def _plot(ac_tab):
     if ac_tab == 'tab_corr':
         return dbc.Container([
-                        html.H1('Correlations between accelerated aging'),
+                        html.H1('Correlation between accelerated aging dimensions'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([

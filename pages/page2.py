@@ -125,7 +125,7 @@ else :
 
 
 layout = dbc.Container([
-                html.H1('Age Prediction Scores'),
+                html.H1('Age prediction performances'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([

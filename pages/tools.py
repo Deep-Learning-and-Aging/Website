@@ -8,6 +8,36 @@ ETHNICITY_COLS = ['Do_not_know', 'Prefer_not_to_answer', 'NA', 'White', 'British
        'Other']
 
 
+dict_dataset_images_to_organ_and_view = {
+    'Brain' : {
+        'MRI' : ['SagittalRaw', 'SagittalReference', 'CoronalRaw', 'CoronalReference', 'TransverseRaw', 'TransverseReference']
+        },
+    'Eyes' : {
+        'Fundus' : ['Raw'],
+        'OCT' : ['Raw']
+        },
+    'Arterial' : {
+        'Carotids' : ['Mixed', 'LongAxis', 'CIMT120', 'CIMT150', 'ShortAxis']
+        },
+    'Heart' : {
+        'MRI' : ['2chambersRaw', '2chambersContrast', '3chambersRaw', '3chambersContrast', '4chambersRaw', '4chambersContrast']
+        },
+    'Abdomen' : {
+        'Liver' : ['Raw', 'Contrast'],
+        'Pancreas' : ['Raw', 'Contrast']
+        },
+    'Musculoskeletal' : {
+        'Spine' : ['Sagittal', 'Coronal'],
+        'Hips' : ['MRI'],
+        'Knees' : ['MRI'],
+        'FullBody' : ['Mixed', 'Figure', 'Skeleton', 'Flesh']
+        },
+    'PhysicalActivity' : {
+        'FullWeek': ['GramianAngularField1minDifference','GramianAngularField1minSummation', 'MarkovTransitionField1min', 'RecurrencePlots1min']
+    }
+
+}
+
 dict_dataset_to_organ_and_view = {
     ## Brain
     'BrainGreyMatterVolumes' : ('Brain', 'MRI', 'GreyMatterVolumes'),
@@ -73,6 +103,7 @@ for key1, key2, value in dict_dataset_to_organ_and_view.values():
     if key2 not in hierarchy_biomarkers[key1].keys():
         hierarchy_biomarkers[key1][key2] = []
     hierarchy_biomarkers[key1][key2].append(value)
+print(hierarchy_biomarkers)
 
 def get_dataset_options(list_):
     list_label_value = []

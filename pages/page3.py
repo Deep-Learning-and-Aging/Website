@@ -124,7 +124,7 @@ layout =  html.Div([
     dcc.Store(id = 'memory_no_str'),
     dcc.Loading([
         dbc.Container([
-            html.H1('Feature Importances'),
+            html.H1('Features importances'),
             dbc.Row([
                 dbc.Col([controls,
                          html.Br(),
