@@ -8,5 +8,4 @@ numpy
 scipy
 pandas
 plotly
-PIL
 io
