@@ -8,6 +8,5 @@ numpy
 scipy
 pandas
 plotly
-base64
 PIL
 io
