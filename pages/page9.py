@@ -19,7 +19,9 @@ from PIL import Image
 import base64
 from io import BytesIO
 
+sample = 0
 path_attention_maps = filename + 'page9_AttentionMaps/Images'
+path_attention_maps_metadata = filename + 'page9_AttentionMaps/Attention_maps_infos/'
 
 if MODE != 'All':
     organ_select = dbc.FormGroup([
@@ -189,13 +191,13 @@ layout =  html.Div([
 def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency):
     print("raw_gradcam_saliency", raw_gradcam_saliency)
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
+        df_metadata = pd.read_csv(path_metadata)
+        df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
+        title = df_metadata['plot_title'].iloc[0]
         if organ in ['Eyes', 'Carotids', 'Knees', 'Hips'] :
-            col = [
-                    html.Img(id = 'attentionmap_left', style={'height':'50%', 'width':'50%'}),
-                    html.Img(id = 'attentionmap_right', style={'height':'50%', 'width':'50%'}),
-                 ]
-            path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_0_left.jpg'
-            path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_0_right.jpg'
+            path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
+            path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
             raw_left = mpimg.imread(path_image_left)
             raw_right = mpimg.imread(path_image_right)
             saliency_left = 5 * np.load(path_image_left.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
@@ -205,10 +207,20 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
             gradcam_left = np.load(path_image_left.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
             gradcam_right = np.load(path_image_right.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
 
+            if raw_left.shape[0] != gradcam_left.shape[0] and raw_left.shape[0] != saliency_left.size[0]:
+                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGBA')
+                #print(raw_left)
+                raw_left.thumbnail((gradcam_left.shape[0], gradcam_left.shape[1]), Image.ANTIALIAS)
+                #print(raw_left)
+                raw_left = np.asarray(raw_left)
+                #print(raw_left)
+
             img_left = np.zeros(raw_left.shape)
             img_right = np.zeros(raw_right.shape)
+            print(img_left.shape, gradcam_left.shape, saliency_left.size)
             final_left = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
             final_right = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
+
             if raw_gradcam_saliency is not None :
                 if 'Raw' in raw_gradcam_saliency :
                     img_left+= raw_left
@@ -233,6 +245,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                 img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
                 src_right = 'data:image/png;base64,{}'.format(img_base64_right)
                 col = [
+                        html.H3(title),
                         html.Img(id = 'attentionmap_left', style={'height':'50%', 'width':'50%'},
                                  src = src_left),
                         html.Img(id = 'attentionmap_right', style={'height':'50%', 'width':'50%'},
@@ -242,12 +255,12 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
 
         else :
 
-            path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_0.jpg'
+            path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
             raw = mpimg.imread(path_image)
             saliency = 5 * np.load(path_image.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
             saliency = Image.fromarray((saliency ).astype(np.uint8)).convert('RGBA')
             gradcam =  np.load(path_image.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
-
+            print(raw.shape, gradcam.shape, saliency.size)
             img = np.zeros(raw.shape)
             final = Image.new("RGBA", (raw.shape[1], raw.shape[0]))
             if raw_gradcam_saliency is not None :
@@ -255,7 +268,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                     img+= raw
                     final2 = Image.alpha_composite(final, Image.fromarray(img.astype(np.uint8)).convert('RGBA'))
                 if 'plot_gradcam' in raw_gradcam_saliency :
-                    img += 0.4 * gradcam * (255 - gradcam[:, :, 2].reshape((gradcam.shape[0],gradcam.shape[1], 1))) / 255
+                    img += 0.4 * gradcam #* (255 - gradcam[:, :, 2].reshape((gradcam.shape[0],gradcam.shape[1], 1))) / 255
                     final2 = Image.alpha_composite(final, Image.fromarray(img.astype(np.uint8)).convert('RGBA'))
                 if 'plot_saliency' in raw_gradcam_saliency :
                     final2 = Image.alpha_composite(Image.fromarray(img.astype(np.uint8)).convert('RGBA'), saliency)
@@ -265,6 +278,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                 img_base64 = base64.b64encode(buffered.getvalue()).decode('ascii')
                 src = 'data:image/png;base64,{}'.format(img_base64)
                 col = [
+                        html.H3(title),
                         html.Img(id = 'attentionmap', style={'height':'50%', 'width':'50%'},
                                  src = src),
                      ]
