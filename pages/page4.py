@@ -19,7 +19,7 @@ import copy
 
 
 
-path_performance = filename + 'page4_correlations/Performances/'
+path_performance = filename + 'page2_predictions/Performances/'
 path_residualscorr = filename + 'page4_correlations/ResidualsCorrelations/'
 path_clustering = filename + 'page4_correlations/HC_final.png'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
