@@ -23,7 +23,7 @@ path_biomarkers = filename + 'Biomarkers_raw.csv'
 path_linear = filename + 'page1_biomarkers/LinearOutput/'
 
 df_sex_age_ethnicity_eid = pd.read_csv(filename + 'page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
-dict_data = pd.read_csv('/Users/samuel/Desktop/dash_app/data_final/Data_Dictionary_Showcase.csv')
+dict_data = pd.read_csv(filename + 'Data_Dictionary_Showcase.csv')
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
 if MODE != 'All':
