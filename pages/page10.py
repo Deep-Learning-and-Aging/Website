@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app, MODE
+from app import app, MODE, filename
 import glob
 import os
 import numpy as np
@@ -17,9 +17,13 @@ import copy
 from PIL import Image
 import base64
 
-organs_gwas = ['Heart']
-filename = '/Users/samuel/Desktop/dash_app/data/GWAS/GWAS_volcano_Age_'
-filename_img = '/Users/samuel/Desktop/dash_app/data/GWAS/GWAS_ManhattanPlot_Age_'
+list_files = glob.glob(filename + 'page10_GWASResults/Volcano/GWAS_volcano_Age_*.csv')
+list_files = [elem.split('/')[-1] for elem in list_files]
+organs_gwas = sorted([elem.split('_')[3].replace('.csv', '') for elem in list_files])#['Heart']
+
+
+filename_volcano = filename + 'page10_GWASResults/Volcano/GWAS_volcano_Age_'
+filename_manhattan = filename + 'page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_'
 dict_chr_to_colors = {'1': '#b9b8b5', '2': '#222222', '3': '#f3c300', '4': '#875692', '5': '#f38400', '6': '#a1caf1',
                       '7': '#be0032', '8': '#c2b280', '9': '#848482', '10': '#008856', '11': '#555555',
                       '12': '#0067a5', '13': '#f99379', '14': '#604e97', '15': '#f6a600', '16': '#b3446c',
@@ -29,7 +33,7 @@ dict_chr_to_colors = {'1': '#b9b8b5', '2': '#222222', '3': '#f3c300', '4': '#875
 #layout = html.Div([], id = 'id_menu')
 if MODE != 'All' :
     style = {'display' : 'None'}
-    value = MODE
+    value = [elem for elem in organs_gwas if MODE in elem ]
 else :
     style = {}
     value = organs_gwas[0]
@@ -112,7 +116,7 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('select_organ', 'value')])
 def _plot_manhattan_plot(organ):
     if organ is not None:
-        path_png = filename_img + organ + '_Genes.png'
+        path_png = filename_manhattan + organ + '_Genes.png'
         img_base64 = base64.b64encode(open(path_png, 'rb').read()).decode('ascii')
         src='data:image/png;base64,{}'.format(img_base64)
         return src
@@ -124,7 +128,11 @@ def _plot_manhattan_plot(organ):
              [Input('select_organ2', 'value')])
 def _plot_volcano_plot(organ):
     if organ is not None:
-        df = pd.read_csv(filename + organ + '.csv')[['CHR', 'gene', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+        try :
+            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'gene', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+        except KeyError :
+            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+            df['gene'] = 'placeholder'
         d = {}
         d['data'] = [go.Scatter(x = df[df.CHR == chromo]['BETA'],
                                 y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),

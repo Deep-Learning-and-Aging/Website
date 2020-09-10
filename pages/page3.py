@@ -21,7 +21,7 @@ targets = ['Sex', 'Age']
 #if MODE != 'All':
 #    list_organs = [elem for elem in list_organs if MODE in elem]
 
-df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
+df_sex_age_ethnicity_eid = pd.read_csv(filename + 'page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([

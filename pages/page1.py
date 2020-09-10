@@ -22,7 +22,7 @@ path_inputs = filename + 'page1_biomarkers/BiomarkerDatasets'
 path_biomarkers = filename + 'Biomarkers_raw.csv'
 path_linear = filename + 'page1_biomarkers/LinearOutput/'
 
-df_sex_age_ethnicity_eid = pd.read_csv('/Users/samuel/Desktop/dash_app/data/sex_age_eid_ethnicity.csv').set_index('id')
+df_sex_age_ethnicity_eid = pd.read_csv(filename + 'page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
 dict_data = pd.read_csv('/Users/samuel/Desktop/dash_app/data_final/Data_Dictionary_Showcase.csv')
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
@@ -179,7 +179,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
         key = (value_organ, value_view, value_transformation)
         df = dict_organ_view_transf_to_id[key]
         cols = pd.read_csv(path_inputs + '/' + df + '.csv', nrows = 10).set_index('id').columns
-        cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex']]
+        cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
         return get_dataset_options(cols)
 
 # small test :
@@ -215,38 +215,41 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
     if value_transformation is not None :
 
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
-        features_p_val = pd.read_csv(path_linear + 'linear_correlations_%s.csv' % id_dataset)
-        features_p_val['p_val'] = features_p_val['p_val'].replace(0, 1e-323)
-        #print(features_p_val)
-        hovertemplate = 'Feature : %{customdata[0]}\
-                         <br>p_value : %{customdata[1]:.3E}\
-                         <br>Correlation : %{customdata[2]:.3f}\
-                         <br>Sample Size : %{customdata[3]}'
-        customdata = np.stack([features_p_val['feature_name'], features_p_val['p_val'], features_p_val['corr_value'], features_p_val['size_na_dropped']], axis=-1)
-        #print(customdata)
-        fig3['data'] = [go.Scatter(x = features_p_val['corr_value'],
-                                   y = -np.log10(features_p_val['p_val']),
-                                   mode='markers',
-                                   showlegend = False,
-                                   name = '',
-                                   hovertemplate = hovertemplate,
-                                   customdata=customdata)]
-        num_tests = features_p_val.shape[0]
-        shapes = []
-        line = dict(
-            color="Black",
-            width=0.5
-                  )
-        fig3['data'].append(
-            go.Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
-                       y = [-np.log((5/100)), -np.log((5/100))],
-                       name = 'No Correction',
-                       mode = 'lines'))
-        fig3['data'].append(
-            go.Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
-                       y = [-np.log((5/100)/num_tests), -np.log((5/100)/num_tests)],
-                       name = 'With Bonferoni Correction',
-                       mode = 'lines'))
+        try :
+            features_p_val = pd.read_csv(path_linear + 'linear_correlations_%s.csv' % id_dataset)
+            features_p_val['p_val'] = features_p_val['p_val'].replace(0, 1e-323)
+            #print(features_p_val)
+            hovertemplate = 'Feature : %{customdata[0]}\
+                             <br>p_value : %{customdata[1]:.3E}\
+                             <br>Correlation : %{customdata[2]:.3f}\
+                             <br>Sample Size : %{customdata[3]}'
+            customdata = np.stack([features_p_val['feature_name'], features_p_val['p_val'], features_p_val['corr_value'], features_p_val['size_na_dropped']], axis=-1)
+            #print(customdata)
+            fig3['data'] = [go.Scatter(x = features_p_val['corr_value'],
+                                       y = -np.log10(features_p_val['p_val']),
+                                       mode='markers',
+                                       showlegend = False,
+                                       name = '',
+                                       hovertemplate = hovertemplate,
+                                       customdata=customdata)]
+            num_tests = features_p_val.shape[0]
+            shapes = []
+            line = dict(
+                color="Black",
+                width=0.5
+                      )
+            fig3['data'].append(
+                go.Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
+                           y = [-np.log((5/100)), -np.log((5/100))],
+                           name = 'No Correction',
+                           mode = 'lines'))
+            fig3['data'].append(
+                go.Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
+                           y = [-np.log((5/100)/num_tests), -np.log((5/100)/num_tests)],
+                           name = 'With Bonferoni Correction',
+                           mode = 'lines'))
+        except FileNotFoundError:
+            fig3 = {}
 
 
 
@@ -261,13 +264,18 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
                 unit = ' ( ' + unit + ' )'
         except KeyError :
             unit = ''
-        print(unit)
         ## Load Data :
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
         df_bio = pd.read_csv(path_inputs + '/%s.csv' % id_dataset, nrows = sample_size_limit).set_index('id').dropna()
-        df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
-        df = df[df.columns[~df.columns.str.contains('_r')]]
-        df.columns = df.columns.str.replace('.0$', '')
+        print(value_group)
+        if value_group != 'PhysicalActivity' :
+            df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
+            df = df[df.columns[~df.columns.str.contains('_r')]]
+            df.columns = df.columns.str.replace('.0$', '')
+        else :
+            df = df_bio
+            df = df.rename(columns = dict(zip(['Ethnicity.' + elem for elem in ETHNICITY_COLS], ETHNICITY_COLS)))
+            print(df[ETHNICITY_COLS])
         df = df[(df['Age when attended assessment centre'] < value_age_filter[1]) & (df['Age when attended assessment centre'] > value_age_filter[0]) ]
         if value_ethnicity is not None:
             df = df[df[value_ethnicity] == 1]

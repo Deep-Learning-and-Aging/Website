@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app, MODE
+from app import app, MODE, filename
 import glob
 import os
 import numpy as np
@@ -18,7 +18,7 @@ from PIL import Image
 import base64
 
 organs_gwas = ['Heart', 'Liver']
-filename_heritabilty = '/Users/samuel/Desktop/dash_app/data/GWAS/GWAS_heritabilities_Age.csv'
+filename_heritabilty = filename + 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
 df = pd.read_csv(filename_heritabilty)
 
 if MODE != 'All' :

@@ -1,4 +1,6 @@
 /data
 /data_final
+/data_final_
 .DS_Store
 __pycache__/
+.csv
