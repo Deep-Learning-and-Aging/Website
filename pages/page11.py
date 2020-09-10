@@ -17,10 +17,10 @@ import copy
 from PIL import Image
 import base64
 
-organs_gwas = ['Heart', 'Liver']
+
 filename_heritabilty = filename + 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
 df = pd.read_csv(filename_heritabilty)
-
+organs_gwas = df['Organ'].drop_duplicates()
 if MODE != 'All' :
     style = {'display' : 'None'}
     value = MODE
