@@ -1,6 +1,7 @@
 dash_bootstrap_components
 dash_core_components
 dash_html_components
+dash-gif-component
 dash_table
 dash
 sklearn

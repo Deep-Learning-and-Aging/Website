@@ -310,7 +310,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         matrix = df[sorted(list_models)].corr()
         matrix.index.name = 'Corr'
         matrix = matrix.reset_index().round(3)
-        print("Matrix : ", matrix)
+        #print("Matrix : ", matrix)
 
         table = dbc.Card([
             dbc.FormGroup([

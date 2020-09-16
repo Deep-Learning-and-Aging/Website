@@ -209,16 +209,16 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
 
             img_left = np.zeros(raw_left.shape)
             img_right = np.zeros(raw_right.shape)
+            print(raw_left.shape, gradcam_left.shape,saliency_left.size)
             if raw_left.shape[0] != gradcam_left.shape[0] and raw_left.shape[0] != saliency_left.size[0]:
                 raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
                 raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
-                #print(raw_left)
+
                 raw_left.thumbnail((gradcam_left.shape[0], gradcam_left.shape[1]), Image.ANTIALIAS)
                 raw_right.thumbnail((gradcam_right.shape[0], gradcam_right.shape[1]), Image.ANTIALIAS)
-                #print(raw_left)
+
                 raw_left = np.asarray(raw_left)
                 raw_right = np.asarray(raw_right)
-                #print(raw_left)
 
             img_left = np.zeros(raw_left.shape)
             img_right = np.zeros(raw_right.shape)

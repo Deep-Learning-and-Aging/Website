@@ -3,19 +3,26 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from collections import OrderedDict
-
-from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11
-filename = '/Users/samuel/Desktop/dash_app/data_final/'
-num_pages = 11
+import sys
+sys.path.append('..')
+print(sys.path)
+from app import app, filename
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12
+num_pages = 12
 top_bar = html.Div([
     dbc.Nav(
         [
             dbc.NavItem(dbc.NavLink("Menu", href="/", active=True, id="menu-link")),
             dbc.NavItem(dbc.NavLink("Biomarkers", href="/pages/page1", id="page1-link")),
             dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
-            dbc.NavItem(dbc.NavLink("Features importances", href="/pages/page3", id="page3-link")),
-            dbc.NavItem(dbc.NavLink("Attention Maps", href="/pages/page9", id="page9-link")),
+            dbc.DropdownMenu([dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
+                              dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
+                              dbc.DropdownMenuItem("Videos", href="/pages/page12", id="page12-link")],
+                              label="Features importances",
+                              nav=True
+                             ),
+            #dbc.NavItem(dbc.NavLink("Features importances", href="/pages/page3", id="page3-link")),
+            #dbc.NavItem(dbc.NavLink("Attention Maps", href="/pages/page9", id="page9-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS - Results", href="/pages/page10", id="page10-link"),
                               dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link")],
                               label="GWAS",
@@ -82,10 +89,12 @@ def display_page(pathname):
         return page10.layout
     elif pathname == '/pages/page11':
         return page11.layout
+    elif pathname == '/pages/page12':
+        return page12.layout
     elif pathname == '/':
         return menu.layout
     else:
-        print('pathname :', pathname)
+        #print('pathname :', pathname)
         return '404'
 
 @app.callback([Output('menu-link', 'active')] + [Output('page%s-link' % i, 'active') for i in range(1, num_pages + 1)],
@@ -102,10 +111,11 @@ def _(pathname):
         if path_ == pathname:
             output[count] = True
         count += 1
-    print(output)
+    #print(output)
     return output
 
 
 
 if __name__ == '__main__':
+    print(app.__dict__)
     app.run_server(debug=True)

@@ -267,7 +267,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
         ## Load Data :
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
         df_bio = pd.read_csv(path_inputs + '/%s.csv' % id_dataset, nrows = sample_size_limit).set_index('id').dropna()
-        print(value_group)
+        #print(value_group)
         if value_group != 'PhysicalActivity' :
             df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
             df = df[df.columns[~df.columns.str.contains('_r')]]
@@ -275,7 +275,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
         else :
             df = df_bio
             df = df.rename(columns = dict(zip(['Ethnicity.' + elem for elem in ETHNICITY_COLS], ETHNICITY_COLS)))
-            print(df[ETHNICITY_COLS])
+            #print(df[ETHNICITY_COLS])
         df = df[(df['Age when attended assessment centre'] < value_age_filter[1]) & (df['Age when attended assessment centre'] > value_age_filter[0]) ]
         if value_ethnicity is not None:
             df = df[df[value_ethnicity] == 1]

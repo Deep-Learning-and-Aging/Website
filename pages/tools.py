@@ -95,7 +95,7 @@ dict_dataset_to_organ_and_view = {
 }
 
 dict_organ_view_transf_to_id = { v : k for k, v in dict_dataset_to_organ_and_view.items()}
-print(dict_organ_view_transf_to_id)
+
 hierarchy_biomarkers = dict()
 for key1, key2, value in dict_dataset_to_organ_and_view.values():
     if key1 not in hierarchy_biomarkers.keys():
@@ -103,7 +103,7 @@ for key1, key2, value in dict_dataset_to_organ_and_view.values():
     if key2 not in hierarchy_biomarkers[key1].keys():
         hierarchy_biomarkers[key1][key2] = []
     hierarchy_biomarkers[key1][key2].append(value)
-print(hierarchy_biomarkers)
+
 
 def get_dataset_options(list_):
     list_label_value = []

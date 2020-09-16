@@ -17,13 +17,17 @@ import copy
 from PIL import Image
 import base64
 
-list_files = glob.glob(filename + 'page10_GWASResults/Volcano/GWAS_volcano_Age_*.csv')
-list_files = [elem.split('/')[-1] for elem in list_files]
-organs_gwas = sorted([elem.split('_')[3].replace('.csv', '') for elem in list_files])#['Heart']
-
-
-filename_volcano = filename + 'page10_GWASResults/Volcano/GWAS_volcano_Age_'
+filename_volcano = filename + 'page10_GWASResults/Volcano/GWAS_hits_Age_'
 filename_manhattan = filename + 'page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_'
+
+list_files_volcano = glob.glob(filename_volcano + '*')
+list_files_volcano = [elem.split('/')[-1] for elem in list_files_volcano]
+organs_gwas_volcano = sorted([elem.split('_')[3].replace('.csv', '') for elem in list_files_volcano])#['Heart']
+
+list_files_manhattan = glob.glob(filename_manhattan + '*')
+list_files_manhattan = [elem.split('/')[-1] for elem in list_files_manhattan]
+organs_gwas_manhattan = sorted([elem.split('_')[3].replace('.png', '') for elem in list_files_manhattan])#['Heart']
+
 dict_chr_to_colors = {'1': '#b9b8b5', '2': '#222222', '3': '#f3c300', '4': '#875692', '5': '#f38400', '6': '#a1caf1',
                       '7': '#be0032', '8': '#c2b280', '9': '#848482', '10': '#008856', '11': '#555555',
                       '12': '#0067a5', '13': '#f99379', '14': '#604e97', '15': '#f6a600', '16': '#b3446c',
@@ -32,35 +36,39 @@ dict_chr_to_colors = {'1': '#b9b8b5', '2': '#222222', '3': '#f3c300', '4': '#875
 
 #layout = html.Div([], id = 'id_menu')
 if MODE != 'All' :
-    style = {'display' : 'None'}
-    value = [elem for elem in organs_gwas if MODE in elem ]
+    #style = {'display' : 'None'}
+    organs_gwas_volcano = [elem for elem in organs_gwas_volcano if MODE in elem ]
+    organs_gwas_manhattan = [elem for elem in organs_gwas_manhattan if MODE in elem ]
+    value_volcano = organs_gwas_volcano[0]
+    value_manhattan = organs_gwas_manhattan[0]
 else :
-    style = {}
-    value = organs_gwas[0]
+    #style = {}
+    value_volcano = 'All'
+    value_manhattan = 'All'
 
 controls1 = dbc.Card([
     dbc.FormGroup([
         html.P("Select an organ: "),
         dcc.Dropdown(
             id='select_organ',
-            options = get_dataset_options(organs_gwas),
-            value = value
+            options = get_dataset_options(organs_gwas_manhattan),
+            value = value_manhattan
             ),
         html.Br()
     ])
-], style = style)
+])
 
 controls2 = dbc.Card([
     dbc.FormGroup([
         html.P("Select an organ: "),
         dcc.Dropdown(
             id='select_organ2',
-            options = get_dataset_options(organs_gwas),
-            value = value
+            options = get_dataset_options(organs_gwas_volcano),
+            value = value_volcano
             ),
         html.Br()
     ])
-], style = style)
+])
 
 
 
@@ -116,7 +124,7 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('select_organ', 'value')])
 def _plot_manhattan_plot(organ):
     if organ is not None:
-        path_png = filename_manhattan + organ + '_Genes.png'
+        path_png = filename_manhattan + organ + '.png'
         img_base64 = base64.b64encode(open(path_png, 'rb').read()).decode('ascii')
         src='data:image/png;base64,{}'.format(img_base64)
         return src
@@ -128,22 +136,35 @@ def _plot_manhattan_plot(organ):
              [Input('select_organ2', 'value')])
 def _plot_volcano_plot(organ):
     if organ is not None:
-        try :
-            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'gene', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
-        except KeyError :
-            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
-            df['gene'] = 'placeholder'
         d = {}
-        d['data'] = [go.Scatter(x = df[df.CHR == chromo]['BETA'],
-                                y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
-                                mode = 'markers',
-                                name = 'CHR %s' % chromo,
-                                marker = dict(color =  dict_chr_to_colors[ str(chromo) ]),
-                                customdata = np.stack((df[df.CHR == chromo]['SNP'], df[df.CHR == chromo]['gene']), axis = 1),
-                                hovertemplate = """SNP : %{customdata[0]}
-                                                   <br> Gene : %{customdata[1]}"""
-                                )  for chromo in df['CHR'].drop_duplicates()
-                     ]
+        if organ != 'All':
+            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+            d['data'] = [go.Scatter(x = df[df.CHR == chromo]['BETA'],
+                                    y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
+                                    mode = 'markers',
+                                    name = 'CHR %s' % chromo,
+                                    marker = dict(color =  dict_chr_to_colors[ str(chromo) ]),
+                                    customdata = np.stack((df[df.CHR == chromo]['SNP'], df[df.CHR == chromo]['Gene'], df[df.CHR == chromo]['Gene_type']), axis = 1),
+                                    hovertemplate = """SNP : %{customdata[0]}
+                                                       <br> Gene : %{customdata[1]}
+                                                       <br> Gene Type : %{customdata[2]}"""
+                                    )  for chromo in df['CHR'].drop_duplicates()
+                         ]
+        else :
+            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
+            d['data'] = [go.Scatter(x = df[df.CHR == chromo]['BETA'],
+                                    y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
+                                    mode = 'markers',
+                                    name = 'CHR %s' % chromo,
+                                    marker = dict(color =  dict_chr_to_colors[ str(chromo) ]),
+                                    customdata = np.stack((df[df.CHR == chromo]['SNP'], df[df.CHR == chromo]['organ'], df[df.CHR == chromo]['Gene'], df[df.CHR == chromo]['Gene_type']), axis = 1),
+                                    hovertemplate = """SNP : %{customdata[0]}
+                                                       <br> Organ : %{customdata[1]}
+                                                       <br> Gene : %{customdata[2]}
+                                                       <br> Gene Type : %{customdata[3]}"""
+                                    )  for chromo in df['CHR'].drop_duplicates()
+                         ]
+
         d['layout'] = dict(title={'text' : 'Volcano plot', 'x':0.5,},# title of plot
                            xaxis={'title' :'Size Effect (SE)'}, # xaxis label
                            yaxis={'title' :'-log(p_value)'}
