@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -21,7 +21,7 @@ from io import BytesIO
 
 path_img = 'page12_AttentionMapsVideos/img/'
 path_gif = 'page12_AttentionMapsVideos/gif/'
-path_attention_maps_videos = filename + 'page12_AttentionMapsVideos/AttentionMapsVideos/'
+path_attention_maps_videos = './' + app.get_asset_url('page12_AttentionMapsVideos/AttentionMapsVideos/')
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select Organ : "),
@@ -105,23 +105,24 @@ layout = dbc.Container([
               Input('select_aging_rate_attention_video', 'value'),
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
-    print(organ, view, transformation, sex, age_group, aging_rate)
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
         print(organ, view, transformation, sex, age_group, aging_rate)
-    #if organ is not None and view is not None and transformation is not None:
         df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
         df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
         eid = df.iloc[0].eid
+        age = df.iloc[0].Age
+        res = df.iloc[0].res
+        title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
         path_to_gif = df.iloc[0].Gif.split('/')[-1]
         path_to_gif = path_gif + path_to_gif
         path_to_jpg = df.iloc[0].Picture.split('/')[-1]
         path_to_jpg = path_img + path_to_jpg
-        print(path_to_gif, path_to_jpg)
-        gif_display = gif.GifPlayer(
-            gif = 'assets2/' + path_to_gif,
-            still = 'assets2/' + path_to_jpg
-            )
-        print(gif_display)
+        gif_display = html.Div([
+            html.H3(title),
+            gif.GifPlayer(
+                gif = app.get_asset_url(path_to_gif),
+                still = app.get_asset_url(path_to_jpg)
+            )])
         return gif_display
     else :
         return dcc.Graph()

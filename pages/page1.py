@@ -13,17 +13,17 @@ import re
 from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id
 
 
-from app import app, MODE, filename
+from app import app, MODE
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-path_inputs = filename + 'page1_biomarkers/BiomarkerDatasets'
-path_biomarkers = filename + 'Biomarkers_raw.csv'
-path_linear = filename + 'page1_biomarkers/LinearOutput/'
+path_inputs = './' + app.get_asset_url('page1_biomarkers/BiomarkerDatasets')
+path_biomarkers = './' + app.get_asset_url('Biomarkers_raw.csv')
+path_linear = './' + app.get_asset_url('page1_biomarkers/LinearOutput/')
 
-df_sex_age_ethnicity_eid = pd.read_csv(filename + 'page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
-dict_data = pd.read_csv(filename + 'Data_Dictionary_Showcase.csv')
+df_sex_age_ethnicity_eid = pd.read_csv('./' + app.get_asset_url('page1_biomarkers/sex_age_eid_ethnicity.csv')).set_index('id')
+dict_data = pd.read_csv('./' + app.get_asset_url('Data_Dictionary_Showcase.csv'))
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
 if MODE != 'All':

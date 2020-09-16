@@ -1,6 +1,7 @@
 /data
 /data_final
 /data_final_
+/assets2
 .DS_Store
 __pycache__/
 .csv

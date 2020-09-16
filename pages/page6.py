@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
 import pandas as pd
 import plotly.graph_objs as go
 
-from app import app, filename
+from app import app
 import glob
 import os
 import numpy as np
@@ -15,7 +15,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_correlations_ewas = filename + 'page6_LinearXWASCorrelations/CorrelationsLinear/'
+path_correlations_ewas = './' + app.get_asset_url('page6_LinearXWASCorrelations/CorrelationsLinear/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',

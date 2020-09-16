@@ -9,7 +9,7 @@ from scipy.cluster import hierarchy
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
 import base64
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -19,9 +19,9 @@ import copy
 
 
 
-path_performance = filename + 'page2_predictions/Performances/'
-path_residualscorr = filename + 'page4_correlations/ResidualsCorrelations/'
-path_clustering = filename + 'page4_correlations/HC_final.png'
+path_performance = './' + app.get_asset_url('page2_predictions/Performances/')
+path_residualscorr = './' + app.get_asset_url('page4_correlations/ResidualsCorrelations/')
+path_clustering = './' + app.get_asset_url('page4_correlations/HC_final.png')
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
 if MODE == 'All':

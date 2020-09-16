@@ -6,7 +6,7 @@ from collections import OrderedDict
 import sys
 sys.path.append('..')
 print(sys.path)
-from app import app, filename
+from app import app
 from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12
 num_pages = 12
 top_bar = html.Div([

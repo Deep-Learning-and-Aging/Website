@@ -6,13 +6,13 @@ from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
 from scipy.stats import pearsonr
 import dash_table
-path_feat_imps = filename + 'page3_featureImp/FeatureImp/'
+path_feat_imps = './' + app.get_asset_url('page3_featureImp/FeatureImp/')
 list_models = ['Correlation', 'ElasticNet', 'LightGbm', 'NeuralNetwork']
 targets = ['Sex', 'Age']
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
@@ -21,7 +21,7 @@ targets = ['Sex', 'Age']
 #if MODE != 'All':
 #    list_organs = [elem for elem in list_organs if MODE in elem]
 
-df_sex_age_ethnicity_eid = pd.read_csv(filename + 'page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
+df_sex_age_ethnicity_eid = pd.read_csv('./' + app.get_asset_url('page1_biomarkers/sex_age_eid_ethnicity.csv')).set_index('id')
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([

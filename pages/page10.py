@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -17,8 +17,8 @@ import copy
 from PIL import Image
 import base64
 
-filename_volcano = filename + 'page10_GWASResults/Volcano/GWAS_hits_Age_'
-filename_manhattan = filename + 'page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_'
+filename_volcano = './' + app.get_asset_url('page10_GWASResults/Volcano/GWAS_hits_Age_')
+filename_manhattan = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_')
 
 list_files_volcano = glob.glob(filename_volcano + '*')
 list_files_volcano = [elem.split('/')[-1] for elem in list_files_volcano]

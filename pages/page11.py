@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -18,7 +18,7 @@ from PIL import Image
 import base64
 
 
-filename_heritabilty = filename + 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
+filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
 df = pd.read_csv(filename_heritabilty)
 organs_gwas = df['Organ'].drop_duplicates()
 if MODE != 'All' :

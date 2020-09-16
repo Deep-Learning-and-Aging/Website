@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.graph_objs as go
 from .tools import get_colorscale
 
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -16,7 +16,7 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-path_scores_ewas = filename + 'page7_MultivariateXWASResults/Scores/'
+path_scores_ewas = './' + app.get_asset_url('page7_MultivariateXWASResults/Scores/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',

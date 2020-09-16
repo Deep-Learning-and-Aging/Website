@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-from app import app, MODE, filename
+from app import app, MODE
 import glob
 import os
 import numpy as np
@@ -20,8 +20,8 @@ import base64
 from io import BytesIO
 
 sample = 0
-path_attention_maps = filename + 'page9_AttentionMaps/Images/Age'
-path_attention_maps_metadata = filename + 'page9_AttentionMaps/Attention_maps_infos/'
+path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age')
+path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
 
 if MODE != 'All':
     organ_select = dbc.FormGroup([
