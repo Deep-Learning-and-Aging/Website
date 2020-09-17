@@ -194,7 +194,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
-        title = df_metadata['plot_title'].iloc[0]
+        title = 'PLOT TITLE' #df_metadata['plot_title'].iloc[0]
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample

@@ -277,22 +277,24 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     df = df.set_index(index)
     std.index.name = 'Models'
     df.index.name = 'Models'
+    #print(df.shape, std.shape, df_instances.shape)
 
     df.index = ['-'.join(elem.split('_')[:4]) for elem in df.index.values]
     df.columns = ['-'.join(elem.split('_')[:4]) for elem in df.index.values]
 
     std.index = ['-'.join(elem.split('_')[:4]) for elem in std.index.values]
     std.columns = ['-'.join(elem.split('_')[:4]) for elem in std.index.values]
+    #print(df.index)
     if value_eid_vs_instances != '*':
         if value_aggregate == 'bestmodels':
-            scores = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_ranked_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
             scores.index = [elem.split('_')[1] for elem in scores.index.values]
             intersect = scores.index.intersection(df.index)
             customdata_score = scores.loc[intersect]
             df = df.loc[intersect, intersect]
             std = std.loc[intersect, intersect]
         else :
-            scores = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_ranked_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
             scores.index = ['-'.join(elem.split('_')[1:5]) for elem in scores.index.values]
             customdata_score = scores.loc[df.index]
         customdata_score = customdata_score['R-Squared_all']
@@ -302,36 +304,48 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
 
     else :
         if value_aggregate == 'bestmodels':
-            scores_instances = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_ranked_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
-            scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_ranked_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_instances = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
         else :
-            scores_instances = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_ranked_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
-            scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_ranked_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_instances = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
 
         index = df_instances.columns[0]
+        #print(df)
+        #print(scores_instances, scores_eids)
         df_instances = df_instances.set_index(index)
         df_instances.index.name = 'Models'
         df_instances.index = ['-'.join(elem.split('_')[:4]) for elem in df_instances.index.values]
         df_instances.columns = ['-'.join(elem.split('_')[:4]) for elem in df_instances.index.values]
         if value_aggregate == 'bestmodels':
-            scores_instances.index = [elem.split('_')[1] for elem in scores_instances.index.values]
-            scores_eids.index = [elem.split('_')[1] for elem in scores_eids.index.values]
+            scores_instances_organs = [elem.split('_')[1] for elem in scores_instances.index.values]
+            scores_instances_views = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in scores_instances.index.values]
+            scores_instances.index = [organ + view for organ, view in zip(scores_instances_organs, scores_instances_views)]
+
+            scores_eids_organs = [elem.split('_')[1] for elem in scores_eids.index.values]
+            scores_eids_view = [elem.split('_')[2].replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in scores_eids.index.values]
+            scores_eids.index = [organ + view for organ, view in zip(scores_eids_organs, scores_eids_view)]
+            #print(scores_eids, len(scores_eids), scores_instances, len(scores_instances))
             intersect = scores_instances.index.intersection(df.index)
             customdata_score_eids = scores_eids.loc[intersect]
             customdata_score_instances = scores_instances.loc[intersect]
+            #print(customdata_score_eids, len(customdata_score_eids), customdata_score_instances, len(customdata_score_instances))
             df = df.loc[intersect, intersect]
             std = std.loc[intersect, intersect]
-            df_instances = df.loc[intersect, intersect]
+            df_instances = df_instances.loc[intersect, intersect]
         else :
             scores_instances.index = ['-'.join(elem.split('_')[1:5]) for elem in scores_instances.index.values]
             scores_eids.index = ['-'.join(elem.split('_')[1:5]) for elem in scores_eids.index.values]
             customdata_score_eids = scores_eids.loc[df.index.values]
             customdata_score_instances = scores_instances.loc[df.index.values]
 
+        #print(df.shape, std.shape, df_instances.shape)
+        #print(customdata_score_eids)
         customdata_score_eids = customdata_score_eids['R-Squared_all'].values
         customdata_score_eids_x = np.tile(customdata_score_eids, (len(customdata_score_eids), 1))
         customdata_score_eids_y = customdata_score_eids_x.T
 
+        #print(customdata_score_eids_x.shape, customdata_score_instances.shape)
         customdata_score_instances = customdata_score_instances['R-Squared_all'].values
         customdata_score_instances_x = np.tile(customdata_score_instances, (len(customdata_score_instances), 1))
         customdata_score_instances_y = customdata_score_instances_x.T
