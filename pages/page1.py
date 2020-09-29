@@ -51,20 +51,20 @@ else :
 controls = dbc.Card([
     organ_select,
     dbc.FormGroup([
-        html.P("Select View : "),
+        html.P("Select Sublevel1 : "),
         dcc.Dropdown(
             id = 'select_view_biomarkers',
             options = get_dataset_options([]),
-            placeholder ="Select a view"
+            placeholder ="Select Sublevel1"
             ),
         html.Br()
     ]),
     dbc.FormGroup([
-        html.P("Select Transformation : "),
+        html.P("Select Sublevel2 : "),
         dcc.Dropdown(
             id = 'select_transformation_biomarkers',
             options = get_dataset_options([]),
-            placeholder ="Select a transformation"
+            placeholder ="Select Sublevel2"
             ),
         html.Br()
         ]),

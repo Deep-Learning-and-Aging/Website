@@ -56,7 +56,7 @@ controls = dbc.Card([
     ]),
     organ_select,
     dbc.FormGroup([
-        html.P("Select a View : "),
+        html.P("Select Sublevel1 : "),
         dcc.Dropdown(
             id='Select_view_1',
             options = get_dataset_options([])
@@ -64,7 +64,7 @@ controls = dbc.Card([
         html.Br()
     ]),
     dbc.FormGroup([
-        html.P("Select a Transformation : "),
+        html.P("Select Sublevel2 : "),
         dcc.Dropdown(
             id='Select_transf_1',
             options = get_dataset_options([])

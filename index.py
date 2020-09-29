@@ -4,11 +4,9 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
-sys.path.append('..')
-print(sys.path)
 from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12
-num_pages = 12
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12, page13
+num_pages = 13
 top_bar = html.Div([
     dbc.Nav(
         [
@@ -17,7 +15,8 @@ top_bar = html.Div([
             dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
                               dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
-                              dbc.DropdownMenuItem("Videos", href="/pages/page12", id="page12-link")],
+                              dbc.DropdownMenuItem("Videos", href="/pages/page12", id="page12-link"),
+                              dbc.DropdownMenuItem("TimeSeries", href="/pages/page13", id="page13-link")],
                               label="Features importances",
                               nav=True
                              ),
@@ -66,35 +65,12 @@ style={"height": "100vh", 'fontSize': 10})
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-
-    if pathname == '/pages/page1':
-        return page1.layout
-    elif pathname == '/pages/page2':
-        return page2.layout
-    elif pathname == '/pages/page3':
-        return page3.layout
-    elif pathname == '/pages/page4':
-        return page4.layout
-    elif pathname == '/pages/page5':
-        return page5.layout
-    elif pathname == '/pages/page6':
-        return page6.layout
-    elif pathname == '/pages/page7':
-        return page7.layout
-    elif pathname == '/pages/page8':
-        return page8.layout
-    elif pathname == '/pages/page9':
-        return page9.layout
-    elif pathname == '/pages/page10':
-        return page10.layout
-    elif pathname == '/pages/page11':
-        return page11.layout
-    elif pathname == '/pages/page12':
-        return page12.layout
+    if 'page' in pathname :
+        num_page = int(pathname.split('/')[-1][4:])
+        return getattr(globals()['page%s' % num_page], 'layout')
     elif pathname == '/':
         return menu.layout
     else:
-        #print('pathname :', pathname)
         return '404'
 
 @app.callback([Output('menu-link', 'active')] + [Output('page%s-link' % i, 'active') for i in range(1, num_pages + 1)],
@@ -117,5 +93,4 @@ def _(pathname):
 
 
 if __name__ == '__main__':
-    print(app.__dict__)
     app.run_server(debug=True)

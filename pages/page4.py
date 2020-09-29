@@ -31,7 +31,7 @@ if MODE == 'All':
             dcc.RadioItems(
                 id = 'select_eid_or_instances_res',
                 options = get_dataset_options(['*', 'instances', 'eids']),
-                value = '*',
+                value = 'eids',
                 labelStyle = {'display': 'inline-block', 'margin': '5px'}
                 ),
             html.Br()
@@ -288,7 +288,10 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     if value_eid_vs_instances != '*':
         if value_aggregate == 'bestmodels':
             scores = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
-            scores.index = [elem.split('_')[1] for elem in scores.index.values]
+            scores_organs = [elem.split('_')[1] for elem in scores.index.values]
+            scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in scores.index.values]
+            scores.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
+
             intersect = scores.index.intersection(df.index)
             customdata_score = scores.loc[intersect]
             df = df.loc[intersect, intersect]
@@ -297,9 +300,12 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
             scores = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
             scores.index = ['-'.join(elem.split('_')[1:5]) for elem in scores.index.values]
             customdata_score = scores.loc[df.index]
+
         customdata_score = customdata_score['R-Squared_all']
-        customdata_score_x = np.tile(customdata_score, (len(customdata_score), 1))
-        customdata_score_y = customdata_score_x.T
+        customdata_score_x = copy.deepcopy(df)
+        customdata_score_y = copy.deepcopy(df)
+        customdata_score_x.values[:] = np.tile(customdata_score, (len(customdata_score), 1))
+        customdata_score_y.values[:] = customdata_score_x.T
 
 
     else :
@@ -311,8 +317,6 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
             scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
 
         index = df_instances.columns[0]
-        #print(df)
-        #print(scores_instances, scores_eids)
         df_instances = df_instances.set_index(index)
         df_instances.index.name = 'Models'
         df_instances.index = ['-'.join(elem.split('_')[:4]) for elem in df_instances.index.values]
@@ -339,13 +343,10 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
             customdata_score_eids = scores_eids.loc[df.index.values]
             customdata_score_instances = scores_instances.loc[df.index.values]
 
-        #print(df.shape, std.shape, df_instances.shape)
-        #print(customdata_score_eids)
         customdata_score_eids = customdata_score_eids['R-Squared_all'].values
         customdata_score_eids_x = np.tile(customdata_score_eids, (len(customdata_score_eids), 1))
         customdata_score_eids_y = customdata_score_eids_x.T
 
-        #print(customdata_score_eids_x.shape, customdata_score_instances.shape)
         customdata_score_instances = customdata_score_instances['R-Squared_all'].values
         customdata_score_instances_x = np.tile(customdata_score_instances, (len(customdata_score_instances), 1))
         customdata_score_instances_y = customdata_score_instances_x.T
@@ -354,13 +355,10 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
 
         customdata_score_x = copy.deepcopy(df)
         customdata_score_y = copy.deepcopy(df)
-
         customdata_score_x.values[na_instances] = customdata_score_instances_x[na_instances]
         customdata_score_y.values[na_instances] = customdata_score_instances_y[na_instances]
-
         customdata_score_x.values[np.invert(na_instances)] = customdata_score_eids_x[np.invert(na_instances)]
         customdata_score_y.values[np.invert(na_instances)] = customdata_score_eids_y[np.invert(na_instances)]
-
     return customdata_score_x, customdata_score_y, df, std
 
 
@@ -421,6 +419,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
         customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
+        print("customdata_score_x3", customdata_score_x)
         organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
         d = {}
         d['layout'] = dict(height = 700,

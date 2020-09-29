@@ -13,7 +13,7 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 import copy
-organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
+organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
 path_linear_ewas = './' + app.get_asset_url('page5_LinearXWASResults/LinearOutput/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
@@ -37,14 +37,14 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
 All = sorted(Environmental + Biomarkers + Pathologies)
 
-## Old just to test :
-organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
-              'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
-              'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
-              'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
-              'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
-              'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
-              'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
+# ## Old just to test :
+# organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
+#               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
+#               'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
+#               'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
+#               'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
+#               'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
+#               'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select data type: "),
