@@ -19,12 +19,13 @@ from PIL import Image
 import base64
 from io import BytesIO
 
-path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age/')
+path_img = './' + app.get_asset_url('page15_AttentionMapsTimeSeries/img/')
+aging_rate = 'Normal'
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select Organ : "),
         dcc.Dropdown(
-            id = 'select_organ_attention_time',
+            id = 'select_organ_time',
             options = get_dataset_options(['Arterial', 'Heart', 'PhysicalActivity']),
             placeholder ="Select an organ"
             ),
@@ -33,7 +34,7 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select View : "),
         dcc.Dropdown(
-            id = 'select_view_attention_time',
+            id = 'select_view_time',
             options = [],
             placeholder ="Select a view"
             ),
@@ -42,7 +43,7 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select Transformation : "),
         dcc.Dropdown(
-            id = 'select_transformation_attention_time',
+            id = 'select_transformation_time',
             options = [],
             placeholder = "Select a transformation"
             ),
@@ -51,7 +52,7 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select channel : "),
         dcc.Dropdown(
-            id = 'select_channel_time',
+            id = 'select_time',
             options = get_dataset_options(['1']),
             placeholder ="Select which channel to display",
             value= '1'
@@ -61,7 +62,7 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select sex : "),
         dcc.Dropdown(
-            id = 'select_sex_attention_time',
+            id = 'select_sex_time',
             options = get_dataset_options(['Male', 'Female']),
             placeholder ="Select a sex"
             ),
@@ -70,25 +71,25 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select an age group : "),
         dcc.Dropdown(
-            id = 'select_age_group_attention_time',
+            id = 'select_age_group_time',
             options = get_dataset_options(['Young', 'Middle', 'Old']),
             placeholder ="Select an age group : "
             ),
         html.Br()
         ]),
-    dbc.FormGroup([
-        html.P("Select an aging rate : "),
-        dcc.Dropdown(
-            id = 'select_aging_rate_attention_time',
-            options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
-            placeholder ="Select an aging rate"
-            ),
-        html.Br()
-        ]),
+    # dbc.FormGroup([
+    #     html.P("Select an aging rate : "),
+    #     dcc.Dropdown(
+    #         id = 'select_aging_rate_attention_time',
+    #         options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+    #         placeholder ="Select an aging rate"
+    #         ),
+    #     html.Br()
+    #     ]),
     ])
 
 layout = dbc.Container([
-                html.H1('AttentionMaps - TimeSeries'),
+                html.H1('Datasets - TimeSeries'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
@@ -96,14 +97,14 @@ layout = dbc.Container([
                              html.Br(),
                              html.Br()], md=3),
                     dbc.Col(
-                        [dcc.Graph(id = 'timeseries_display')],
+                        [dcc.Graph(id = 'timeseries_raw_display')],
                         style={'overflowX': 'scroll', 'width' : 1000},
                         md=9)
                     ])
             ], fluid = True)
 
-@app.callback(Output('select_view_attention_time', 'options'),
-             [Input('select_organ_attention_time', 'value')])
+@app.callback(Output('select_view_time', 'options'),
+             [Input('select_organ_time', 'value')])
 def _get_options_transformation(value_organ):
     if value_organ == 'Arterial':
         return get_dataset_options(['PulseWaveAnalysis'])
@@ -114,13 +115,13 @@ def _get_options_transformation(value_organ):
     else :
         return []
 
-@app.callback(Output('select_channel_time', 'options'),
-             [Input('select_view_attention_time', 'value'), Input('select_transformation_attention_time', 'value')])
+@app.callback(Output('select_time', 'options'),
+             [Input('select_view_time', 'value'), Input('select_transformation_time', 'value')])
 def _get_options_transformation(value_view, value_transformation):
     if value_view == 'PulseWaveAnalysis':
         return get_dataset_options([str(elem) for elem in range(1, 1+1)])
     elif value_view == 'ECG':
-        return get_dataset_options([str(elem) for elem in range(1, 15 + 1)])
+        return get_dataset_options([str(elem) for elem in range(1, 12 + 1)])
     elif value_view == 'FullWeek':
         if value_transformation == 'Acceleration':
             return get_dataset_options([str(elem) for elem in range(1, 1 + 1)])
@@ -131,8 +132,8 @@ def _get_options_transformation(value_view, value_transformation):
     else :
         return []
 
-@app.callback(Output('select_transformation_attention_time', 'options'),
-             [Input('select_view_attention_time', 'value')])
+@app.callback(Output('select_transformation_time', 'options'),
+             [Input('select_view_time', 'value')])
 def _get_options_transformation(value_view):
     if value_view == 'PulseWaveAnalysis' or value_view == 'ECG':
         print(get_dataset_options(['TimeSeries']))
@@ -145,37 +146,52 @@ def _get_options_transformation(value_view):
         return []
 
 
-@app.callback(Output('timeseries_display', 'figure'),
-             [Input('select_organ_attention_time', 'value'),
-              Input('select_view_attention_time', 'value'),
-              Input('select_transformation_attention_time', 'value'),
-              Input('select_sex_attention_time', 'value'),
-              Input('select_age_group_attention_time', 'value'),
-              Input('select_aging_rate_attention_time', 'value'),
-              Input('select_channel_time', 'value')
+@app.callback(Output('timeseries_raw_display', 'figure'),
+             [Input('select_organ_time', 'value'),
+              Input('select_view_time', 'value'),
+              Input('select_transformation_time', 'value'),
+              Input('select_sex_time', 'value'),
+              Input('select_age_group_time', 'value'),
+              Input('select_time', 'value')
              ])
-def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel):
+def _display_gif(organ, view, transformation, sex, age_group, channel):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
-        #path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
-        #numpy_arr_raw = np.load(path_raw)
-        path_attentionmaps = path_attention_maps + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
-        numpy_attentionmap = np.load(path_attentionmaps)
-        print(numpy_attentionmap.shape)
+        path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        numpy_arr_raw = np.load(path_raw)
+        if view == 'ECG' :
+            unit_x = '2ms/Lsb'
+            unit_y = '5uV/Lsb'
+        elif view == 'PulseWaveAnalysis':
+            unit_x = '10ms/Lsb'
+            unit_y = 'blood-pressure [normalized]'
+        elif view == 'Walking':
+            unit_x == '10ms/Lsb'
+            unit_y == 'milligravity'
+        elif view == 'FullWeek':
+            if transformation == 'Acceleration' :
+                unit_x = '1min/Lsb'
+                unit_y = 'milligravity'
+            elif transformation == 'TimeSeriesFeatures' :
+                unit_x = '5min/Lsb'
+                unit_y = 'NONE'
+            else :
+                unit_x = ''
+                unit_y = ''
+        else :
+            unit_x = ''
+            unit_y = ''
         channel = int(channel)
-        np_channel = numpy_attentionmap[channel-1, :, :]
-        np_channel_data = np_channel[0]
-        np_channel_couleur = np_channel[1]
+        np_channel = numpy_arr_raw[channel - 1]
         scatter = go.Scatter(
-            y = np_channel_data,
+            y = np_channel,
             mode='markers',
             marker=dict(
-                size=5,
-                color=np_channel_couleur, #set color equal to a variable
-                colorscale='RdBu_r', # one of plotly colorscales
-                showscale=True
+                size=5
                 )
             )
-        d = {'data' : [scatter]}
+        d = {'data' : [scatter], 'layout' : {'xaxis' : {'title' : {'text' : unit_x}},
+                                             'yaxis' : {'title' : {'text' : unit_y}}}
+            }
         return go.Figure(d)
     else :
         return go.Figure()

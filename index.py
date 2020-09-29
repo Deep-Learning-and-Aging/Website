@@ -5,13 +5,19 @@ from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
 from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12, page13
-num_pages = 13
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12, page13, page14, page15, page16
+num_pages = 16
 top_bar = html.Div([
     dbc.Nav(
         [
             dbc.NavItem(dbc.NavLink("Menu", href="/", active=True, id="menu-link")),
-            dbc.NavItem(dbc.NavLink("Biomarkers", href="/pages/page1", id="page1-link")),
+            dbc.DropdownMenu([dbc.DropdownMenuItem("Scalars", href="/pages/page1", id="page1-link"),
+                              dbc.DropdownMenuItem("Images", href="/pages/page14", id="page14-link"),
+                              dbc.DropdownMenuItem("Videos", href="/pages/page16", id="page16-link"),
+                              dbc.DropdownMenuItem("TimeSeries", href="/pages/page15", id="page15-link")],
+                              label="Datasets",
+                              nav=True
+                             ),
             dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
                               dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
