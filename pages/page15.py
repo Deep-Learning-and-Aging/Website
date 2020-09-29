@@ -52,40 +52,62 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select channel : "),
         dcc.Dropdown(
-            id = 'select_time',
+            id = 'select_time_channel',
             options = get_dataset_options(['1']),
             placeholder ="Select which channel to display",
             value= '1'
         ),
         html.Br()
         ]),
-    dbc.FormGroup([
-        html.P("Select sex : "),
-        dcc.Dropdown(
-            id = 'select_sex_time',
-            options = get_dataset_options(['Male', 'Female']),
-            placeholder ="Select a sex"
-            ),
-        html.Br()
+    ])
+controls_1 = dbc.Row([
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select sex : "),
+            dcc.Dropdown(
+                id = 'select_sex_time_1',
+                options = get_dataset_options(['Male', 'Female']),
+                placeholder ="Select a sex"
+                ),
+            html.Br()
+            ])
         ]),
-    dbc.FormGroup([
-        html.P("Select an age group : "),
-        dcc.Dropdown(
-            id = 'select_age_group_time',
-            options = get_dataset_options(['Young', 'Middle', 'Old']),
-            placeholder ="Select an age group : "
-            ),
-        html.Br()
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an age group : "),
+            dcc.Dropdown(
+                id = 'select_age_group_time_1',
+                options = get_dataset_options(['Young', 'Middle', 'Old']),
+                placeholder ="Select an age group : "
+                ),
+            html.Br()
+            ]),
+        ])
+    ])
+
+controls_2 = dbc.Row([
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select sex : "),
+            dcc.Dropdown(
+                id = 'select_sex_time_2',
+                options = get_dataset_options(['Male', 'Female']),
+                placeholder ="Select a sex"
+                ),
+            html.Br()
+            ])
         ]),
-    # dbc.FormGroup([
-    #     html.P("Select an aging rate : "),
-    #     dcc.Dropdown(
-    #         id = 'select_aging_rate_attention_time',
-    #         options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
-    #         placeholder ="Select an aging rate"
-    #         ),
-    #     html.Br()
-    #     ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an age group : "),
+            dcc.Dropdown(
+                id = 'select_age_group_time_2',
+                options = get_dataset_options(['Young', 'Middle', 'Old']),
+                placeholder ="Select an age group : "
+                ),
+            html.Br()
+            ]),
+        ])
     ])
 
 layout = dbc.Container([
@@ -97,7 +119,11 @@ layout = dbc.Container([
                              html.Br(),
                              html.Br()], md=3),
                     dbc.Col(
-                        [dcc.Graph(id = 'timeseries_raw_display')],
+                        [controls_1,
+                        dcc.Graph(id = 'timeseries_raw_display_1'),
+                        controls_2,
+                        dcc.Graph(id = 'timeseries_raw_display_2'),
+                        ],
                         style={'overflowX': 'scroll', 'width' : 1000},
                         md=9)
                     ])
@@ -146,13 +172,13 @@ def _get_options_transformation(value_view):
         return []
 
 
-@app.callback(Output('timeseries_raw_display', 'figure'),
+@app.callback(Output('timeseries_raw_display_1', 'figure'),
              [Input('select_organ_time', 'value'),
               Input('select_view_time', 'value'),
               Input('select_transformation_time', 'value'),
-              Input('select_sex_time', 'value'),
-              Input('select_age_group_time', 'value'),
-              Input('select_time', 'value')
+              Input('select_sex_time_1', 'value'),
+              Input('select_age_group_time_1', 'value'),
+              Input('select_time_channel', 'value')
              ])
 def _display_gif(organ, view, transformation, sex, age_group, channel):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
@@ -196,3 +222,52 @@ def _display_gif(organ, view, transformation, sex, age_group, channel):
     else :
         return go.Figure()
         #print(numpy_arr_raw,numpy_arr_raw.shape,  numpy_attentionmap, numpy_attentionmap.shape)
+@app.callback(Output('timeseries_raw_display_2', 'figure'),
+             [Input('select_organ_time', 'value'),
+              Input('select_view_time', 'value'),
+              Input('select_transformation_time', 'value'),
+              Input('select_sex_time_2', 'value'),
+              Input('select_age_group_time_2', 'value'),
+              Input('select_time_channel', 'value')
+             ])
+def _display_gif2(organ, view, transformation, sex, age_group, channel):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        numpy_arr_raw = np.load(path_raw)
+        if view == 'ECG' :
+            unit_x = '2ms/Lsb'
+            unit_y = '5uV/Lsb'
+        elif view == 'PulseWaveAnalysis':
+            unit_x = '10ms/Lsb'
+            unit_y = 'blood-pressure [normalized]'
+        elif view == 'Walking':
+            unit_x == '10ms/Lsb'
+            unit_y == 'milligravity'
+        elif view == 'FullWeek':
+            if transformation == 'Acceleration' :
+                unit_x = '1min/Lsb'
+                unit_y = 'milligravity'
+            elif transformation == 'TimeSeriesFeatures' :
+                unit_x = '5min/Lsb'
+                unit_y = 'NONE'
+            else :
+                unit_x = ''
+                unit_y = ''
+        else :
+            unit_x = ''
+            unit_y = ''
+        channel = int(channel)
+        np_channel = numpy_arr_raw[channel - 1]
+        scatter = go.Scatter(
+            y = np_channel,
+            mode='markers',
+            marker=dict(
+                size=5
+                )
+            )
+        d = {'data' : [scatter], 'layout' : {'xaxis' : {'title' : {'text' : unit_x}},
+                                             'yaxis' : {'title' : {'text' : unit_y}}}
+            }
+        return go.Figure(d)
+    else :
+        return go.Figure()
