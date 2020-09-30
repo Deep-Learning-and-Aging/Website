@@ -1,5 +1,27 @@
 import numpy as np
 import pandas as pd
+
+empty_graph = {
+    "layout": {
+        "xaxis": {
+            "visible": False
+        },
+        "yaxis": {
+            "visible": False
+        },
+        "annotations": [
+            {
+                "text": "No matching data found",
+                "xref": "paper",
+                "yref": "paper",
+                "showarrow": False,
+                "font": {
+                    "size": 28
+                }
+            }
+        ]
+    }
+}
 ETHNICITY_COLS = ['Do_not_know', 'Prefer_not_to_answer', 'NA', 'White', 'British',
        'Irish', 'White_Other', 'Mixed', 'White_and_Black_Caribbean',
        'White_and_Black_African', 'White_and_Asian', 'Mixed_Other', 'Asian',

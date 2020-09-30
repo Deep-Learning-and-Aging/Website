@@ -70,14 +70,11 @@ controls2 = dbc.Card([
     ])
 ])
 
-
-
-
 layout = html.Div([
     dbc.Tabs([
         dbc.Tab(label = 'Manhattan Plot', tab_id='man_plot'),
         dbc.Tab(label = 'Volcano Plot', tab_id = 'vol_plot'),
-    ], id = 'tab_manager_gwas', active_tab = 'vol_plot'),
+    ], id = 'tab_manager_gwas', active_tab = 'man_plot'),
     html.Div(id="tab_content_gwas")
 ])
 
@@ -95,7 +92,7 @@ def _plot_with_given_env_dataset(ac_tab):
                                      html.Br()], md=3),
                             dbc.Col(
                                 [dcc.Loading([
-                                    html.Img(id = 'mana_plot', style={'height':'50%', 'width':'50%'})
+                                    html.Img(id = 'mana_plot', style={'height':'70%', 'width':'70%'})
                                     #dcc.Graph(id = 'mana_plot')
                                  ])],
                                 md=9)
@@ -137,9 +134,15 @@ def _plot_manhattan_plot(organ):
 def _plot_volcano_plot(organ):
     if organ is not None:
         d = {}
+
         if organ != 'All':
             df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
-            d['data'] = [go.Scatter(x = df[df.CHR == chromo]['BETA'],
+            d['data'] = [
+                go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
+                           y = [-np.log(5e-8), -np.log(5e-8)],
+                           name = '*Significance level after FDR',
+                           mode = 'lines')]
+            d['data'] += [go.Scatter(x = df[df.CHR == chromo]['BETA'],
                                     y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
                                     mode = 'markers',
                                     name = 'CHR %s' % chromo,
@@ -152,7 +155,12 @@ def _plot_volcano_plot(organ):
                          ]
         else :
             df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
-            d['data'] = [go.Scatter(x = df[df.CHR == chromo]['BETA'],
+            d['data'] = [
+                go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
+                           y = [-np.log(5e-8), -np.log(5e-8)],
+                           name = '*Significance level after FDR',
+                           mode = 'lines')]
+            d['data'] += [go.Scatter(x = df[df.CHR == chromo]['BETA'],
                                     y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
                                     mode = 'markers',
                                     name = 'CHR %s' % chromo,
@@ -164,6 +172,7 @@ def _plot_volcano_plot(organ):
                                                        <br> Gene Type : %{customdata[3]}"""
                                     )  for chromo in df['CHR'].drop_duplicates()
                          ]
+
 
         d['layout'] = dict(title={'text' : 'Volcano plot', 'x':0.5,},# title of plot
                            xaxis={'title' :'Size Effect (SE)'}, # xaxis label

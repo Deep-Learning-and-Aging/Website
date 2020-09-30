@@ -85,7 +85,7 @@ else :
             html.Br()
         ]),
         dbc.FormGroup([
-            html.P("Select aggregate type : "),
+            html.P("Select which models to display : "),
             dcc.RadioItems(
                 id ='select_aggregate_type',
                 options = [{'value' : 'bestmodels', 'label' : 'Bestmodels'},

@@ -102,8 +102,8 @@ table = dbc.Card([
         html.P("Select correlation type"),
         dcc.RadioItems(
             id = 'select correlation type',
-            options = get_dataset_options(['pearson', 'spearman']),
-            value = 'pearson',
+            options = get_dataset_options(['Pearson', 'Spearman']),
+            value = 'Pearson',
             labelStyle = {'display': 'inline-block', 'margin': '5px'}
         ),
         html.Br()
@@ -363,7 +363,7 @@ def _sort_table(sort_by_col, data):
 def _change_corr_method(value, data):
     df = pd.DataFrame(data = data)
     df = df[sorted(df.columns)]
-    corr_matrix = df.corr(method=value)
+    corr_matrix = df.corr(method=value.lower())
     corr_matrix.index.name = 'Corr'
     corr_matrix = corr_matrix.reset_index().round(3)
     return corr_matrix.to_dict('record')

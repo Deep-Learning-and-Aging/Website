@@ -59,6 +59,9 @@ d['data'] = go.Bar(
     error_y = dict(type = 'data', array = df['h2_sd']),
     name='Heritability'
 )
+d['layout'] = {'xaxis' : {'title' : {'text' : 'Heritability'}},
+               #'yaxis' : {'title' : {'text' : unit_y}}
+               }
 figure = go.Figure(d)
 
 layout = dbc.Container([

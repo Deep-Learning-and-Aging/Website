@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options
+from .tools import get_dataset_options, empty_graph
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -270,4 +270,4 @@ def _display_gif2(organ, view, transformation, sex, age_group, channel):
             }
         return go.Figure(d)
     else :
-        return go.Figure()
+        return go.Figure(empty_graph)

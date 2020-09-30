@@ -34,14 +34,11 @@ top_bar = html.Div([
                               nav=True
                              ),
             #dbc.NavItem(dbc.NavLink("GWAS", href="/pages/page10", id="page10-link")),
-            dbc.DropdownMenu([dbc.DropdownMenuItem("Linear XWAS - Results", href="/pages/page5", id="page5-link"),
-                              dbc.DropdownMenuItem("Linear XWAS - Correlations", href="/pages/page6", id="page6-link")],
-                              label="Linear XWAS",
-                              nav=True
-                             ),
-            dbc.DropdownMenu([dbc.DropdownMenuItem("Multivariate XWAS - Results", href="/pages/page7", id="page7-link"),
+            dbc.DropdownMenu([dbc.DropdownMenuItem("Univariate XWAS - Results", href="/pages/page5", id="page5-link"),
+                              dbc.DropdownMenuItem("Univariate XWAS - Correlations", href="/pages/page6", id="page6-link"),
+                              dbc.DropdownMenuItem("Multivariate XWAS - Results", href="/pages/page7", id="page7-link"),
                               dbc.DropdownMenuItem("Multivariate XWAS - Correlations", href="/pages/page8", id="page8-link")],
-                              label="Multivariate XWAS",
+                              label="XWAS",
                               nav=True
                              ),
             dbc.NavItem(dbc.NavLink("Correlation between accelerated aging dimensions", href="/pages/page4", id="page4-link")),
