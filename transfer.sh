@@ -17,11 +17,7 @@ cp /n/groups/patel/JbProst/Heart/ActivationMap/Age/AttentionMaps-samples_Age_Hea
 cp /n/groups/patel/JbProst/Heart/ActivationMap/Age/Gradient/Gif/*.gif /n/groups/patel/samuel/data_final/page12_AttentionMapsVideos/gif
 cp /n/groups/patel/JbProst/Heart/ActivationMap/Age/Gradient/2D/*.jpg /n/groups/patel/samuel/data_final/page12_AttentionMapsVideos/img
 
-cp -r /n/groups/patel/Alan/Aging/Medical_Images/figures/Images_TimeSeries/Age/ /n/groups/patel/samuel/data_final/page13_AttentionMapsTimeSeries/img
-#cp -r /n/groups/patel/Alan/Aging/Medical_Images/figures/Attention_Maps/Age/Heart /n/groups/patel/samuel/data_final/page13_AttentionMapsTimeSeries/attentionmaps/
-#cp -r /n/groups/patel/Alan/Aging/Medical_Images/figures/Attention_Maps/Age/PhysicalActivity /n/groups/patel/samuel/data_final/page13_AttentionMapsTimeSeries/attentionmaps/
-#cp -r /n/groups/patel/Alan/Aging/Medical_Images/figures/Attention_Maps/Age/Arterial*PulseWaveAnalysis* /n/groups/patel/samuel/data_final/page13_AttentionMapsTimeSeries/attentionmaps/
-
+cp -r /n/groups/patel/Alan/Aging/Medical_Images/figures/Images_TimeSeries/Age/ /n/groups/patel/samuel/data_final/page15_AttentionMapsTimeSeries/img/
 
 
 scp -r "sd375@transfer.rc.hms.harvard.edu:/n/groups/patel/samuel/data_final/page13_AttentionMapsTimeSeries/" Desktop/dash_app/data/page13_AttentionMapsTimeSeries/

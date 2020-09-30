@@ -67,100 +67,104 @@ controls = dbc.Card([
         ]),
     ])
 
-controls_1 = dbc.Row([
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select Sex : "),
-            dcc.Dropdown(
-                id = 'select_sex_attention_image_1',
-                options = get_dataset_options(['Male', 'Female']),
-                placeholder ="Select a sex"
+controls_1 = dbc.Card([
+    dbc.Row([
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select Sex : "),
+                dcc.Dropdown(
+                    id = 'select_sex_attention_image_1',
+                    options = get_dataset_options(['Male', 'Female']),
+                    placeholder ="Select a sex"
+                    )
+                ])
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select an age group : "),
+                dcc.Dropdown(
+                    id = 'select_age_group_attention_image_1',
+                    options = get_dataset_options(['Young', 'Middle', 'Old']),
+                    placeholder ="Select an age group"
+                    ),
+                html.Br()
+                ])
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select an aging rate : "),
+                dcc.Dropdown(
+                    id = 'select_aging_rate_attention_image_1',
+                    options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+                    placeholder ="Select an aging rate"
+                    ),
+                ]),
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select image to display : "),
+                dcc.Checklist(
+                    id = 'select_raw_gradcam_saliency_1',
+                    options=[
+                        {'label': 'Raw', 'value': 'Raw'},
+                        {'label': 'GradCam', 'value': 'plot_gradcam'},
+                        {'label': 'Saliency', 'value': 'plot_saliency'}
+                    ],
+                    value = ['Raw', 'plot_gradcam', 'plot_saliency']
                 )
             ])
-        ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select an age group : "),
-            dcc.Dropdown(
-                id = 'select_age_group_attention_image_1',
-                options = get_dataset_options(['Young', 'Middle', 'Old']),
-                placeholder ="Select an age group"
-                ),
-            html.Br()
-            ])
-        ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select an aging rate : "),
-            dcc.Dropdown(
-                id = 'select_aging_rate_attention_image_1',
-                options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
-                placeholder ="Select an aging rate"
-                ),
-            ]),
-        ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select image to display : "),
-            dcc.Checklist(
-                id = 'select_raw_gradcam_saliency_1',
-                options=[
-                    {'label': 'Raw', 'value': 'Raw'},
-                    {'label': 'GradCam', 'value': 'plot_gradcam'},
-                    {'label': 'Saliency', 'value': 'plot_saliency'}
-                ]
-            )
         ])
     ])
 ])
-
-controls_2 = dbc.Row([
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select Sex : "),
-            dcc.Dropdown(
-                id = 'select_sex_attention_image_2',
-                options = get_dataset_options(['Male', 'Female']),
-                placeholder ="Select a sex"
+controls_2 = dbc.Card([
+    dbc.Row([
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select Sex : "),
+                dcc.Dropdown(
+                    id = 'select_sex_attention_image_2',
+                    options = get_dataset_options(['Male', 'Female']),
+                    placeholder ="Select a sex"
+                    )
+                ])
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select an age group : "),
+                dcc.Dropdown(
+                    id = 'select_age_group_attention_image_2',
+                    options = get_dataset_options(['Young', 'Middle', 'Old']),
+                    placeholder ="Select an age group"
+                    ),
+                html.Br()
+                ])
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select an aging rate : "),
+                dcc.Dropdown(
+                    id = 'select_aging_rate_attention_image_2',
+                    options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+                    placeholder ="Select an aging rate"
+                    ),
+                ]),
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select image to display : "),
+                dcc.Checklist(
+                    id = 'select_raw_gradcam_saliency_2',
+                    options=[
+                        {'label': 'Raw', 'value': 'Raw'},
+                        {'label': 'GradCam', 'value': 'plot_gradcam'},
+                        {'label': 'Saliency', 'value': 'plot_saliency'}
+                    ],
+                    value = ['Raw', 'plot_gradcam', 'plot_saliency']
                 )
             ])
-        ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select an age group : "),
-            dcc.Dropdown(
-                id = 'select_age_group_attention_image_2',
-                options = get_dataset_options(['Young', 'Middle', 'Old']),
-                placeholder ="Select an age group"
-                ),
-            html.Br()
-            ])
-        ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select an aging rate : "),
-            dcc.Dropdown(
-                id = 'select_aging_rate_attention_image_2',
-                options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
-                placeholder ="Select an aging rate"
-                ),
-            ]),
-        ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select image to display : "),
-            dcc.Checklist(
-                id = 'select_raw_gradcam_saliency_2',
-                options=[
-                    {'label': 'Raw', 'value': 'Raw'},
-                    {'label': 'GradCam', 'value': 'plot_gradcam'},
-                    {'label': 'Saliency', 'value': 'plot_saliency'}
-                ]
-            )
         ])
     ])
 ])
-
 @app.callback(Output('select_transformation_attention_image', 'options'),
               [Input('select_organ_attention_image', 'value'), Input('select_view_attention_image', 'value')])
 def generate_list_view_list(value_organ, value_view):
@@ -261,11 +265,11 @@ layout =  html.Div([
               ])
 def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency):
     print("raw_gradcam_saliency", raw_gradcam_saliency)
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
-        title = 'PLOT TITLE' #df_metadata['plot_title'].iloc[0]
+        title = 'Chronological Age = %.2f; Biological Age = %.2f' % (df_metadata['Age'].iloc[0], df_metadata['Biological_Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
@@ -310,6 +314,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                 if 'plot_saliency' in raw_gradcam_saliency :
                     final2_left = Image.alpha_composite(Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'), saliency_left)
                     final2_right = Image.alpha_composite(Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'), saliency_right)
+                final2_right = final2_right.transpose(Image.FLIP_LEFT_RIGHT)
                 buffered_left = BytesIO()
                 final2_left.save(buffered_left, format="PNG")
                 img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
@@ -359,9 +364,9 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                      ]
                 return col
             else  :
-                return [dcc.Graph(children = go.Figure(empty_graph))]
+                return [dcc.Graph(figure = go.Figure(empty_graph))]
     else :
-        return [dcc.Graph(children = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = go.Figure(empty_graph))]
 
 @app.callback(Output('columns_attention_map_2', 'children'),
              [Input('select_organ_attention_image', 'value'),
@@ -374,11 +379,11 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
               ])
 def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency):
     print("raw_gradcam_saliency", raw_gradcam_saliency)
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
-        title = 'PLOT TITLE' #df_metadata['plot_title'].iloc[0]
+        title = 'Chronological Age = %.2f; Biological Age = %.2f' % (df_metadata['Age'].iloc[0], df_metadata['Biological_Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
@@ -427,7 +432,8 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                 final2_left.save(buffered_left, format="PNG")
                 img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
                 src_left = 'data:image/png;base64,{}'.format(img_base64_left)
-
+                # flip right image to keep symmetry :
+                final2_right = final2_right.transpose(Image.FLIP_LEFT_RIGHT)
                 buffered_right = BytesIO()
                 final2_right.save(buffered_right, format="PNG")
                 img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
@@ -472,9 +478,9 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                      ]
                 return col
             else  :
-                return [dcc.Graph(children = go.Figure(empty_graph))]
+                return [dcc.Graph(figure = go.Figure(empty_graph))]
     else :
-        return [dcc.Graph(children = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = go.Figure(empty_graph))]
 
 
 

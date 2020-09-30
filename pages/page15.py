@@ -18,8 +18,8 @@ import copy
 from PIL import Image
 import base64
 from io import BytesIO
-
-path_img = './' + app.get_asset_url('page15_AttentionMapsTimeSeries/img/')
+path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
+path_img = './' + app.get_asset_url('page15_AttentionMapsTimeSeries/img/Age')
 aging_rate = 'Normal'
 controls = dbc.Card([
     dbc.FormGroup([
@@ -182,6 +182,10 @@ def _get_options_transformation(value_view):
              ])
 def _display_gif(organ, view, transformation, sex, age_group, channel):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        channel = int(channel)
+        path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
+        df_metadata = pd.read_csv(path_metadata)
+        df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
         path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
         numpy_arr_raw = np.load(path_raw)
         if view == 'ECG' :
@@ -206,7 +210,7 @@ def _display_gif(organ, view, transformation, sex, age_group, channel):
         else :
             unit_x = ''
             unit_y = ''
-        channel = int(channel)
+
         np_channel = numpy_arr_raw[channel - 1]
         scatter = go.Scatter(
             y = np_channel,
@@ -220,7 +224,7 @@ def _display_gif(organ, view, transformation, sex, age_group, channel):
             }
         return go.Figure(d)
     else :
-        return go.Figure()
+        return go.Figure(empty_graph)
         #print(numpy_arr_raw,numpy_arr_raw.shape,  numpy_attentionmap, numpy_attentionmap.shape)
 @app.callback(Output('timeseries_raw_display_2', 'figure'),
              [Input('select_organ_time', 'value'),

@@ -58,34 +58,79 @@ controls = dbc.Card([
         ),
         html.Br()
         ]),
-    dbc.FormGroup([
-        html.P("Select sex : "),
-        dcc.Dropdown(
-            id = 'select_sex_attention_time',
-            options = get_dataset_options(['Male', 'Female']),
-            placeholder ="Select a sex"
-            ),
-        html.Br()
+    ])
+
+controls_1 = dbc.Row([
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select sex : "),
+            dcc.Dropdown(
+                id = 'select_sex_attention_time_1',
+                options = get_dataset_options(['Male', 'Female']),
+                placeholder ="Select a sex"
+                ),
+            html.Br()
+            ]),
         ]),
-    dbc.FormGroup([
-        html.P("Select an age group : "),
-        dcc.Dropdown(
-            id = 'select_age_group_attention_time',
-            options = get_dataset_options(['Young', 'Middle', 'Old']),
-            placeholder ="Select an age group : "
-            ),
-        html.Br()
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an age group : "),
+            dcc.Dropdown(
+                id = 'select_age_group_attention_time_1',
+                options = get_dataset_options(['Young', 'Middle', 'Old']),
+                placeholder ="Select an age group : "
+                ),
+            html.Br()
+            ]),
         ]),
-    dbc.FormGroup([
-        html.P("Select an aging rate : "),
-        dcc.Dropdown(
-            id = 'select_aging_rate_attention_time',
-            options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
-            placeholder ="Select an aging rate"
-            ),
-        html.Br()
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an aging rate : "),
+            dcc.Dropdown(
+                id = 'select_aging_rate_attention_time_1',
+                options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+                placeholder ="Select an aging rate"
+                ),
+            html.Br()
         ]),
     ])
+])
+
+controls_2 = dbc.Row([
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select sex : "),
+            dcc.Dropdown(
+                id = 'select_sex_attention_time_2',
+                options = get_dataset_options(['Male', 'Female']),
+                placeholder ="Select a sex"
+                ),
+            html.Br()
+            ]),
+        ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an age group : "),
+            dcc.Dropdown(
+                id = 'select_age_group_attention_time_2',
+                options = get_dataset_options(['Young', 'Middle', 'Old']),
+                placeholder ="Select an age group : "
+                ),
+            html.Br()
+            ]),
+        ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an aging rate : "),
+            dcc.Dropdown(
+                id = 'select_aging_rate_attention_time_2',
+                options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+                placeholder ="Select an aging rate"
+                ),
+            html.Br()
+            ]),
+        ])
+])
 
 layout = dbc.Container([
                 html.H1('AttentionMaps - TimeSeries'),
@@ -96,7 +141,10 @@ layout = dbc.Container([
                              html.Br(),
                              html.Br()], md=3),
                     dbc.Col(
-                        [dcc.Graph(id = 'timeseries_display')],
+                        [controls_1,
+                        dcc.Graph(id = 'timeseries_display_1'),
+                        controls_2,
+                        dcc.Graph(id = 'timeseries_display_2')],
                         style={'overflowX': 'scroll', 'width' : 1000},
                         md=9)
                     ])
@@ -145,13 +193,49 @@ def _get_options_transformation(value_view):
         return []
 
 
-@app.callback(Output('timeseries_display', 'figure'),
+@app.callback(Output('timeseries_display_1', 'figure'),
              [Input('select_organ_attention_time', 'value'),
               Input('select_view_attention_time', 'value'),
               Input('select_transformation_attention_time', 'value'),
-              Input('select_sex_attention_time', 'value'),
-              Input('select_age_group_attention_time', 'value'),
-              Input('select_aging_rate_attention_time', 'value'),
+              Input('select_sex_attention_time_1', 'value'),
+              Input('select_age_group_attention_time_1', 'value'),
+              Input('select_aging_rate_attention_time_1', 'value'),
+              Input('select_channel_time', 'value')
+             ])
+def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        #path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        #numpy_arr_raw = np.load(path_raw)
+        path_attentionmaps = path_attention_maps + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        numpy_attentionmap = np.load(path_attentionmaps)
+        print(numpy_attentionmap.shape)
+        channel = int(channel)
+        np_channel = numpy_attentionmap[channel-1, :, :]
+        np_channel_data = np_channel[0]
+        np_channel_couleur = np_channel[1]
+        scatter = go.Scatter(
+            y = np_channel_data,
+            mode='markers',
+            marker=dict(
+                size=5,
+                color=np_channel_couleur, #set color equal to a variable
+                colorscale='RdBu_r', # one of plotly colorscales
+                showscale=True
+                )
+            )
+        d = {'data' : [scatter]}
+        return go.Figure(d)
+    else :
+        return go.Figure()
+        #print(numpy_arr_raw,numpy_arr_raw.shape,  numpy_attentionmap, numpy_attentionmap.shape)
+
+@app.callback(Output('timeseries_display_2', 'figure'),
+             [Input('select_organ_attention_time', 'value'),
+              Input('select_view_attention_time', 'value'),
+              Input('select_transformation_attention_time', 'value'),
+              Input('select_sex_attention_time_2', 'value'),
+              Input('select_age_group_attention_time_2', 'value'),
+              Input('select_aging_rate_attention_time_2', 'value'),
               Input('select_channel_time', 'value')
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel):

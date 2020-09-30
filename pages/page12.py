@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options
+from .tools import get_dataset_options, empty_graph
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -52,34 +52,82 @@ controls = dbc.Card([
             ),
         html.Br()
         ]),
+    ])
+
+controls_1  =  dbc.Card([
+dbc.Row([
+    dbc.Col([
     dbc.FormGroup([
         html.P("Select sex : "),
         dcc.Dropdown(
-            id = 'select_sex_attention_video',
+            id = 'select_sex_attention_video_1',
             options = [{'value' : 0, 'label' : 'Female'}, {'value' : 1, 'label' : 'Male'}],
             placeholder ="Select a sex"
             ),
         html.Br()
         ]),
-    dbc.FormGroup([
-        html.P("Select an age group : "),
-        dcc.Dropdown(
-            id = 'select_age_group_attention_video',
-            options = get_dataset_options(['Young', 'Middle', 'Old']),
-            placeholder ="Select an age group : "
-            ),
-        html.Br()
-        ]),
-    dbc.FormGroup([
-        html.P("Select an aging rate : "),
-        dcc.Dropdown(
-            id = 'select_aging_rate_attention_video',
-            options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
-            placeholder ="Select an aging rate"
-            ),
-        html.Br()
-        ]),
+    ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an age group : "),
+            dcc.Dropdown(
+                id = 'select_age_group_attention_video_1',
+                options = get_dataset_options(['Young', 'Middle', 'Old']),
+                placeholder ="Select an age group : "
+                ),
+            html.Br()
+            ]),
+    ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an aging rate : "),
+            dcc.Dropdown(
+                id = 'select_aging_rate_attention_video_1',
+                options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+                placeholder ="Select an aging rate"
+                ),
+            html.Br()
+            ]),
+        ])
     ])
+])
+controls_2  =  dbc.Card([
+dbc.Row([
+    dbc.Col([
+    dbc.FormGroup([
+        html.P("Select sex : "),
+        dcc.Dropdown(
+            id = 'select_sex_attention_video_2',
+            options = [{'value' : 0, 'label' : 'Female'}, {'value' : 1, 'label' : 'Male'}],
+            placeholder ="Select a sex"
+            ),
+        html.Br()
+        ]),
+    ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an age group : "),
+            dcc.Dropdown(
+                id = 'select_age_group_attention_video_2',
+                options = get_dataset_options(['Young', 'Middle', 'Old']),
+                placeholder ="Select an age group : "
+                ),
+            html.Br()
+            ]),
+    ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select an aging rate : "),
+            dcc.Dropdown(
+                id = 'select_aging_rate_attention_video_2',
+                options = get_dataset_options(['Decelerated', 'Normal', 'Accelerated']),
+                placeholder ="Select an aging rate"
+                ),
+            html.Br()
+            ]),
+        ])
+    ])
+])
 
 layout = dbc.Container([
                 html.H1('AttentionMaps - Videos'),
@@ -90,19 +138,22 @@ layout = dbc.Container([
                              html.Br(),
                              html.Br()], md=3),
                     dbc.Col(
-                        [dcc.Loading(id = 'gif_display')],
+                        [controls_1,
+                        dcc.Loading(id = 'gif_display_1'),
+                        controls_2,
+                        dcc.Loading(id = 'gif_display_2')],
                         style={'overflowX': 'scroll', 'width' : 1000},
                         md=9)
                     ])
             ], fluid = True)
 
-@app.callback(Output('gif_display', 'children'),
+@app.callback(Output('gif_display_1', 'children'),
              [Input('select_organ_attention_video', 'value'),
               Input('select_view_attention_video', 'value'),
               Input('select_transformation_attention_video', 'value'),
-              Input('select_sex_attention_video', 'value'),
-              Input('select_age_group_attention_video', 'value'),
-              Input('select_aging_rate_attention_video', 'value'),
+              Input('select_sex_attention_video_1', 'value'),
+              Input('select_age_group_attention_video_1', 'value'),
+              Input('select_aging_rate_attention_video_1', 'value'),
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
@@ -125,4 +176,35 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
             )])
         return gif_display
     else :
-        return dcc.Graph()
+        return dcc.Graph(figure = go.Figure(empty_graph))
+
+@app.callback(Output('gif_display_2', 'children'),
+             [Input('select_organ_attention_video', 'value'),
+              Input('select_view_attention_video', 'value'),
+              Input('select_transformation_attention_video', 'value'),
+              Input('select_sex_attention_video_2', 'value'),
+              Input('select_age_group_attention_video_2', 'value'),
+              Input('select_aging_rate_attention_video_2', 'value'),
+             ])
+def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        print(organ, view, transformation, sex, age_group, aging_rate)
+        df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
+        df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
+        eid = df.iloc[0].eid
+        age = df.iloc[0].Age
+        res = df.iloc[0].res
+        title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
+        path_to_gif = df.iloc[0].Gif.split('/')[-1]
+        path_to_gif = path_gif + path_to_gif
+        path_to_jpg = df.iloc[0].Picture.split('/')[-1]
+        path_to_jpg = path_img + path_to_jpg
+        gif_display = html.Div([
+            html.H3(title),
+            gif.GifPlayer(
+                gif = app.get_asset_url(path_to_gif),
+                still = app.get_asset_url(path_to_jpg)
+            )])
+        return gif_display
+    else :
+        return dcc.Graph(figure = go.Figure(empty_graph))

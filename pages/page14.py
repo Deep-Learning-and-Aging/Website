@@ -22,7 +22,7 @@ from io import BytesIO
 sample = 0
 aging_rate = 'Normal'
 path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age')
-
+path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
 if MODE != 'All':
     organ_select = dbc.FormGroup([
         html.P("Select Organ : "),
@@ -67,56 +67,58 @@ controls = dbc.Card([
         ]),
     ])
 
-controls_1 = dbc.Row([
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select Sex : "),
-            dcc.Dropdown(
-                id = 'select_sex_image_1',
-                options = get_dataset_options(['Male', 'Female']),
-                placeholder ="Select a sex"
-                ),
-            html.Br()
+controls_1 = dbc.Card([
+    dbc.Row([
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select Sex : "),
+                dcc.Dropdown(
+                    id = 'select_sex_image_1',
+                    options = get_dataset_options(['Male', 'Female']),
+                    placeholder ="Select a sex"
+                    ),
+                html.Br()
             ]),
-    ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select an age group : "),
-            dcc.Dropdown(
-                id = 'select_age_group_image_1',
-                options = get_dataset_options(['Young', 'Middle', 'Old']),
-                placeholder ="Select an age group"
-                ),
-            html.Br()
-            ]),
-        ])
-    ])
-
-controls_2 = dbc.Row([
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select Sex : "),
-            dcc.Dropdown(
-                id = 'select_sex_image_2',
-                options = get_dataset_options(['Male', 'Female']),
-                placeholder ="Select a sex"
-                ),
-            html.Br()
-            ]),
-    ]),
-    dbc.Col([
-        dbc.FormGroup([
-            html.P("Select an age group : "),
-            dcc.Dropdown(
-                id = 'select_age_group_image_2',
-                options = get_dataset_options(['Young', 'Middle', 'Old']),
-                placeholder ="Select an age group"
-                ),
-            html.Br()
+        ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select an age group : "),
+                dcc.Dropdown(
+                    id = 'select_age_group_image_1',
+                    options = get_dataset_options(['Young', 'Middle', 'Old']),
+                    placeholder ="Select an age group"
+                    ),
+                html.Br()
             ]),
         ])
     ])
-
+])
+controls_2 = dbc.Card([
+    dbc.Row([
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select Sex : "),
+                dcc.Dropdown(
+                    id = 'select_sex_image_2',
+                    options = get_dataset_options(['Male', 'Female']),
+                    placeholder ="Select a sex"
+                    ),
+                html.Br()
+                ]),
+            ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select an age group : "),
+                dcc.Dropdown(
+                    id = 'select_age_group_image_2',
+                    options = get_dataset_options(['Young', 'Middle', 'Old']),
+                    placeholder ="Select an age group"
+                    ),
+                html.Br()
+            ]),
+        ])
+    ])
+])
 @app.callback(Output('select_transformation_image', 'options'),
               [Input('select_organ_image', 'value'), Input('select_view_image', 'value')])
 def generate_list_view_list(value_organ, value_view):
@@ -164,8 +166,12 @@ layout =  html.Div([
               ])
 def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
+        df_metadata = pd.read_csv(path_metadata)
+        df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
+        title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
-            title = '# TO MODIFY : SELECT TITLE'
+
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
             raw_left = mpimg.imread(path_image_left)
@@ -180,6 +186,7 @@ def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
             src_left = 'data:image/png;base64,{}'.format(img_base64_left)
 
             buffered_right = BytesIO()
+            raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
             raw_right.save(buffered_right, format="PNG")
             img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
             src_right = 'data:image/png;base64,{}'.format(img_base64_right)
@@ -203,7 +210,6 @@ def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
             return col
 
         else :
-            title = '# TO MODIFY : SELECT TITLE'
             path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
             raw = mpimg.imread(path_image)
             raw = Image.fromarray((raw).astype(np.uint8)).convert('RGB')
@@ -219,7 +225,7 @@ def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
                 ]
             return col
     else :
-        return [dcc.Graph(children = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = go.Figure(empty_graph))]
 
 @app.callback(Output('row_image_2', 'children'),
              [Input('select_organ_image', 'value'),
@@ -231,8 +237,11 @@ def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
               ])
 def _plot_images_2(organ, view, transformation, sex, age_group):#, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+        path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
+        df_metadata = pd.read_csv(path_metadata)
+        df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
+        title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
-            title = '# TO MODIFY : SELECT TITLE'
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
             raw_left = mpimg.imread(path_image_left)
@@ -240,7 +249,7 @@ def _plot_images_2(organ, view, transformation, sex, age_group):#, aging_rate):
 
             raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
             raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
-
+            raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
             buffered_left = BytesIO()
             raw_left.save(buffered_left, format="PNG")
             img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
@@ -269,7 +278,6 @@ def _plot_images_2(organ, view, transformation, sex, age_group):#, aging_rate):
             return col
 
         else :
-            title = '# TO MODIFY : SELECT TITLE'
             path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
             raw = mpimg.imread(path_image)
             raw = Image.fromarray((raw).astype(np.uint8)).convert('RGB')
@@ -285,5 +293,4 @@ def _plot_images_2(organ, view, transformation, sex, age_group):#, aging_rate):
                 ]
             return col
     else :
-        fig = go.Figure(empty_graph)
-        return [dcc.Graph(children = fig)]
+        return [dcc.Graph(figure = go.Figure(empty_graph))]

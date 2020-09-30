@@ -11,7 +11,7 @@ empty_graph = {
         },
         "annotations": [
             {
-                "text": "No matching data found",
+                "text": "No data",
                 "xref": "paper",
                 "yref": "paper",
                 "showarrow": False,

@@ -17,9 +17,23 @@ import copy
 from PIL import Image
 import base64
 
+## Set performance file
+performances = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv')
+df_perf = pd.read_csv(performances).set_index('version')
+scores_organs = [elem.split('_')[1] for elem in df_perf.index.values]
+scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in df_perf.index.values]
+df_perf.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
+df_perf = df_perf[['R-Squared_all', 'N_all']]
+
+## Set heritability file
+filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
+df_heritability = pd.read_csv(filename_heritabilty).set_index('Organ')
+
+
+
 filename_volcano = './' + app.get_asset_url('page10_GWASResults/Volcano/GWAS_hits_Age_')
 filename_manhattan = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_')
-
+filename_qq = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS_QQPlot_Age_')
 list_files_volcano = glob.glob(filename_volcano + '*')
 list_files_volcano = [elem.split('/')[-1] for elem in list_files_volcano]
 organs_gwas_volcano = sorted([elem.split('_')[3].replace('.csv', '') for elem in list_files_volcano])#['Heart']
@@ -91,10 +105,14 @@ def _plot_with_given_env_dataset(ac_tab):
                                      html.Br(),
                                      html.Br()], md=3),
                             dbc.Col(
-                                [dcc.Loading([
-                                    html.Img(id = 'mana_plot', style={'height':'70%', 'width':'70%'})
+                                [
+                                dcc.Loading([
+                                    html.H3(id = 'title_man'),
+                                    html.Img(id = 'mana_plot', style={'height':'70%', 'width':'70%'}),
+                                    html.Img(id = 'qq_plot', style={'height':'70%', 'width':'70%'})
                                     #dcc.Graph(id = 'mana_plot')
-                                 ])],
+                                    ])
+                                ],
                                 md=9)
                                 ])
                         ], fluid = True)
@@ -117,16 +135,26 @@ def _plot_with_given_env_dataset(ac_tab):
                         ], fluid = True)
 
 
-@app.callback(Output('mana_plot', 'src'),
+@app.callback([Output('mana_plot', 'src'),Output('qq_plot', 'src'), Output('title_man', 'children')],
              [Input('select_organ', 'value')])
 def _plot_manhattan_plot(organ):
     if organ is not None:
-        path_png = filename_manhattan + organ + '.png'
-        img_base64 = base64.b64encode(open(path_png, 'rb').read()).decode('ascii')
-        src='data:image/png;base64,{}'.format(img_base64)
-        return src
+        path_man = filename_manhattan + organ + '.png'
+        path_qq = filename_qq + organ + '.png'
+        img_man64 = base64.b64encode(open(path_man, 'rb').read()).decode('ascii')
+        img_qq64 = base64.b64encode(open(path_qq, 'rb').read()).decode('ascii')
+        src_man ='data:image/png;base64,{}'.format(img_man64)
+        src_qq ='data:image/png;base64,{}'.format(img_qq64)
+        if organ != 'All' :
+            score = df_perf.loc[organ]['R-Squared_all']
+            sample_size = int(df_perf.loc[organ]['N_all'])
+            heritability = df_heritability.loc[organ]['h2']
+            title = 'R-squared : %.3f, Sample Size : %d, Heritability : %.3f' % (score, sample_size, heritability)
+        else :
+            title = ''
+        return src_man, src_qq, title
     else :
-        return ''
+        return '', '', ''
 
 
 @app.callback(Output('vol_plot', 'figure'),
