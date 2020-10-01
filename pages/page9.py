@@ -446,9 +446,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                                  src = src_right)
                      ]
                 return col
-
         else :
-
             path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
             raw = mpimg.imread(path_image)
             saliency = 5 * np.load(path_image.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
@@ -481,17 +479,3 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                 return [dcc.Graph(figure = go.Figure(empty_graph))]
     else :
         return [dcc.Graph(figure = go.Figure(empty_graph))]
-
-
-
-
-
-
-
-    #    if organ is not None:
-    #        path_png = path_attention_maps + organ + '.png'
-    #        img_base64 = base64.b64encode(open(path_png, 'rb').read()).decode('ascii')
-    #        src = 'data:image/png;base64,{}'.format(img_base64)
-    #        return src
-    #    else :
-    #        return ''

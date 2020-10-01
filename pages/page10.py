@@ -108,7 +108,9 @@ def _plot_with_given_env_dataset(ac_tab):
                                 [
                                 dcc.Loading([
                                     html.H3(id = 'title_man'),
-                                    html.Img(id = 'mana_plot', style={'height':'70%', 'width':'70%'}),
+                                    html.H3('Manhattan Plot'),
+                                    html.Img(id = 'mana_plot', style={'height':'100%', 'width':'100%'}),
+                                    html.H3('QQ Plot'),
                                     html.Img(id = 'qq_plot', style={'height':'70%', 'width':'70%'})
                                     #dcc.Graph(id = 'mana_plot')
                                     ])
@@ -204,7 +206,10 @@ def _plot_volcano_plot(organ):
 
         d['layout'] = dict(title={'text' : 'Volcano plot', 'x':0.5,},# title of plot
                            xaxis={'title' :'Size Effect (SE)'}, # xaxis label
-                           yaxis={'title' :'-log(p_value)'}
+                           yaxis={'title' :'-log(p_value)'},
+                           legend={'orientation' : 'h'},
+                           margin = {'l': 0, 'b': 150, 't': 0, 'r': 0},
+                           height = 700
                                 )
         return go.Figure(d)
     else :

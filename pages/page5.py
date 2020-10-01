@@ -130,7 +130,7 @@ def _select_sub_dropdown(val_data_type):
 
 
 layout = dbc.Container([
-                html.H1('Linear XWAS'),
+                html.H1('Univariate XWAS'),
                 html.Br(),
                 html.Br(),
                 dcc.Loading([

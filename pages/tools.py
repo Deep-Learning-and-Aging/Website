@@ -138,11 +138,11 @@ def f(x):
     if x <= 0:
         x1 = 255*(x + 1)
         x1 = round(x1, 5)
-        return 'rgba(%s, %s, %s, 0.85)' % (255, x1, x1)
+        return 'rgba(%s, %s, %s, 0.85)' % (255, int(x1), int(x1))
     else :
         x2 = 255*(1 - x)
         x2 = round(x2, 5)
-        return 'rgba(%s, %s, %s, 0.85)' % (x2, x2, 255)
+        return 'rgba(%s, %s, %s, 0.85)' % (int(x2), int(x2), 255)
 
 def get_colorscale(df):
     min = df.min().min()

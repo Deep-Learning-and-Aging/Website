@@ -122,7 +122,7 @@ layout = html.Div([
 def _plot_with_given_env_dataset(ac_tab):
     if ac_tab == 'tab_X':
         return  dbc.Container([
-                        html.H1('Correlations between accelerated aging'),
+                        html.H1('Univariate XWAS - Correlations between accelerated aging'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([
@@ -139,7 +139,7 @@ def _plot_with_given_env_dataset(ac_tab):
                         ], fluid = True)
     elif ac_tab == 'tab_organ':
         return  dbc.Container([
-                        html.H1('Correlations between accelerated aging'),
+                        html.H1('Univariate XWAS - Correlations between accelerated aging'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([

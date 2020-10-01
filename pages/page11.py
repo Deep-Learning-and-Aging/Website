@@ -59,7 +59,9 @@ d['data'] = go.Bar(
     error_y = dict(type = 'data', array = df['h2_sd']),
     name='Heritability'
 )
-d['layout'] = {'xaxis' : {'title' : {'text' : 'Heritability'}},
+d['layout'] = {
+               'yaxis' : {'title' : {'text' : 'Heritability'}},
+               'height' : 700
                #'yaxis' : {'title' : {'text' : unit_y}}
                }
 figure = go.Figure(d)
@@ -75,7 +77,7 @@ layout = dbc.Container([
                              figure = figure
                              ),
                          ],
-                        style={'overflowY': 'scroll', 'height': 600, 'overflowX': 'scroll', 'width' : 700},
+                        style={ 'overflowX': 'scroll', 'width' : 800},
                          md=9)
                         ])
             ], fluid = True)

@@ -88,7 +88,7 @@ else :
             html.P("Select which models to display : "),
             dcc.RadioItems(
                 id ='select_aggregate_type',
-                options = [{'value' : 'bestmodels', 'label' : 'Bestmodels'},
+                options = [{'value' : 'bestmodels', 'label' : 'Best models'},
                            {'value' : 'withEnsembles', 'label' : 'All models'},
                            {'value' : 'tuned', 'label' : 'Non-ensemble models'}],
                 value = 'bestmodels',
@@ -204,10 +204,14 @@ def _plot_r2_scores(value_eid_vs_instances,
             df_res_archi = df_res[df_res.architecture == archi]
             df_res_archi['view'] = df_res_archi['view'] + ' - ' + df_res_archi['transformation']
             df_res_archi['view'] = df_res_archi['view'].str.replace('- raw', '')
-            plot_test = go.Bar(x = [df_res_archi[df_res_archi.architecture == archi]['organ'].values,
-                                    df_res_archi[df_res_archi.architecture == archi]['view'].values],
-                               y = df_res_archi[df_res_archi.architecture == archi][metric],
-                               error_y=dict(type='data', array=df_res_archi[df_res_archi.architecture == archi][std]),
+            hovertemplate = 'Model : %{x}\
+                             <br>Architecture : ' + archi + '<br>Score : %{y}<br>'
+
+            plot_test = go.Bar(x = [df_res_archi['organ'].values,
+                                    df_res_archi['view'].values],
+                               y = df_res_archi[metric],
+                               error_y=dict(type='data', array=df_res_archi[std]),
+                               hovertemplate = hovertemplate,
                                name = archi)
             plots.append(plot_test)
 
@@ -223,39 +227,20 @@ def _plot_r2_scores(value_eid_vs_instances,
         distinct_architectures = df_res.architecture.drop_duplicates()
         plots = []
         for archi in distinct_architectures:
-            plot_test = go.Bar(x = [df_res[df_res.architecture == archi]['view'].values,
-                                    df_res[df_res.architecture == archi]['transformation'].values],
-                               y = df_res[df_res.architecture == archi][metric],
-                               error_y = dict(type='data', array=df_res[df_res.architecture == archi][std]),
+            df_res_archi = df_res[df_res.architecture == archi]
+            hovertemplate = 'Model : %{x}\
+                             <br>Architecture : ' + archi + '<br>Score : %{y}<br>'
+            plot_test = go.Bar(x = [df_res_archi['view'].values,
+                                    df_res_archi['transformation'].values],
+                               y = df_res_archi[metric],
+                               error_y = dict(type='data', array=df_res_archi[std]),
+                               hovertemplate = hovertemplate,
                                name = archi)
             plots.append(plot_test)
         d = {'data' : plots,
              'layout' : dict(height = 600,
                              width = max(25*len(df_res['architecture']), 850),
                              margin = {'l': 40, 'b': 150, 't': 10, 'r': 40},
-                             #legend=dict(orientation='h',
-                            #             y = -0.4),
                             )}
-    # elif value_organ in  ['Carotids', 'Eyes', 'FullBody', 'Hips', 'Knees', 'Spine', 'Brain']:
-    #     df_res = df_res[df_res.organ == value_organ]
-    #     #print(df_res)
-    #     distinct_architectures = df_res.architecture.drop_duplicates()
-    #     plots = []
-    #     for archi in distinct_architectures:
-    #         print('Archi')
-    #         print(df_res[df_res.architecture == archi][['organ', 'view', 'transformation', 'architecture']])
-    #         plot_test = go.Bar(x = [df_res[df_res.architecture == archi]['view'].values,
-    #                                 df_res[df_res.architecture == archi]['transformation'].values],
-    #                            y = df_res[df_res.architecture == archi][metric],
-    #                            error_y = dict(type='data', array=df_res[df_res.architecture == archi][std]),
-    #                            name = archi)
-    #         plots.append(plot_test)
-    #     d = {'data' : plots,
-    #          'layout' : dict(height = 600,
-    #                          width = max(25*len(df_res['architecture']), 850),
-    #                          margin = {'l': 40, 'b': 0, 't': 10, 'r': 40},
-    #                          legend=dict(orientation='h',
-    #                                      y = -0.4))}
-
 
     return go.Figure(d)

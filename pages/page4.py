@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
 import pandas as pd
 import plotly.graph_objs as go
 from scipy.cluster import hierarchy
@@ -419,7 +419,6 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
         customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
-        print("customdata_score_x3", customdata_score_x)
         organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
         d = {}
         d['layout'] = dict(height = 700,
@@ -428,22 +427,11 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                            xaxis = dict(titlefont=dict(size=8)),
                            yaxis = dict(titlefont=dict(size=8)),
                            plot_bgcolor='rgba(0,0,0,0)')
-        ## Linear mapping
-        def f(x):
-            if x <= 0:
-                return 'rgba(%s, %s, %s, 0.85)' % (255, 255*(x + 1), 255*(x + 1))
-            else :
-                return 'rgba(%s, %s, %s, 0.85)' % (255*(1 - x), 255*(1 - x), 255)
 
         if value_organ == 'All':
             #Color Scale
-            min = df.min().min()
-            max = df.max().max()
-            abs = np.abs(min/(min - max))
-            colorscale =  [[0, f(min)],
-                           [abs, 'rgba(255, 255, 255, 0.85)'],
-                           [1, f(max)]]
-
+            colorscale =  get_colorscale(df)
+            print(colorscale)
             df_miror = 1*df.isna()
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
@@ -512,11 +500,12 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                     width=0.5
                           )
                 for organ in distincts_organs:
-                    x0 = -20.5
-                    x1 = -40.5
+                    x0 = -40
+                    x1 = -80
                     where_organ = np.where(x.str.startswith(organ))[0]
                     min_organ = where_organ.min()
                     max_organ = where_organ.max()
+
                     shapes.append(dict(type="line",
                                        xref="x",
                                        yref="y",
@@ -566,8 +555,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                     distincts_views = x[x.str.startswith(organ)]
                     distincts_views = [elem.split('-')[1] for elem in distincts_views]
                     distincts_views = list(set(distincts_views))
-                    x0 = -20.5
-                    x1 = -0.5
+                    x0 = -40
+                    x1 = -0
                     for view in distincts_views:
                         where_organ_view = np.where(x.str.contains(organ + '-' + view, regex = False))[0]
                         min_view = where_organ_view.min()
@@ -657,16 +646,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                  <br>Correlation : %{z:.3f} ± %{customdata[0]:.3f}'
 
                 customdata = np.dstack([std.values, customdata_score_x, customdata_score_y])
-                colorbar = None
                 df = df.values
                 np.fill_diagonal(df, np.nan)
-            #linkage = hierarchy.linkage(df.fillna(0), method='complete')
-            #leaves = hierarchy.leaves_list(linkage)
-            #leaves = df.index.values[leaves]
-
-
-
-            #print("x ", x.shape, "Total shape : ", df.shape, 'y ', y.shape)
 
             d['data'] = [
                         ## Actual plot
@@ -678,7 +659,6 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                     colorscale=colorscale,
                                     customdata = customdata,
                                     hovertemplate = hovertemplate,
-                                    colorbar = colorbar
                                     ),
                          ## Miror to fill na
                         go.Heatmap(z=df_miror,
@@ -691,9 +671,6 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                   )
                          ]
             #pdist = hierarchy.distance.pdist(df)
-
-
-
 
         else:
             mask = df.columns.str.contains(value_organ)
@@ -729,7 +706,6 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                 x = df.index
                 y = df.index
 
-
             list_elem_1 = np.char.array([elem.split('-') for elem in df.index])[:, 1]
             list_elem_2 = np.char.array([elem.split('-') for elem in df.index])[:, 2]
             list_elem_3 = np.char.array([elem.split('-') for elem in df.index])[:, 3]
@@ -756,17 +732,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                              <br>Score x : %{customdata[8]:.3f}\
                              <br>\
                              <br>Correlation : %{z:.3f} ± %{customdata[6]:.3f}'
-            min = df.min().min()
-            max = df.max().max()
-            abs = np.abs(min/(min - max))
-            if abs > 0 and abs < 1 and min < 0 and max > 0:
-
-                colorscale =  [[0, f(min)],
-                               [abs, 'rgba(255, 255, 255, 0.85)'],
-                               [1, f(max)]]
-            else :
-                colorscale = [[0, f(min)],
-                               [1, f(max)]]
+            colorscale = get_colorscale(df)
 
 
             df_miror = 1*df.isna()
@@ -794,6 +760,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                            colorscale = [[0, 'rgba(128,128,128, 0.7)'], [1, 'rgba(128,128,128, 0.7)']]
                            )
                 ]
+            d['layout']['width'] = 900
+            d['layout']['height'] = 800
 
             n_cols = len(cols)
 
@@ -814,14 +782,14 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             fig['layout']['yaxis']['showgrid'] = False
             fig['layout']['yaxis2']['domain'] = [0, 0.7]
             fig['layout']['yaxis2']['showgrid'] = False
+            fig['layout']['width'] = 800
+            fig['layout']['height'] = 800
             if value_aggregate == 'All':
                 fig['layout']['xaxis2']['showticklabels'] = False
                 fig['layout']['xaxis']['autorange'] =  True
                 fig['layout']['yaxis2']['showticklabels'] = False
-            print(fig)
         else :
             fig = go.Figure(d)
-        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
         return fig#, d2
     else :
         return go.Figure()#, go.Figure()
