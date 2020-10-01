@@ -36,7 +36,7 @@ filename_manhattan = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS
 filename_qq = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS_QQPlot_Age_')
 list_files_volcano = glob.glob(filename_volcano + '*')
 list_files_volcano = [elem.split('/')[-1] for elem in list_files_volcano]
-organs_gwas_volcano = sorted([elem.split('_')[3].replace('.csv', '') for elem in list_files_volcano])#['Heart']
+organs_gwas_volcano = sorted(list(set([elem.split('_')[3].replace('.csv', '') for elem in list_files_volcano])))#['Heart']
 
 list_files_manhattan = glob.glob(filename_manhattan + '*')
 list_files_manhattan = [elem.split('/')[-1] for elem in list_files_manhattan]
@@ -164,7 +164,7 @@ def _plot_volcano_plot(organ):
         d = {}
 
         if organ != 'All':
-            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+            df = pd.read_csv(filename_volcano + organ + 'withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
             d['data'] = [
                 go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],
@@ -182,7 +182,7 @@ def _plot_volcano_plot(organ):
                                     )  for chromo in df['CHR'].drop_duplicates()
                          ]
         else :
-            df = pd.read_csv(filename_volcano + organ + '.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
+            df = pd.read_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
             d['data'] = [
                 go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],

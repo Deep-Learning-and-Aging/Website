@@ -19,7 +19,7 @@ from PIL import Image
 import base64
 from io import BytesIO
 path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
-path_img = './' + app.get_asset_url('page15_AttentionMapsTimeSeries/img/Age')
+path_img = './' + app.get_asset_url('page15_AttentionMapsTimeSeries/img/Age/')
 aging_rate = 'Normal'
 controls = dbc.Card([
     dbc.FormGroup([
