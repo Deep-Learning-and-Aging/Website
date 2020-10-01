@@ -5,8 +5,8 @@ from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
 from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12, page13, page14, page15, page16
-num_pages = 16
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12, page13, page14, page15, page16, page17
+num_pages = 17
 top_bar = html.Div([
     dbc.Nav(
         [
@@ -29,7 +29,8 @@ top_bar = html.Div([
                               nav=True
                              ),
             dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS - Results", href="/pages/page10", id="page10-link"),
-                              dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link")],
+                              dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link"),
+                              dbc.DropdownMenuItem("GWAS - Correlation", href="/pages/page17", id="page17-link")],
                               label="GWAS",
                               nav=True
                              ),

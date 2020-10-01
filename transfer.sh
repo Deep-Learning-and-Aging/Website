@@ -18,6 +18,6 @@ cp /n/groups/patel/JbProst/Heart/ActivationMap/Age/Gradient/Gif/*.gif /n/groups/
 cp /n/groups/patel/JbProst/Heart/ActivationMap/Age/Gradient/2D/*.jpg /n/groups/patel/samuel/data_final/page12_AttentionMapsVideos/img
 
 cp -r /n/groups/patel/Alan/Aging/Medical_Images/figures/Images_TimeSeries/Age/ /n/groups/patel/samuel/data_final/page15_AttentionMapsTimeSeries/img/
-
+cp /n/groups/patel/Alan/Aging/Medical_Images/data/GWAS_correlations*.csv /n/groups/patel/samuel/data_final/page17_GWASCorrelations/
 
 scp -r "sd375@transfer.rc.hms.harvard.edu:/n/groups/patel/samuel/data_final/page13_AttentionMapsTimeSeries/" Desktop/dash_app/data/page13_AttentionMapsTimeSeries/
