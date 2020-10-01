@@ -210,8 +210,12 @@ def _display_gif(organ, view, transformation, sex, age_group, channel):
         else :
             unit_x = ''
             unit_y = ''
+        print(numpy_arr_raw, numpy_arr_raw.shape, numpy_arr_raw.ndim)
+        if numpy_arr_raw.ndim > 1 :
+            np_channel = numpy_arr_raw[channel - 1]
+        else :
+            np_channel = numpy_arr_raw
 
-        np_channel = numpy_arr_raw[channel - 1]
         scatter = go.Scatter(
             y = np_channel,
             mode='markers',

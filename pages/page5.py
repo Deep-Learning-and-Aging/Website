@@ -16,26 +16,26 @@ import copy
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
 path_linear_ewas = './' + app.get_asset_url('page5_LinearXWASResults/LinearOutput/')
-Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
+Environmental = sorted(['All', 'Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
                  'ChestPain', 'CancerScreening', 'Medication', 'Hearing',
                  'Household', 'MentalHealth', 'OtherSociodemographics',
                  'PhysicalActivity', 'SexualFactors', 'Sleep', 'SocialSupport',
                  'SunExposure', 'EarlyLifeFactors'])
-Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
+Biomarkers = sorted(['All', 'HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
               'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
               'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
               'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
               'BoneDensitometryOfHeel', 'HearingTest'])
-Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
+Pathologies = sorted(['All'] + ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
                                                     'F', 'G', 'H', 'I', 'J',
                                                     'K', 'L', 'M', 'N', 'O',
                                                     'P', 'Q', 'R', 'S', 'T',
-                                                    'U', 'V', 'W', 'X', 'Y', 'Z']]
-All = sorted(Environmental + Biomarkers + Pathologies)
+                                                    'U', 'V', 'W', 'X', 'Y', 'Z']])
+All = sorted(list(set(Environmental + Biomarkers + Pathologies)))
 
 # ## Old just to test :
 # organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
@@ -72,7 +72,7 @@ controls = dbc.Card([
         dcc.Dropdown(
             id='Select_organ_ewas',
             options = get_dataset_options(organs),
-            value = 'HeartImages'
+            value = 'Heart'
             ),
         html.Br()
     ], id = 'Select_organ_ewas_full'),
@@ -179,11 +179,14 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
         list_df = []
         for idx, env_dataset in enumerate(globals()[value_data]):
             try :
+                print(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
                 t = pd.read_csv(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
+
                 t['Env_Dataset'] = env_dataset
                 list_df.append(t)
-            except FileNotFoundError:
                 print("Env Dataset : ", env_dataset, "Organ : ", value_organ)
+            except FileNotFoundError:
+                continue
         res = pd.concat(list_df)
         res['p_val'] = res['p_val'].replace(0, 1e-323)
 
