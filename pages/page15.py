@@ -268,7 +268,6 @@ def _display_gif2(organ, view, transformation, sex, age_group, channel):
         else :
             np_channel = numpy_arr_raw
         channel = int(channel)
-        np_channel = numpy_arr_raw[channel - 1]
         scatter = go.Scatter(
             y = np_channel,
             mode='markers',
