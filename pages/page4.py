@@ -784,9 +784,9 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             fig['layout']['yaxis2']['showgrid'] = False
             fig['layout']['width'] = 800
             fig['layout']['height'] = 800
+            fig['layout']['xaxis']['autorange'] =  True
             if value_aggregate == 'All':
                 fig['layout']['xaxis2']['showticklabels'] = False
-                fig['layout']['xaxis']['autorange'] =  True
                 fig['layout']['yaxis2']['showticklabels'] = False
         else :
             fig = go.Figure(d)
