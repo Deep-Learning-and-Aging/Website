@@ -16,6 +16,13 @@ import dash_table
 import copy
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
+filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
+df_heritability = pd.read_csv(filename_heritabilty)[['h2', 'h2_sd', 'Organ']]
+df_heritability = df_heritability.rename(columns = {'h2' : 'r2', 'h2_sd' : 'std', 'Organ' : 'organ'})
+df_heritability['env_dataset'] = 'Genetics'
+df_heritability['subset'] = 'Genetics'
+
+
 path_scores_ewas = './' + app.get_asset_url('page7_MultivariateXWASResults/Scores/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
@@ -53,7 +60,7 @@ controls = dbc.Card([
         html.P("Select data type: "),
         dcc.RadioItems(
             id='Select_data_type_scores',
-            options = get_dataset_options(['All', 'Biomarkers', 'Pathologies', 'Environmental']),
+            options = get_dataset_options(['All', 'Biomarkers', 'Pathologies', 'Environmental', 'Genetics']),
             value = 'All',
             labelStyle = {'display': 'inline-block', 'margin': '5px'}
             ),
@@ -125,6 +132,7 @@ def _compute_plots(algo, step, group, view_type):
     if algo is not None and step is not None:
 
         df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]))
+        df = pd.concat([df, df_heritability])
         if group is not None and group != 'All':
             df  = df[df.subset == group]
 
@@ -133,7 +141,7 @@ def _compute_plots(algo, step, group, view_type):
         df_pivot = pd.pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ')
         df_pivot_without_negative = df_pivot.clip(lower = 0)
         d = dict()
-        print(get_colorscale(df_pivot_without_negative))
+
 
         hovertemplate = 'X dataset : %{y}\
                          <br>Organ : %{x}\
