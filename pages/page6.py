@@ -63,12 +63,11 @@ controls1 = dbc.Card([
         dcc.Dropdown(
             id='Select_subset_method1',
             options = get_dataset_options(['All', 'Union', 'Intersection']),
-            placeholder = 'All',
-            value = 'All',
+            value = 'Union',
             )
     ]),
     dbc.FormGroup([
-        html.P("Select Environmental Dataset: "),
+        html.P("Select X Dataset: "),
         dcc.Dropdown(
             id='Select_env_dataset_lin_ewas',
             options = get_dataset_options(sorted(All)),

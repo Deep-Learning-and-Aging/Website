@@ -5,8 +5,9 @@ from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
 from app import app
-from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, page10, page11, page12, page13, page14, page15, page16, page17
-num_pages = 17
+from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, \
+                  page10, page11, page12, page13, page14, page15, page16, page17, page18
+num_pages = 18
 top_bar = html.Div([
     dbc.Nav(
         [
@@ -37,7 +38,9 @@ top_bar = html.Div([
             dbc.DropdownMenu([dbc.DropdownMenuItem("Univariate XWAS - Results", href="/pages/page5", id="page5-link"),
                               dbc.DropdownMenuItem("Univariate XWAS - Correlations", href="/pages/page6", id="page6-link"),
                               dbc.DropdownMenuItem("Multivariate XWAS - Results", href="/pages/page7", id="page7-link"),
-                              dbc.DropdownMenuItem("Multivariate XWAS - Correlations", href="/pages/page8", id="page8-link")],
+                              dbc.DropdownMenuItem("Multivariate XWAS - Correlations", href="/pages/page8", id="page8-link"),
+                              dbc.DropdownMenuItem("Multivariate XWAS - Features importances", href="/pages/page18", id="page18-link")
+                              ],
                               label="XWAS",
                               nav=True
                              ),

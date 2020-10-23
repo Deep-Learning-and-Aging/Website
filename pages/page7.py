@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS
 import pandas as pd
 import plotly.graph_objs as go
-from .tools import get_colorscale
+from .tools import get_colorscale, empty_graph
 
 from app import app, MODE
 import glob
@@ -157,6 +157,7 @@ def _compute_plots(algo, step, group, view_type):
                     )
             ]
 
+
         d2 = dict()
         if view_type == 'Organ':
             d2['data'] = [
@@ -166,8 +167,9 @@ def _compute_plots(algo, step, group, view_type):
             d2['data'] = [
                 go.Bar(name = x_dataset, x = df[df.env_dataset == x_dataset].organ, y = df[df.env_dataset == x_dataset].r2, error_y = dict(type = 'data', array = df[df.env_dataset == x_dataset]['std'])) for x_dataset in df.env_dataset.drop_duplicates()
             ]
-
+        d['layout']={'height' : 1000}
+        d2['layout'] = {'height' : 1000}
 
         return go.Figure(d), go.Figure(d2)
     else :
-        return go.Figure(), go.Figure()
+        return go.Figure(empty_graph), go.Figure(empty_graph)

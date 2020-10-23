@@ -13,15 +13,15 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 path_feat_imps = './' + app.get_asset_url('page3_featureImp/FeatureImp/')
-list_models = ['Correlation', 'ElasticNet', 'LightGbm', 'NeuralNetwork']
+path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
+list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
 targets = ['Sex', 'Age']
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
 #list_organs = sorted(list(set(list_organs)))
 
 #if MODE != 'All':
 #    list_organs = [elem for elem in list_organs if MODE in elem]
-
-df_sex_age_ethnicity_eid = pd.read_csv('./' + app.get_asset_url('page1_biomarkers/sex_age_eid_ethnicity.csv')).set_index('id')
+score = pd.read_csv(path_score_scalar)
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([
@@ -91,10 +91,10 @@ def generate_list_view_list(value):
         return get_dataset_options(hierarchy_biomarkers[value])
 
 
-table_df = pd.DataFrame(data = {'Corr' : ['Correlation', 'ElasticNet', 'LightGbm', 'NeuralNetwork'],
+table_df = pd.DataFrame(data = {'Corr' : ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork'],
                                 'Correlation' : [1, 0, 0, 0],
                                 'ElasticNet' : [0, 1, 0, 0],
-                                'LightGbm': [0, 0, 1, 0],
+                                'LightGBM': [0, 0, 1, 0],
                                 'NeuralNetwork' : [0, 0, 0, 1]})
 
 table = dbc.Card([
@@ -125,35 +125,41 @@ layout =  html.Div([
     dcc.Loading([
         dbc.Container([
             html.H1('Features importances'),
+            html.Br(),
+            html.H2(id = 'scores'),
+            html.Br(),
             dbc.Row([
                 dbc.Col([controls,
                          html.Br(),
                          html.Br(),
                          table
-                         ], md=4),
+                         ], md=3),
                 dbc.Col([
-                    dash_table.DataTable(
-                        id = 'table_feature_imps',
-                        )
-                     ],
-                    style={'overflowY': 'scroll', 'height': 800},
-                    md=8)
+                    html.H2('Feature Importances - Bar plot'),
+                    dcc.Graph(
+                         id='Plot Feature Imps',
+                         )
+                ],
+                md=9,
+                style={'overflowY': 'scroll', 'height' : 1000}),
+
                 ],
                 className="h-5"),
             html.Br(),
             html.Br(),
-            html.H2('Feature Importances - Bar plot'),
+            html.H2('Feature Importances - Table'),
             html.Br(),
             html.Br(),
             dbc.Row([
                 dbc.Col([
-                    dcc.Graph(
-                         id='Plot Feature Imps'
-                         )
-                ],
-                style={'overflowY': 'scroll', 'height' : 1500},
-                width={"size": 10, "offset": 1})
-            ], className="h-75")
+                    dash_table.DataTable(
+                        id = 'table_feature_imps',
+                        sort_action="native",
+                        )
+                     ],
+                    style={'overflowY': 'scroll', 'height': 800},
+                    width={"size": 10, "offset": 1})
+                ], className="h-75")
             ],
             style={"height": "100vh"},
             fluid = True)
@@ -161,121 +167,41 @@ layout =  html.Div([
         id = 'Loading Data'
     )])
 
-#layout =  html.Div([
-#     dcc.Store(id='memory'),
-#     dcc.Store(id = 'memory_no_str'),
-#     dcc.Loading([
-#         dbc.Container([
-#             dbc.Row([
-#                 dbc.Col([controls,
-#                          html.Br(),
-#                          html.Br(),
-#                          table
-#                          ], md=4),
-#                 dbc.Col(
-#                     [dcc.Graph(
-#                          id='Plot Feature Imps'
-#                          )
-#                      ],
-#                     md=8)
-#                 ])
-#             ],
-#             style={"height": "100vh"},
-#             fluid = True)
-#         ],
-#         id = 'Loading Data'
-#     )])
 
 
-#    output =
-
-# @app.callback(Output("Loading Data", "children"),
-#               [Input('select_target', 'value'), Input('select_model', 'value'), Input('Select_organ_1', 'value'), Input('select correlation type', 'value')])
-# def _ (value_target, value_model, value_organ, corr_type):
-#     return value_target, value_model, value_organ, corr_type
-#
-#
-# @app.callback([Output('Plot Feature Imps', 'figure'), Output('table_corr', 'data')],
-#               [Input('select_target', 'value'), Input('select_model', 'value'), Input('Select_organ_1', 'value'), Input('select correlation type', 'value')])
-# def _plot_r2_scores(value_target, value_model, value_organ, corr_type):
-#     if value_model != 'All':
-#         df = pd.read_csv(path_feat_imps + 'FeatureImp_%s_%s_%s.csv' % (value_target, value_organ, value_model)).set_index('features')
-#         df.columns = [value_model]
-#         df = df.sort_values(value_model, ascending = True)
-#     else :
-#         list_models=['Correlation']
-#         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_*.csv' % (value_target, value_organ))
-#         for idx, elem in enumerate(list_df):
-#             df_new = pd.read_csv(elem).set_index('features')
-#             _, _, _, model = os.path.basename(elem).split('_')
-#             model = model.replace('.csv', '')
-#             list_models.append(model)
-#             df_new.columns = [model]
-#             if idx == 0:
-#                 df = df_new
-#             else :
-#                 df = df.join(df_new)
-#         df['mean'] = df.mean(axis = 1)
-#         df = df.sort_values('mean', ascending = True).drop(columns = ['mean'])
-#         df = df/df.sum()
-#     features = df.index
-#
-#     # Add Corr plot
-#     df_bio = pd.read_csv(path_inputs + '/%s.csv' % value_organ).set_index('id').dropna()
-#     df_corr = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
-#     df_corr_age = df_corr['Age when attended assessment centre'].astype('float')
-#     features  = ['NA' if pd.isna(elem) else elem for elem in features ]
-#     df_corr = df_corr[features].astype('float')
-#     corr_with_age = df_corr.apply(lambda col : pearsonr(col, df_corr_age)[0]).abs()
-#     corr_with_age = corr_with_age/corr_with_age.sum()
-#     corr_with_age.name = 'Correlation'
-#     df = df.join(corr_with_age)
-#     ## Plot
-#     d = {'data' : [go.Bar(name = model, x = df[model], y = df.index, orientation='h') for model in df.columns],
-#          'layout' : dict(height = 1000,
-#                          margin={'l': 40, 'b': 30, 't': 10, 'r': 0})}
-#
-#     matrix = df[sorted(list_models)].corr(method=corr_type)
-#     matrix.index.name = 'Corr'
-#     matrix = matrix.reset_index().round(3)
-#
-#     return go.Figure(d), matrix.to_dict('records')
-
-
-
-
-@app.callback([Output("memory", "data"), Output("memory_no_str", "data"), Output("table_feature_imps", 'columns'), Output("Plot Feature Imps", "figure")],
+@app.callback([Output("memory", "data"), Output("memory_no_str", "data"), Output("table_feature_imps", 'columns'), Output("Plot Feature Imps", "figure"), Output("scores", "children")],
               [Input('select_target', 'value'), Input('Select_organ_1', 'value'), Input('Select_view_1', 'value'), Input('Select_transf_1', 'value')])
 def _plot_r2_scores(value_target, value_organ, value_view, value_transformation):
     if value_transformation is not None :
+        score_model = score[(score['organ'] == value_organ) & (score['view'] == value_view) & (score['transformation'] == value_transformation)][['architecture', 'R-Squared_all']]
+        score_lightgbm = score_model[score_model['architecture'] == 'LightGBM']['R-Squared_all']
+        score_nn = score_model[score_model['architecture'] == 'NeuralNetwork']['R-Squared_all']
+        score_elasticnet = score_model[score_model['architecture'] == 'ElasticNet']['R-Squared_all']
+
+        title = 'R-Squared : ElasticNet %.3f, LightGBM %.3f, NeuralNetwork %.3f' % (score_elasticnet, score_lightgbm, score_nn)
         list_models = []
         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
 
         for idx, elem in enumerate(list_df):
+
             df_new = pd.read_csv(elem, na_filter = False).set_index('features')
+            print(df_new)
             _, _, _, _, _, model = os.path.basename(elem).split('_')
-            model = model.replace('.csv', '')
+            model = model.replace('.csv', '').replace('LightGbm', 'LightGBM')
             list_models.append(model)
             df_new.columns = [model]
             if idx == 0:
                 df = df_new
             else :
                 df = df.join(df_new)
-
         df = np.abs(df)/np.abs(df).sum()
-        df['mean'] = df.mean(axis = 1)
-
-        df = df.sort_values('mean', ascending = True).drop(columns = ['mean'])
-        #df = df/df.sum()
-
-        features = df.index
 
         list_models_sd = []
         for idx, elem in enumerate(list_df_sd):
             df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
             _, _, _, _, _, _, model = os.path.basename(elem).split('_')
-            model = model.replace('.csv', '')
+            model = model.replace('.csv', '').replace('LightGbm', 'LightGBM')
             list_models_sd.append(model)
             df_new_sd.columns = [model]
             if idx == 0:
@@ -283,25 +209,44 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
             else :
                 df_sd = df_sd.join(df_new_sd)
 
+        ## Sort by mean of 3 models :
+        # df['mean'] = df.mean(axis = 1)
+        # df = df.sort_values('mean', ascending = True).drop(columns = ['mean'])
 
-        list_models_mean = []
-        for idx, elem in enumerate(list_models_mean):
-            df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
-            _, _, _, _, _, _,  model = os.path.basename(elem).split('_')
-            model = model.replace('.csv', '')
-            list_models_sd.append(model)
-            df_new_mean.columns = [model]
-            if idx == 0:
-                df_mean = df_new_mean
-            else :
-                df_mean = df_mean.join(df_new_mean)
+        ## Sort by best model :
+        if score_lightgbm.values > score_nn.values and score_lightgbm.values > score_elasticnet.values:
+            df = df.sort_values('LightGBM')
+            df_sd = df_sd.sort_values('LightGBM')
+        elif score_nn.values > score_lightgbm.values and score_nn.values > score_elasticnet.values:
+            df = df.sort_values('NeuralNetwork')
+            df_sd = df_sd.sort_values('NeuralNetwork')
+        else :
+            df = df.sort_values('ElasticNet')
+            df_sd = df_sd.sort_values('ElasticNet')
+        features = df.index
+
         df_sd = df_sd.loc[features]
-        df_mean = df_sd.loc[features]
+
+        # list_models_mean = []
+        # for idx, elem in enumerate(list_models_mean):
+        #     df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
+        #     _, _, _, _, _, _,  model = os.path.basename(elem).split('_')
+        #     model = model.replace('.csv', '')
+        #     list_models_sd.append(model)
+        #     df_new_mean.columns = [model]
+        #     if idx == 0:
+        #         df_mean = df_new_mean
+        #     else :
+        #         df_mean = df_mean.join(df_new_mean)
+        # df_mean = df_mean.loc[features]
+
+
 
 
         df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
         df.index = df.index.str.replace('.0$', '', regex = True)
         df_str.index = df_str.index.str.replace('.0$', '', regex = True)
+        print(df_str)
 
         ## Plot
         d = {'data' : [go.Bar(name = model, x = df[model], y = df.index, orientation='h') for model in sorted(df.columns)],
@@ -336,9 +281,9 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         ])
 
 
-        return df_str.to_dict(), df.to_dict(), [{"name": i, "id": i} for i in ['features'] + sorted(df.columns)], go.Figure(d)
+        return df_str.iloc[::-1].to_dict(), df.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], go.Figure(d), title
     else :
-        return None, None, None, go.Figure()
+        return None, None, None, go.Figure(), ""
 
 
 
@@ -348,7 +293,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 def _sort_table(sort_by_col, data):
     df = pd.DataFrame(data = data)
     df = df[sorted(df.columns)]
-    df.index.name = 'features'
+    df.index.name = 'Features'
     df = df.reset_index()
     if sort_by_col is not None and len(sort_by_col):
         sorting = sort_by_col[0]
