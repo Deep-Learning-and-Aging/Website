@@ -166,7 +166,7 @@ def _plot_volcano_plot(organ):
         d = {}
 
         if organ != 'All':
-            df = pd.read_csv(filename_volcano + organ + 'withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+            df = pd.read_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
             d['data'] = [
                 go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],
