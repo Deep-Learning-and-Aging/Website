@@ -74,16 +74,17 @@ layout = dbc.Container([
                                 ),
                             html.Br()
                         ])
-                    ]),
+                    ],md = 3),
                 dbc.Col(
                     [dcc.Graph(
                          id='Plot_GWAS_Corr_'
                          ),
                      ],
-                    style={ 'overflowX': 'scroll', 'width' : 800},
-                     md=9)
+                     md=9,
+                     style={ 'overflowX': 'scroll', 'width' : 800},
+                     )
                     ])
-                ])
+                ], fluid = True)
 
 
 @app.callback(Output('Plot_GWAS_Corr_', 'figure'),

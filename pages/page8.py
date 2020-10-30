@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -207,7 +207,7 @@ controls1 = dbc.Card([
             )
     ]),
     dbc.FormGroup([
-        html.P("Select Environmental Dataset: "),
+        html.P("Select an X Dataset: "),
         dcc.Dropdown(
             id='Select_env_dataset_mul_ewas',
             options = get_dataset_options(sorted(All)),
@@ -329,6 +329,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df_organ[df_organ.organ_2 != organ]
         matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
+        print(matrix_organ)
         colorscale =  get_colorscale(matrix_organ)
         d = {}
         d['data'] = go.Heatmap(z=matrix_organ.T,

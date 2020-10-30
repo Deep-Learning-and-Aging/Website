@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS
+from .tools import get_dataset_options, ETHNICITY_COLS, empty_graph
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -37,14 +37,6 @@ Pathologies = sorted(['All'] + ['medical_diagnoses_%s' % letter for letter in ['
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']])
 All = sorted(list(set(Environmental + Biomarkers + Pathologies)))
 
-# ## Old just to test :
-# organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
-#               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
-#               'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
-#               'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
-#               'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
-#               'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
-#               'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select data type: "),
@@ -57,7 +49,7 @@ controls = dbc.Card([
         html.Br()
     ], id = 'Select_data_type_full'),
     dbc.FormGroup([
-        html.P("Select an Environmental Dataset : "),
+        html.P("Select an X Dataset : "),
         dcc.Dropdown(
             id='Select_dataset_ewas',
             options = [{'value' : '', 'label' : ''}],
@@ -93,7 +85,7 @@ if MODE != 'All':
             html.Br()
         ], id = 'Select_data_type_full'),
         dbc.FormGroup([
-            html.P("Select an Environmental Dataset : "),
+            html.P("Select an X Dataset : "),
             dcc.Dropdown(
                 id='Select_dataset_ewas',
                 options = [{'value' : '', 'label' : ''}],
@@ -187,16 +179,19 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                 print("Env Dataset : ", env_dataset, "Organ : ", value_organ)
             except FileNotFoundError:
                 continue
+
+        if len(list_df) == 0:
+            return go.Figure(empty_graph), {}
         res = pd.concat(list_df)
         res['p_val'] = res['p_val'].replace(0, 1e-323)
+        res['env_feature_name'] = res['env_feature_name'].str.replace('.0', '')
 
         if value_datasets != 'All' or value_datasets is None:
             res = res[res.Env_Dataset.isin(value_datasets)]
 
-        res = res
         hovertemplate = 'Feature : %{customdata[0]}\
                          <br>Organ : %{customdata[1]}\
-                         <br>Environmental Dataset : %{customdata[2]}\
+                         <br>X Dataset : %{customdata[2]}\
                          <br>p_value : %{customdata[3]:.3E}\
                          <br>Correlation : %{customdata[4]:.3f}\
                          <br>Sample Size : %{customdata[5]}'
@@ -230,7 +225,7 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                        mode = 'lines'))
 
         data = res.rename(columns = dict(zip(['env_feature_name', 'target_dataset_name', 'Env_Dataset', 'p_val', 'corr_value', 'size_na_dropped'],
-                                             ['Environmental Feature', 'Organ', 'Environmental Dataset', 'p_value', 'Correlation', 'Sample Size']))).to_dict('records')
+                                             ['Environmental Feature', 'Organ', 'X Dataset', 'p_value', 'Correlation', 'Sample Size']))).to_dict('records')
     return go.Figure(fig), data
 
 

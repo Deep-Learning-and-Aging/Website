@@ -145,7 +145,7 @@ table = dbc.Card([
 
 
 layout = dbc.Container([
-                html.H1('Biomarkers'),
+                html.H1('Datasets - Scalars'),
                 html.Br(),
                 html.Br(),
                 dcc.Loading([
@@ -178,7 +178,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
     else :
         key = (value_organ, value_view, value_transformation)
         df = dict_organ_view_transf_to_id[key]
-        cols = pd.read_csv(path_inputs + '/' + df + '.csv', nrows = 10).set_index('id').columns
+        cols = pd.read_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 10).set_index('id').columns
         cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
         return get_dataset_options(cols)
 
@@ -266,7 +266,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
             unit = ''
         ## Load Data :
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
-        df_bio = pd.read_csv(path_inputs + '/%s.csv' % id_dataset, nrows = sample_size_limit).set_index('id').dropna()
+        df_bio = pd.read_csv((path_inputs + '/%s.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
         #print(value_group)
         if value_group != 'PhysicalActivity' :
             df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()

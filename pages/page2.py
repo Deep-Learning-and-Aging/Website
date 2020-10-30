@@ -205,7 +205,7 @@ def _plot_r2_scores(value_eid_vs_instances,
             df_res_archi['view'] = df_res_archi['view'] + ' - ' + df_res_archi['transformation']
             df_res_archi['view'] = df_res_archi['view'].str.replace('- raw', '')
             hovertemplate = 'Model : %{x}\
-                             <br>Architecture : ' + archi + '<br>Score : %{y}<br>'
+                             <br>Algorithm : ' + archi + '<br>Score : %{y}<br>'
 
             plot_test = go.Bar(x = [df_res_archi['organ'].values,
                                     df_res_archi['view'].values],

@@ -126,7 +126,6 @@ layout =  html.Div([
         dbc.Container([
             html.H1('Features importances'),
             html.Br(),
-            html.H2(id = 'scores'),
             html.Br(),
             dbc.Row([
                 dbc.Col([controls,
@@ -135,7 +134,7 @@ layout =  html.Div([
                          table
                          ], md=3),
                 dbc.Col([
-                    html.H2('Feature Importances - Bar plot'),
+                    html.H2(id = 'scores'),
                     dcc.Graph(
                          id='Plot Feature Imps',
                          )
@@ -173,12 +172,14 @@ layout =  html.Div([
               [Input('select_target', 'value'), Input('Select_organ_1', 'value'), Input('Select_view_1', 'value'), Input('Select_transf_1', 'value')])
 def _plot_r2_scores(value_target, value_organ, value_view, value_transformation):
     if value_transformation is not None :
-        score_model = score[(score['organ'] == value_organ) & (score['view'] == value_view) & (score['transformation'] == value_transformation)][['architecture', 'R-Squared_all']]
+        print(score)
+        score_model = score[(score['organ'] == value_organ) & (score['view'] == value_view) & (score['transformation'] == value_transformation)][['architecture', 'R-Squared_all', 'N_all']]
         score_lightgbm = score_model[score_model['architecture'] == 'LightGBM']['R-Squared_all']
         score_nn = score_model[score_model['architecture'] == 'NeuralNetwork']['R-Squared_all']
         score_elasticnet = score_model[score_model['architecture'] == 'ElasticNet']['R-Squared_all']
+        sample_size = score_model[score_model['architecture'] == 'ElasticNet']['N_all']
 
-        title = 'R-Squared : ElasticNet %.3f, LightGBM %.3f, NeuralNetwork %.3f' % (score_elasticnet, score_lightgbm, score_nn)
+        title = 'Bar Plot - R-Squared : ElasticNet %.3f, LightGBM %.3f, NeuralNetwork %.3f, Sample Size %d' % (score_elasticnet, score_lightgbm, score_nn, sample_size)
         list_models = []
         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
@@ -251,7 +252,8 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         ## Plot
         d = {'data' : [go.Bar(name = model, x = df[model], y = df.index, orientation='h') for model in sorted(df.columns)],
              'layout' : dict(height = len(df.index) * 20,
-                             margin={'l': 40, 'b': 30, 't': 10, 'r': 0})}
+                             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
+                             xaxis_title='Feature importance')}
         matrix = df[sorted(list_models)].corr()
         matrix.index.name = 'Corr'
         matrix = matrix.reset_index().round(3)
@@ -283,7 +285,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 
         return df_str.iloc[::-1].to_dict(), df.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], go.Figure(d), title
     else :
-        return None, None, None, go.Figure(), ""
+        return None, None, None, go.Figure(), ''
 
 
 

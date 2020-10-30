@@ -29,10 +29,10 @@ top_bar = html.Div([
                               label="Features importances",
                               nav=True
                              ),
-            dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS - Results", href="/pages/page10", id="page10-link"),
+            dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS", href="/pages/page10", id="page10-link"),
                               dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link"),
                               dbc.DropdownMenuItem("GWAS - Correlation", href="/pages/page17", id="page17-link")],
-                              label="GWAS",
+                              label="Genetics",
                               nav=True
                              ),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Univariate XWAS - Results", href="/pages/page5", id="page5-link"),

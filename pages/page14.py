@@ -19,7 +19,6 @@ from PIL import Image
 import base64
 from io import BytesIO
 
-sample = 0
 aging_rate = 'Normal'
 path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age')
 path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
@@ -90,6 +89,17 @@ controls_1 = dbc.Card([
                     ),
                 html.Br()
             ]),
+        ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select a sample : "),
+                dcc.Dropdown(
+                    id = 'select_sample_image_1',
+                    options = get_dataset_options([i for i in range(10)]),
+                    placeholder ="Select a sample"
+                    ),
+                html.Br()
+            ]),
         ])
     ])
 ])
@@ -113,6 +123,17 @@ controls_2 = dbc.Card([
                     id = 'select_age_group_image_2',
                     options = get_dataset_options(['Young', 'Middle', 'Old']),
                     placeholder ="Select an age group"
+                    ),
+                html.Br()
+            ]),
+        ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select a sample : "),
+                dcc.Dropdown(
+                    id = 'select_sample_image_2',
+                    options = get_dataset_options([i for i in range(10)]),
+                    placeholder ="Select a sample"
                     ),
                 html.Br()
             ]),
@@ -162,10 +183,10 @@ layout =  html.Div([
               Input('select_transformation_image', 'value'),
               Input('select_sex_image_1', 'value'),
               Input('select_age_group_image_1', 'value'),
-              #Input('select_aging_rate_image', 'value')
+              Input('select_sample_image_1', 'value')
               ])
-def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging_rate):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
@@ -233,10 +254,10 @@ def _plot_images_1(organ, view, transformation, sex, age_group):#, aging_rate):
               Input('select_transformation_image', 'value'),
               Input('select_sex_image_2', 'value'),
               Input('select_age_group_image_2', 'value'),
-              #Input('select_aging_rate_image', 'value')
+              Input('select_sample_image_2', 'value')
               ])
-def _plot_images_2(organ, view, transformation, sex, age_group):#, aging_rate):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging_rate):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]

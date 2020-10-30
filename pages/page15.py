@@ -82,7 +82,19 @@ controls_1 = dbc.Row([
                 ),
             html.Br()
             ]),
-        ])
+        ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select a sample : "),
+            dcc.Dropdown(
+                id = 'select_sample_1',
+                options = get_dataset_options([i for i in range(10)]),
+                placeholder ="Select a sample : "
+                ),
+            html.Br()
+            ]),
+        ]),
+
     ])
 
 controls_2 = dbc.Row([
@@ -107,7 +119,18 @@ controls_2 = dbc.Row([
                 ),
             html.Br()
             ]),
-        ])
+        ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select a sample : "),
+            dcc.Dropdown(
+                id = 'select_sample_2',
+                options = get_dataset_options([i for i in range(10)]),
+                placeholder ="Select a sample : "
+                ),
+            html.Br()
+            ]),
+        ]),
     ])
 
 layout = dbc.Container([
@@ -141,7 +164,7 @@ def _get_options_transformation(value_organ):
     else :
         return []
 
-@app.callback(Output('select_time', 'options'),
+@app.callback(Output('select_time_channel', 'options'),
              [Input('select_view_time', 'value'), Input('select_transformation_time', 'value')])
 def _get_options_transformation(value_view, value_transformation):
     if value_view == 'PulseWaveAnalysis':
@@ -162,7 +185,6 @@ def _get_options_transformation(value_view, value_transformation):
              [Input('select_view_time', 'value')])
 def _get_options_transformation(value_view):
     if value_view == 'PulseWaveAnalysis' or value_view == 'ECG':
-        print(get_dataset_options(['TimeSeries']))
         return get_dataset_options(['TimeSeries'])
     elif value_view == 'FullWeek':
         return get_dataset_options(['Acceleration', 'TimeSeriesFeatures'])
@@ -178,15 +200,16 @@ def _get_options_transformation(value_view):
               Input('select_transformation_time', 'value'),
               Input('select_sex_time_1', 'value'),
               Input('select_age_group_time_1', 'value'),
-              Input('select_time_channel', 'value')
+              Input('select_time_channel', 'value'),
+              Input('select_sample_1', 'value')
              ])
-def _display_gif(organ, view, transformation, sex, age_group, channel):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+def _display_gif(organ, view, transformation, sex, age_group, channel, sample):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         channel = int(channel)
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
-        path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
         numpy_arr_raw = np.load(path_raw)
         if view == 'ECG' :
             unit_x = '2ms/Lsb'
@@ -235,11 +258,16 @@ def _display_gif(organ, view, transformation, sex, age_group, channel):
               Input('select_transformation_time', 'value'),
               Input('select_sex_time_2', 'value'),
               Input('select_age_group_time_2', 'value'),
-              Input('select_time_channel', 'value')
+              Input('select_time_channel', 'value'),
+              Input('select_sample_2', 'value')
              ])
-def _display_gif2(organ, view, transformation, sex, age_group, channel):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
-        path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+def _display_gif2(organ, view, transformation, sex, age_group, channel, sample):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
+        channel = int(channel)
+        path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
+        df_metadata = pd.read_csv(path_metadata)
+        df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
+        path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
         numpy_arr_raw = np.load(path_raw)
         if view == 'ECG' :
             unit_x = '2ms/Lsb'
@@ -267,7 +295,7 @@ def _display_gif2(organ, view, transformation, sex, age_group, channel):
             np_channel = numpy_arr_raw[channel - 1]
         else :
             np_channel = numpy_arr_raw
-        channel = int(channel)
+
         scatter = go.Scatter(
             y = np_channel,
             mode='markers',

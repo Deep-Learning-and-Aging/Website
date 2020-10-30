@@ -70,7 +70,7 @@ if MODE == 'All':
             dcc.Dropdown(
                 id='Select_ordering',
                 options = get_dataset_options(['Score', 'Custom', 'Clustering']),
-                value = 'Score'
+                value = 'Clustering'
                 ),
             html.Br()
         ], id = 'Select_ordering_full')
@@ -683,6 +683,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             std = std.loc[std.index.str.contains(value_organ)]
 
             organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
+            print(organ_sorted_by_score)
             d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
             dendro_leaves = d2['layout']['xaxis']['ticktext']
 
@@ -697,12 +698,12 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                 customdata_score_y = customdata_score_y.loc[dendro_leaves, dendro_leaves]
                 std = std.loc[dendro_leaves, dendro_leaves]
 
-            if value_aggregate == 'All' and value_ordering != 'Clustering':
+            if value_aggregate == 'All' and value_ordering != 'Clustering' and value_ordering != 'Score':
                 list_elem_0 = np.char.array([elem.split('-') for elem in df.index])[:, 1]
                 list_elem_1 = np.char.array([elem.split('-') for elem in df.index])[:, 2] + '_' + np.char.array([elem.split('-') for elem in df.index])[:, 3]
                 x = [list_elem_0, list_elem_1]
                 y = [list_elem_0, list_elem_1]
-            else :#value_aggregate != 'All' :
+            else :
                 x = df.index
                 y = df.index
 

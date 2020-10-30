@@ -108,7 +108,7 @@ dbc.Row([
 dict_sex_id_to_sex = {0 : 'Female', 1 : 'Male'}
 
 layout = dbc.Container([
-                html.H1('AttentionMaps - Videos'),
+                html.H1('Datasets - Videos'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
