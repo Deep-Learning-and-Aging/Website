@@ -52,7 +52,7 @@ All = sorted(list(set(Environmental + Biomarkers + Pathologies)))
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([
-        html.P("Select an X dataset : "),
+        html.P("Select X dataset : "),
         dcc.Dropdown(
             id='Select_organ_feat_imps_xwas_1',
             options = get_dataset_options(All)
@@ -61,7 +61,7 @@ if MODE == 'All' :
     ])
 else:
     organ_select = dbc.FormGroup([
-        html.P("Select an X dataset : "),
+        html.P("Select X dataset : "),
         dcc.Dropdown(
             id='Select_organ_feat_imps_xwas_1',
             options = get_dataset_options([MODE]),

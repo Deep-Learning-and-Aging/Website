@@ -19,7 +19,6 @@ from PIL import Image
 import base64
 from io import BytesIO
 
-sample = 0
 path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age')
 path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
 
@@ -113,7 +112,17 @@ controls_1 = dbc.Card([
                     value = ['Raw', 'plot_gradcam', 'plot_saliency']
                 )
             ])
-        ])
+        ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select sample : "),
+                dcc.Dropdown(
+                    id = 'select_sample_attention_image_1',
+                    options = get_dataset_options([i for i in range(10)]),
+                    placeholder ="Select sample"
+                    ),
+                ]),
+            ]),
     ])
 ])
 controls_2 = dbc.Card([
@@ -162,7 +171,17 @@ controls_2 = dbc.Card([
                     value = ['Raw', 'plot_gradcam', 'plot_saliency']
                 )
             ])
-        ])
+        ]),
+        dbc.Col([
+            dbc.FormGroup([
+                html.P("Select sample : "),
+                dcc.Dropdown(
+                    id = 'select_sample_attention_image_2',
+                    options = get_dataset_options([i for i in range(10)]),
+                    placeholder ="Select sample"
+                    ),
+                ]),
+            ]),
     ])
 ])
 @app.callback(Output('select_transformation_attention_image', 'options'),
@@ -261,11 +280,12 @@ layout =  html.Div([
               Input('select_sex_attention_image_1', 'value'),
               Input('select_age_group_attention_image_1', 'value'),
               Input('select_aging_rate_attention_image_1', 'value'),
-              Input('select_raw_gradcam_saliency_1', 'value')
+              Input('select_raw_gradcam_saliency_1', 'value'),
+              Input('select_sample_attention_image_1', 'value')
               ])
-def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency):
+def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency, sample):
     print("raw_gradcam_saliency", raw_gradcam_saliency)
-    if None not in [organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency]:
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
@@ -375,11 +395,12 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
               Input('select_sex_attention_image_2', 'value'),
               Input('select_age_group_attention_image_2', 'value'),
               Input('select_aging_rate_attention_image_2', 'value'),
-              Input('select_raw_gradcam_saliency_2', 'value')
+              Input('select_raw_gradcam_saliency_2', 'value'),
+              Input('select_sample_attention_image_2', 'value')
               ])
-def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency):
+def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency, sample):
     print("raw_gradcam_saliency", raw_gradcam_saliency)
-    if None not in [organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency]:
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, raw_gradcam_saliency, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]

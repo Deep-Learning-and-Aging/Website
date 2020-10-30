@@ -93,6 +93,17 @@ controls_1 = dbc.Row([
                 ),
             html.Br()
         ]),
+    ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select sample : "),
+            dcc.Dropdown(
+                id = 'select_sample_attention_time_1',
+                options = get_dataset_options([i for i in range(10)]),
+                placeholder ="Select sample"
+                ),
+            html.Br()
+        ]),
     ])
 ])
 
@@ -129,11 +140,22 @@ controls_2 = dbc.Row([
                 ),
             html.Br()
             ]),
-        ])
+        ]),
+    dbc.Col([
+        dbc.FormGroup([
+            html.P("Select sample : "),
+            dcc.Dropdown(
+                id = 'select_sample_attention_time_2',
+                options = get_dataset_options([i for i in range(10)]),
+                placeholder ="Select sample"
+                ),
+            html.Br()
+        ]),
+    ])
 ])
 
 layout = dbc.Container([
-                html.H1('AttentionMaps - TimeSeries'),
+                html.H1('AttentionMaps - Time Series'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
@@ -200,13 +222,14 @@ def _get_options_transformation(value_view):
               Input('select_sex_attention_time_1', 'value'),
               Input('select_age_group_attention_time_1', 'value'),
               Input('select_aging_rate_attention_time_1', 'value'),
-              Input('select_channel_time', 'value')
+              Input('select_channel_time', 'value'),
+              Input('select_sample_attention_time_1', 'value')
              ])
-def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel, sample):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         #path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
         #numpy_arr_raw = np.load(path_raw)
-        path_attentionmaps = path_attention_maps + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        path_attentionmaps = path_attention_maps + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
         numpy_attentionmap = np.load(path_attentionmaps)
         print(numpy_attentionmap.shape)
         channel = int(channel)
@@ -236,13 +259,14 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
               Input('select_sex_attention_time_2', 'value'),
               Input('select_age_group_attention_time_2', 'value'),
               Input('select_aging_rate_attention_time_2', 'value'),
-              Input('select_channel_time', 'value')
+              Input('select_channel_time', 'value'),
+              Input('select_sample_attention_time_2', 'value')
              ])
-def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
+def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel, sample):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         #path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
         #numpy_arr_raw = np.load(path_raw)
-        path_attentionmaps = path_attention_maps + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_0.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower())
+        path_attentionmaps = path_attention_maps + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
         numpy_attentionmap = np.load(path_attentionmaps)
         print(numpy_attentionmap.shape)
         channel = int(channel)

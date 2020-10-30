@@ -134,7 +134,7 @@ controls_2 = dbc.Row([
     ])
 
 layout = dbc.Container([
-                html.H1('Datasets - TimeSeries'),
+                html.H1('Datasets - Time Series'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
@@ -143,8 +143,10 @@ layout = dbc.Container([
                              html.Br()], md=3),
                     dbc.Col(
                         [controls_1,
+                        html.H3(id = 'age_1'),
                         dcc.Graph(id = 'timeseries_raw_display_1'),
                         controls_2,
+                        html.H3(id = 'age_2'),
                         dcc.Graph(id = 'timeseries_raw_display_2'),
                         ],
                         style={'overflowX': 'scroll', 'width' : 1000},
@@ -194,7 +196,8 @@ def _get_options_transformation(value_view):
         return []
 
 
-@app.callback(Output('timeseries_raw_display_1', 'figure'),
+@app.callback([Output('timeseries_raw_display_1', 'figure'),
+               Output('age_1', 'children')],
              [Input('select_organ_time', 'value'),
               Input('select_view_time', 'value'),
               Input('select_transformation_time', 'value'),
@@ -209,6 +212,8 @@ def _display_gif(organ, view, transformation, sex, age_group, channel, sample):
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
+        age = df_metadata['Age']
+        title = 'Chronological Age : %.3f' % age
         path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
         numpy_arr_raw = np.load(path_raw)
         if view == 'ECG' :
@@ -248,11 +253,12 @@ def _display_gif(organ, view, transformation, sex, age_group, channel, sample):
         d = {'data' : [scatter], 'layout' : {'xaxis' : {'title' : {'text' : unit_x}},
                                              'yaxis' : {'title' : {'text' : unit_y}}}
             }
-        return go.Figure(d)
+        return go.Figure(d), title
     else :
-        return go.Figure(empty_graph)
+        return go.Figure(empty_graph), ''
         #print(numpy_arr_raw,numpy_arr_raw.shape,  numpy_attentionmap, numpy_attentionmap.shape)
-@app.callback(Output('timeseries_raw_display_2', 'figure'),
+@app.callback([Output('timeseries_raw_display_2', 'figure'),
+                Output('age_2', 'children')],
              [Input('select_organ_time', 'value'),
               Input('select_view_time', 'value'),
               Input('select_transformation_time', 'value'),
@@ -267,6 +273,8 @@ def _display_gif2(organ, view, transformation, sex, age_group, channel, sample):
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
         df_metadata = pd.read_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
+        age = df_metadata['Age']
+        title = 'Chronological Age : %.3f' % age
         path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
         numpy_arr_raw = np.load(path_raw)
         if view == 'ECG' :
@@ -306,6 +314,6 @@ def _display_gif2(organ, view, transformation, sex, age_group, channel, sample):
         d = {'data' : [scatter], 'layout' : {'xaxis' : {'title' : {'text' : unit_x}},
                                              'yaxis' : {'title' : {'text' : unit_y}}}
             }
-        return go.Figure(d)
+        return go.Figure(d), title
     else :
-        return go.Figure(empty_graph)
+        return go.Figure(empty_graph), ''

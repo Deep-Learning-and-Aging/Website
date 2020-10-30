@@ -18,8 +18,8 @@ import copy
 from PIL import Image
 import base64
 from io import BytesIO
-
-path_gif = 'page12_AttentionMapsVideos/RawVideos/MRI'
+sample = 0
+path_gif = 'page12_AttentionMapsVideos/RawVideos/MRI/'
 path_attention_maps_videos = './' + app.get_asset_url('page12_AttentionMapsVideos/AttentionMapsVideos/')
 controls = dbc.Card([
     dbc.FormGroup([
@@ -46,7 +46,7 @@ controls = dbc.Card([
         html.P("Select Transformation : "),
         dcc.Dropdown(
             id = 'select_transformation_attention_video_raw',
-            options = get_dataset_options(['3chambersRaw', '4chambersRaw']),
+            options = get_dataset_options(['3chambersRawVideo', '4chambersRawVideo']),
             placeholder ="Select a transformation"
             ),
         html.Br()
@@ -134,22 +134,20 @@ layout = dbc.Container([
              ])
 def _display_gif(organ, view, transformation, sex, age_group):
     if None not in [organ, view, transformation, sex, age_group]:
-        df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
-        df = df[(df.Sex == sex) & (df.age_category == age_group.lower())]
-        eid = df.iloc[0].eid
-        age = df.iloc[0].Age
-        res = df.iloc[0].res
-        title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
-        path_to_gif = df.iloc[0].Gif.split('/')[-1]
+
+        #title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
+        path_to_gif = path_gif + '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_%s.' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower(), sample)
+        path_to_gif_img = path_to_gif + 'gif'
+        path_to_jpg_img = path_to_gif + 'png'
         print(path_to_gif)
-        path_to_gif = path_gif + path_to_gif
-        path_to_jpg = df.iloc[0].Picture.split('/')[-1]
-        path_to_jpg = path_gif + path_to_jpg
+        frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
+        frame.seek(0)
+        print(frame)
+        frame.save('./' + app.get_asset_url(path_to_jpg_img))
         gif_display = html.Div([
-            html.H3(title),
             gif.GifPlayer(
-                gif = app.get_asset_url(path_to_gif),
-                still = app.get_asset_url(path_to_jpg)
+                gif = app.get_asset_url(path_to_gif_img),
+                still = app.get_asset_url(path_to_jpg_img)
             )])
         return gif_display
     else :
@@ -164,20 +162,20 @@ def _display_gif(organ, view, transformation, sex, age_group):
              ])
 def _display_gif(organ, view, transformation, sex, age_group):
     if None not in [organ, view, transformation, sex, age_group]:
-        print(organ, view, transformation, sex, age_group)
-        df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
-        df = df[(df.Sex == sex) & (df.age_category == age_group.lower())]
-        eid = df.iloc[0].eid
-        age = df.iloc[0].Age
-        res = df.iloc[0].res
-        title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
-        path_to_gif = '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_0.gif' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower())
+
+        #title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
+        path_to_gif = path_gif + '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_%s.' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower(), sample)
+        path_to_gif_img = path_to_gif + 'gif'
+        path_to_jpg_img = path_to_gif + 'png'
         print(path_to_gif)
-        path_to_gif = path_gif + path_to_gif
+        frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
+        frame.seek(0)
+        print(frame)
+        frame.save('./' + app.get_asset_url(path_to_jpg_img))
         gif_display = html.Div([
-            html.H3(title),
             gif.GifPlayer(
-                gif = app.get_asset_url(path_to_gif),
+                gif = app.get_asset_url(path_to_gif_img),
+                still = app.get_asset_url(path_to_jpg_img)
             )])
         return gif_display
     else :

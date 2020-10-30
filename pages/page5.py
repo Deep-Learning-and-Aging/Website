@@ -49,7 +49,7 @@ controls = dbc.Card([
         html.Br()
     ], id = 'Select_data_type_full'),
     dbc.FormGroup([
-        html.P("Select an X Dataset : "),
+        html.P("Select X Dataset : "),
         dcc.Dropdown(
             id='Select_dataset_ewas',
             options = [{'value' : '', 'label' : ''}],
@@ -85,7 +85,7 @@ if MODE != 'All':
             html.Br()
         ], id = 'Select_data_type_full'),
         dbc.FormGroup([
-            html.P("Select an X Dataset : "),
+            html.P("Select X Dataset : "),
             dcc.Dropdown(
                 id='Select_dataset_ewas',
                 options = [{'value' : '', 'label' : ''}],
@@ -142,7 +142,7 @@ layout = dbc.Container([
                         dbc.Col([
                             dash_table.DataTable(
                                 id = 'table_ewas_linear',
-                                columns =[{"name": i, "id": i} for i in ['Environmental Feature', 'Organ', 'Environmental Dataset', 'p_value', 'Correlation', 'Sample Size']],
+                                columns =[{"name": i, "id": i} for i in ['Environmental Feature', 'Organ', 'X Dataset', 'p_value', 'Partial correlation', 'Sample Size']],
                                 style_cell={'textAlign': 'left'},
                                 sort_action='custom',
                                 sort_mode='single')
@@ -162,7 +162,7 @@ layout = dbc.Container([
               [Input('Select_organ_ewas', 'value'), Input('Select_data_type', 'value'), Input('Select_dataset_ewas', 'value')])
 def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
     fig = {'layout' : dict(title='Volcano plot', # title of plot
-                           xaxis_title='Correlation',
+                           xaxis_title='Partial correlation',
                            yaxis_title='-log(p_value)'
                            )}
     data = None
@@ -193,7 +193,7 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                          <br>Organ : %{customdata[1]}\
                          <br>X Dataset : %{customdata[2]}\
                          <br>p_value : %{customdata[3]:.3E}\
-                         <br>Correlation : %{customdata[4]:.3f}\
+                         <br>Partial correlation : %{customdata[4]:.3f}\
                          <br>Sample Size : %{customdata[5]}'
 
         fig['data'] = []
@@ -225,7 +225,7 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                        mode = 'lines'))
 
         data = res.rename(columns = dict(zip(['env_feature_name', 'target_dataset_name', 'Env_Dataset', 'p_val', 'corr_value', 'size_na_dropped'],
-                                             ['Environmental Feature', 'Organ', 'X Dataset', 'p_value', 'Correlation', 'Sample Size']))).to_dict('records')
+                                             ['Environmental Feature', 'Organ', 'X Dataset', 'p_value', 'Partial correlation', 'Sample Size']))).to_dict('records')
     return go.Figure(fig), data
 
 

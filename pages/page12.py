@@ -18,7 +18,7 @@ import copy
 from PIL import Image
 import base64
 from io import BytesIO
-
+sample = 0
 path_img = 'page12_AttentionMapsVideos/img/'
 path_gif = 'page12_AttentionMapsVideos/gif/'
 path_attention_maps_videos = './' + app.get_asset_url('page12_AttentionMapsVideos/AttentionMapsVideos/')
@@ -88,7 +88,18 @@ dbc.Row([
                 ),
             html.Br()
             ]),
-        ])
+        ]),
+    # dbc.Col([
+    #     dbc.FormGroup([
+    #         html.P("Select sample : "),
+    #         dcc.Dropdown(
+    #             id = 'select_sample_attention_video_1',
+    #             options = get_dataset_options(range(6)),
+    #             placeholder ="Select sample"
+    #             ),
+    #         html.Br()
+    #         ]),
+    #     ])
     ])
 ])
 controls_2  =  dbc.Card([
@@ -125,7 +136,18 @@ dbc.Row([
                 ),
             html.Br()
             ]),
-        ])
+        ]),
+    # dbc.Col([
+    #     dbc.FormGroup([
+    #         html.P("Select sample : "),
+    #         dcc.Dropdown(
+    #             id = 'select_sample_attention_video_2',
+    #             options = get_dataset_options(range(6)),
+    #             placeholder ="Select sample"
+    #             ),
+    #         html.Br()
+    #         ]),
+    #     ])
     ])
 ])
 
@@ -154,19 +176,20 @@ layout = dbc.Container([
               Input('select_sex_attention_video_1', 'value'),
               Input('select_age_group_attention_video_1', 'value'),
               Input('select_aging_rate_attention_video_1', 'value'),
+              #Input('select_sample_attention_video_1', 'value')
              ])
-def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
-        print(organ, view, transformation, sex, age_group, aging_rate)
+def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sample):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate]:#, sample]:
         df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
         df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
-        eid = df.iloc[0].eid
-        age = df.iloc[0].Age
-        res = df.iloc[0].res
+        print(df)
+        eid = df.iloc[sample].eid
+        age = df.iloc[sample].Age
+        res = df.iloc[sample].res
         title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
-        path_to_gif = df.iloc[0].Gif.split('/')[-1]
+        path_to_gif = df.iloc[sample].Gif.split('/')[-1]
         path_to_gif = path_gif + path_to_gif
-        path_to_jpg = df.iloc[0].Picture.split('/')[-1]
+        path_to_jpg = df.iloc[sample].Picture.split('/')[-1]
         path_to_jpg = path_img + path_to_jpg
         gif_display = html.Div([
             html.H3(title),
@@ -185,19 +208,19 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
               Input('select_sex_attention_video_2', 'value'),
               Input('select_age_group_attention_video_2', 'value'),
               Input('select_aging_rate_attention_video_2', 'value'),
+              #Input('select_sample_attention_video_2', 'value')
              ])
-def _display_gif(organ, view, transformation, sex, age_group, aging_rate):
-    if None not in [organ, view, transformation, sex, age_group, aging_rate]:
-        print(organ, view, transformation, sex, age_group, aging_rate)
+def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sample):
+    if None not in [organ, view, transformation, sex, age_group, aging_rate]:#, sample]:
         df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
         df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
-        eid = df.iloc[0].eid
-        age = df.iloc[0].Age
-        res = df.iloc[0].res
+        eid = df.iloc[sample].eid
+        age = df.iloc[sample].Age
+        res = df.iloc[sample].res
         title = 'Chronological Age = %.3f, Biological Age = %.3f' % (age, age + res)
-        path_to_gif = df.iloc[0].Gif.split('/')[-1]
+        path_to_gif = df.iloc[sample].Gif.split('/')[-1]
         path_to_gif = path_gif + path_to_gif
-        path_to_jpg = df.iloc[0].Picture.split('/')[-1]
+        path_to_jpg = df.iloc[sample].Picture.split('/')[-1]
         path_to_jpg = path_img + path_to_jpg
         gif_display = html.Div([
             html.H3(title),

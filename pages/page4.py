@@ -379,6 +379,13 @@ def _hide_organ_dropdown(value_aggregate):
     else :
         return {}
 
+@app.callback(Output('Select_ordering', 'value'),
+              [Input('select_aggregate_type_res', 'value')])
+def _hide_organ_dropdown(value_aggregate):
+    if value_aggregate == 'All':
+        return 'Custom'
+    elif value_aggregate == 'bestmodels':
+        return 'Clustering'
 
 
 @app.callback(Output('loading_plot_hc', 'children'),
@@ -388,29 +395,27 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
         ## Load Data :
         customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
 
-        if value_aggregate == 'bestmodels':
-            img_base64 = base64.b64encode(open(path_clustering, 'rb').read()).decode('ascii')
-            src = 'data:image/png;base64,{}'.format(img_base64)
-            return html.Img(id = 'attentionmap', style={'height':'50%', 'width':'50%'}, src = src)
+        ## Work with HC and p_values
+        # if value_aggregate == 'bestmodels':
+        #     img_base64 = base64.b64encode(open(path_clustering, 'rb').read()).decode('ascii')
+        #     src = 'data:image/png;base64,{}'.format(img_base64)
+        #     return html.Img(id = 'attentionmap', style={'height':'50%', 'width':'50%'}, src = src)
 
-        else :
-            if value_organ != 'All':
-                mask = df.columns.str.contains(value_organ)
-                df = df[df.columns[mask]]
-                df = df.loc[mask]
-            n_cols = len(df.columns)
-            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
-            d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
-            return dcc.Graph(
-                id = 'plot HC',
-                figure = d2
-            )
 
-    else :
-        return dcc.Graph(
-            id = 'plot HC',
-            figure = go.Figure()
-        )
+        print(value_aggregate, value_organ, value_step)
+
+        if value_organ != 'All' :
+            mask = df.columns.str.contains(value_organ)
+            df = df[df.columns[mask]]
+            df = df.loc[mask]
+
+        n_cols = len(df.columns)
+        d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+        d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
+        return dcc.Graph(id = 'plot HC',
+                         figure = d2
+                         )
+
 
 
 @app.callback(Output('Plot Corr Heatmap', 'figure'),

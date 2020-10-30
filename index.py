@@ -29,9 +29,9 @@ top_bar = html.Div([
                               label="Features importances",
                               nav=True
                              ),
-            dbc.DropdownMenu([dbc.DropdownMenuItem("GWAS", href="/pages/page10", id="page10-link"),
-                              dbc.DropdownMenuItem("GWAS - Heritability", href="/pages/page11", id="page11-link"),
-                              dbc.DropdownMenuItem("GWAS - Correlation", href="/pages/page17", id="page17-link")],
+            dbc.DropdownMenu([dbc.DropdownMenuItem("Genetics - GWAS", href="/pages/page10", id="page10-link"),
+                              dbc.DropdownMenuItem("Genetics - Heritability", href="/pages/page11", id="page11-link"),
+                              dbc.DropdownMenuItem("Genetics - Correlation", href="/pages/page17", id="page17-link")],
                               label="Genetics",
                               nav=True
                              ),

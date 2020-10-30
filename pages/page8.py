@@ -207,7 +207,7 @@ controls1 = dbc.Card([
             )
     ]),
     dbc.FormGroup([
-        html.P("Select an X Dataset: "),
+        html.P("Select X Dataset: "),
         dcc.Dropdown(
             id='Select_env_dataset_mul_ewas',
             options = get_dataset_options(sorted(All)),
