@@ -13,7 +13,7 @@ top_bar = html.Div([
         [
             dbc.NavItem(dbc.NavLink("Menu", href="/", active=True, id="menu-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Scalars", href="/pages/page1", id="page1-link"),
-                              dbc.DropdownMenuItem("TimeSeries", href="/pages/page15", id="page15-link"),
+                              dbc.DropdownMenuItem("Time Series", href="/pages/page15", id="page15-link"),
                               dbc.DropdownMenuItem("Images", href="/pages/page14", id="page14-link"),
                               dbc.DropdownMenuItem("Videos", href="/pages/page16", id="page16-link"),
                               ],
@@ -22,13 +22,14 @@ top_bar = html.Div([
                              ),
             dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
-                              dbc.DropdownMenuItem("TimeSeries", href="/pages/page13", id="page13-link"),
+                              dbc.DropdownMenuItem("Time Series", href="/pages/page13", id="page13-link"),
                               dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
                               dbc.DropdownMenuItem("Videos", href="/pages/page12", id="page12-link"),
                               ],
                               label="Features importances",
                               nav=True
                              ),
+            dbc.NavItem(dbc.NavLink("Correlation between accelerated aging dimensions", href="/pages/page4", id="page4-link")),
             dbc.DropdownMenu([dbc.DropdownMenuItem("Genetics - GWAS", href="/pages/page10", id="page10-link"),
                               dbc.DropdownMenuItem("Genetics - Heritability", href="/pages/page11", id="page11-link"),
                               dbc.DropdownMenuItem("Genetics - Correlation", href="/pages/page17", id="page17-link")],
@@ -44,7 +45,7 @@ top_bar = html.Div([
                               label="XWAS",
                               nav=True
                              ),
-            dbc.NavItem(dbc.NavLink("Correlation between accelerated aging dimensions", href="/pages/page4", id="page4-link")),
+
         ],
     fill=True,
     pills=True),

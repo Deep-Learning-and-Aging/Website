@@ -70,7 +70,8 @@ layout = dbc.Container([
                             html.P("Order by: "),
                             dcc.Dropdown(
                                 id='Select_ordering_gwas_',
-                                options = get_dataset_options(['Score', 'Custom', 'Clustering'])
+                                options = get_dataset_options(['Score', 'Custom', 'Clustering']),
+                                value = 'Clustering'
                                 ),
                             html.Br()
                         ])
@@ -168,8 +169,8 @@ def _plot_heatmap_(value_ordering):
             fig['layout']['yaxis']['showgrid'] = False
             fig['layout']['yaxis2']['domain'] = [0, 0.7]
             fig['layout']['yaxis2']['showgrid'] = False
-            fig['layout']['width'] = 800
-            fig['layout']['height'] = 800
+            fig['layout']['width'] = 900
+            fig['layout']['height'] = 900
             fig['layout']['xaxis']['autorange'] =  True
             return fig
         else :

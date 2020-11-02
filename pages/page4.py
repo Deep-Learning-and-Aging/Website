@@ -17,8 +17,8 @@ from scipy.stats import pearsonr
 import dash_table
 import copy
 
-
-
+order = ['Brain', 'Eyes', 'Hearing', 'Lungs', 'Arterial', 'Heart', 'Abdomen', 'Musculoskeletal', 'PhysicalActivity', 'Biochemistry', 'ImmuneSystem']
+value_step = 'Test'
 path_performance = './' + app.get_asset_url('page2_predictions/Performances/')
 path_residualscorr = './' + app.get_asset_url('page4_correlations/ResidualsCorrelations/')
 path_clustering = './' + app.get_asset_url('page4_correlations/HC_final.png')
@@ -40,7 +40,8 @@ if MODE == 'All':
             html.P("Select aggregate type : "),
             dcc.RadioItems(
                 id ='select_aggregate_type_res',
-                options = get_dataset_options(['bestmodels', 'All']),
+                options = [{'value' : 'bestmodels', 'label' : 'Best models'},
+                           {'value' : 'All', 'label' : 'All models'}],
                 value = 'bestmodels',
                 labelStyle = {'display': 'inline-block', 'margin': '5px'}
                 ),
@@ -56,15 +57,15 @@ if MODE == 'All':
                 ),
             html.Br()
         ], id = 'select_organ_res_full'),
-        dbc.FormGroup([
-            html.P("Select step : "),
-            dcc.Dropdown(
-                id='Select_step_res',
-                options = get_dataset_options(['Test', 'Validation', 'Train']),
-                value = 'Test'
-                ),
-            html.Br()
-        ]),
+        # dbc.FormGroup([
+        #     html.P("Select step : "),
+        #     dcc.Dropdown(
+        #         id='Select_step_res',
+        #         options = get_dataset_options(['Test', 'Validation', 'Train']),
+        #         value = 'Test'
+        #         ),
+        #     html.Br()
+        # ]),
         dbc.FormGroup([
             html.P("Order by: "),
             dcc.Dropdown(
@@ -91,7 +92,8 @@ if MODE == 'All':
             html.P("Select aggregate type : "),
             dcc.RadioItems(
                 id ='select_aggregate_type_res_2',
-                options = get_dataset_options(['bestmodels', 'All']),
+                options = [{'value' : 'bestmodels', 'label' : 'Best models'},
+                           {'value' : 'All', 'label' : 'All models'}],
                 value = 'bestmodels',
                 labelStyle = {'display': 'inline-block', 'margin': '5px'}
                 ),
@@ -107,15 +109,15 @@ if MODE == 'All':
                 ),
             html.Br()
         ], id = 'select_organ_res_full_2'),
-        dbc.FormGroup([
-            html.P("Select step : "),
-            dcc.Dropdown(
-                id='Select_step_res_2',
-                options = get_dataset_options(['Test', 'Validation', 'Train']),
-                value = 'Test'
-                ),
-            html.Br()
-        ])
+        # dbc.FormGroup([
+        #     html.P("Select step : "),
+        #     dcc.Dropdown(
+        #         id='Select_step_res_2',
+        #         options = get_dataset_options(['Test', 'Validation', 'Train']),
+        #         value = 'Test'
+        #         ),
+        #     html.Br()
+        # ])
     ])
 else :
     controls = dbc.Card([
@@ -148,15 +150,15 @@ else :
                 ),
             html.Br()
         ], id = 'select_organ_res_full', style = {'display': 'none'}),
-        dbc.FormGroup([
-            html.P("Select step : "),
-            dcc.Dropdown(
-                id='Select_step_res',
-                options = get_dataset_options(['Test', 'Validation', 'Train']),
-                value = 'Test'
-                ),
-            html.Br()
-        ]),
+        # dbc.FormGroup([
+        #     html.P("Select step : "),
+        #     dcc.Dropdown(
+        #         id='Select_step_res',
+        #         options = get_dataset_options(['Test', 'Validation', 'Train']),
+        #         value = 'Test'
+        #         ),
+        #     html.Br()
+        # ]),
         dbc.FormGroup([
             html.P("Order by: "),
             dcc.Dropdown(
@@ -198,15 +200,15 @@ else :
                 ),
             html.Br()
         ], id = 'select_organ_res_full_2', style = {'display': 'none'}),
-        dbc.FormGroup([
-            html.P("Select step : "),
-            dcc.Dropdown(
-                id='Select_step_res_2',
-                options = get_dataset_options(['Test', 'Validation', 'Train']),
-                value = 'Test'
-                ),
-            html.Br()
-        ])
+        # dbc.FormGroup([
+        #     html.P("Select step : "),
+        #     dcc.Dropdown(
+        #         id='Select_step_res_2',
+        #         options = get_dataset_options(['Test', 'Validation', 'Train']),
+        #         value = 'Test'
+        #         ),
+        #     html.Br()
+        # ])
     ])
 
 
@@ -359,7 +361,14 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
         customdata_score_y.values[na_instances] = customdata_score_instances_y[na_instances]
         customdata_score_x.values[np.invert(na_instances)] = customdata_score_eids_x[np.invert(na_instances)]
         customdata_score_y.values[np.invert(na_instances)] = customdata_score_eids_y[np.invert(na_instances)]
-    return customdata_score_x, customdata_score_y, df, std
+
+    custom_order = []
+    for organ_ in order :
+        custom_order = custom_order + list(df.index[df.index.str.contains(organ_)])
+    difference = df.index.difference(pd.Index(custom_order))
+    custom_order = list(difference) + custom_order
+
+    return customdata_score_x, customdata_score_y, df, std, custom_order
 
 
 
@@ -389,20 +398,21 @@ def _hide_organ_dropdown(value_aggregate):
 
 
 @app.callback(Output('loading_plot_hc', 'children'),
-              [Input('select_eid_or_instances_res_2', 'value'), Input('select_aggregate_type_res_2', 'value'), Input('Select_organ_res_2', 'value'), Input('Select_step_res_2', 'value')])
-def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step):
+              [Input('select_eid_or_instances_res_2', 'value'),
+               Input('select_aggregate_type_res_2', 'value'),
+               Input('Select_organ_res_2', 'value'),
+               #Input('Select_step_res_2', 'value')
+               ])
+def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
-        customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
+        customdata_score_x, customdata_score_y, df, std, custom_order = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
 
         ## Work with HC and p_values
         # if value_aggregate == 'bestmodels':
         #     img_base64 = base64.b64encode(open(path_clustering, 'rb').read()).decode('ascii')
         #     src = 'data:image/png;base64,{}'.format(img_base64)
         #     return html.Img(id = 'attentionmap', style={'height':'50%', 'width':'50%'}, src = src)
-
-
-        print(value_aggregate, value_organ, value_step)
 
         if value_organ != 'All' :
             mask = df.columns.str.contains(value_organ)
@@ -419,15 +429,20 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
 
 
 @app.callback(Output('Plot Corr Heatmap', 'figure'),
-              [Input('select_eid_or_instances_res', 'value'), Input('select_aggregate_type_res', 'value'), Input('Select_organ_res', 'value'), Input('Select_step_res', 'value'), Input('Select_ordering', 'value')])
-def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_step, value_ordering):
+              [Input('select_eid_or_instances_res', 'value'),
+              Input('select_aggregate_type_res', 'value'),
+              Input('Select_organ_res', 'value'),
+              #Input('Select_step_res', 'value'),
+              Input('Select_ordering', 'value')
+              ])
+def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_ordering):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
-        customdata_score_x, customdata_score_y, df, std = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
+        customdata_score_x, customdata_score_y, df, std, custom_order = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
         organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
         d = {}
-        d['layout'] = dict(height = 700,
-                           width = 700,
+        d['layout'] = dict(height = 800,
+                           width = 800,
                            margin = {'l': 0, 'b': 0, 't': 0, 'r': 0},
                            xaxis = dict(titlefont=dict(size=8)),
                            yaxis = dict(titlefont=dict(size=8)),
@@ -436,25 +451,22 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
         if value_organ == 'All':
             #Color Scale
             colorscale =  get_colorscale(df)
-            print(colorscale)
             df_miror = 1*df.isna()
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
             cols = df.columns
             d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
-
             dendro_leaves = d2['layout']['xaxis']['ticktext']
             n_cols = len(cols)
-            if value_ordering == 'Score':
-                df = df.loc[organ_sorted_by_score, organ_sorted_by_score]
-                std = std.loc[organ_sorted_by_score, organ_sorted_by_score]
-                customdata_score_x = customdata_score_x.loc[organ_sorted_by_score, organ_sorted_by_score]
-                customdata_score_y = customdata_score_y.loc[organ_sorted_by_score, organ_sorted_by_score]
-            elif value_ordering == 'Clustering':
-                df = df.loc[dendro_leaves, dendro_leaves]
-                customdata_score_x = customdata_score_x.loc[dendro_leaves, dendro_leaves]
-                customdata_score_y = customdata_score_y.loc[dendro_leaves, dendro_leaves]
-                std = std.loc[dendro_leaves, dendro_leaves]
+
+            dict_value_ordering_to_index = {'Score' : (organ_sorted_by_score, organ_sorted_by_score),
+                                            'Clustering' : (dendro_leaves, dendro_leaves),
+                                            'Custom' : (custom_order, custom_order)
+                                            }
+            df = df.loc[dict_value_ordering_to_index[value_ordering]]
+            std = std.loc[dict_value_ordering_to_index[value_ordering]]
+            customdata_score_x = customdata_score_x.loc[dict_value_ordering_to_index[value_ordering]]
+            customdata_score_y = customdata_score_y.loc[dict_value_ordering_to_index[value_ordering]]
 
             if value_aggregate == 'All':
                 ## Remove ticks labels :
@@ -788,8 +800,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             fig['layout']['yaxis']['showgrid'] = False
             fig['layout']['yaxis2']['domain'] = [0, 0.7]
             fig['layout']['yaxis2']['showgrid'] = False
-            fig['layout']['width'] = 800
-            fig['layout']['height'] = 800
+            fig['layout']['width'] = 1000
+            fig['layout']['height'] = 1000
             fig['layout']['xaxis']['autorange'] =  True
             if value_aggregate == 'All':
                 fig['layout']['xaxis2']['showticklabels'] = False

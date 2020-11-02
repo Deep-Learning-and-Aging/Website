@@ -14,6 +14,7 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 import copy
+step = 'test'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
 filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
@@ -75,15 +76,15 @@ controls = dbc.Card([
             ),
         html.Br()
     ], id = 'Select_dataset_ewas_full'),
-    dbc.FormGroup([
-        html.P("Select step  : "),
-        dcc.Dropdown(
-            id='Select_step_scores_ewas',
-            options = get_dataset_options(['training', 'validation', 'test']),
-            value = 'test'
-            ),
-        html.Br()
-    ], id = 'Select_step_ewas_scores'),
+    # dbc.FormGroup([
+    #     html.P("Select step  : "),
+    #     dcc.Dropdown(
+    #         id='Select_step_scores_ewas',
+    #         options = get_dataset_options(['training', 'validation', 'test']),
+    #         value = 'test'
+    #         ),
+    #     html.Br()
+    # ], id = 'Select_step_ewas_scores'),
     dbc.FormGroup([
         html.P("View Scores by : "),
         dcc.RadioItems(
@@ -98,7 +99,7 @@ controls = dbc.Card([
 
 
 layout = dbc.Container([
-                html.H1('Multivariate XWAS'),
+                html.H1('Multivariate XWAS - Results'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
@@ -127,8 +128,11 @@ layout = dbc.Container([
 
 
 @app.callback([Output('Plot R2 Heatmap', 'figure'), Output('Plot Bar Plot', 'figure')],
-             [Input('Select_algorithm', 'value'), Input('Select_step_scores_ewas', 'value'), Input('Select_data_type_scores', 'value'), Input('Select_view_type', 'value')])
-def _compute_plots(algo, step, group, view_type):
+             [Input('Select_algorithm', 'value'),
+              #Input('Select_step_scores_ewas', 'value'),
+              Input('Select_data_type_scores', 'value'),
+              Input('Select_view_type', 'value')])
+def _compute_plots(algo, group, view_type):
     if algo is not None and step is not None:
 
         df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]))
