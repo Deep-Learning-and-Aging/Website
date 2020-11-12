@@ -13,7 +13,7 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 import copy
-organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
+organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
 path_correlations_ewas = './' + app.get_asset_url('page8_MultivariateXWASCorrelations/CorrelationsMultivariate/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
@@ -36,13 +36,6 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
 All = sorted(Environmental + Biomarkers + Pathologies)
-organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
-              'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
-              'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
-              'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
-              'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
-              'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
-              'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
 
 colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
                [0.5, 'rgba(255, 255, 255, 0.85)'],
@@ -304,7 +297,10 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df_env = df[df.env_dataset == env_dataset]
         matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'])
-        colorscale =  get_colorscale(matrix_env)
+        try :
+            colorscale =  get_colorscale(matrix_env)
+        except ValueError:
+            return go.Figure(empty_graph)
         d = {}
         d['data'] = go.Heatmap(z=matrix_env,
                    x=matrix_env.index,
@@ -329,8 +325,10 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df_organ[df_organ.organ_2 != organ]
         matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
-        print(matrix_organ)
-        colorscale =  get_colorscale(matrix_organ)
+        try :
+            colorscale =  get_colorscale(matrix_organ)
+        except ValueError:
+            return go.Figure(empty_graph)
         d = {}
         d['data'] = go.Heatmap(z=matrix_organ.T,
                    x=matrix_organ.T.columns,
@@ -339,7 +337,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         d['layout'] = dict(xaxis = dict(dtick = 1),
                            yaxis = dict(dtick = 1),
                            width = 1000,
-                           height = 600)
+                           height = 800)
         return go.Figure(d)
     else :
         return go.Figure()

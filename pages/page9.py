@@ -19,6 +19,8 @@ from PIL import Image
 import base64
 from io import BytesIO
 
+path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
+score = pd.read_csv(path_score_scalar)
 path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age')
 path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
 
@@ -262,6 +264,7 @@ layout =  html.Div([
             dbc.Row([
                 dbc.Col([controls], md=3),
                 dbc.Col([
+                    html.H3(id = 'score_images'),
                     controls_1,
                     html.Div(id = 'columns_attention_map_1'),
                     controls_2,
@@ -293,74 +296,94 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
-            raw_left = mpimg.imread(path_image_left)
-            raw_right = mpimg.imread(path_image_right)
-            saliency_left = np.load(path_image_left.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
-            saliency_right = np.load(path_image_right.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
-            saliency_left = Image.fromarray((saliency_left).astype(np.uint8)).convert('RGBA')
-            saliency_right = Image.fromarray((saliency_right).astype(np.uint8)).convert('RGBA')
-            gradcam_left = np.load(path_image_left.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
-            gradcam_right = np.load(path_image_right.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
-            img_left = np.zeros(raw_left.shape)
-            img_right = np.zeros(raw_right.shape)
+            count = [True, True]
+            try :
+                raw_left = mpimg.imread(path_image_left)
+            except FileNotFoundError:
+                count[0] = False
+            try :
+                raw_right = mpimg.imread(path_image_right)
+            except FileNotFoundError :
+                count[1] = False
 
-            if raw_left.shape[0] != gradcam_left.shape[0] and raw_left.shape[0] != saliency_left.size[0]:
-                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
-                raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+            if count[0]:
+                saliency_left = np.load(path_image_left.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
+                saliency_left = Image.fromarray((saliency_left).astype(np.uint8)).convert('RGBA')
+                gradcam_left = np.load(path_image_left.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
+                img_left = np.zeros(raw_left.shape)
+                final_left = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
+                if raw_gradcam_saliency is not None :
+                    if 'Raw' in raw_gradcam_saliency :
+                        img_left+= raw_left
+                        final2_left = Image.alpha_composite(final_left, Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'))
+                        img_left = 0.7 * img_left + 0.3 * gradcam_left #* (255 - gradcam_left[:, :, 2].reshape((gradcam_left.shape[0],gradcam_left.shape[1], 1))) / 255
+                        final2_left = Image.alpha_composite(final_left, Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'))
+                    if 'plot_saliency' in raw_gradcam_saliency :
+                        final2_left = Image.alpha_composite(Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'), saliency_left)
+                    buffered_left = BytesIO()
+                    final2_left.save(buffered_left, format="PNG")
+                    img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                    src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+            if count[1]:
+                saliency_right = np.load(path_image_right.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
+                saliency_right = Image.fromarray((saliency_right).astype(np.uint8)).convert('RGBA')
+                gradcam_right = np.load(path_image_right.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
+                img_right = np.zeros(raw_right.shape)
+                final_right = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
+                if raw_gradcam_saliency is not None :
+                    if 'Raw' in raw_gradcam_saliency :
+                        img_right+= raw_right
+                        final2_right = Image.alpha_composite(final_right, Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'))
+                    if 'plot_gradcam' in raw_gradcam_saliency :
+                        img_right = 0.7 * img_right + 0.3 * gradcam_right# * (255 - gradcam_right[:, :, 2].reshape((gradcam_right.shape[0],gradcam_right.shape[1], 1))) / 255
+                        final2_right = Image.alpha_composite(final_right, Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'))
+                    if 'plot_saliency' in raw_gradcam_saliency :
+                        final2_right = Image.alpha_composite(Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'), saliency_right)
+                    # flip right image to keep symmetry :
+                    final2_right = final2_right.transpose(Image.FLIP_LEFT_RIGHT)
+                    buffered_right = BytesIO()
+                    final2_right.save(buffered_right, format="PNG")
+                    img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                    src_right = 'data:image/png;base64,{}'.format(img_base64_right)
 
-                raw_left.thumbnail((gradcam_left.shape[0], gradcam_left.shape[1]), Image.ANTIALIAS)
-                raw_right.thumbnail((gradcam_right.shape[0], gradcam_right.shape[1]), Image.ANTIALIAS)
+                # if raw_left.shape[0] != gradcam_left.shape[0] and raw_left.shape[0] != saliency_left.size[0]:
+                #     raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
+                #     raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+                #
+                #     raw_left.thumbnail((gradcam_left.shape[0], gradcam_left.shape[1]), Image.ANTIALIAS)
+                #     raw_right.thumbnail((gradcam_right.shape[0], gradcam_right.shape[1]), Image.ANTIALIAS)
+                #
+                #     raw_left = np.asarray(raw_left)
+                #     raw_right = np.asarray(raw_right)
 
-                raw_left = np.asarray(raw_left)
-                raw_right = np.asarray(raw_right)
-
-            img_left = np.zeros(raw_left.shape)
-            img_right = np.zeros(raw_right.shape)
-            final2_left = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
-            final2_right = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
-
-            if raw_gradcam_saliency is not None :
-                if 'Raw' in raw_gradcam_saliency :
-                    img_left+= raw_left
-                    img_right+= raw_right
-                    final2_left = Image.fromarray(img_left.astype(np.uint8)).convert('RGBA')
-                    final2_right = Image.fromarray(img_right.astype(np.uint8)).convert('RGBA')
-                if 'plot_gradcam' in raw_gradcam_saliency :
-                    img_left = 0.7 * img_left + 0.3 * gradcam_left #* (255 - gradcam_left[:, :, 2].reshape((gradcam_left.shape[0],gradcam_left.shape[1], 1))) / 255
-                    img_right = 0.7 * img_right + 0.3 * gradcam_right# * (255 - gradcam_right[:, :, 2].reshape((gradcam_right.shape[0],gradcam_right.shape[1], 1))) / 255
-                    final2_left = Image.fromarray(img_left.astype(np.uint8)).convert('RGBA')
-                    final2_right = Image.fromarray(img_right.astype(np.uint8)).convert('RGBA')
-                if 'plot_saliency' in raw_gradcam_saliency :
-                    final2_left = Image.alpha_composite(Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'), saliency_left)
-                    final2_right = Image.alpha_composite(Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'), saliency_right)
-
-                final2_right = final2_right.transpose(Image.FLIP_LEFT_RIGHT)
+            if count[0] and not count[1]:
+                final_right = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
+                buffered_right = BytesIO()
+                final_right.save(buffered_right, format="PNG")
+                img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                src_right = 'data:image/png;base64,{}'.format(img_base64_right)
+            elif not count[0] and count[1]:
+                final_left = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
                 buffered_left = BytesIO()
-                final2_left.save(buffered_left, format="PNG")
+                final_left.save(buffered_left, format="PNG")
                 img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
                 src_left = 'data:image/png;base64,{}'.format(img_base64_left)
 
-                buffered_right = BytesIO()
-                final2_right.save(buffered_right, format="PNG")
-                img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
-                src_right = 'data:image/png;base64,{}'.format(img_base64_right)
-                col = [
-                        html.H3(title),
-                        html.Img(id = 'attentionmap_left', style={'height':'50%', 'width':'50%'},
-                                 src = src_left),
-                        html.Img(id = 'attentionmap_right', style={'height':'50%', 'width':'50%'},
-                                 src = src_right)
-                     ]
-                return col
-
+            col = [
+                    html.H3(title),
+                    html.Img(id = 'attentionmap_left', style={'height':'50%', 'width':'50%'},
+                             src = src_left),
+                    html.Img(id = 'attentionmap_right', style={'height':'50%', 'width':'50%'},
+                             src = src_right)
+                 ]
+            return col
         else :
-
             path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
             raw = mpimg.imread(path_image)
             saliency = np.load(path_image.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
             saliency = Image.fromarray((saliency ).astype(np.uint8)).convert('RGBA')
             gradcam =  np.load(path_image.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
-
+            print(raw.shape, gradcam.shape, saliency.size)
             img = np.zeros(raw.shape)
             final = Image.new("RGBA", (raw.shape[1], raw.shape[0]))
             if raw_gradcam_saliency is not None :
@@ -368,7 +391,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                     img += raw
                     final2 = Image.alpha_composite(final, Image.fromarray(img.astype(np.uint8)).convert('RGBA'))
                 if 'plot_gradcam' in raw_gradcam_saliency :
-                    img = 0.7 * img + 0.3 * gradcam
+                    img = 0.7 * img + 0.3 * gradcam #* (255 - gradcam[:, :, 2].reshape((gradcam.shape[0],gradcam.shape[1], 1))) / 255
                     final2 = Image.alpha_composite(final, Image.fromarray(img.astype(np.uint8)).convert('RGBA'))
                 if 'plot_saliency' in raw_gradcam_saliency :
                     final2 = Image.alpha_composite(Image.fromarray(img.astype(np.uint8)).convert('RGBA'), saliency)
@@ -387,6 +410,22 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                 return [dcc.Graph(figure = go.Figure(empty_graph))]
     else :
         return [dcc.Graph(figure = go.Figure(empty_graph))]
+
+
+@app.callback(Output('score_images', 'children'),
+             [Input('select_organ_attention_image', 'value'),
+              Input('select_view_attention_image', 'value'),
+              Input('select_transformation_attention_image', 'value')
+              ])
+def generate_score(organ, view, transformation):
+    if None not in [organ, view, transformation]:
+        score_model = score[(score['organ'] == organ) & (score['view'] == view) & (score['transformation'] == transformation)][['architecture', 'R-Squared_all', 'N_all']]
+        print(score_model)
+        score_model = score_model.sort_values('R-Squared_all').iloc[0]
+        title = 'Best R-Squared :  %.3f, Sample Size %d' % (score_model['R-Squared_all'], score_model['N_all'])
+        return title
+    else :
+        return ''
 
 @app.callback(Output('columns_attention_map_2', 'children'),
              [Input('select_organ_attention_image', 'value'),
@@ -408,65 +447,89 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
-            raw_left = mpimg.imread(path_image_left)
-            raw_right = mpimg.imread(path_image_right)
-            saliency_left = np.load(path_image_left.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
-            saliency_right = np.load(path_image_right.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
-            saliency_left = Image.fromarray((saliency_left).astype(np.uint8)).convert('RGBA')
-            saliency_right = Image.fromarray((saliency_right).astype(np.uint8)).convert('RGBA')
-            gradcam_left = np.load(path_image_left.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
-            gradcam_right = np.load(path_image_right.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
+            count = [True, True]
+            try :
+                raw_left = mpimg.imread(path_image_left)
+            except FileNotFoundError:
+                count[0] = False
+            try :
+                raw_right = mpimg.imread(path_image_right)
+            except FileNotFoundError :
+                count[1] = False
 
-            img_left = np.zeros(raw_left.shape)
-            img_right = np.zeros(raw_right.shape)
+            if count[0]:
+                saliency_left = np.load(path_image_left.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
+                saliency_left = Image.fromarray((saliency_left).astype(np.uint8)).convert('RGBA')
+                gradcam_left = np.load(path_image_left.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
+                img_left = np.zeros(raw_left.shape)
+                final_left = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
+                if raw_gradcam_saliency is not None :
+                    if 'Raw' in raw_gradcam_saliency :
+                        img_left+= raw_left
+                        final2_left = Image.alpha_composite(final_left, Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'))
+                        img_left = 0.7 * img_left + 0.3 * gradcam_left #* (255 - gradcam_left[:, :, 2].reshape((gradcam_left.shape[0],gradcam_left.shape[1], 1))) / 255
+                        final2_left = Image.alpha_composite(final_left, Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'))
+                    if 'plot_saliency' in raw_gradcam_saliency :
+                        final2_left = Image.alpha_composite(Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'), saliency_left)
+                    buffered_left = BytesIO()
+                    final2_left.save(buffered_left, format="PNG")
+                    img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                    src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+            if count[1]:
+                saliency_right = np.load(path_image_right.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
+                saliency_right = Image.fromarray((saliency_right).astype(np.uint8)).convert('RGBA')
+                gradcam_right = np.load(path_image_right.replace('RawImage', 'Gradcam').replace('.jpg', '.npy'))
+                img_right = np.zeros(raw_right.shape)
+                final_right = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
+                if raw_gradcam_saliency is not None :
+                    if 'Raw' in raw_gradcam_saliency :
+                        img_right+= raw_right
+                        final2_right = Image.alpha_composite(final_right, Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'))
+                    if 'plot_gradcam' in raw_gradcam_saliency :
+                        img_right = 0.7 * img_left + 0.3 * gradcam_right# * (255 - gradcam_right[:, :, 2].reshape((gradcam_right.shape[0],gradcam_right.shape[1], 1))) / 255
+                        final2_right = Image.alpha_composite(final_right, Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'))
+                    if 'plot_saliency' in raw_gradcam_saliency :
+                        final2_right = Image.alpha_composite(Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'), saliency_right)
+                    # flip right image to keep symmetry :
+                    final2_right = final2_right.transpose(Image.FLIP_LEFT_RIGHT)
+                    buffered_right = BytesIO()
+                    final2_right.save(buffered_right, format="PNG")
+                    img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                    src_right = 'data:image/png;base64,{}'.format(img_base64_right)
 
-            if raw_left.shape[0] != gradcam_left.shape[0] and raw_left.shape[0] != saliency_left.size[0]:
-                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
-                raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
 
-                raw_left.thumbnail((gradcam_left.shape[0], gradcam_left.shape[1]), Image.ANTIALIAS)
-                raw_right.thumbnail((gradcam_right.shape[0], gradcam_right.shape[1]), Image.ANTIALIAS)
 
-                raw_left = np.asarray(raw_left)
-                raw_right = np.asarray(raw_right)
+                # if raw_left.shape[0] != gradcam_left.shape[0] and raw_left.shape[0] != saliency_left.size[0]:
+                #     raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
+                #     raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+                #
+                #     raw_left.thumbnail((gradcam_left.shape[0], gradcam_left.shape[1]), Image.ANTIALIAS)
+                #     raw_right.thumbnail((gradcam_right.shape[0], gradcam_right.shape[1]), Image.ANTIALIAS)
+                #
+                #     raw_left = np.asarray(raw_left)
+                #     raw_right = np.asarray(raw_right)
 
-            img_left = np.zeros(raw_left.shape)
-            img_right = np.zeros(raw_right.shape)
-            final_left = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
-            final_right = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
-
-            if raw_gradcam_saliency is not None :
-                if 'Raw' in raw_gradcam_saliency :
-                    img_left+= raw_left
-                    img_right+= raw_right
-                    final2_left = Image.alpha_composite(final_left, Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'))
-                    final2_right = Image.alpha_composite(final_right, Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'))
-                if 'plot_gradcam' in raw_gradcam_saliency :
-                    img_left = 0.7 * img_left + 0.3 * gradcam_left #* (255 - gradcam_left[:, :, 2].reshape((gradcam_left.shape[0],gradcam_left.shape[1], 1))) / 255
-                    img_right = 0.7 * img_left + 0.3 * gradcam_right# * (255 - gradcam_right[:, :, 2].reshape((gradcam_right.shape[0],gradcam_right.shape[1], 1))) / 255
-                    final2_left = Image.alpha_composite(final_left, Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'))
-                    final2_right = Image.alpha_composite(final_right, Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'))
-                if 'plot_saliency' in raw_gradcam_saliency :
-                    final2_left = Image.alpha_composite(Image.fromarray(img_left.astype(np.uint8)).convert('RGBA'), saliency_left)
-                    final2_right = Image.alpha_composite(Image.fromarray(img_right.astype(np.uint8)).convert('RGBA'), saliency_right)
-                buffered_left = BytesIO()
-                final2_left.save(buffered_left, format="PNG")
-                img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
-                src_left = 'data:image/png;base64,{}'.format(img_base64_left)
-                # flip right image to keep symmetry :
-                final2_right = final2_right.transpose(Image.FLIP_LEFT_RIGHT)
+            if count[0] and not count[1]:
+                final_right = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
                 buffered_right = BytesIO()
-                final2_right.save(buffered_right, format="PNG")
+                final_right.save(buffered_right, format="PNG")
                 img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
                 src_right = 'data:image/png;base64,{}'.format(img_base64_right)
-                col = [
-                        html.H3(title),
-                        html.Img(id = 'attentionmap_left', style={'height':'50%', 'width':'50%'},
-                                 src = src_left),
-                        html.Img(id = 'attentionmap_right', style={'height':'50%', 'width':'50%'},
-                                 src = src_right)
-                     ]
-                return col
+            elif not count[0] and count[1]:
+                final_left = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
+                buffered_left = BytesIO()
+                final_left.save(buffered_left, format="PNG")
+                img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+
+            col = [
+                    html.H3(title),
+                    html.Img(id = 'attentionmap_left', style={'height':'50%', 'width':'50%'},
+                             src = src_left),
+                    html.Img(id = 'attentionmap_right', style={'height':'50%', 'width':'50%'},
+                             src = src_right)
+                 ]
+            return col
         else :
             path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
             raw = mpimg.imread(path_image)

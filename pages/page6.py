@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -13,7 +13,7 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 import copy
-organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
+organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
 path_correlations_ewas = './' + app.get_asset_url('page6_LinearXWASCorrelations/CorrelationsLinear/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
@@ -36,13 +36,6 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
 All = sorted(Environmental + Biomarkers + Pathologies)
-organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
-              'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
-              'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
-              'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
-              'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
-              'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
-              'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
 
 colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
                [0.5, 'rgba(255, 255, 255, 0.85)'],
@@ -121,7 +114,7 @@ layout = html.Div([
 def _plot_with_given_env_dataset(ac_tab):
     if ac_tab == 'tab_X':
         return  dbc.Container([
-                        html.H1('Univariate XWAS - Correlations between accelerated aging'),
+                        html.H1('Univariate XWAS - Correlations'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([
@@ -138,7 +131,7 @@ def _plot_with_given_env_dataset(ac_tab):
                         ], fluid = True)
     elif ac_tab == 'tab_organ':
         return  dbc.Container([
-                        html.H1('Univariate XWAS - Correlations between accelerated aging'),
+                        html.H1('Univariate XWAS - Correlations'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([
@@ -160,18 +153,33 @@ def _plot_with_given_env_dataset(ac_tab):
 def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
         df = pd.read_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type))
-        df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
+        df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]
+        df_organ = df_organ.fillna(0)
         matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
 
-        colorscale = get_colorscale(matrix_organ)
+        try :
+            colorscale = get_colorscale(matrix_organ)
+        except ValueError:
+            return go.Figure(empty_graph)
         d = {}
+        sample_size_matrix =  pd.pivot_table(df_organ, values='sample_size', index=['env_dataset'],
+                columns=['organ_2']).values
+        customdata = np.dstack((sample_size_matrix, matrix_organ))
+        hovertemplate = 'Correlation : %{z}\
+                 <br>Organ x : %{x}\
+                 <br>Organ y : %{y}\
+                 <br>Sample Size : %{customdata[0]}'
+
         d['data'] = go.Heatmap(z=matrix_organ.T,
                    x=matrix_organ.T.columns,
                    y=matrix_organ.T.index,
-                   colorscale = colorscale)
+                   colorscale = colorscale,
+                   customdata = customdata,
+                   hovertemplate = hovertemplate)
+
         d['layout'] = dict(xaxis = dict(dtick = 1),
                            yaxis = dict(dtick = 1),
                            width = 1000,
@@ -186,18 +194,30 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
         df = pd.read_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type))
-        df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
+        df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_env = df[df.env_dataset == env_dataset]
+        df_env = df_env.fillna(0)
         matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'])
-        colorscale =  get_colorscale(matrix_env)
-        print(colorscale)
+        try :
+            colorscale =  get_colorscale(matrix_env)
+        except ValueError:
+            return go.Figure(empty_graph)
+        sample_size_matrix =  pd.pivot_table(df_env, values='sample_size', index=['organ_1'],
+                        columns=['organ_2']).values
+        customdata = np.dstack((sample_size_matrix, matrix_env))
+        hovertemplate = 'Correlation : %{z}\
+                         <br>Organ x : %{x}\
+                         <br>Organ y : %{y}\
+                         <br>Sample Size : %{customdata[0]}'
 
         d = {}
         d['data'] = go.Heatmap(z=matrix_env,
                    x=matrix_env.index,
                    y=matrix_env.columns,
-                   colorscale = colorscale)
+                   colorscale = colorscale,
+                   customdata = customdata,
+                   hovertemplate = hovertemplate)
         d['layout'] = dict(xaxis = dict(dtick = 1),
                            yaxis = dict(dtick = 1),
                            width = 800,

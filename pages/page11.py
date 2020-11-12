@@ -67,7 +67,7 @@ d['layout'] = {
 figure = go.Figure(d)
 
 layout = dbc.Container([
-                html.H1('Heritability Scores'),
+                html.H1('Genetics - Heritability'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([

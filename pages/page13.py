@@ -19,6 +19,10 @@ from PIL import Image
 import base64
 from io import BytesIO
 
+
+path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
+score = pd.read_csv(path_score_scalar)
+
 path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age/')
 path_attention_maps_infos = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/AttentionMaps-samples_Age_')
 controls = dbc.Card([
@@ -164,7 +168,8 @@ layout = dbc.Container([
                              html.Br(),
                              html.Br()], md=3),
                     dbc.Col(
-                        [controls_1,
+                        [html.H3(id = 'score_times_series'),
+                        controls_1,
                         html.H3(id = 'title_timeseries_1'),
                         dcc.Graph(id = 'timeseries_display_1'),
                         controls_2,
@@ -190,17 +195,18 @@ def _get_options_transformation(value_organ):
 @app.callback(Output('select_channel_time', 'options'),
              [Input('select_view_attention_time', 'value'), Input('select_transformation_attention_time', 'value')])
 def _get_options_transformation(value_view, value_transformation):
-    if value_view == 'PulseWaveAnalysis':
-        return get_dataset_options([str(elem) for elem in range(1, 1+1)])
-    elif value_view == 'ECG':
-        return get_dataset_options([str(elem) for elem in range(1, 15 + 1)])
-    elif value_view == 'FullWeek':
-        if value_transformation == 'Acceleration':
-            return get_dataset_options([str(elem) for elem in range(1, 1 + 1)])
-        elif value_transformation == 'TimeSeriesFeatures' :
-            return get_dataset_options([str(elem) for elem in range(1, 113 + 1)])
-    elif value_view == 'Walking':
-        return get_dataset_options([str(elem) for elem in range(1, 3 + 1)])
+    if None not in [value_view, value_transformation]:
+        if value_view == 'PulseWaveAnalysis':
+            return get_dataset_options([str(elem) for elem in range(1, 1+1)])
+        elif value_view == 'ECG':
+            return get_dataset_options([str(elem) for elem in range(1, 15 + 1)])
+        elif value_view == 'FullWeek':
+            if value_transformation == 'Acceleration':
+                return get_dataset_options([str(elem) for elem in range(1, 1 + 1)])
+            elif value_transformation == 'TimeSeriesFeatures' :
+                return get_dataset_options([str(elem) for elem in range(1, 113 + 1)])
+        elif value_view == 'Walking':
+            return get_dataset_options([str(elem) for elem in range(1, 3 + 1)])
     else :
         return []
 
@@ -208,7 +214,6 @@ def _get_options_transformation(value_view, value_transformation):
              [Input('select_view_attention_time', 'value')])
 def _get_options_transformation(value_view):
     if value_view == 'PulseWaveAnalysis' or value_view == 'ECG':
-        print(get_dataset_options(['TimeSeries']))
         return get_dataset_options(['TimeSeries'])
     elif value_view == 'FullWeek':
         return get_dataset_options(['Acceleration', 'TimeSeriesFeatures'])
@@ -256,6 +261,21 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
         return go.Figure(d), title
     else :
         return go.Figure(empty_graph), ''
+
+@app.callback(Output('score_times_series', 'children'),
+             [Input('select_organ_attention_time', 'value'),
+              Input('select_view_attention_time', 'value'),
+              Input('select_transformation_attention_time', 'value')
+              ])
+def generate_score(organ, view, transformation):
+    if None not in [organ, view, transformation]:
+        score_model = score[(score['organ'] == organ) & (score['view'] == view) & (score['transformation'] == transformation)][['architecture', 'R-Squared_all', 'N_all']]
+        print(score_model)
+        score_model = score_model.sort_values('R-Squared_all').iloc[0]
+        title = 'Best R-Squared :  %.3f, Sample Size %d' % (score_model['R-Squared_all'], score_model['N_all'])
+        return title
+    else :
+        return ''
 
 @app.callback([Output('timeseries_display_2', 'figure'),
                Output('title_timeseries_2', 'children')],

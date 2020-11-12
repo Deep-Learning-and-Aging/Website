@@ -22,6 +22,11 @@ sample = 0
 path_img = 'page12_AttentionMapsVideos/img/'
 path_gif = 'page12_AttentionMapsVideos/gif/'
 path_attention_maps_videos = './' + app.get_asset_url('page12_AttentionMapsVideos/AttentionMapsVideos/')
+
+
+path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
+score = pd.read_csv(path_score_scalar)
+
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select Organ : "),
@@ -160,7 +165,8 @@ layout = dbc.Container([
                              html.Br(),
                              html.Br()], md=3),
                     dbc.Col(
-                        [controls_1,
+                        [html.H3(id = 'score_videos'),
+                        controls_1,
                         dcc.Loading(id = 'gif_display_1'),
                         controls_2,
                         dcc.Loading(id = 'gif_display_2')],
@@ -168,6 +174,22 @@ layout = dbc.Container([
                         md=9)
                     ])
             ], fluid = True)
+
+
+@app.callback(Output('score_videos', 'children'),
+             [Input('select_organ_attention_video', 'value'),
+              Input('select_view_attention_video', 'value'),
+              Input('select_transformation_attention_video', 'value')
+              ])
+def generate_score(organ, view, transformation):
+    if None not in [organ, view, transformation]:
+        score_model = score[(score['organ'] == organ) & (score['view'] == view) & (score['transformation'] == transformation)][['architecture', 'R-Squared_all', 'N_all']]
+        print(score_model)
+        score_model = score_model.sort_values('R-Squared_all').iloc[0]
+        title = 'Best R-Squared :  %.3f, Sample Size %d' % (score_model['R-Squared_all'], score_model['N_all'])
+        return title
+    else :
+        return ''
 
 @app.callback(Output('gif_display_1', 'children'),
              [Input('select_organ_attention_video', 'value'),

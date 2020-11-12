@@ -65,7 +65,7 @@ dict_dataset_to_organ_and_view = {
     'BrainGreyMatterVolumes' : ('Brain', 'MRI', 'GreyMatterVolumes'),
     'BrainSubcorticalVolumes': ('Brain', 'MRI', 'SubcorticalVolumes'),
     'BraindMRIWeightedMeans' : ('Brain', 'MRI', 'dMRIWeightedMeans'),
-    'BrainMRIAllBiomarkers' : ('Brain', 'MRI', 'AllBiomarkers'),
+    'BrainMRIAllBiomarkers' : ('Brain', 'MRI', 'AllScalars'),
     'CognitiveReactionTime' : ('Brain', 'Cognitive', 'ReactionTime'),
     'CognitiveMatrixPatternCompletion' : ('Brain', 'Cognitive', 'MatrixPatternCompletion'),
     'CognitiveTowerRearranging' : ('Brain', 'Cognitive', 'TowerRearranging'),
@@ -88,10 +88,10 @@ dict_dataset_to_organ_and_view = {
     # Lungs
     'Spirometry' :  ('Lungs', 'Spirometry', 'Scalars'),
     # Vascular
-    'BloodPressure' : ('Vascular', 'BloodPressure', 'Scalars'),
-    'CarotidUltrasound' : ('Vascular', 'Carotids', 'Scalars'),
-    'ArterialStiffness' : ('Vascular', 'PWA', 'Scalars'),
-    'VascularAllBiomarkers' : ('Vascular', 'All', 'Scalars'),
+    'BloodPressure' : ('Arterial', 'BloodPressure', 'Scalars'),
+    'CarotidUltrasound' : ('Arterial', 'Carotids', 'Scalars'),
+    'ArterialStiffness' : ('Arterial', 'PWA', 'Scalars'),
+    'VascularAllBiomarkers' : ('Arterial', 'All', 'Scalars'),
     # Heart
     'HeartAllBiomarkers' : ('Heart', 'All', 'Scalars'),
     'HeartSize' : ('Heart', 'MRI', 'Size'),
@@ -107,9 +107,9 @@ dict_dataset_to_organ_and_view = {
     'MusculoskeletalAllBiomarkers' : ('Musculoskeletal', 'Scalars', 'AllBiomarkers'),
 
     #Biochemistry
-    'BloodBiochemestry' : ('Biochemistry', 'Blood', 'Biomarkers'),
-    'UrineBiochemestry' : ('Biochemistry', 'Urine', 'Biomarkers'),
-    'Biochemistry' : ('Biochemistry', 'All', 'Biomarkers'),
+    'BloodBiochemestry' : ('Biochemistry', 'Blood', 'Scalars'),
+    'UrineBiochemestry' : ('Biochemistry', 'Urine', 'Scalars'),
+    'Biochemistry' : ('Biochemistry', 'All', 'Scalars'),
     #ImmuneSystem
     'BloodCount' : ('ImmuneSystem', 'BloodCount', 'Scalars'),  # Need to do blood infection
     'PhysicalActivity' : ('PhysicalActivity', 'FullWeek', 'Scalars'),
@@ -147,6 +147,8 @@ def f(x):
 def get_colorscale(df):
     min = df.min().min()
     max = df.max().max()
+    print(min)
+    print(max)
     abs = np.abs(min/(min - max))
     if abs > 1 :
         colorscale =  [[0, f(min)],

@@ -85,6 +85,7 @@ controls2 = dbc.Card([
 ])
 
 layout = html.Div([
+    html.H1('Genetics - GWAS '),
     dbc.Tabs([
         dbc.Tab(label = 'Manhattan Plot', tab_id='man_plot'),
         dbc.Tab(label = 'Volcano Plot', tab_id = 'vol_plot'),
@@ -97,7 +98,6 @@ layout = html.Div([
 def _plot_with_given_env_dataset(ac_tab):
     if ac_tab == 'man_plot':
         return  dbc.Container([
-                        html.H1('GWAS - Manhattan Plot '),
                         html.Br(),
                         html.Br(),
                         dbc.Row([
@@ -109,7 +109,7 @@ def _plot_with_given_env_dataset(ac_tab):
                                 dcc.Loading([
                                     html.H3(id = 'title_man'),
                                     html.H3('Manhattan Plot'),
-                                    html.Img(id = 'mana_plot', style={'height':'100%', 'width':'100%'}),
+                                    html.Img(id = 'mana_plot', style={'height':'70%', 'width':'70%'}),
                                     html.H3('QQ Plot'),
                                     html.Img(id = 'qq_plot', style={'height':'70%', 'width':'70%'})
                                     #dcc.Graph(id = 'mana_plot')
@@ -120,7 +120,6 @@ def _plot_with_given_env_dataset(ac_tab):
                         ], fluid = True)
     elif ac_tab == 'vol_plot':
         return  dbc.Container([
-                        html.H1('GWAS - Volcano Plot'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([

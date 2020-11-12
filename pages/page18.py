@@ -119,7 +119,7 @@ layout =  html.Div([
     dcc.Store(id = 'memory_no_str_xwas_feat_imps'),
     dcc.Loading([
         dbc.Container([
-            html.H1('Features importances'),
+            html.H1('Multivariate XWAS - Features importances'),
             html.Br(),
             html.H2(id = 'scores_xwas'),
             html.Br(),

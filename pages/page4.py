@@ -22,7 +22,6 @@ value_step = 'Test'
 path_performance = './' + app.get_asset_url('page2_predictions/Performances/')
 path_residualscorr = './' + app.get_asset_url('page4_correlations/ResidualsCorrelations/')
 path_clustering = './' + app.get_asset_url('page4_correlations/HC_final.png')
-organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
 if MODE == 'All':
     controls = dbc.Card([
@@ -51,7 +50,7 @@ if MODE == 'All':
             html.P("Select an Organ : "),
             dcc.Dropdown(
                 id='Select_organ_res',
-                options = get_dataset_options(organs + ['All']),
+                options = get_dataset_options(order + ['All']),
                 placeholder = 'All',
                 value = 'All'
                 ),
@@ -103,7 +102,7 @@ if MODE == 'All':
             html.P("Select an Organ : "),
             dcc.Dropdown(
                 id='Select_organ_res_2',
-                options = get_dataset_options(organs + ['All']),
+                options = get_dataset_options(order + ['All']),
                 placeholder = 'All',
                 value = 'All'
                 ),
@@ -441,12 +440,13 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
         customdata_score_x, customdata_score_y, df, std, custom_order = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
         organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
         d = {}
-        d['layout'] = dict(height = 800,
-                           width = 800,
+        d['layout'] = dict(height = 1000,
+                           width = 1000,
                            margin = {'l': 0, 'b': 0, 't': 0, 'r': 0},
                            xaxis = dict(titlefont=dict(size=8)),
                            yaxis = dict(titlefont=dict(size=8)),
-                           plot_bgcolor='rgba(0,0,0,0)')
+                           plot_bgcolor='rgba(0,0,0,0)',
+                           font = dict(size = 8))
 
         if value_organ == 'All':
             #Color Scale
@@ -800,8 +800,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             fig['layout']['yaxis']['showgrid'] = False
             fig['layout']['yaxis2']['domain'] = [0, 0.7]
             fig['layout']['yaxis2']['showgrid'] = False
-            fig['layout']['width'] = 1000
-            fig['layout']['height'] = 1000
+            fig['layout']['width'] = 1100
+            fig['layout']['height'] = 1100
             fig['layout']['xaxis']['autorange'] =  True
             if value_aggregate == 'All':
                 fig['layout']['xaxis2']['showticklabels'] = False

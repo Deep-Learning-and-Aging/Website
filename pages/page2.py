@@ -194,7 +194,8 @@ def _plot_r2_scores(value_eid_vs_instances,
                             margin = {'l': 40, 'b': 0, 't': 10, 'r': 40},
                             legend= dict(orientation='h',
                                          x = 0,
-                                         y = -0.4))}
+                                         y = -0.4),
+                            yaxis={'title' :'R2 score'})}
     elif value_organ == 'All':
         distinct_architectures = df_res.architecture.drop_duplicates()
         plots = []
@@ -220,7 +221,9 @@ def _plot_r2_scores(value_eid_vs_instances,
                              width = 3500,
                              margin = {'l': 20, 'b': 250, 't': 10, 'r': 0},
                              bargap = 0,
-                             xaxis = dict(tickfont = dict(size = 8)))}
+                             xaxis = dict(tickfont = dict(size = 8)),
+                             yaxis={'title' :'R2 score'}),
+                             }
 
     else :#value_organ in ['Heart', 'Liver', 'Pancreas']:
         df_res = df_res[df_res.organ == value_organ]
@@ -241,6 +244,7 @@ def _plot_r2_scores(value_eid_vs_instances,
              'layout' : dict(height = 600,
                              width = max(25*len(df_res['architecture']), 850),
                              margin = {'l': 40, 'b': 150, 't': 10, 'r': 40},
+                             yaxis={'title' :'R2 score'},
                             )}
 
     return go.Figure(d)

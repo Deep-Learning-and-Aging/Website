@@ -172,22 +172,19 @@ layout =  html.Div([
               [Input('select_target', 'value'), Input('Select_organ_1', 'value'), Input('Select_view_1', 'value'), Input('Select_transf_1', 'value')])
 def _plot_r2_scores(value_target, value_organ, value_view, value_transformation):
     if value_transformation is not None :
-        print(score)
         score_model = score[(score['organ'] == value_organ) & (score['view'] == value_view) & (score['transformation'] == value_transformation)][['architecture', 'R-Squared_all', 'N_all']]
         score_lightgbm = score_model[score_model['architecture'] == 'LightGBM']['R-Squared_all']
         score_nn = score_model[score_model['architecture'] == 'NeuralNetwork']['R-Squared_all']
         score_elasticnet = score_model[score_model['architecture'] == 'ElasticNet']['R-Squared_all']
         sample_size = score_model[score_model['architecture'] == 'ElasticNet']['N_all']
-
+        print(score_lightgbm, score_nn, score_elasticnet)
         title = 'Bar Plot - R-Squared : ElasticNet %.3f, LightGBM %.3f, NeuralNetwork %.3f, Sample Size %d' % (score_elasticnet, score_lightgbm, score_nn, sample_size)
         list_models = []
         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
-
+        print(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         for idx, elem in enumerate(list_df):
-
             df_new = pd.read_csv(elem, na_filter = False).set_index('features')
-            print(df_new)
             _, _, _, _, _, model = os.path.basename(elem).split('_')
             model = model.replace('.csv', '').replace('LightGbm', 'LightGBM')
             list_models.append(model)

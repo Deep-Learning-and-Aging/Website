@@ -61,7 +61,7 @@ def create_dfs(mode = MODE):
 
 
 layout = dbc.Container([
-                html.H1('GWAS - Correlations'),
+                html.H1('Genetics - Correlations'),
                 html.Br(),
                 html.Br(),
                 dbc.Row([
