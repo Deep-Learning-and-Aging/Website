@@ -21,7 +21,7 @@ from io import BytesIO
 
 path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
 score = pd.read_csv(path_score_scalar)
-path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/Age')
+path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images')
 path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
 
 if MODE != 'All':
