@@ -219,16 +219,16 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging
                 count[1] = False
 
             if count[0]:
-                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
+                final_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
                 buffered_left = BytesIO()
-                raw_left.save(buffered_left, format="PNG")
+                final_left.save(buffered_left, format="PNG")
                 img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
                 src_left = 'data:image/png;base64,{}'.format(img_base64_left)
             if count[1] :
-                raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
-                raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
+                final_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+                final_right = final_right.transpose(Image.FLIP_LEFT_RIGHT)
                 buffered_right = BytesIO()
-                raw_right.save(buffered_right, format="PNG")
+                final_right.save(buffered_right, format="PNG")
                 img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
                 src_right = 'data:image/png;base64,{}'.format(img_base64_right)
 
@@ -310,16 +310,16 @@ def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging
                 count[1] = False
 
             if count[0]:
-                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
+                final_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
                 buffered_left = BytesIO()
-                raw_left.save(buffered_left, format="PNG")
+                final_left.save(buffered_left, format="PNG")
                 img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
                 src_left = 'data:image/png;base64,{}'.format(img_base64_left)
             if count[1] :
-                raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
-                raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
+                final_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+                final_right = final_right.transpose(Image.FLIP_LEFT_RIGHT)
                 buffered_right = BytesIO()
-                raw_right.save(buffered_right, format="PNG")
+                final_right.save(buffered_right, format="PNG")
                 img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
                 src_right = 'data:image/png;base64,{}'.format(img_base64_right)
 
