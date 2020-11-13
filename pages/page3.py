@@ -177,12 +177,11 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         score_nn = score_model[score_model['architecture'] == 'NeuralNetwork']['R-Squared_all']
         score_elasticnet = score_model[score_model['architecture'] == 'ElasticNet']['R-Squared_all']
         sample_size = score_model[score_model['architecture'] == 'ElasticNet']['N_all']
-        print(score_lightgbm, score_nn, score_elasticnet)
         title = 'Bar Plot - R-Squared : ElasticNet %.3f, LightGBM %.3f, NeuralNetwork %.3f, Sample Size %d' % (score_elasticnet, score_lightgbm, score_nn, sample_size)
         list_models = []
         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
-        print(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
+        print(list_df)
         for idx, elem in enumerate(list_df):
             df_new = pd.read_csv(elem, na_filter = False).set_index('features')
             _, _, _, _, _, model = os.path.basename(elem).split('_')
@@ -193,7 +192,9 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
                 df = df_new
             else :
                 df = df.join(df_new)
-        df = np.abs(df)/np.abs(df).sum()
+        df = df.replace('', 0).fillna(0).astype(float)
+        print(df.dtypes)
+        df = df.abs()/df.abs().sum()
 
         list_models_sd = []
         for idx, elem in enumerate(list_df_sd):
