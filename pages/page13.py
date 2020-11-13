@@ -270,9 +270,12 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
 def generate_score(organ, view, transformation):
     if None not in [organ, view, transformation]:
         score_model = score[(score['organ'] == organ) & (score['view'] == view) & (score['transformation'] == transformation)][['architecture', 'R-Squared_all', 'N_all']]
-        print(score_model)
-        score_model = score_model.sort_values('R-Squared_all').iloc[0]
-        title = 'Best R-Squared :  %.3f, Sample Size %d' % (score_model['R-Squared_all'], score_model['N_all'])
+        best_row = score_model.sort_values('R-Squared_all', ascending = False).iloc[0]
+        title = 'R2 = %.3f (%s), ' % (best_row['R-Squared_all'], best_row['architecture'])
+        title += 'Sample size = %d' % best_row['N_all']
+        ## Old title with best score :
+        # score_model = score_model.sort_values('R-Squared_all').iloc[0]
+        # title = 'Best R-Squared :  %.3f, Sample Size %d' % (score_model['R-Squared_all'], score_model['N_all'])
         return title
     else :
         return ''

@@ -101,7 +101,7 @@ dict_dataset_to_organ_and_view = {
 
     # Musculoskeletal
     'AnthropometryImpedance' : ('Musculoskeletal', 'Scalars', 'Impedance'),
-    'AnthropometryBodySize' : ('Musculoskeletal', 'Scalars', 'BodySize'),
+    'AnthropometryBodySize' : ('Musculoskeletal', 'Scalars', 'Anthropometry'),
     'BoneDensitometryOfHeel' : ('Musculoskeletal', 'Scalars', 'HeelBoneDensitometry'),
     'HandGripStrength' : ('Musculoskeletal', 'Scalars', 'HandGripStrength'),
     'MusculoskeletalAllBiomarkers' : ('Musculoskeletal', 'Scalars', 'AllScalars'),

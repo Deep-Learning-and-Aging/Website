@@ -13,8 +13,12 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 import copy
+
+
+
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
+path_scores_ewas = './' + app.get_asset_url('page7_MultivariateXWASResults/Scores/')
 path_correlations_ewas = './' + app.get_asset_url('page8_MultivariateXWASCorrelations/CorrelationsMultivariate/')
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
@@ -292,11 +296,39 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('Select_corr_type_mul_ewas1', 'value'), Input('Select_algorithm_method1', 'value'), Input('Select_env_dataset_mul_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
+        score = pd.read_csv(path_scores_ewas + 'Scores_%s_test.csv' % (subset_method))
+        distinct_organs = score.organ.drop_duplicates()
+        score_std_env = score[score['env_dataset'] == env_dataset][['r2', 'organ', 'std']]
+        score_env = dict(zip(score_std_env['organ'], score_std_env['r2']))
+        std_env = dict(zip(score_std_env['organ'], score_std_env['std']))
+        for organ in distinct_organs:
+            if organ not in score_env.keys():
+                score_env[organ] = np.nan
+            if organ not in std_env.keys():
+                std_env[organ] = np.nan
+        print(std_env)
         df = pd.read_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
         df_env = df[df.env_dataset == env_dataset]
+        print(df_env)
+        #df_env = df_env.merge(score, how = 'inner', left_on = 'organ_1', right_on = 'organ')
+        df_env['score_1'] = df_env['organ_1'].map(score_env)
+        df_env['score_2'] = df_env['organ_2'].map(score_env)
+        df_env['std_1'] = df_env['organ_1'].map(std_env)
+        df_env['std_2'] = df_env['organ_2'].map(std_env)
+
         matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
-                        columns=['organ_2'])
+                        columns=['organ_2'], dropna = False)
+        r2_score_y = pd.pivot_table(df_env, values='score_1', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        r2_score_x = pd.pivot_table(df_env, values='score_2', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        std_y = pd.pivot_table(df_env, values='std_1', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        std_x = pd.pivot_table(df_env, values='std_2', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        customdata = np.dstack([r2_score_x, std_x, r2_score_y, std_y])
+        hovertemplate = "Organ x : %{x}<br> Score organ x : %{customdata[0]:.3f}<br>Std organ y : %{customdata[1]:.3f}<br>Organ y : %{y}<br>Score organ y : %{customdata[2]:.3f}<br>Std organ y : %{customdata[3]:.3f}"
         try :
             colorscale =  get_colorscale(matrix_env)
         except ValueError:
@@ -305,6 +337,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         d['data'] = go.Heatmap(z=matrix_env,
                    x=matrix_env.index,
                    y=matrix_env.columns,
+                   customdata =customdata,
+                   hovertemplate = hovertemplate,
                    colorscale = colorscale)
         d['layout'] = dict(xaxis = dict(dtick = 1),
                            yaxis = dict(dtick = 1),

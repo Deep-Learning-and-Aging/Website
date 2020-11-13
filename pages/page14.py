@@ -192,40 +192,60 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
         title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
-
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
-            raw_left = mpimg.imread(path_image_left)
-            raw_right = mpimg.imread(path_image_right)
 
-            raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
-            raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+            count = [True, True]
+            try :
+                raw_left = mpimg.imread(path_image_left)
+            except FileNotFoundError:
+                count[0] = False
+            try :
+                raw_right = mpimg.imread(path_image_right)
+            except FileNotFoundError :
+                count[1] = False
 
-            buffered_left = BytesIO()
-            raw_left.save(buffered_left, format="PNG")
-            img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
-            src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+            if count[0]:
+                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
+                buffered_left = BytesIO()
+                raw_left.save(buffered_left, format="PNG")
+                img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+            if count[1] :
+                raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+                raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
+                buffered_right = BytesIO()
+                raw_right.save(buffered_right, format="PNG")
+                img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                src_right = 'data:image/png;base64,{}'.format(img_base64_right)
 
-            buffered_right = BytesIO()
-            raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
-            raw_right.save(buffered_right, format="PNG")
-            img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
-            src_right = 'data:image/png;base64,{}'.format(img_base64_right)
+            if count[0] and not count[1]:
+                final_right = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
+                buffered_right = BytesIO()
+                final_right.save(buffered_right, format="PNG")
+                img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                src_right = 'data:image/png;base64,{}'.format(img_base64_right)
+            elif not count[0] and count[1]:
+                final_left = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
+                buffered_left = BytesIO()
+                final_left.save(buffered_left, format="PNG")
+                img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+
             col = [
                     dbc.Row([
                         html.H3(title),
                         html.Br()
                         ]),
-                    html.Br(),
                     dbc.Row([
                         dbc.Col([
                             html.Img(id = 'attentionmap_left', style={'height':'100%', 'width':'100%'},
                                      src = src_left)
-                                ], md = 6),
+                                ]),
                         dbc.Col([
                             html.Img(id = 'attentionmap_right', style={'height':'100%', 'width':'100%'},
                                      src = src_right)
-                                ], md = 6)
+                                ])
                             ])
                  ]
             return col
@@ -265,21 +285,44 @@ def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
             path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
             path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
-            raw_left = mpimg.imread(path_image_left)
-            raw_right = mpimg.imread(path_image_right)
 
-            raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
-            raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
-            raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
-            buffered_left = BytesIO()
-            raw_left.save(buffered_left, format="PNG")
-            img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
-            src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+            count = [True, True]
+            try :
+                raw_left = mpimg.imread(path_image_left)
+            except FileNotFoundError:
+                count[0] = False
+            try :
+                raw_right = mpimg.imread(path_image_right)
+            except FileNotFoundError :
+                count[1] = False
 
-            buffered_right = BytesIO()
-            raw_right.save(buffered_right, format="PNG")
-            img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
-            src_right = 'data:image/png;base64,{}'.format(img_base64_right)
+            if count[0]:
+                raw_left = Image.fromarray((raw_left).astype(np.uint8)).convert('RGB')
+                buffered_left = BytesIO()
+                raw_left.save(buffered_left, format="PNG")
+                img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+            if count[1] :
+                raw_right = Image.fromarray((raw_right).astype(np.uint8)).convert('RGB')
+                raw_right = raw_right.transpose(Image.FLIP_LEFT_RIGHT)
+                buffered_right = BytesIO()
+                raw_right.save(buffered_right, format="PNG")
+                img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                src_right = 'data:image/png;base64,{}'.format(img_base64_right)
+
+            if count[0] and not count[1]:
+                final_right = Image.new("RGBA", (raw_left.shape[1], raw_left.shape[0]))
+                buffered_right = BytesIO()
+                final_right.save(buffered_right, format="PNG")
+                img_base64_right = base64.b64encode(buffered_right.getvalue()).decode('ascii')
+                src_right = 'data:image/png;base64,{}'.format(img_base64_right)
+            elif not count[0] and count[1]:
+                final_left = Image.new("RGBA", (raw_right.shape[1], raw_right.shape[0]))
+                buffered_left = BytesIO()
+                final_left.save(buffered_left, format="PNG")
+                img_base64_left = base64.b64encode(buffered_left.getvalue()).decode('ascii')
+                src_left = 'data:image/png;base64,{}'.format(img_base64_left)
+
             col = [
                     dbc.Row([
                         html.H3(title),

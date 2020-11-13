@@ -177,11 +177,11 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         score_nn = score_model[score_model['architecture'] == 'NeuralNetwork']['R-Squared_all']
         score_elasticnet = score_model[score_model['architecture'] == 'ElasticNet']['R-Squared_all']
         sample_size = score_model[score_model['architecture'] == 'ElasticNet']['N_all']
-        title = 'Bar Plot - R-Squared : ElasticNet %.3f, LightGBM %.3f, NeuralNetwork %.3f, Sample Size %d' % (score_elasticnet, score_lightgbm, score_nn, sample_size)
+
+        title = 'R2 = %.3f (ElasticNet), R2 = %.3f (LightGBM), R2 = %.3f (NeuralNetwork), Sample Size = %d (Scalars)' % (score_elasticnet, score_lightgbm, score_nn, sample_size)
         list_models = []
         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
-        print(list_df)
         for idx, elem in enumerate(list_df):
             df_new = pd.read_csv(elem, na_filter = False).set_index('features')
             _, _, _, _, _, model = os.path.basename(elem).split('_')
@@ -193,8 +193,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
             else :
                 df = df.join(df_new)
         df = df.replace('', 0).fillna(0).astype(float)
-        print(df.dtypes)
-        df = df.abs()/df.abs().sum()
+        df_abs = df.abs()/df.abs().sum()
 
         list_models_sd = []
         for idx, elem in enumerate(list_df_sd):
@@ -214,13 +213,13 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 
         ## Sort by best model :
         if score_lightgbm.values > score_nn.values and score_lightgbm.values > score_elasticnet.values:
-            df = df.sort_values('LightGBM')
+            df_abs = df_abs.sort_values('LightGBM')
             df_sd = df_sd.sort_values('LightGBM')
         elif score_nn.values > score_lightgbm.values and score_nn.values > score_elasticnet.values:
-            df = df.sort_values('NeuralNetwork')
+            df_abs = df_abs.sort_values('NeuralNetwork')
             df_sd = df_sd.sort_values('NeuralNetwork')
         else :
-            df = df.sort_values('ElasticNet')
+            df_abs = df_abs.sort_values('ElasticNet')
             df_sd = df_sd.sort_values('ElasticNet')
         features = df.index
 
@@ -239,20 +238,31 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         #         df_mean = df_mean.join(df_new_mean)
         # df_mean = df_mean.loc[features]
 
-
+# 'Organ_x : %{customdata[0]}\
+#                  <br>View x: %{customdata[2]}\
+#                  <br>Transformation x : %{customdata[4]}\
+#                  <br>Architecture x : %{customdata[6]}\
+#                  <br>Score x : %{customdata[9]:.3f}\
+#                  <br>\
+#                  <br>Organ_y : %{customdata[1]}\
+#                  <br>View y : %{customdata[3]}\
+#                  <br>Transformation y : %{customdata[5]}\
+#                  <br>Architecture y : %{customdata[7]}\
+#                  <br>Score y : %{customdata[10]:.3f}\
+#                  <br>\
+#                  <br>Correlation : %{z:.3f} ± %{customdata[8]:.3f}'
 
 
         df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
         df.index = df.index.str.replace('.0$', '', regex = True)
+        df_abs.index = df_abs.index.str.replace('.0$', '', regex = True)
         df_str.index = df_str.index.str.replace('.0$', '', regex = True)
-        print(df_str)
-
         ## Plot
-        d = {'data' : [go.Bar(name = model, x = df[model], y = df.index, orientation='h') for model in sorted(df.columns)],
+        d = {'data' : [go.Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
              'layout' : dict(height = len(df.index) * 20,
                              margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
                              xaxis_title='Feature importance')}
-        matrix = df[sorted(list_models)].corr()
+        matrix = df_abs[sorted(list_models)].corr()
         matrix.index.name = 'Corr'
         matrix = matrix.reset_index().round(3)
         #print("Matrix : ", matrix)
