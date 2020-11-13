@@ -12,6 +12,7 @@ import os
 import numpy as np
 from scipy.stats import pearsonr
 import dash_table
+from dash.exceptions import PreventUpdate
 path_feat_imps = './' + app.get_asset_url('page3_featureImp/FeatureImp/')
 path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
 list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
@@ -71,7 +72,21 @@ controls = dbc.Card([
             ),
         html.Br()
     ]),
+    dbc.Button("Reset", id = 'reset_page3', className="mr-2", color = "primary"),
 ])
+
+@app.callback([Output("Select_organ_1", "value"),
+               Output("Select_view_1", "value"),
+               Output("Select_transf_1", "value")],
+               [Input("reset_page3", "n_clicks")])
+def reset(n):
+    if n :
+        if n > 0 :
+            return [None, None, None]
+    else :
+        raise PreventUpdate()
+
+
 
 @app.callback(Output('Select_transf_1', 'options'),
               [Input('Select_organ_1', 'value'), Input('Select_view_1', 'value')])
@@ -194,6 +209,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
                 df = df.join(df_new)
         df = df.replace('', 0).fillna(0).astype(float)
         df_abs = df.abs()/df.abs().sum()
+        df = df.round(4)
 
         list_models_sd = []
         for idx, elem in enumerate(list_df_sd):
@@ -258,7 +274,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         df_abs.index = df_abs.index.str.replace('.0$', '', regex = True)
         df_str.index = df_str.index.str.replace('.0$', '', regex = True)
         ## Plot
-        d = {'data' : [go.Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
+        d = {'data' : [go.Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata:.3f}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
              'layout' : dict(height = len(df.index) * 20,
                              margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
                              xaxis_title='Feature importance')}

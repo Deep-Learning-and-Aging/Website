@@ -11,7 +11,7 @@ import numpy as np
 from scipy.stats import pearsonr, linregress
 import re
 from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id
-
+from dash.exceptions import PreventUpdate
 
 from app import app, MODE
 import pandas as pd
@@ -109,8 +109,26 @@ controls = dbc.Card([
             marks = dict(zip(range(0, 600000 + 1, 100000 ), [str(elem//1000)for elem in range(0, 600000 + 1, 100000)]))
             ),
         html.Br()
-    ])
+    ]),
+    dbc.Button("Reset", id = 'reset_page1', className="mr-2", color = "primary"),
 ])
+
+
+
+
+@app.callback([Output("select_group_biomarkers", "value"),
+               Output("select_view_biomarkers", "value"),
+               Output("select_transformation_biomarkers", "value"),
+               Output("select_biomarkers_of_group", "value"),
+               Output("Ethnicity filter", "value")],
+               [Input("reset_page1", "n_clicks")])
+def reset(n):
+    if n :
+        if n > 0 :
+            return [None, None, None, None, None]
+    else :
+        raise PreventUpdate()
+
 
 @app.callback(Output('select_transformation_biomarkers', 'options'),
               [Input('select_group_biomarkers', 'value'), Input('select_view_biomarkers', 'value')])

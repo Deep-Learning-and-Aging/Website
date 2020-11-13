@@ -18,6 +18,7 @@ import copy
 from PIL import Image
 import base64
 from io import BytesIO
+from dash.exceptions import PreventUpdate
 
 aging_rate = 'Normal'
 path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images')
@@ -64,7 +65,19 @@ controls = dbc.Card([
             ),
         html.Br()
         ]),
+    dbc.Button("Reset", id = 'reset_page14', className="mr-2", color = "primary"),
     ])
+
+@app.callback([Output("select_organ_image", "value"),
+               Output("select_view_image", "value"),
+               Output("select_transformation_image", "value")],
+               [Input("reset_page14", "n_clicks")])
+def reset(n):
+    if n :
+        if n > 0 :
+            return [None, None, None]
+    else :
+        raise PreventUpdate()
 
 controls_1 = dbc.Card([
     dbc.Row([

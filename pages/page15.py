@@ -7,7 +7,7 @@ from .tools import get_dataset_options, empty_graph
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
-
+from dash.exceptions import PreventUpdate
 from app import app, MODE
 import glob
 import os
@@ -59,7 +59,23 @@ controls = dbc.Card([
         ),
         html.Br()
         ]),
+    dbc.Button("Reset", id = 'reset_page15', className="mr-2", color = "primary"),
     ])
+
+
+@app.callback([Output("select_organ_time", "value"),
+               Output("select_view_time", "value"),
+               Output("select_transformation_time", "value"),
+               Output("select_time_channel", "value")],
+               [Input("reset_page15", "n_clicks")])
+def reset(n):
+    if n :
+        if n > 0 :
+            return [None, None, None, None]
+    else :
+        raise PreventUpdate()
+
+
 controls_1 = dbc.Row([
     dbc.Col([
         dbc.FormGroup([

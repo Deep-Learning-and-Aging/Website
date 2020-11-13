@@ -18,6 +18,7 @@ import copy
 from PIL import Image
 import base64
 from io import BytesIO
+from dash.exceptions import PreventUpdate
 
 path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
 score = pd.read_csv(path_score_scalar)
@@ -66,6 +67,7 @@ controls = dbc.Card([
             ),
         html.Br()
         ]),
+    dbc.Button("Reset", id = 'reset_page9', className="mr-2", color = "primary"),
     ])
 
 controls_1 = dbc.Card([
@@ -203,10 +205,16 @@ def generate_list_view_list(value):
     else :
         return get_dataset_options(dict_dataset_images_to_organ_and_view[value])
 
-
-
-
-
+@app.callback([Output("select_organ_attention_image", "value"),
+               Output("select_view_attention_image", "value"),
+               Output("select_transformation_attention_image", "value")],
+               [Input("reset_page9", "n_clicks")])
+def reset(n):
+    if n :
+        if n > 0 :
+            return [None, None, None]
+    else :
+        raise PreventUpdate()
 
 
 # # Parameters (will come from the options selected on the website)
