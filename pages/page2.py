@@ -170,17 +170,17 @@ def _plot_r2_scores(value_eid_vs_instances,
         raise ValueError("WRONG METRIC ! ")
     if value_step == 'Validation':
         df = pd.read_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_val.csv' % (value_aggregate, value_eid_vs_instances))
-        df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all']]
+        df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all', 'N_all']]
         df_res = df_res.sort_values(['organ', 'view', 'transformation', 'architecture'])
 
     elif value_step == 'Train':
         df = pd.read_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_train.csv' % (value_aggregate, value_eid_vs_instances))
-        df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all']]
+        df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all', 'N_all']]
         df_res = df_res.sort_values(['organ', 'view', 'transformation', 'architecture'])
 
     elif value_step == 'Test':
         df = pd.read_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_test.csv' % (value_aggregate, value_eid_vs_instances))
-        df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all']]
+        df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all', 'N_all']]
         df_res = df_res.sort_values(['organ', 'view', 'transformation', 'architecture'])
 
     if value_aggregate == 'bestmodels' and value_organ == 'All' :
@@ -188,6 +188,10 @@ def _plot_r2_scores(value_eid_vs_instances,
         df_res['organ'] = [ organ + view for organ, view in zip(df_res['organ'], df_res['view'])]
         d = {'data' : go.Bar(x = df_res['organ'].values,
                              y = df_res[metric],
+                             hovertemplate = 'Organ : %{x}\
+                                              <br>Score : %{y}\
+                                              <br>Sample Size : %{customdata}',
+                             customdata = df_res['N_all'],
                              error_y=dict(type='data', array = df_res[std])),
             'layout' : dict(height = 600,
                             width = max(20*len(df_res['architecture']), 850),
@@ -206,13 +210,14 @@ def _plot_r2_scores(value_eid_vs_instances,
             df_res_archi['view'] = df_res_archi['view'] + ' - ' + df_res_archi['transformation']
             df_res_archi['view'] = df_res_archi['view'].str.replace('- raw', '')
             hovertemplate = 'Model : %{x}\
-                             <br>Algorithm : ' + archi + '<br>Score : %{y}<br>'
+                             <br>Algorithm : ' + archi + '<br>Score : %{y}<br> Sample Size : %{customdata}'
 
             plot_test = go.Bar(x = [df_res_archi['organ'].values,
                                     df_res_archi['view'].values],
                                y = df_res_archi[metric],
                                error_y=dict(type='data', array=df_res_archi[std]),
                                hovertemplate = hovertemplate,
+                               customdata = df_res_archi['N_all'],
                                name = archi)
             plots.append(plot_test)
 
@@ -232,12 +237,13 @@ def _plot_r2_scores(value_eid_vs_instances,
         for archi in distinct_architectures:
             df_res_archi = df_res[df_res.architecture == archi]
             hovertemplate = 'Model : %{x}\
-                             <br>Architecture : ' + archi + '<br>Score : %{y}<br>'
+                             <br>Architecture : ' + archi + '<br>Score : %{y}<br> Sample Size : %{customdata}'
             plot_test = go.Bar(x = [df_res_archi['view'].values,
                                     df_res_archi['transformation'].values],
                                y = df_res_archi[metric],
                                error_y = dict(type='data', array=df_res_archi[std]),
                                hovertemplate = hovertemplate,
+                               customdata = df_res_archi['N_all'],
                                name = archi)
             plots.append(plot_test)
         d = {'data' : plots,
