@@ -71,8 +71,8 @@ controls = dbc.Card([
         html.P("Select an Algorithm : "),
         dcc.Dropdown(
             id='Select_algorithm',
-            options = get_dataset_options(['ElasticNet', 'LightGbm', 'NeuralNetwork', 'BestOfThem']),
-            value = 'LightGbm'
+            options = get_dataset_options(['ElasticNet', 'LightGbm', 'NeuralNetwork', 'Best Algorithm']),
+            value = 'Best Algorithm'
             ),
         html.Br()
     ], id = 'Select_dataset_ewas_full'),
@@ -86,7 +86,7 @@ controls = dbc.Card([
     #     html.Br()
     # ], id = 'Select_step_ewas_scores'),
     dbc.FormGroup([
-        html.P("View Scores by : "),
+        html.P("View R2 by : "),
         dcc.RadioItems(
             id = 'Select_view_type',
             options = get_dataset_options(['Organ', 'X']),
@@ -134,29 +134,41 @@ layout = dbc.Container([
               Input('Select_view_type', 'value')])
 def _compute_plots(algo, group, view_type):
     if algo is not None and step is not None:
-
-        df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]))
-        df = pd.concat([df, df_heritability])
+        if algo != 'Best Algorithm' :
+            df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset', 'sample_size'])
+            df = pd.concat([df, df_heritability])
+        else :
+            list_df = []
+            for algo_ in ['LightGBM', 'NeuralNetwork', 'ElasticNet'] :
+                df_algo = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo_, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset' , 'sample_size'])
+                df_algo['algo'] = algo_
+                list_df.append(df_algo)
+            df_all = pd.concat(list_df).reset_index()
+            best_idx = df_all.groupby(by = ['env_dataset', 'organ', 'subset'])['r2'].idxmax().reset_index()['r2']
+            df  = df_all.loc[best_idx.values]
+            df = pd.concat([df, df_heritability])
         if group is not None and group != 'All':
             df  = df[df.subset == group]
 
         if MODE != 'All':
             df = df[df.organ == MODE]
-        df_pivot = pd.pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ')
+        df_pivot = pd.pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ', dropna = False)
+        df_pivot_sample_size = pd.pivot_table(df, values = 'sample_size', index = 'env_dataset', columns = 'organ', dropna = False)
         df_pivot_without_negative = df_pivot.clip(lower = 0)
         d = dict()
 
 
         hovertemplate = 'X dataset : %{y}\
                          <br>Organ : %{x}\
-                         <br>R2 Score : %{customdata}'
+                         <br>R2 : %{customdata[0]}\
+                         <br>Sample Size : %{customdata[1]}'
         d['data'] = [
             go.Heatmap(z=df_pivot_without_negative,
                    x=df_pivot_without_negative.columns,
                    y=df_pivot_without_negative.index,
                     #hoverongaps = False,
                     colorscale=get_colorscale(df_pivot_without_negative),
-                    customdata = df_pivot.round(4),
+                    customdata = np.dstack([df_pivot.round(4),df_pivot_sample_size]),
                     hovertemplate = hovertemplate,
                     )
             ]
