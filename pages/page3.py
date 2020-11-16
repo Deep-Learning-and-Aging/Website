@@ -46,6 +46,7 @@ else:
 
 controls = dbc.Card([
     dbc.FormGroup([
+        html.Br(),
         html.P("Select a target : "),
         dcc.RadioItems(
             id = 'select_target',
@@ -112,26 +113,27 @@ table_df = pd.DataFrame(data = {'Corr' : ['Correlation', 'ElasticNet', 'LightGBM
                                 'LightGBM': [0, 0, 1, 0],
                                 'NeuralNetwork' : [0, 0, 0, 1]})
 
-table = dbc.Card([
-    dbc.FormGroup([
-        html.P("Select correlation type"),
-        dcc.RadioItems(
-            id = 'select correlation type',
-            options = get_dataset_options(['Pearson', 'Spearman']),
-            value = 'Pearson',
-            labelStyle = {'display': 'inline-block', 'margin': '5px'}
-        ),
-        html.Br()
+table = html.Div([
+    dbc.Card([
+        dbc.FormGroup([
+            html.Br(),
+            html.P("Select correlation type"),
+            dcc.RadioItems(
+                id = 'select correlation type',
+                options = get_dataset_options(['Pearson', 'Spearman']),
+                value = 'Pearson',
+                labelStyle = {'display': 'inline-block', 'margin': '5px'}
+            ),
+        ]),
     ]),
-    dbc.FormGroup([
-        html.P("Correlation between feature importances/correlation : "),
-        dash_table.DataTable(
-            id = 'table_corr',
-            columns =[{"name": i, "id": i} for i in table_df.columns],
-            data = table_df.to_dict('records')
-        ),
-        html.Br()
-    ])
+    html.Br(),
+    html.P("Correlation between feature importances/correlation : "),
+    dash_table.DataTable(
+        id = 'table_corr',
+        columns =[{"name": i, "id": i} for i in table_df.columns],
+        data = table_df.to_dict('records'),
+        style_cell = {'fontSize':8}
+    ),
 ])
 
 layout =  html.Div([
@@ -211,6 +213,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         df_abs = df.abs()/df.abs().sum()
         df = df.round(4)
 
+
         list_models_sd = []
         for idx, elem in enumerate(list_df_sd):
             df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
@@ -222,7 +225,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
                 df_sd = df_new_sd
             else :
                 df_sd = df_sd.join(df_new_sd)
-
+        df_sd = df_sd.replace('', 0).fillna(0).astype(float).round(4)
         ## Sort by mean of 3 models :
         # df['mean'] = df.mean(axis = 1)
         # df = df.sort_values('mean', ascending = True).drop(columns = ['mean'])
@@ -230,16 +233,16 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         ## Sort by best model :
         if score_lightgbm.values > score_nn.values and score_lightgbm.values > score_elasticnet.values:
             df_abs = df_abs.sort_values('LightGBM')
-            df_sd = df_sd.sort_values('LightGBM')
         elif score_nn.values > score_lightgbm.values and score_nn.values > score_elasticnet.values:
             df_abs = df_abs.sort_values('NeuralNetwork')
-            df_sd = df_sd.sort_values('NeuralNetwork')
         else :
             df_abs = df_abs.sort_values('ElasticNet')
-            df_sd = df_sd.sort_values('ElasticNet')
-        features = df.index
 
-        df_sd = df_sd.loc[features]
+        features = df.index
+        ## REORDER ASSOCIATED TABLES
+        df_sd = df_sd.reindex(df_abs.index)
+        df = df.reindex(df_abs.index)
+
 
         # list_models_mean = []
         # for idx, elem in enumerate(list_models_mean):
@@ -270,14 +273,17 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 
 
         df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
-        df.index = df.index.str.replace('.0$', '', regex = True)
-        df_abs.index = df_abs.index.str.replace('.0$', '', regex = True)
-        df_str.index = df_str.index.str.replace('.0$', '', regex = True)
-        ## Plot
+
+
         d = {'data' : [go.Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata:.3f}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
              'layout' : dict(height = len(df.index) * 20,
                              margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
                              xaxis_title='Feature importance')}
+
+        df.index = df.index.str.replace('.0$', '', regex = True)
+        df_abs.index = df_abs.index.str.replace('.0$', '', regex = True)
+        df_str.index = df_str.index.str.replace('.0$', '', regex = True)
+
         matrix = df_abs[sorted(list_models)].corr()
         matrix.index.name = 'Corr'
         matrix = matrix.reset_index().round(3)
