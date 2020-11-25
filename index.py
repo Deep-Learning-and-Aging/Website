@@ -5,8 +5,10 @@ from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
 from app import app
+server = app.server
 from pages import menu, page1, page2, page3, page4, page5, page6, page7, page8, page9, \
                   page10, page11, page12, page13, page14, page15, page16, page17, page18
+
 num_pages = 18
 top_bar = html.Div([
     dbc.Nav(
@@ -97,8 +99,5 @@ def _(pathname):
     #print(output)
     return output
 
-
-
 if __name__ == '__main__':
-    server = app.server
     app.run_server(debug=True, threaded=True)
