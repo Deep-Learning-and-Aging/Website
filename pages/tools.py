@@ -6,7 +6,9 @@ import io
 import pandas as pd
 import boto3
 from botocore.client import Config
+import os
 
+## S3 credentials
 client = boto3.client('s3',
 aws_access_key_id='AKIAJLH6PDGZYILEGDLQ',
 aws_secret_access_key='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',
@@ -17,6 +19,18 @@ def load_csv(id_path, **kwargs):
     obj = client.get_object(Bucket='harvardxwastest', Key=id_path)
     df = pd.read_csv(io.BytesIO(obj['Body'].read()), **kwargs)
     return df
+
+
+## Score of all models
+path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
+score = load_csv(path_score_scalar)
+
+## Load heritability
+filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
+heritability = load_csv(filename_heritabilty)[['h2', 'h2_sd', 'Organ']]
+
+
+
 
 empty_graph = {
     "layout": {

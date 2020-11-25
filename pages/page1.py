@@ -21,7 +21,6 @@ from plotly.subplots import make_subplots
 
 path_inputs = 'page1_biomarkers/BiomarkerDatasets'
 path_linear = 'page1_biomarkers/LinearOutput/'
-df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
 dict_data = load_csv('Data_Dictionary_Showcase.csv')
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
@@ -209,6 +208,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
                Input('Ethnicity filter', 'value'),
                Input('limit_sample_size', 'value')])
 def plot_distribution_of_feature(value_group, value_view, value_transformation, value_feature, value_age_filter, value_ethnicity, sample_size_limit):
+    df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
     fig = {'layout' : dict(title='Distribution of the feature', # title of plot
                            xaxis={'title' : 'Value'}, # xaxis label
                            yaxis={'title' : 'Count'}, # yaxis label

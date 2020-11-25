@@ -17,12 +17,6 @@ import copy
 step = 'test'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
-df_heritability = load_csv(filename_heritabilty)[['h2', 'h2_sd', 'Organ']]
-df_heritability = df_heritability.rename(columns = {'h2' : 'r2', 'h2_sd' : 'std', 'Organ' : 'organ'})
-df_heritability['env_dataset'] = 'Genetics'
-df_heritability['subset'] = 'Genetics'
-
 
 path_scores_ewas = 'page7_MultivariateXWASResults/Scores/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
@@ -133,6 +127,9 @@ layout = dbc.Container([
               Input('Select_data_type_scores', 'value'),
               Input('Select_view_type', 'value')])
 def _compute_plots(algo, group, view_type):
+    df_heritability = df_heritability.rename(columns = {'h2' : 'r2', 'h2_sd' : 'std', 'Organ' : 'organ'})
+    df_heritability['env_dataset'] = 'Genetics'
+    df_heritability['subset'] = 'Genetics'
     if algo is not None and step is not None:
         if algo != 'Best Algorithm' :
             df = load_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset', 'sample_size'])

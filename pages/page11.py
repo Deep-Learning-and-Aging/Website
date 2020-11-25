@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv, heritability
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -18,9 +18,7 @@ from PIL import Image
 import base64
 
 
-filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
-df = load_csv(filename_heritabilty)
-organs_gwas = df['Organ'].drop_duplicates()
+organs_gwas = heritability['Organ'].drop_duplicates()
 if MODE != 'All' :
     style = {'display' : 'None'}
     value = MODE
@@ -54,9 +52,9 @@ else :
 
 d = dict()
 d['data'] = go.Bar(
-    x=df['Organ'],
-    y=df['h2'],
-    error_y = dict(type = 'data', array = df['h2_sd']),
+    x=heritability['Organ'],
+    y=heritability['h2'],
+    error_y = dict(type = 'data', array = heritability['h2_sd']),
     name='Heritability'
 )
 d['layout'] = {

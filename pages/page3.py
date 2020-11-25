@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, load_csv
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, load_csv, score
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -14,7 +14,6 @@ from scipy.stats import pearsonr
 import dash_table
 from dash.exceptions import PreventUpdate
 path_feat_imps = 'page3_featureImp/FeatureImp/'
-path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
 list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
 targets = ['Sex', 'Age']
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
@@ -22,7 +21,6 @@ targets = ['Sex', 'Age']
 
 #if MODE != 'All':
 #    list_organs = [elem for elem in list_organs if MODE in elem]
-score = load_csv(path_score_scalar)
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([

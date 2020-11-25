@@ -1,27 +1,31 @@
+## Import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, load_csv
-import pandas as pd
+from dash.exceptions import PreventUpdate
+import dash_table
 import plotly.graph_objs as go
 import plotly.express as px
+
+
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, load_csv, score
+from app import app, MODE
+
+import pandas as pd
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-from app import app, MODE
 import glob
 import os
 import numpy as np
 from scipy.stats import pearsonr
-import dash_table
+
 import copy
 from PIL import Image
 import base64
 from io import BytesIO
-from dash.exceptions import PreventUpdate
 
-path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
-score = load_csv(path_score_scalar)
+
 path_attention_maps = 'page9_AttentionMaps/Images'
 path_attention_maps_metadata = 'page9_AttentionMaps/Attention_maps_infos/'
 

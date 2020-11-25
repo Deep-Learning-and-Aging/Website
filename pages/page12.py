@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, empty_graph, load_csv
+from .tools import get_dataset_options, empty_graph, load_csv, score
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -23,9 +23,6 @@ path_img = 'page12_AttentionMapsVideos/img/'
 path_gif = 'page12_AttentionMapsVideos/gif/'
 path_attention_maps_videos = 'page12_AttentionMapsVideos/AttentionMapsVideos/'
 
-
-path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
-score = load_csv(path_score_scalar)
 
 controls = dbc.Card([
     dbc.FormGroup([
