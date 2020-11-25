@@ -10,3 +10,5 @@ scipy
 pandas
 plotly
 matplotlib
+gunicorn
+
