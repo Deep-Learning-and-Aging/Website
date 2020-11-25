@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS
+from .tools import get_dataset_options, ETHNICITY_COLS, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -11,7 +11,7 @@ import numpy as np
 
 distinct_colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000']
 
-path_performance = './' + app.get_asset_url('page2_predictions/Performances/')
+path_performance = 'page2_predictions/Performances/'
 organs = ['*', '*instances23', '*instances1.5x', '*instances01', 'Abdomen', 'Arterial', 'Biochemistry', 'Brain', 'Eyes','Hearing','Heart','ImmuneSystem','Lungs','Musculoskeletal','PhysicalActivity']
 value_step = 'Test'
 
@@ -169,17 +169,17 @@ def _plot_r2_scores(value_eid_vs_instances,
     else :
         raise ValueError("WRONG METRIC ! ")
     if value_step == 'Validation':
-        df = pd.read_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_val.csv' % (value_aggregate, value_eid_vs_instances))
+        df = load_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_val.csv' % (value_aggregate, value_eid_vs_instances))
         df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all', 'N_all']]
         df_res = df_res.sort_values(['organ', 'view', 'transformation', 'architecture'])
 
     elif value_step == 'Train':
-        df = pd.read_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_train.csv' % (value_aggregate, value_eid_vs_instances))
+        df = load_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_train.csv' % (value_aggregate, value_eid_vs_instances))
         df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all', 'N_all']]
         df_res = df_res.sort_values(['organ', 'view', 'transformation', 'architecture'])
 
     elif value_step == 'Test':
-        df = pd.read_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_test.csv' % (value_aggregate, value_eid_vs_instances))
+        df = load_csv(path_performance + 'PERFORMANCES_%s_ranked_%s_Age_test.csv' % (value_aggregate, value_eid_vs_instances))
         df_res = df[['target', 'organ', 'view', 'transformation', 'architecture', 'RMSE_all', 'RMSE_sd_all', 'R-Squared_all', 'R-Squared_sd_all', 'N_all']]
         df_res = df_res.sort_values(['organ', 'view', 'transformation', 'architecture'])
 

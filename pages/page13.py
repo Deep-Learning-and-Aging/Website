@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, empty_graph
+from .tools import get_dataset_options, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -20,11 +20,11 @@ import base64
 from io import BytesIO
 
 
-path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
-score = pd.read_csv(path_score_scalar)
+path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
+score = load_csv(path_score_scalar)
 
-path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images/')
-path_attention_maps_infos = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/AttentionMaps-samples_Age_')
+path_attention_maps = 'page9_AttentionMaps/Images/'
+path_attention_maps_infos = 'page9_AttentionMaps/Attention_maps_infos/AttentionMaps-samples_Age_'
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select Organ : "),
@@ -249,7 +249,7 @@ def _get_options_transformation(value_view):
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel, sample):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
-        df = pd.read_csv(path_attention_maps_infos + organ + '_' + view + '_' + transformation + '.csv')
+        df = load_csv(path_attention_maps_infos + organ + '_' + view + '_' + transformation + '.csv')
         df = df[(df['sex'] == sex) & (df['age_category'] == age_group.lower()) & (df['aging_rate'] == aging_rate.lower()) & (df['sample'] == sample)]
         df_bioage = df['Biological_Age']
         df_chroage = df['Age']
@@ -306,7 +306,7 @@ def generate_score(organ, view, transformation):
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channel, sample):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
-        df = pd.read_csv(path_attention_maps_infos + organ + '_' + view + '_' + transformation + '.csv')
+        df = load_csv(path_attention_maps_infos + organ + '_' + view + '_' + transformation + '.csv')
         df = df[(df['sex'] == sex) & (df['age_category'] == age_group.lower()) & (df['aging_rate'] == aging_rate.lower()) & (df['sample'] == sample)]
         df_bioage = df['Biological_Age']
         df_chroage = df['Age']

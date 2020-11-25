@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -18,8 +18,8 @@ from PIL import Image
 import base64
 
 
-filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
-df = pd.read_csv(filename_heritabilty)
+filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
+df = load_csv(filename_heritabilty)
 organs_gwas = df['Organ'].drop_duplicates()
 if MODE != 'All' :
     style = {'display' : 'None'}

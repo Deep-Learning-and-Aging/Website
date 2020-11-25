@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -13,8 +13,8 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 from dash.exceptions import PreventUpdate
-path_feat_imps = './' + app.get_asset_url('page3_featureImp/FeatureImp/')
-path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
+path_feat_imps = 'page3_featureImp/FeatureImp/'
+path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
 list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
 targets = ['Sex', 'Age']
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
@@ -22,7 +22,7 @@ targets = ['Sex', 'Age']
 
 #if MODE != 'All':
 #    list_organs = [elem for elem in list_organs if MODE in elem]
-score = pd.read_csv(path_score_scalar)
+score = load_csv(path_score_scalar)
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([
@@ -200,7 +200,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
         for idx, elem in enumerate(list_df):
-            df_new = pd.read_csv(elem, na_filter = False).set_index('features')
+            df_new = load_csv(elem, na_filter = False).set_index('features')
             _, _, _, _, _, model = os.path.basename(elem).split('_')
             model = model.replace('.csv', '').replace('LightGbm', 'LightGBM')
             list_models.append(model)
@@ -216,7 +216,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 
         list_models_sd = []
         for idx, elem in enumerate(list_df_sd):
-            df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
+            df_new_sd = load_csv(elem, na_filter = False).set_index('features')
             _, _, _, _, _, _, model = os.path.basename(elem).split('_')
             model = model.replace('.csv', '').replace('LightGbm', 'LightGBM')
             list_models_sd.append(model)

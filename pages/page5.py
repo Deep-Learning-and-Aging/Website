@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, empty_graph
+from .tools import get_dataset_options, ETHNICITY_COLS, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -15,7 +15,7 @@ import dash_table
 import copy
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
-path_linear_ewas = './' + app.get_asset_url('page5_LinearXWASResults/LinearOutput/')
+path_linear_ewas = 'page5_LinearXWASResults/LinearOutput/'
 Environmental = sorted(['All', 'Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
@@ -172,7 +172,7 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
         for idx, env_dataset in enumerate(globals()[value_data]):
             try :
                 print(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
-                t = pd.read_csv(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
+                t = load_csv(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
 
                 t['Env_Dataset'] = env_dataset
                 list_df.append(t)

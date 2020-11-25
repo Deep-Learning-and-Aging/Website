@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, empty_graph
+from .tools import get_dataset_options, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -19,7 +19,7 @@ from PIL import Image
 import base64
 from io import BytesIO
 path_gif = 'page12_AttentionMapsVideos/RawVideos/MRI/'
-path_attention_maps_videos = './' + app.get_asset_url('page12_AttentionMapsVideos/AttentionMapsVideos/')
+path_attention_maps_videos = 'page12_AttentionMapsVideos/AttentionMapsVideos/'
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select Organ : "),
@@ -173,7 +173,7 @@ layout = dbc.Container([
              ])
 def _display_gif(organ, view, transformation, sex, age_group, sample):
     if None not in [organ, view, transformation, sex, age_group, sample]:
-        df = pd.read_csv('./' + app.get_asset_url('page12_AttentionMapsVideos//RawVideos/files/') + 'AttentionMaps-samples_Age_Heart_MRI_%s.csv' % transformation)
+        df = load_csv('./' + app.get_asset_url('page12_AttentionMapsVideos//RawVideos/files/') + 'AttentionMaps-samples_Age_Heart_MRI_%s.csv' % transformation)
         df = df[(df['age_category'] == age_group.lower()) & (df['Sex'] == sex) & (df['sample'] == int(sample)) & (df['aging_rate'] == 'normal')]
         title = 'Chronological Age = %.3f' % df['Age']
         path_to_gif = path_gif + '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_%s.' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower(), sample)
@@ -202,7 +202,7 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
              ])
 def _display_gif(organ, view, transformation, sex, age_group, sample):
     if None not in [organ, view, transformation, sex, age_group, sample]:
-        df = pd.read_csv('./' + app.get_asset_url('page12_AttentionMapsVideos//RawVideos/files/') + 'AttentionMaps-samples_Age_Heart_MRI_%s.csv' % transformation)
+        df = load_csv('./' + app.get_asset_url('page12_AttentionMapsVideos//RawVideos/files/') + 'AttentionMaps-samples_Age_Heart_MRI_%s.csv' % transformation)
         df = df[(df['age_category'] == age_group.lower()) & (df['Sex'] == sex) & (df['sample'] == int(sample)) & (df['aging_rate'] == 'normal')]
         title = 'Chronological Age = %.3f' % df['Age']
         path_to_gif = path_gif + '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_%s.' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower(), sample)

@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 from scipy.cluster import hierarchy
@@ -19,9 +19,9 @@ import copy
 
 order = ['Brain', 'Eyes', 'Hearing', 'Lungs', 'Arterial', 'Heart', 'Abdomen', 'Musculoskeletal', 'PhysicalActivity', 'Biochemistry', 'ImmuneSystem']
 value_step = 'Test'
-path_performance = './' + app.get_asset_url('page2_predictions/Performances/')
-path_residualscorr = './' + app.get_asset_url('page4_correlations/ResidualsCorrelations/')
-path_clustering = './' + app.get_asset_url('page4_correlations/HC_final.png')
+path_performance = 'page2_predictions/Performances/'
+path_residualscorr = 'page4_correlations/ResidualsCorrelations/'
+path_clustering = 'page4_correlations/HC_final.png'
 
 if MODE == 'All':
     controls = dbc.Card([
@@ -262,15 +262,15 @@ def _plot(ac_tab):
 def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     dict_value_step_value = dict(zip(['Validation', 'Train', 'Test'], ['val', 'train', 'test']))
     if value_aggregate == 'bestmodels':
-        df = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
-        std = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        df = load_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        std = load_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
         if value_eid_vs_instances == '*':
-            df_instances = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
+            df_instances = load_csv(path_residualscorr + 'ResidualsCorrelations_bestmodels_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
     else :
-        df = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
-        std = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        df = load_csv(path_residualscorr + 'ResidualsCorrelations_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
+        std = load_csv(path_residualscorr + 'ResidualsCorrelations_sd_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))
         if value_eid_vs_instances == '*':
-            df_instances = pd.read_csv(path_residualscorr + 'ResidualsCorrelations_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
+            df_instances = load_csv(path_residualscorr + 'ResidualsCorrelations_%s_Age_%s.csv' % ('*', dict_value_step_value[value_step]))
 
     index_std = std.columns[0]
     index = df.columns[0]
@@ -288,7 +288,7 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     #print(df.index)
     if value_eid_vs_instances != '*':
         if value_aggregate == 'bestmodels':
-            scores = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores = load_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
             scores_organs = [elem.split('_')[1] for elem in scores.index.values]
             scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in scores.index.values]
             scores.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
@@ -298,7 +298,7 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
             df = df.loc[intersect, intersect]
             std = std.loc[intersect, intersect]
         else :
-            scores = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores = load_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
             scores.index = ['-'.join(elem.split('_')[1:5]) for elem in scores.index.values]
             customdata_score = scores.loc[df.index]
 
@@ -311,11 +311,11 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
 
     else :
         if value_aggregate == 'bestmodels':
-            scores_instances = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
-            scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_instances = load_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_eids = load_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
         else :
-            scores_instances = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
-            scores_eids = pd.read_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_instances = load_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_instances_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
+            scores_eids = load_csv(path_performance + 'PERFORMANCES_withEnsembles_alphabetical_eids_Age_%s.csv' % (dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
 
         index = df_instances.columns[0]
         df_instances = df_instances.set_index(index)

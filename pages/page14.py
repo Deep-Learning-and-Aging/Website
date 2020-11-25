@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -21,8 +21,8 @@ from io import BytesIO
 from dash.exceptions import PreventUpdate
 
 aging_rate = 'Normal'
-path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images')
-path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
+path_attention_maps = 'page9_AttentionMaps/Images'
+path_attention_maps_metadata = 'page9_AttentionMaps/Attention_maps_infos/'
 if MODE != 'All':
     organ_select = dbc.FormGroup([
         html.P("Select Organ : "),
@@ -201,7 +201,7 @@ layout =  html.Div([
 def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
-        df_metadata = pd.read_csv(path_metadata)
+        df_metadata = load_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
         title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
@@ -292,7 +292,7 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging
 def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
-        df_metadata = pd.read_csv(path_metadata)
+        df_metadata = load_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
         title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :

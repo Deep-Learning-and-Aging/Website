@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -18,22 +18,22 @@ from PIL import Image
 import base64
 
 ## Set performance file
-performances = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv')
-df_perf = pd.read_csv(performances).set_index('version')
+performances = 'page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv'
+df_perf = load_csv(performances).set_index('version')
 scores_organs = [elem.split('_')[1] for elem in df_perf.index.values]
 scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in df_perf.index.values]
 df_perf.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
 df_perf = df_perf[['R-Squared_all', 'N_all']]
 
 ## Set heritability file
-filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
-df_heritability = pd.read_csv(filename_heritabilty).set_index('Organ')
+filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
+df_heritability = load_csv(filename_heritabilty).set_index('Organ')
 
 
 
-filename_volcano = './' + app.get_asset_url('page10_GWASResults/Volcano/GWAS_hits_Age_')
-filename_manhattan = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_')
-filename_qq = './' + app.get_asset_url('page10_GWASResults/Manhattan/GWAS_QQPlot_Age_')
+filename_volcano = 'page10_GWASResults/Volcano/GWAS_hits_Age_'
+filename_manhattan = 'page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_'
+filename_qq = 'page10_GWASResults/Manhattan/GWAS_QQPlot_Age_'
 list_files_volcano = glob.glob(filename_volcano + '*')
 list_files_volcano = [elem.split('/')[-1] for elem in list_files_volcano]
 organs_gwas_volcano = sorted(list(set([elem.split('_')[3].replace('.csv', '') for elem in list_files_volcano])))#['Heart']
@@ -165,7 +165,7 @@ def _plot_volcano_plot(organ):
         d = {}
 
         if organ != 'All':
-            df = pd.read_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
+            df = load_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
             d['data'] = [
                 go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],
@@ -183,7 +183,7 @@ def _plot_volcano_plot(organ):
                                     )  for chromo in df['CHR'].drop_duplicates()
                          ]
         else :
-            df = pd.read_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
+            df = load_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
             d['data'] = [
                 go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],
