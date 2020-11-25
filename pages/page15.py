@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 from dash.exceptions import PreventUpdate
 from app import app, MODE
-import glob
+
 import os
 import numpy as np
 from scipy.stats import pearsonr

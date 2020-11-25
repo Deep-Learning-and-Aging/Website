@@ -10,9 +10,9 @@ import os
 
 ## S3 credentials
 client = boto3.client('s3',
-aws_access_key_id='AKIAJLH6PDGZYILEGDLQ',
-aws_secret_access_key='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',
-config=Config(signature_version='s3v4'))
+                      aws_access_key_id='AKIAJLH6PDGZYILEGDLQ',
+                      aws_secret_access_key='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',
+                      config=Config(signature_version='s3v4'))
 
 
 def load_csv(id_path, **kwargs):
@@ -20,7 +20,12 @@ def load_csv(id_path, **kwargs):
     df = pd.read_csv(io.BytesIO(obj['Body'].read()), **kwargs)
     return df
 
-
+def list_obj(id_path):
+    try :
+        res = [elem['Key'] for elem in client.list_objects_v2(Bucket='harvardxwastest', Prefix = id_path)['Contents']]
+        return res
+    except KeyError :
+        return []
 ## Score of all models
 path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
 score = load_csv(path_score_scalar)

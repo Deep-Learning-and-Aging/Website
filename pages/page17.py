@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 import plotly.figure_factory as ff
 from app import app, MODE
-import glob
+
 import os
 import numpy as np
 from scipy.stats import pearsonr

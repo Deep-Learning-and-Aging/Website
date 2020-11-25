@@ -8,19 +8,13 @@ import dash_table
 import plotly.graph_objs as go
 import plotly.express as px
 
-
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, load_csv, score
 from app import app, MODE
 
 import pandas as pd
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-import glob
-import os
 import numpy as np
-from scipy.stats import pearsonr
-
-import copy
 from PIL import Image
 import base64
 from io import BytesIO

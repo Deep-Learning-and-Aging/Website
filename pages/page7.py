@@ -2,21 +2,15 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, load_csv
-import pandas as pd
 import plotly.graph_objs as go
-from .tools import get_colorscale, empty_graph
-
-from app import app, MODE
-import glob
-import os
-import numpy as np
-from scipy.stats import pearsonr
 import dash_table
-import copy
+
+from .tools import get_dataset_options, ETHNICITY_COLS, load_csv, get_colorscale, empty_graph
+from app import app, MODE
+import pandas as pd
+
 step = 'test'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
-
 
 path_scores_ewas = 'page7_MultivariateXWASResults/Scores/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',

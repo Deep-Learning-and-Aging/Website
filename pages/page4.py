@@ -10,7 +10,6 @@ import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
 import base64
 from app import app, MODE
-import glob
 import os
 import numpy as np
 from scipy.stats import pearsonr

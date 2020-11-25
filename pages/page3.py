@@ -2,12 +2,12 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, load_csv, score
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, load_csv, score, list_obj
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from app import app, MODE
-import glob
+
 import os
 import numpy as np
 from scipy.stats import pearsonr
@@ -195,8 +195,8 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 
         title = 'R2 = %.3f (ElasticNet), R2 = %.3f (LightGBM), R2 = %.3f (NeuralNetwork), Sample Size = %d (Scalars)' % (score_elasticnet, score_lightgbm, score_nn, sample_size)
         list_models = []
-        list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
-        list_df_sd = glob.glob(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_*.csv' % (value_target, value_organ, value_view, value_transformation))
+        list_df = list_obj(path_feat_imps + 'FeatureImp_%s_%s_%s_%s_' % (value_target, value_organ, value_view, value_transformation))
+        list_df_sd = list_obj(path_feat_imps + 'FeatureImp_sd_%s_%s_%s_%s_' % (value_target, value_organ, value_view, value_transformation))
         for idx, elem in enumerate(list_df):
             df_new = load_csv(elem, na_filter = False).set_index('features')
             _, _, _, _, _, model = os.path.basename(elem).split('_')

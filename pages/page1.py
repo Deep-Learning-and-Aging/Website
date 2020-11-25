@@ -3,7 +3,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
 from dash.dependencies import Input, Output
-import glob
 import os
 from sklearn.linear_model import LinearRegression
 import time

@@ -2,12 +2,11 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph, load_csv
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph, load_csv, list_obj
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 from app import app, MODE
-import glob
 import os
 import numpy as np
 from scipy.stats import pearsonr
@@ -17,9 +16,7 @@ targets = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdom
 list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
 path_score = 'page7_MultivariateXWASResults/Scores/Scores_'
 
-scores_nn = load_csv(path_score + 'NeuralNetwork_test.csv')
-scores_elastic = load_csv(path_score + 'ElasticNet_test.csv')
-scores_lightgbm = load_csv(path_score + 'LightGbm_test.csv')
+
 
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
 #list_organs = sorted(list(set(list_organs)))
@@ -168,8 +165,12 @@ layout =  html.Div([
               [Input('Select_target_feat_imps', 'value'), Input('Select_organ_feat_imps_xwas_1', 'value')])
 def _plot_r2_scores(value_target, value_organ):
     if None not in [value_organ, value_target] :
+        scores_nn = load_csv(path_score + 'NeuralNetwork_test.csv')
+        scores_elastic = load_csv(path_score + 'ElasticNet_test.csv')
+        scores_lightgbm = load_csv(path_score + 'LightGbm_test.csv')
+        
         list_models = []
-        list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_*.csv' % (value_organ, value_target))
+        list_df = list_obj(path_feat_imps + 'FeatureImp_%s_%s_' % (value_organ, value_target))
         if len(list_df) > 0 :
             for idx, elem in enumerate(list_df):
 

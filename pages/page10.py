@@ -9,11 +9,9 @@ import plotly.express as px
 
 from app import app, MODE
 import glob
-import os
 import numpy as np
 from scipy.stats import pearsonr
 import dash_table
-import copy
 from PIL import Image
 import base64
 

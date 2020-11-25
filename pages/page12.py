@@ -3,21 +3,20 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, empty_graph, load_csv, score
-import pandas as pd
+import dash_table
 import plotly.graph_objs as go
 import plotly.express as px
 from dash.exceptions import PreventUpdate
+
 from app import app, MODE
-import glob
-import os
+from .tools import get_dataset_options, empty_graph, load_csv, score
+
+import pandas as pd
 import numpy as np
-from scipy.stats import pearsonr
-import dash_table
-import copy
 from PIL import Image
 import base64
 from io import BytesIO
+
 sample = 0
 path_img = 'page12_AttentionMapsVideos/img/'
 path_gif = 'page12_AttentionMapsVideos/gif/'

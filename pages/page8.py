@@ -2,19 +2,14 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
-import pandas as pd
+import dash_table
 import plotly.graph_objs as go
 
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
 from app import app
-import glob
-import os
+
+import pandas as pd
 import numpy as np
-from scipy.stats import pearsonr
-import dash_table
-import copy
-
-
 
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 

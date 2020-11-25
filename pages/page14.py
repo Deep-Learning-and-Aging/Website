@@ -9,7 +9,7 @@ import plotly.express as px
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from app import app, MODE
-import glob
+
 import os
 import numpy as np
 from scipy.stats import pearsonr
