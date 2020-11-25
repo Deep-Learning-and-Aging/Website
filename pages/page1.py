@@ -21,6 +21,7 @@ from plotly.subplots import make_subplots
 path_inputs = 'page1_biomarkers/BiomarkerDatasets'
 path_linear = 'page1_biomarkers/LinearOutput/'
 dict_data = load_csv('Data_Dictionary_Showcase.csv')
+df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
 if MODE != 'All':
@@ -95,18 +96,18 @@ controls = dbc.Card([
             ),
         html.Br()
     ]),
-    dbc.FormGroup([
-        html.P("Limit the Sample Size (in thousands) : "),
-        dcc.Slider(
-            id='limit_sample_size',
-            min = 0,
-            max = 600000,
-            value = 600000,
-            step = 100000,
-            marks = dict(zip(range(0, 600000 + 1, 100000 ), [str(elem//1000)for elem in range(0, 600000 + 1, 100000)]))
-            ),
-        html.Br()
-    ]),
+    # dbc.FormGroup([
+    #     html.P("Limit the Sample Size (in thousands) : "),
+    #     dcc.Slider(
+    #         id='limit_sample_size',
+    #         min = 0,
+    #         max = 600000,
+    #         value = 600000,
+    #         step = 100000,
+    #         marks = dict(zip(range(0, 600000 + 1, 100000 ), [str(elem//1000)for elem in range(0, 600000 + 1, 100000)]))
+    #         ),
+    #     html.Br()
+    # ]),
     dbc.Button("Reset", id = 'reset_page1', className="mr-2", color = "primary"),
 ])
 
@@ -193,7 +194,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
     else :
         key = (value_organ, value_view, value_transformation)
         df = dict_organ_view_transf_to_id[key]
-        cols = load_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 10).set_index('id').columns
+        cols = load_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 1).set_index('id').columns
         cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
         return get_dataset_options(cols)
 
@@ -205,9 +206,9 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
                Input('select_biomarkers_of_group', 'value'),
                Input('Age filter', 'value'),
                Input('Ethnicity filter', 'value'),
-               Input('limit_sample_size', 'value')])
-def plot_distribution_of_feature(value_group, value_view, value_transformation, value_feature, value_age_filter, value_ethnicity, sample_size_limit):
-    df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
+               #Input('limit_sample_size', 'value')
+               ])
+def plot_distribution_of_feature(value_group, value_view, value_transformation, value_feature, value_age_filter, value_ethnicity):
     fig = {'layout' : dict(title='Distribution of the feature', # title of plot
                            xaxis={'title' : 'Value'}, # xaxis label
                            yaxis={'title' : 'Count'}, # yaxis label
@@ -282,7 +283,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
             unit = ''
         ## Load Data :
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
-        df_bio = load_csv((path_inputs + '/%s.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
+        df_bio = load_csv((path_inputs + '/%s_short.csv' % id_dataset).replace('Biochemestry', 'Biochemistry')).set_index('id').dropna()
         #print(value_group)
         if value_group != 'PhysicalActivity' :
             df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()

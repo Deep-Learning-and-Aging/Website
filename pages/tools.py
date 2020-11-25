@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
 
-
 import io
 import pandas as pd
 import boto3
 from botocore.client import Config
 import os
+import base64
 
 ## S3 credentials
 client = boto3.client('s3',
@@ -19,6 +19,10 @@ def load_csv(id_path, **kwargs):
     obj = client.get_object(Bucket='harvardxwastest', Key=id_path)
     df = pd.read_csv(io.BytesIO(obj['Body'].read()), **kwargs)
     return df
+
+def encode_img_s3(id_path):
+    obj = client.get_object(Bucket='harvardxwastest', Key=id_path)
+    return base64.b64encode(obj['Body'].read()).decode('ascii')
 
 def list_obj(id_path):
     try :

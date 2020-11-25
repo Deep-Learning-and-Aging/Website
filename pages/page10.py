@@ -2,13 +2,12 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv, score, heritability
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv, heritability, list_obj, encode_img_s3
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
 
 from app import app, MODE
-import glob
 import numpy as np
 from scipy.stats import pearsonr
 import dash_table
@@ -16,7 +15,9 @@ from PIL import Image
 import base64
 
 ## Set performance file
-df_perf = score.set_index('version')
+performances = 'page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv'
+df_perf = load_csv(performances).set_index('version')
+
 scores_organs = [elem.split('_')[1] for elem in df_perf.index.values]
 scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in df_perf.index.values]
 df_perf.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
@@ -27,11 +28,11 @@ del scores_organs, scores_view
 filename_volcano = 'page10_GWASResults/Volcano/GWAS_hits_Age_'
 filename_manhattan = 'page10_GWASResults/Manhattan/GWAS_ManhattanPlot_Age_'
 filename_qq = 'page10_GWASResults/Manhattan/GWAS_QQPlot_Age_'
-list_files_volcano = glob.glob(filename_volcano + '*')
+list_files_volcano = list_obj(filename_volcano)
 list_files_volcano = [elem.split('/')[-1] for elem in list_files_volcano]
 organs_gwas_volcano = sorted(list(set([elem.split('_')[3].replace('.csv', '') for elem in list_files_volcano])))#['Heart']
-
-list_files_manhattan = glob.glob(filename_manhattan + '*')
+print(list_files_volcano, organs_gwas_volcano)
+list_files_manhattan = list_obj(filename_manhattan)
 list_files_manhattan = [elem.split('/')[-1] for elem in list_files_manhattan]
 organs_gwas_manhattan = sorted([elem.split('_')[3].replace('.png', '') for elem in list_files_manhattan])#['Heart']
 
@@ -135,15 +136,17 @@ def _plot_manhattan_plot(organ):
     if organ is not None:
         path_man = filename_manhattan + organ + '.png'
         path_qq = filename_qq + organ + '.png'
-        img_man64 = base64.b64encode(open(path_man, 'rb').read()).decode('ascii')
-        img_qq64 = base64.b64encode(open(path_qq, 'rb').read()).decode('ascii')
+        img_man64 = encode_img_s3(path_man)
+        img_qq64 = encode_img_s3(path_qq)
         src_man ='data:image/png;base64,{}'.format(img_man64)
         src_qq ='data:image/png;base64,{}'.format(img_qq64)
+
         if organ != 'All' :
+            print(df_perf.loc[organ])
             score = df_perf.loc[organ]['R-Squared_all']
             sample_size = int(df_perf.loc[organ]['N_all'])
-            heritability = heritability.loc[organ]['h2']
-            title = 'R-squared : %.3f, Sample Size : %d, Heritability : %.3f' % (score, sample_size, heritability)
+            heritability_val = heritability.set_index('Organ').loc[organ]['h2']
+            title = 'R-squared : %.3f, Sample Size : %d, Heritability : %.3f' % (score, sample_size, heritability_val)
         else :
             title = ''
         return src_man, src_qq, title
