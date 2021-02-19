@@ -142,6 +142,7 @@ def generate_list_view_list(value_organ, value_view):
 @app.callback(Output('select_view_biomarkers', 'options'),
               [Input('select_group_biomarkers', 'value')])
 def generate_list_view_list(value):
+    print(hierarchy_biomarkers[value])
     if value is None:
         return [{'value' : '', 'label' : ''}]
     else :
@@ -195,9 +196,14 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
         return [{'value' : '', 'label' : ''}]
     else :
         key = (value_organ, value_view, value_transformation)
+        print(key)
         df = dict_organ_view_transf_to_id[key]
+        print(df)
         cols = pd.read_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 10).set_index('id').columns
-        cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
+        if value_organ == 'Demographics':
+            cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
+        else :
+            cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['Age when attended assessment centre', 'eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
         return get_dataset_options(cols)
 
 # small test :

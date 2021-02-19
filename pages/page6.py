@@ -152,7 +152,7 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('Select_corr_type_lin_ewas2', 'value'), Input('Select_subset_method2', 'value'), Input('Select_organ_lin_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
-        df = pd.read_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type))
+        df = pd.read_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]
@@ -193,7 +193,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
              [Input('Select_corr_type_lin_ewas1', 'value'), Input('Select_subset_method1', 'value'), Input('Select_env_dataset_lin_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
-        df = pd.read_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type))
+        df = pd.read_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_env = df[df.env_dataset == env_dataset]
         df_env = df_env.fillna(0)

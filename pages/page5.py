@@ -167,16 +167,17 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                            )}
     data = None
     if value_organ is not None and value_data is not None:
-
         list_df = []
         for idx, env_dataset in enumerate(globals()[value_data]):
             try :
-                print(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
+                if value_organ == '*':
+                    value_organ = '\\*'
                 t = pd.read_csv(path_linear_ewas + 'linear_correlations_%s_%s.csv' % (env_dataset, value_organ))
-
                 t['Env_Dataset'] = env_dataset
                 list_df.append(t)
-                print("Env Dataset : ", env_dataset, "Organ : ", value_organ)
+                if value_organ == '\\*':
+                    value_organ = '*'
+                #print("Env Dataset : ", env_dataset, "Organ : ", value_organ)
             except FileNotFoundError:
                 continue
 

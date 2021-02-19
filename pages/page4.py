@@ -16,6 +16,7 @@ import numpy as np
 from scipy.stats import pearsonr
 import dash_table
 import copy
+from scipy.spatial.distance import squareform
 
 order = ['Brain', 'Eyes', 'Hearing', 'Lungs', 'Arterial', 'Heart', 'Abdomen', 'Musculoskeletal', 'PhysicalActivity', 'Biochemistry', 'ImmuneSystem']
 value_step = 'Test'
@@ -419,7 +420,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ):
             df = df.loc[mask]
 
         n_cols = len(df.columns)
-        d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+        d2 = ff.create_dendrogram(df.fillna(0), labels = df.index, distfun=lambda x : squareform(1 - x))
         d2.update_layout(width = np.max([1000, n_cols * 15]), margin = dict(b = 250), height = 500)
         return dcc.Graph(id = 'plot HC',
                          figure = d2
@@ -455,7 +456,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
             cols = df.columns
-            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index, distfun=lambda x : squareform(1 - x))
             dendro_leaves = d2['layout']['xaxis']['ticktext']
             n_cols = len(cols)
 
@@ -700,8 +701,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             std = std.loc[std.index.str.contains(value_organ)]
 
             organ_sorted_by_score = customdata_score_x.iloc[0].sort_values(ascending = True).index
-            print(organ_sorted_by_score)
-            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index)
+            print(df.fillna(0))
+            d2 = ff.create_dendrogram(df.fillna(0), labels = df.index, distfun=lambda x : squareform(1 - x))
             dendro_leaves = d2['layout']['xaxis']['ticktext']
 
             if value_ordering == 'Score':
@@ -757,7 +758,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             df_miror = df_miror.replace(0, np.nan).values
             np.fill_diagonal(df_miror, 1)
             cols = df.columns
-            d2 = ff.create_dendrogram(df.fillna(0), labels=df.index)
+            print(df)
+            d2 = ff.create_dendrogram(df.fillna(0), labels=df.index, distfun=lambda x : squareform(1 - x))
             df = df.values
 
             np.fill_diagonal(df, np.nan)

@@ -237,11 +237,12 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
             df_abs = df_abs.sort_values('NeuralNetwork')
         else :
             df_abs = df_abs.sort_values('ElasticNet')
-
         features = df.index
         ## REORDER ASSOCIATED TABLES
         df_sd = df_sd.reindex(df_abs.index)
         df = df.reindex(df_abs.index)
+        print(df_sd)
+        print(df)
 
 
         # list_models_mean = []
@@ -273,7 +274,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
 
 
         df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
-
+        print(df_str)
 
         d = {'data' : [go.Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata:.3f}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
              'layout' : dict(height = len(df.index) * 20,
@@ -284,9 +285,11 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         df_abs.index = df_abs.index.str.replace('.0$', '', regex = True)
         df_str.index = df_str.index.str.replace('.0$', '', regex = True)
 
-        matrix = df_abs[sorted(list_models)].corr()
+        matrix = df[sorted(list_models)].corr()
+        print(matrix)
         matrix.index.name = 'Corr'
         matrix = matrix.reset_index().round(3)
+        print(matrix)
         #print("Matrix : ", matrix)
 
         table = dbc.Card([
@@ -313,7 +316,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         ])
 
 
-        return df_str.iloc[::-1].to_dict(), df.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], go.Figure(d), title
+        return df_str.iloc[::-1].to_dict(), df_abs.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], go.Figure(d), title
     else :
         return None, None, None, go.Figure(), ''
 
