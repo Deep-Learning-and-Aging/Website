@@ -10,20 +10,18 @@ import time
 import numpy as np
 from scipy.stats import pearsonr, linregress
 import re
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id, load_csv
 from dash.exceptions import PreventUpdate
-
+from botocore.exceptions import ClientError
 from app import app, MODE
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
-path_inputs = './' + app.get_asset_url('page1_biomarkers/BiomarkerDatasets')
-path_biomarkers = './' + app.get_asset_url('Biomarkers_raw.csv')
-path_linear = './' + app.get_asset_url('page1_biomarkers/LinearOutput/')
-
-df_sex_age_ethnicity_eid = pd.read_csv('./' + app.get_asset_url('page1_biomarkers/sex_age_eid_ethnicity.csv')).set_index('id')
-dict_data = pd.read_csv('./' + app.get_asset_url('Data_Dictionary_Showcase.csv'))
+path_inputs = 'page1_biomarkers/BiomarkerDatasets'
+path_linear = 'page1_biomarkers/LinearOutput/'
+dict_data = load_csv('Data_Dictionary_Showcase.csv')
+df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
 if MODE != 'All':
@@ -199,7 +197,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
         print(key)
         df = dict_organ_view_transf_to_id[key]
         print(df)
-        cols = pd.read_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 10).set_index('id').columns
+        cols = load_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 1).set_index('id').columns
         if value_organ == 'Demographics':
             cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
         else :
@@ -240,7 +238,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
 
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
         try :
-            features_p_val = pd.read_csv(path_linear + 'linear_correlations_%s.csv' % id_dataset)
+            features_p_val = load_csv(path_linear + 'linear_correlations_%s.csv' % id_dataset)
             features_p_val['p_val'] = features_p_val['p_val'].replace(0, 1e-323)
             #print(features_p_val)
             hovertemplate = 'Feature : %{customdata[0]}\
@@ -272,7 +270,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
                            y = [-np.log((5/100)/num_tests), -np.log((5/100)/num_tests)],
                            name = 'With Bonferoni Correction',
                            mode = 'lines'))
-        except FileNotFoundError:
+        except (FileNotFoundError, ClientError):
             fig3 = {}
 
 
@@ -290,7 +288,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
             unit = ''
         ## Load Data :
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
-        df_bio = pd.read_csv((path_inputs + '/%s.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
+        df_bio = load_csv((path_inputs + '/%s_short.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
         #print(value_group)
         if value_group != 'PhysicalActivity' :
             df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()

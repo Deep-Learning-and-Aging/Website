@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, empty_graph
+from .tools import get_dataset_options, empty_graph, load_csv, load_npy
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -18,8 +18,8 @@ import copy
 from PIL import Image
 import base64
 from io import BytesIO
-path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
-path_img = './' + app.get_asset_url('page15_AttentionMapsTimeSeries/img/Age/')
+path_attention_maps_metadata = 'page9_AttentionMaps/Attention_maps_infos/'
+path_img = 'page15_AttentionMapsTimeSeries/img/Age/'
 aging_rate = 'Normal'
 controls = dbc.Card([
     dbc.FormGroup([
@@ -160,10 +160,10 @@ layout = dbc.Container([
                     dbc.Col(
                         [controls_1,
                         html.H3(id = 'age_1'),
-                        dcc.Graph(id = 'timeseries_raw_display_1'),
+                        dcc.Loading(dcc.Graph(id = 'timeseries_raw_display_1')),
                         controls_2,
                         html.H3(id = 'age_2'),
-                        dcc.Graph(id = 'timeseries_raw_display_2'),
+                        dcc.Loading(dcc.Graph(id = 'timeseries_raw_display_2')),
                         ],
                         style={'overflowX': 'scroll', 'width' : 1000},
                         md=9)
@@ -226,12 +226,12 @@ def _display_gif(organ, view, transformation, sex, age_group, channel, sample):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         channel = int(channel)
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
-        df_metadata = pd.read_csv(path_metadata)
+        df_metadata = load_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
         age = df_metadata['Age']
         title = 'Chronological Age : %.3f' % age
         path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
-        numpy_arr_raw = np.load(path_raw)
+        numpy_arr_raw = load_npy(path_raw)
         if view == 'ECG' :
             unit_x = '2ms/Lsb'
             unit_y = '5uV/Lsb'
@@ -287,12 +287,12 @@ def _display_gif2(organ, view, transformation, sex, age_group, channel, sample):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         channel = int(channel)
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
-        df_metadata = pd.read_csv(path_metadata)
+        df_metadata = load_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == channel)]
         age = df_metadata['Age']
         title = 'Chronological Age : %.3f' % age
         path_raw = path_img + '%s/%s/%s/%s/%s/%s/Saliency_Age_%s_%s_%s_%s_%s_%s_%s.npy' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower(),organ, view, transformation, sex, age_group.lower(), aging_rate.lower(), sample)
-        numpy_arr_raw = np.load(path_raw)
+        numpy_arr_raw = load_npy(path_raw)
         if view == 'ECG' :
             unit_x = '2ms/Lsb'
             unit_y = '5uV/Lsb'

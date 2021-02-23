@@ -2,12 +2,11 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 
 from app import app
-import glob
 import os
 import numpy as np
 from scipy.stats import pearsonr
@@ -18,8 +17,8 @@ import copy
 
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
-path_scores_ewas = './' + app.get_asset_url('page7_MultivariateXWASResults/Scores/')
-path_correlations_ewas = './' + app.get_asset_url('page8_MultivariateXWASCorrelations/CorrelationsMultivariate/')
+path_scores_ewas = 'page7_MultivariateXWASResults/Scores/'
+path_correlations_ewas = 'page8_MultivariateXWASCorrelations/CorrelationsMultivariate/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
@@ -296,7 +295,7 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('Select_corr_type_mul_ewas1', 'value'), Input('Select_algorithm_method1', 'value'), Input('Select_env_dataset_mul_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
-        score = pd.read_csv(path_scores_ewas + 'Scores_%s_test.csv' % (subset_method))
+        score = load_csv(path_scores_ewas + 'Scores_%s_test.csv' % (subset_method))
         distinct_organs = score.organ.drop_duplicates()
         score_std_env = score[score['env_dataset'] == env_dataset][['r2', 'organ', 'std']]
         score_env = dict(zip(score_std_env['organ'], score_std_env['r2']))
@@ -306,11 +305,9 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                 score_env[organ] = np.nan
             if organ not in std_env.keys():
                 std_env[organ] = np.nan
-        print(std_env)
-        df = pd.read_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
+        df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
         df_env = df[df.env_dataset == env_dataset]
-        print(df_env)
         #df_env = df_env.merge(score, how = 'inner', left_on = 'organ_1', right_on = 'organ')
         df_env['score_1'] = df_env['organ_1'].map(score_env)
         df_env['score_2'] = df_env['organ_2'].map(score_env)
@@ -353,7 +350,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
              [Input('Select_corr_type_mul_ewas2', 'value'), Input('Select_algorithm_method2', 'value'), Input('Select_organ_mul_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
-        df = pd.read_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
+        df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]

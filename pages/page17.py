@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, heritability, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -17,26 +17,27 @@ import copy
 from PIL import Image
 import base64
 from plotly.subplots import make_subplots
+from scipy.spatial.distance import squareform
 ## Set performance file
-performances = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv')
+performances = 'page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv'
 ## Set heritability file
-filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
+filename_heritabilty = heritability
 ## Set heritability file
-filename_gwas_corr = './' + app.get_asset_url('page17_GWASCorrelations/')
+filename_gwas_corr = 'page17_GWASCorrelations/'
 
 
 
 
 def create_dfs(mode = MODE):
-    df_perf = pd.read_csv(performances).set_index('version')
+    df_perf = load_csv(performances).set_index('version')
     scores_organs = [elem.split('_')[1] for elem in df_perf.index.values]
     scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in df_perf.index.values]
     df_perf.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
     df_perf = df_perf['R-Squared_all']
 
-    df_heritability = pd.read_csv(filename_heritabilty).set_index('Organ')['h2']
-    corr_gwas = pd.read_csv(filename_gwas_corr + 'GWAS_correlations_Age.csv').set_index('Unnamed: 0')
-    corr_gwas_sd = pd.read_csv(filename_gwas_corr + 'GWAS_correlations_sd_Age.csv').set_index('Unnamed: 0')
+    df_heritability = heritability.set_index('Organ')['h2']
+    corr_gwas = load_csv(filename_gwas_corr + 'GWAS_correlations_Age.csv').set_index('Unnamed: 0')
+    corr_gwas_sd = load_csv(filename_gwas_corr + 'GWAS_correlations_sd_Age.csv').set_index('Unnamed: 0')
 
     if mode != 'All' :
         corr_gwas = corr_gwas[corr_gwas.columns[corr_gwas.columns.str.contains(mode)]]
@@ -77,10 +78,10 @@ layout = dbc.Container([
                         ])
                     ],md = 3),
                 dbc.Col(
-                    [dcc.Graph(
+                    dcc.Loading([dcc.Graph(
                          id='Plot_GWAS_Corr_'
                          ),
-                     ],
+                     ]),
                      md=9,
                      style={ 'overflowX': 'scroll', 'width' : 800},
                      )
@@ -110,7 +111,12 @@ def _plot_heatmap_(value_ordering):
             corr_gwas_sd = corr_gwas_sd.loc[organ_sorted_alphabetically, organ_sorted_alphabetically]
 
         elif value_ordering == 'Clustering':
-            d2 = ff.create_dendrogram(corr_gwas.fillna(0), labels = corr_gwas.index)
+            labels = corr_gwas.index
+            corr_gwas = corr_gwas.fillna(0)
+            corr_gwas = ((corr_gwas + corr_gwas.T)/2)
+            corr_gwas_den = corr_gwas.copy().values
+            np.fill_diagonal(corr_gwas_den, 1)
+            d2 = ff.create_dendrogram(corr_gwas_den, labels = labels, distfun=lambda x : squareform(1 - x))
             dendro_leaves = d2['layout']['xaxis']['ticktext']
             organ_sorted_cluster = dendro_leaves
             ## Sort alphabetically

@@ -1,6 +1,76 @@
 import numpy as np
 import pandas as pd
 
+import io
+import pandas as pd
+import boto3
+from botocore.client import Config
+import os
+import base64
+import matplotlib.image as mpimg
+from app import app
+path_credentials = '/Users/samuel/Downloads/Alan_accessKeys.csv'
+creds = pd.read_csv(path_credentials)
+access_key = creds.iloc[0]['Access key ID']
+secret_key = creds.iloc[0]['Secret access key']
+## S3 credentials
+client = boto3.client('s3',
+                      aws_access_key_id=access_key,
+                      aws_secret_access_key=secret_key,
+                      config=Config(signature_version='s3v4'))
+
+
+def load_csv(id_path, **kwargs):
+    obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+    df = pd.read_csv(io.BytesIO(obj['Body'].read()), **kwargs)
+    return df
+
+def read_img(id_path, remote = True):
+    if remote :
+        obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+        return mpimg.imread(io.BytesIO(obj['Body'].read()), format="jpg")
+    else :
+        id_path = './' + app.get_asset_url(id_path)
+        return mpimg.imread(id_path)
+
+def load_npy(id_path, remote = True):
+    if remote :
+        obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+        return np.load(io.BytesIO(obj['Body'].read()))
+    else :
+        id_path = './' + app.get_asset_url(id_path)
+        return np.load(id_path)
+
+
+def encode_img_s3(id_path, remote = True):
+    if remote:
+        obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+        return base64.b64encode(obj['Body'].read()).decode('ascii')
+    else :
+        id_path = './' + app.get_asset_url(id_path)
+        return base64.b64encode(open(id_path, 'rb').read()).decode('ascii')
+
+
+def list_obj(id_path, remote = True):
+    if remote :
+        try :
+            res = [elem['Key'] for elem in client.list_objects_v2(Bucket='age-prediction-site', Prefix = id_path)['Contents']]
+            return res
+        except KeyError :
+            return []
+    else :
+        id_path = './' + app.get_asset_url(id_path)
+        return glob.glob(id_path + '*')
+
+## Score of all models
+path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
+score = load_csv(path_score_scalar)
+
+## Load heritability
+filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
+heritability = load_csv(filename_heritabilty)[['h2', 'h2_sd', 'Organ']]
+
+
 empty_graph = {
     "layout": {
         "xaxis": {
@@ -147,8 +217,6 @@ def f(x):
 def get_colorscale(df):
     min = df.min().min()
     max = df.max().max()
-    print(min)
-    print(max)
     abs = np.abs(min/(min - max))
     if abs > 1 :
         colorscale =  [[0, f(min)],

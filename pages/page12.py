@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_gif_component as gif
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, empty_graph
+from .tools import get_dataset_options, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -21,11 +21,12 @@ from io import BytesIO
 sample = 0
 path_img = 'page12_AttentionMapsVideos/img/'
 path_gif = 'page12_AttentionMapsVideos/gif/'
-path_attention_maps_videos = './' + app.get_asset_url('page12_AttentionMapsVideos/AttentionMapsVideos/')
+path_attention_maps_videos = 'page12_AttentionMapsVideos/AttentionMapsVideos/'
 
 
-path_score_scalar = './' + app.get_asset_url('page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv')
-score = pd.read_csv(path_score_scalar)
+
+path_score_scalar = 'page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_eids_Age_test.csv'
+score = load_csv(path_score_scalar)
 
 controls = dbc.Card([
     dbc.FormGroup([
@@ -218,7 +219,7 @@ def generate_score(organ, view, transformation):
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sample):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:#, sample]:
-        df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
+        df = load_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
         df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
         print(df)
         eid = df.iloc[sample].eid
@@ -250,7 +251,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sam
              ])
 def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sample):
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:#, sample]:
-        df = pd.read_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
+        df = load_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
         df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
         eid = df.iloc[sample].eid
         age = df.iloc[sample].Age

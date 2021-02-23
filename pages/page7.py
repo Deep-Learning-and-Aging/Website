@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS
+from .tools import get_dataset_options, ETHNICITY_COLS, heritability, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 from .tools import get_colorscale, empty_graph
@@ -17,14 +17,12 @@ import copy
 step = 'test'
 organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
 
-filename_heritabilty = './' + app.get_asset_url('page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv')
-df_heritability = pd.read_csv(filename_heritabilty)[['h2', 'h2_sd', 'Organ']]
-df_heritability = df_heritability.rename(columns = {'h2' : 'r2', 'h2_sd' : 'std', 'Organ' : 'organ'})
+df_heritability = heritability.rename(columns = {'h2' : 'r2', 'h2_sd' : 'std', 'Organ' : 'organ'})
 df_heritability['env_dataset'] = 'Genetics'
 df_heritability['subset'] = 'Genetics'
 
 
-path_scores_ewas = './' + app.get_asset_url('page7_MultivariateXWASResults/Scores/')
+path_scores_ewas = 'page7_MultivariateXWASResults/Scores/'
 Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
@@ -135,12 +133,12 @@ layout = dbc.Container([
 def _compute_plots(algo, group, view_type):
     if algo is not None and step is not None:
         if algo != 'Best Algorithm' :
-            df = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset', 'sample_size'])
+            df = load_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset', 'sample_size'])
             df = pd.concat([df, df_heritability])
         else :
             list_df = []
-            for algo_ in ['LightGBM', 'NeuralNetwork', 'ElasticNet'] :
-                df_algo = pd.read_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo_, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset' , 'sample_size'])
+            for algo_ in ['LightGbm', 'NeuralNetwork', 'ElasticNet'] :
+                df_algo = load_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo_, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset' , 'sample_size'])
                 df_algo['algo'] = algo_
                 list_df.append(df_algo)
             df_all = pd.concat(list_df).reset_index()

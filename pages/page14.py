@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph
+from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, read_img, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 import plotly.express as px
@@ -21,8 +21,8 @@ from io import BytesIO
 from dash.exceptions import PreventUpdate
 
 aging_rate = 'Normal'
-path_attention_maps = './' + app.get_asset_url('page9_AttentionMaps/Images')
-path_attention_maps_metadata = './' + app.get_asset_url('page9_AttentionMaps/Attention_maps_infos/')
+path_attention_maps = 'page9_AttentionMaps/Images'
+path_attention_maps_metadata = 'page9_AttentionMaps/Attention_maps_infos/'
 if MODE != 'All':
     organ_select = dbc.FormGroup([
         html.P("Select Organ : "),
@@ -179,9 +179,9 @@ layout =  html.Div([
                 dbc.Col([controls], md=3),
                 dbc.Col([
                     controls_1,
-                    html.Div(id = 'row_image_1'),
+                    dcc.Loading(html.Div(id = 'row_image_1')),
                     controls_2,
-                    html.Div(id = 'row_image_2')
+                    dcc.Loading(html.Div(id = 'row_image_2'))
                     ], md=9)
                 ])
             ],
@@ -201,20 +201,21 @@ layout =  html.Div([
 def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
-        df_metadata = pd.read_csv(path_metadata)
+        df_metadata = load_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
         title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
-            path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
-            path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
 
+            path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
+            path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
+            print(path_image_left)
             count = [True, True]
             try :
-                raw_left = mpimg.imread(path_image_left)
+                raw_left = read_img(path_image_left)
             except FileNotFoundError:
                 count[0] = False
             try :
-                raw_right = mpimg.imread(path_image_right)
+                raw_right = read_img(path_image_right)
             except FileNotFoundError :
                 count[1] = False
 
@@ -264,8 +265,8 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging
             return col
 
         else :
-            path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
-            raw = mpimg.imread(path_image)
+            path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s.jpg' % sample
+            raw = read_img(path_image)
             raw = Image.fromarray((raw).astype(np.uint8)).convert('RGB')
             buffered = BytesIO()
             raw.save(buffered, format="PNG")
@@ -292,20 +293,20 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging
 def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging_rate):
     if None not in [organ, view, transformation, sex, age_group, aging_rate, sample]:
         path_metadata = path_attention_maps_metadata + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation)
-        df_metadata = pd.read_csv(path_metadata)
+        df_metadata = load_csv(path_metadata)
         df_metadata =  df_metadata[(df_metadata.sex == sex) & (df_metadata.age_category == age_group.lower()) & (df_metadata.aging_rate == aging_rate.lower()) & (df_metadata['sample'] == sample)]
         title = 'Chronological Age = %.2f' % (df_metadata['Age'].iloc[0])
         if (organ, view) in [('Eyes','Fundus'), ('Eyes','OCT'), ('Arterial', 'Carotids'), ('Musculoskeletal', 'Knees'), ('Musculoskeletal', 'Hips')] :
-            path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
-            path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + '/right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
+            path_image_left = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'left/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_left.jpg' % sample
+            path_image_right = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'right/RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s_right.jpg' % sample
 
             count = [True, True]
             try :
-                raw_left = mpimg.imread(path_image_left)
+                raw_left = read_img(path_image_left)
             except FileNotFoundError:
                 count[0] = False
             try :
-                raw_right = mpimg.imread(path_image_right)
+                raw_right = read_img(path_image_right)
             except FileNotFoundError :
                 count[1] = False
 
@@ -355,8 +356,8 @@ def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging
             return col
 
         else :
-            path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group, aging_rate) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group + '_' + aging_rate + '_%s.jpg' % sample
-            raw = mpimg.imread(path_image)
+            path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s.jpg' % sample
+            raw = read_img(path_image)
             raw = Image.fromarray((raw).astype(np.uint8)).convert('RGB')
             buffered = BytesIO()
             raw.save(buffered, format="PNG")
