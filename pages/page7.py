@@ -15,8 +15,6 @@ from scipy.stats import pearsonr
 import dash_table
 import copy
 step = 'test'
-organs = ['Eyes','FullBody','Heart','Hips','Pancreas','Knees','Liver','Spine','Brain','Carotids']
-
 df_heritability = heritability.rename(columns = {'h2' : 'r2', 'h2_sd' : 'std', 'Organ' : 'organ'})
 df_heritability['env_dataset'] = 'Genetics'
 df_heritability['subset'] = 'Genetics'
@@ -45,13 +43,7 @@ Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D'
 All = sorted(Environmental + Biomarkers + Pathologies)
 dict_step_to_proper = dict(zip(['training', 'validation', 'test'], ['train', 'val', 'test']))
 ## Old just to test :
-organs = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
-              'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
-              'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
-              'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
-              'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
-              'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
-              'BoneDensitometryOfHeel', 'HearingTest', 'HeartImages', 'LiverImages'])
+organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 if MODE != 'All':
     organs = [MODE]
 controls = dbc.Card([

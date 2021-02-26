@@ -295,11 +295,13 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('Select_corr_type_mul_ewas1', 'value'), Input('Select_algorithm_method1', 'value'), Input('Select_env_dataset_mul_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
-        score = load_csv(path_scores_ewas + 'Scores_%s_test.csv' % (subset_method))
+        score = load_csv(path_scores_ewas + 'scores_EWAS.csv')
         distinct_organs = score.organ.drop_duplicates()
-        score_std_env = score[score['env_dataset'] == env_dataset][['r2', 'organ', 'std']]
+        score_std_env = score[score['env_dataset'] == env_dataset.replace('Clusters_', '')][['r2', 'organ', 'std']]
+        print(score_std_env)
         score_env = dict(zip(score_std_env['organ'], score_std_env['r2']))
         std_env = dict(zip(score_std_env['organ'], score_std_env['std']))
+        print(std_env)
         for organ in distinct_organs:
             if organ not in score_env.keys():
                 score_env[organ] = np.nan
@@ -307,6 +309,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                 std_env[organ] = np.nan
         df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
+        df['env_dataset'] = df['env_dataset'].str.replace('Clusters_', '')
+        print(df)
         df_env = df[df.env_dataset == env_dataset]
         #df_env = df_env.merge(score, how = 'inner', left_on = 'organ_1', right_on = 'organ')
         df_env['score_1'] = df_env['organ_1'].map(score_env)
@@ -324,7 +328,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                         columns=['organ_2'], dropna = False)
         std_x = pd.pivot_table(df_env, values='std_2', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
-        customdata = np.dstack([r2_score_x, std_x, r2_score_y, std_y])
+        customdata = np.dstack((r2_score_x, std_x, r2_score_y, std_y))
+        print(customdata)
         hovertemplate = "Organ x : %{x}<br> Score organ x : %{customdata[0]:.3f}<br>Std organ y : %{customdata[1]:.3f}<br>Organ y : %{y}<br>Score organ y : %{customdata[2]:.3f}<br>Std organ y : %{customdata[3]:.3f}"
         try :
             colorscale =  get_colorscale(matrix_env)
@@ -352,6 +357,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
         df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
+        df['env_dataset'] = df['env_dataset'].str.replace('Clusters_', '')
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]
         matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
