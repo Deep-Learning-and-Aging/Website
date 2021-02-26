@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph, load_csv
 import pandas as pd
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
@@ -12,14 +12,14 @@ import os
 import numpy as np
 from scipy.stats import pearsonr
 import dash_table
-path_feat_imps = './' + app.get_asset_url('page18_MultivariateXWASFeatures/')
+path_feat_imps = 'page18_MultivariateXWASFeatures/'
 targets = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
-path_score = './' + app.get_asset_url('page7_MultivariateXWASResults/Scores/Scores_')
+path_score = 'page7_MultivariateXWASResults/Scores/Scores_'
 
-scores_nn = pd.read_csv(path_score + 'NeuralNetwork_test.csv')
-scores_elastic = pd.read_csv(path_score + 'ElasticNet_test.csv')
-scores_lightgbm = pd.read_csv(path_score + 'LightGbm_test.csv')
+scores_nn = load_csv(path_score + 'NeuralNetwork_test.csv')
+scores_elastic = load_csv(path_score + 'ElasticNet_test.csv')
+scores_lightgbm = load_csv(path_score + 'LightGbm_test.csv')
 
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
 #list_organs = sorted(list(set(list_organs)))

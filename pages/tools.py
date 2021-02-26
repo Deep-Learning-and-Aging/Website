@@ -12,14 +12,14 @@ from app import app
 
 import os
 try :
-    access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-    secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    bucket_name = 'age-prediction-site'
-except ValueError:
     path_credentials = '/Users/samuel/Downloads/Alan_accessKeys.csv'
     creds = pd.read_csv(path_credentials)
     access_key = creds.iloc[0]['Access key ID']
     secret_key = creds.iloc[0]['Secret access key']
+    bucket_name = 'age-prediction-site'
+except FileNotFoundError:
+    access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+    secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     bucket_name = 'age-prediction-site'
 ## S3 credentials
 client = boto3.client('s3',
