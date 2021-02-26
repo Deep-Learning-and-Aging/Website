@@ -8,5 +8,6 @@ sklearn
 numpy
 scipy
 pandas
+gunicorn
 plotly
 matplotlib
