@@ -9,10 +9,18 @@ import os
 import base64
 import matplotlib.image as mpimg
 from app import app
-path_credentials = '/Users/samuel/Downloads/Alan_accessKeys.csv'
-creds = pd.read_csv(path_credentials)
-access_key = creds.iloc[0]['Access key ID']
-secret_key = creds.iloc[0]['Secret access key']
+
+import os
+try :
+    access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+    secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    bucket_name = 'age-prediction-site'
+except ValueError:
+    path_credentials = '/Users/samuel/Downloads/Alan_accessKeys.csv'
+    creds = pd.read_csv(path_credentials)
+    access_key = creds.iloc[0]['Access key ID']
+    secret_key = creds.iloc[0]['Secret access key']
+    bucket_name = 'age-prediction-site'
 ## S3 credentials
 client = boto3.client('s3',
                       aws_access_key_id=access_key,
@@ -21,13 +29,13 @@ client = boto3.client('s3',
 
 
 def load_csv(id_path, **kwargs):
-    obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+    obj = client.get_object(Bucket=bucket_name, Key=id_path)
     df = pd.read_csv(io.BytesIO(obj['Body'].read()), **kwargs)
     return df
 
 def read_img(id_path, remote = True):
     if remote :
-        obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+        obj = client.get_object(Bucket=bucket_name, Key=id_path)
         return mpimg.imread(io.BytesIO(obj['Body'].read()), format="jpg")
     else :
         id_path = './' + app.get_asset_url(id_path)
@@ -35,7 +43,7 @@ def read_img(id_path, remote = True):
 
 def load_npy(id_path, remote = True):
     if remote :
-        obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+        obj = client.get_object(Bucket=bucket_name, Key=id_path)
         return np.load(io.BytesIO(obj['Body'].read()))
     else :
         id_path = './' + app.get_asset_url(id_path)
@@ -44,7 +52,7 @@ def load_npy(id_path, remote = True):
 
 def encode_img_s3(id_path, remote = True):
     if remote:
-        obj = client.get_object(Bucket='age-prediction-site', Key=id_path)
+        obj = client.get_object(Bucket=bucket_name, Key=id_path)
         return base64.b64encode(obj['Body'].read()).decode('ascii')
     else :
         id_path = './' + app.get_asset_url(id_path)
@@ -54,7 +62,7 @@ def encode_img_s3(id_path, remote = True):
 def list_obj(id_path, remote = True):
     if remote :
         try :
-            res = [elem['Key'] for elem in client.list_objects_v2(Bucket='age-prediction-site', Prefix = id_path)['Contents']]
+            res = [elem['Key'] for elem in client.list_objects_v2(Bucket=bucket_name, Prefix = id_path)['Contents']]
             return res
         except KeyError :
             return []
