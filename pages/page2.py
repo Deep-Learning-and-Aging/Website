@@ -3,8 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, load_csv
-import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar
 from plotly.subplots import make_subplots
 from app import app, MODE
 import numpy as np
@@ -186,7 +185,7 @@ def _plot_r2_scores(value_eid_vs_instances,
     if value_aggregate == 'bestmodels' and value_organ == 'All' :
         df_res['view'] = df_res['view'].str.replace('*', '')
         df_res['organ'] = [ organ + view for organ, view in zip(df_res['organ'], df_res['view'])]
-        d = {'data' : go.Bar(x = df_res['organ'].values,
+        d = {'data' : Bar(x = df_res['organ'].values,
                              y = df_res[metric],
                              hovertemplate = 'Organ : %{x}\
                                               <br>Score : %{y}\
@@ -212,7 +211,7 @@ def _plot_r2_scores(value_eid_vs_instances,
             hovertemplate = 'Model : %{x}\
                              <br>Algorithm : ' + archi + '<br>Score : %{y}<br> Sample Size : %{customdata}'
 
-            plot_test = go.Bar(x = [df_res_archi['organ'].values,
+            plot_test = Bar(x = [df_res_archi['organ'].values,
                                     df_res_archi['view'].values],
                                y = df_res_archi[metric],
                                error_y=dict(type='data', array=df_res_archi[std]),
@@ -238,7 +237,7 @@ def _plot_r2_scores(value_eid_vs_instances,
             df_res_archi = df_res[df_res.architecture == archi]
             hovertemplate = 'Model : %{x}\
                              <br>Architecture : ' + archi + '<br>Score : %{y}<br> Sample Size : %{customdata}'
-            plot_test = go.Bar(x = [df_res_archi['view'].values,
+            plot_test = Bar(x = [df_res_archi['view'].values,
                                     df_res_archi['transformation'].values],
                                y = df_res_archi[metric],
                                error_y = dict(type='data', array=df_res_archi[std]),
@@ -253,4 +252,4 @@ def _plot_r2_scores(value_eid_vs_instances,
                              yaxis={'title' :'R2 score'},
                             )}
 
-    return go.Figure(d)
+    return Figure(d)

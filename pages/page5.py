@@ -3,8 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, empty_graph, load_csv
-import pandas as pd
-import plotly.graph_objs as go
+from pandas import concat, Index, DataFrame
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from botocore.exceptions import ClientError
 from app import app, MODE
 import os
@@ -181,8 +181,8 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                 continue
 
         if len(list_df) == 0:
-            return go.Figure(empty_graph), {}
-        res = pd.concat(list_df)
+            return Figure(empty_graph), {}
+        res = concat(list_df)
         res['p_val'] = res['p_val'].replace(0, 1e-323)
         res['env_feature_name'] = res['env_feature_name'].str.replace('.0', '')
 
@@ -201,7 +201,7 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
             res_ = res[res.Env_Dataset == env_dataset]
             customdata = np.stack([res_['env_feature_name'], res_['target_dataset_name'], res_['Env_Dataset'], res_['p_val'], res_['corr_value'], res_['size_na_dropped']], axis=-1)
             fig['data'].append(
-                go.Scatter(x = res_['corr_value'],
+                Scatter(x = res_['corr_value'],
                            y = -np.log10(res_['p_val']),
                            mode='markers',
                            name = env_dataset,
@@ -214,26 +214,26 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
             width=0.5
                   )
         fig['data'].append(
-            go.Scatter(x = [res['corr_value'].min() - res['corr_value'].std(), res['corr_value'].max() + res['corr_value'].std()],
+            Scatter(x = [res['corr_value'].min() - res['corr_value'].std(), res['corr_value'].max() + res['corr_value'].std()],
                        y = [-np.log((5/100)), -np.log((5/100))],
                        name = 'No Correction',
                        mode = 'lines'))
         fig['data'].append(
-            go.Scatter(x = [res['corr_value'].min() - res['corr_value'].std(), res['corr_value'].max() + res['corr_value'].std()],
+            Scatter(x = [res['corr_value'].min() - res['corr_value'].std(), res['corr_value'].max() + res['corr_value'].std()],
                        y = [-np.log((5/100)/num_tests), -np.log((5/100)/num_tests)],
                        name = 'With Bonferoni Correction',
                        mode = 'lines'))
 
         data = res.rename(columns = dict(zip(['env_feature_name', 'target_dataset_name', 'Env_Dataset', 'p_val', 'corr_value', 'size_na_dropped'],
                                              ['Environmental Feature', 'Organ', 'X Dataset', 'p_value', 'Partial correlation', 'Sample Size']))).to_dict('records')
-    return go.Figure(fig), data
+    return Figure(fig), data
 
 
 @app.callback(Output('table_ewas_linear', 'data'),
               [Input('table_ewas_linear', 'sort_by'), Input('memory_ewas', 'data'), Input('Volcano Plot - EWAS', 'restyleData')])
 def _sort_table(sort_by_col, data, restyle):
     print(restyle)
-    df = pd.DataFrame(data = data)
+    df = DataFrame(data = data)
     df = df.reset_index()
     if sort_by_col is not None and len(sort_by_col):
         sorting = sort_by_col[0]

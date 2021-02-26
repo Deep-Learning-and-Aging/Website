@@ -5,7 +5,7 @@ import dash_gif_component as gif
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, empty_graph, load_csv
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 from dash.exceptions import PreventUpdate
 from app import app, MODE
@@ -189,7 +189,7 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
             )])
         return gif_display, title
     else :
-        return dcc.Graph(figure = go.Figure(empty_graph)), ''
+        return dcc.Graph(figure = Figure(empty_graph)), ''
 
 @app.callback([Output('gif_display_2_raw', 'children'),
                Output('title_video_raw2', 'children')],
@@ -218,4 +218,4 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
             )])
         return gif_display, title
     else :
-        return dcc.Graph(figure = go.Figure(empty_graph)), ''
+        return dcc.Graph(figure = Figure(empty_graph)), ''

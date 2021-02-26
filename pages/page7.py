@@ -3,8 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, heritability, load_csv
-import pandas as pd
-import plotly.graph_objs as go
+from pandas import pivot_table, concat
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from .tools import get_colorscale, empty_graph
 
 from app import app, MODE
@@ -126,24 +126,24 @@ def _compute_plots(algo, group, view_type):
     if algo is not None and step is not None:
         if algo != 'Best Algorithm' :
             df = load_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset', 'sample_size'])
-            df = pd.concat([df, df_heritability])
+            df = concat([df, df_heritability])
         else :
             list_df = []
             for algo_ in ['LightGbm', 'NeuralNetwork', 'ElasticNet'] :
                 df_algo = load_csv(path_scores_ewas + 'Scores_%s_%s.csv' % (algo_, dict_step_to_proper[step]), usecols = ['env_dataset', 'r2', 'std', 'organ', 'subset' , 'sample_size'])
                 df_algo['algo'] = algo_
                 list_df.append(df_algo)
-            df_all = pd.concat(list_df).reset_index()
+            df_all = concat(list_df).reset_index()
             best_idx = df_all.groupby(by = ['env_dataset', 'organ', 'subset'])['r2'].idxmax().reset_index()['r2']
             df  = df_all.loc[best_idx.values]
-            df = pd.concat([df, df_heritability])
+            df = concat([df, df_heritability])
         if group is not None and group != 'All':
             df  = df[df.subset == group]
 
         if MODE != 'All':
             df = df[df.organ == MODE]
-        df_pivot = pd.pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ', dropna = False)
-        df_pivot_sample_size = pd.pivot_table(df, values = 'sample_size', index = 'env_dataset', columns = 'organ', dropna = False)
+        df_pivot = pivot_table(df, values = 'r2', index = 'env_dataset', columns = 'organ', dropna = False)
+        df_pivot_sample_size = pivot_table(df, values = 'sample_size', index = 'env_dataset', columns = 'organ', dropna = False)
         df_pivot_without_negative = df_pivot.clip(lower = 0)
         d = dict()
 
@@ -153,7 +153,7 @@ def _compute_plots(algo, group, view_type):
                          <br>R2 : %{customdata[0]}\
                          <br>Sample Size : %{customdata[1]}'
         d['data'] = [
-            go.Heatmap(z=df_pivot_without_negative,
+            Heatmap(z=df_pivot_without_negative,
                    x=df_pivot_without_negative.columns,
                    y=df_pivot_without_negative.index,
                     #hoverongaps = False,
@@ -167,15 +167,15 @@ def _compute_plots(algo, group, view_type):
         d2 = dict()
         if view_type == 'Organ':
             d2['data'] = [
-                go.Bar(name = organ, x = df[df.organ == organ].env_dataset, y = df[df.organ == organ].r2, error_y = dict(type = 'data', array = df[df.organ == organ]['std'])) for organ in df.organ.drop_duplicates()
+                Bar(name = organ, x = df[df.organ == organ].env_dataset, y = df[df.organ == organ].r2, error_y = dict(type = 'data', array = df[df.organ == organ]['std'])) for organ in df.organ.drop_duplicates()
             ]
         elif view_type == 'X':
             d2['data'] = [
-                go.Bar(name = x_dataset, x = df[df.env_dataset == x_dataset].organ, y = df[df.env_dataset == x_dataset].r2, error_y = dict(type = 'data', array = df[df.env_dataset == x_dataset]['std'])) for x_dataset in df.env_dataset.drop_duplicates()
+                Bar(name = x_dataset, x = df[df.env_dataset == x_dataset].organ, y = df[df.env_dataset == x_dataset].r2, error_y = dict(type = 'data', array = df[df.env_dataset == x_dataset]['std'])) for x_dataset in df.env_dataset.drop_duplicates()
             ]
         d['layout']={'height' : 1000}
         d2['layout'] = {'height' : 1000}
 
-        return go.Figure(d), go.Figure(d2)
+        return Figure(d), Figure(d2)
     else :
-        return go.Figure(empty_graph), go.Figure(empty_graph)
+        return Figure(empty_graph), Figure(empty_graph)

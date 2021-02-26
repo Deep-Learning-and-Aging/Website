@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv, heritability, list_obj, encode_img_s3
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 
 from app import app, MODE
@@ -176,11 +176,11 @@ def _plot_volcano_plot(organ):
         if organ != 'All':
             df = load_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA']].sort_values('CHR')
             d['data'] = [
-                go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
+                Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],
                            name = '*Significance level after FDR',
                            mode = 'lines')]
-            d['data'] += [go.Scatter(x = df[df.CHR == chromo]['BETA'],
+            d['data'] += [Scatter(x = df[df.CHR == chromo]['BETA'],
                                     y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
                                     mode = 'markers',
                                     name = 'CHR %s' % chromo,
@@ -194,11 +194,11 @@ def _plot_volcano_plot(organ):
         else :
             df = load_csv(filename_volcano + organ + '_withGenes.csv')[['CHR', 'Gene', 'Gene_type', 'SNP', 'P_BOLT_LMM_INF', 'BETA', 'organ']].sort_values('CHR')
             d['data'] = [
-                go.Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
+                Scatter(x = [df['BETA'].min() - df['BETA'].std(), df['BETA'].max() + df['BETA'].std()],
                            y = [-np.log(5e-8), -np.log(5e-8)],
                            name = '*Significance level after FDR',
                            mode = 'lines')]
-            d['data'] += [go.Scatter(x = df[df.CHR == chromo]['BETA'],
+            d['data'] += [Scatter(x = df[df.CHR == chromo]['BETA'],
                                     y = - np.log(df[df.CHR == chromo]['P_BOLT_LMM_INF']),
                                     mode = 'markers',
                                     name = 'CHR %s' % chromo,
@@ -219,6 +219,6 @@ def _plot_volcano_plot(organ):
                            margin = {'l': 0, 'b': 150, 't': 0, 'r': 0},
                            height = 700
                                 )
-        return go.Figure(d)
+        return Figure(d)
     else :
-        return go.Figure()
+        return Figure()

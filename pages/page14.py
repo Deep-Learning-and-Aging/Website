@@ -4,10 +4,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, read_img, load_csv
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
 from app import app, MODE
 import glob
 import os
@@ -280,7 +278,7 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):#, aging
                 ]
             return col
     else :
-        return [dcc.Graph(figure = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = Figure(empty_graph))]
 
 @app.callback(Output('row_image_2', 'children'),
              [Input('select_organ_image', 'value'),
@@ -371,4 +369,4 @@ def _plot_images_2(organ, view, transformation, sex, age_group, sample):#, aging
                 ]
             return col
     else :
-        return [dcc.Graph(figure = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = Figure(empty_graph))]

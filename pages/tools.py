@@ -1,19 +1,18 @@
 import numpy as np
-import pandas as pd
+from pandas import read_csv
 
-import io
-import pandas as pd
-import boto3
+from io import BytesIO
+from boto3 import client
 from botocore.client import Config
 import os
 import base64
-import matplotlib.image as mpimg
+from matplotlib.image import imread
 from app import app
 
 import os
 try :
     path_credentials = '/Users/samuel/Downloads/Alan_accessKeys.csv'
-    creds = pd.read_csv(path_credentials)
+    creds = read_csv(path_credentials)
     access_key = creds.iloc[0]['Access key ID']
     secret_key = creds.iloc[0]['Secret access key']
     bucket_name = 'age-prediction-site'
@@ -24,29 +23,28 @@ except FileNotFoundError:
 print("SECRET KEY IS ", secret_key)
 print("ACCESS KEY IS ", access_key)
 ## S3 credentials
-client = boto3.client('s3',
-                      aws_access_key_id=access_key,
+client = client('s3', aws_access_key_id=access_key,
                       aws_secret_access_key=secret_key,
                       config=Config(signature_version='s3v4'))
 
 
 def load_csv(id_path, **kwargs):
     obj = client.get_object(Bucket=bucket_name, Key=id_path)
-    df = pd.read_csv(io.BytesIO(obj['Body'].read()), **kwargs)
+    df = read_csv(BytesIO(obj['Body'].read()), **kwargs)
     return df
 
 def read_img(id_path, remote = True):
     if remote :
         obj = client.get_object(Bucket=bucket_name, Key=id_path)
-        return mpimg.imread(io.BytesIO(obj['Body'].read()), format="jpg")
+        return imread(BytesIO(obj['Body'].read()), format="jpg")
     else :
         id_path = './' + app.get_asset_url(id_path)
-        return mpimg.imread(id_path)
+        return imread(id_path)
 
 def load_npy(id_path, remote = True):
     if remote :
         obj = client.get_object(Bucket=bucket_name, Key=id_path)
-        return np.load(io.BytesIO(obj['Body'].read()))
+        return np.load(BytesIO(obj['Body'].read()))
     else :
         id_path = './' + app.get_asset_url(id_path)
         return np.load(id_path)
@@ -236,3 +234,14 @@ def get_colorscale(df):
                         [abs, 'rgba(255, 255, 255, 0.85)'],
                         [1, f(max)]]
     return colorscale
+
+import sys
+from numbers import Number
+from collections import Set, Mapping, deque
+
+try: # Python 2
+    zero_depth_bases = (basestring, Number, xrange, bytearray)
+    iteritems = 'iteritems'
+except NameError: # Python 3
+    zero_depth_bases = (str, bytes, Number, range, bytearray)
+    iteritems = 'items'

@@ -3,11 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, dict_dataset_images_to_organ_and_view, empty_graph, score, load_csv, read_img, load_npy
-import pandas as pd
-import plotly.graph_objs as go
-import plotly.express as px
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from app import app, MODE
 import glob
 import os
@@ -412,9 +408,9 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                      ]
                 return col
             else  :
-                return [dcc.Graph(figure = go.Figure(empty_graph))]
+                return [dcc.Graph(figure = Figure(empty_graph))]
     else :
-        return [dcc.Graph(figure = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = Figure(empty_graph))]
 
 
 @app.callback(Output('score_images', 'children'),
@@ -563,6 +559,6 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
                      ]
                 return col
             else  :
-                return [dcc.Graph(figure = go.Figure(empty_graph))]
+                return [dcc.Graph(figure = Figure(empty_graph))]
     else :
-        return [dcc.Graph(figure = go.Figure(empty_graph))]
+        return [dcc.Graph(figure = Figure(empty_graph))]

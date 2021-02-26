@@ -5,7 +5,7 @@ import dash_gif_component as gif
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, empty_graph, load_csv, load_npy
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 from dash.exceptions import PreventUpdate
 from app import app, MODE
@@ -260,7 +260,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
         np_channel = numpy_attentionmap[channel-1, :, :]
         np_channel_data = np_channel[0]
         np_channel_couleur = np_channel[1]
-        scatter = go.Scatter(
+        scatter = Scatter(
             y = np_channel_data,
             mode='markers',
             marker=dict(
@@ -271,9 +271,9 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
                 )
             )
         d = {'data' : [scatter]}
-        return go.Figure(d), title
+        return Figure(d), title
     else :
-        return go.Figure(empty_graph), ''
+        return Figure(empty_graph), ''
 
 @app.callback(Output('score_times_series', 'children'),
              [Input('select_organ_attention_time', 'value'),
@@ -317,7 +317,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
         np_channel = numpy_attentionmap[channel-1, :, :]
         np_channel_data = np_channel[0]
         np_channel_couleur = np_channel[1]
-        scatter = go.Scatter(
+        scatter = Scatter(
             y = np_channel_data,
             mode='markers',
             marker=dict(
@@ -328,7 +328,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
                 )
             )
         d = {'data' : [scatter]}
-        return go.Figure(d), title
+        return Figure(d), title
     else :
-        return go.Figure(empty_graph), ''
+        return Figure(empty_graph), ''
         #print(numpy_arr_raw,numpy_arr_raw.shape,  numpy_attentionmap, numpy_attentionmap.shape)

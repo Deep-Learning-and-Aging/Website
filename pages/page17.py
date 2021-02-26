@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, heritability, load_csv
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 import plotly.figure_factory as ff
 from app import app, MODE
@@ -148,7 +148,7 @@ def _plot_heatmap_(value_ordering):
         colorscale = get_colorscale(corr_gwas)
         d = {}
         d['data'] = [
-            go.Heatmap(z=corr_gwas,
+            Heatmap(z=corr_gwas,
                        x=corr_gwas.index,
                        y=corr_gwas.columns,
                        colorscale=colorscale,
@@ -180,6 +180,6 @@ def _plot_heatmap_(value_ordering):
             fig['layout']['xaxis']['autorange'] =  True
             return fig
         else :
-            return go.Figure(d)
+            return Figure(d)
     else :
-        return go.Figure(empty_graph)
+        return Figure(empty_graph)

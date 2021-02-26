@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph, load_csv
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from plotly.subplots import make_subplots
 from app import app, MODE
 import glob
@@ -206,7 +206,7 @@ def _plot_r2_scores(value_target, value_organ):
 
 
             ## Plot
-            d = {'data' : [go.Bar(name = model, x = df[model], y = df.index, orientation='h') for model in sorted(df.columns)],
+            d = {'data' : [Bar(name = model, x = df[model], y = df.index, orientation='h') for model in sorted(df.columns)],
                  'layout' : dict(height = len(df.index) * 20,
                                  margin={'l': 40, 'b': 30, 't': 10, 'r': 0})}
             matrix = df[sorted(list_models)].corr()
@@ -237,9 +237,9 @@ def _plot_r2_scores(value_target, value_organ):
             ])
 
 
-            return df_str.iloc[::-1].to_dict(), df.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], go.Figure(d), title
+            return df_str.iloc[::-1].to_dict(), df.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], Figure(d), title
     else :
-        return None, None, None, go.Figure(empty_graph), ""
+        return None, None, None, Figure(empty_graph), ""
 
 
 

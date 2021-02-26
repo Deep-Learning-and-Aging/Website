@@ -68,7 +68,6 @@ app.layout = html.Div([
     ],
 style={"height": "100vh", 'fontSize': 10})
 
-
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
@@ -97,7 +96,7 @@ def _(pathname):
     #print(output)
     return output
 
+server = app.server
 
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)

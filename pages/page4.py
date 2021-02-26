@@ -3,8 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv
-import pandas as pd
-import plotly.graph_objs as go
+from pandas import Index
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from scipy.cluster import hierarchy
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
@@ -369,7 +369,7 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     custom_order = []
     for organ_ in order :
         custom_order = custom_order + list(df.index[df.index.str.contains(organ_)])
-    difference = df.index.difference(pd.Index(custom_order))
+    difference = df.index.difference(Index(custom_order))
     custom_order = list(difference) + custom_order
 
     return customdata_score_x, customdata_score_y, df, std, custom_order
@@ -411,12 +411,6 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ):
     if value_aggregate is not None and value_organ is not None and value_step is not None:
         ## Load Data :
         customdata_score_x, customdata_score_y, df, std, custom_order = LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step)
-
-        ## Work with HC and p_values
-        # if value_aggregate == 'bestmodels':
-        #     img_base64 = base64.b64encode(open(path_clustering, 'rb').read()).decode('ascii')
-        #     src = 'data:image/png;base64,{}'.format(img_base64)
-        #     return html.Img(id = 'attentionmap', style={'height':'50%', 'width':'50%'}, src = src)
 
         if value_organ != 'All' :
             mask = df.columns.str.contains(value_organ)
@@ -677,7 +671,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
 
             d['data'] = [
                         ## Actual plot
-                        go.Heatmap(z=df,
+                        Heatmap(z=df,
                                     x=x,
                                     y=y,
                                     zsmooth=False,
@@ -687,7 +681,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                     hovertemplate = hovertemplate,
                                     ),
                          ## Miror to fill na
-                        go.Heatmap(z=df_miror,
+                        Heatmap(z=df_miror,
                                    x=x,
                                    y=y,
                                    showlegend = False,
@@ -775,13 +769,13 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
             np.fill_diagonal(df, np.nan)
 
             d['data'] = [
-                go.Heatmap(z=df,
+                Heatmap(z=df,
                            x=x,
                            y=y,
                            colorscale=colorscale,
                            customdata=customdata,
                            hovertemplate=hovertemplate),
-                go.Heatmap(z=df_miror,
+                Heatmap(z=df_miror,
                            x=x,
                            y=y,
                            showlegend = False,
@@ -819,7 +813,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                 fig['layout']['xaxis2']['showticklabels'] = False
                 fig['layout']['yaxis2']['showticklabels'] = False
         else :
-            fig = go.Figure(d)
+            fig = Figure(d)
         return fig#, d2
     else :
-        return go.Figure()#, go.Figure()
+        return Figure()#, Figure()

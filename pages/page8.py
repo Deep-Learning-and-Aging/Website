@@ -3,8 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
-import pandas as pd
-import plotly.graph_objs as go
+from pandas import pivot_table
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 
 from app import app
 import os
@@ -148,7 +148,7 @@ colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
 #                     columns=['organ_2'])
 #
 #     d = {}
-#     d['data'] = go.Heatmap(z=matrix_env,
+#     d['data'] = Heatmap(z=matrix_env,
 #                x=matrix_env.index,
 #                y=matrix_env.columns,
 #                colorscale = colorscale)
@@ -157,7 +157,7 @@ colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
 #                        width = 600,
 #                        height = 600)
 #
-#     return go.Figure(d)
+#     return Figure(d)
 #
 # @app.callback(Output('Correlation Mul - Select Organ', 'figure'),
 #              [Input('memory_corr_ewas_mul', 'data'), Input('Select_organ_mul_ewas', 'value')])
@@ -170,7 +170,7 @@ colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
 #     print(matrix_organ)
 #     print(matrix_organ.index)
 #     d = {}
-#     d['data'] = go.Heatmap(z=matrix_organ.T,
+#     d['data'] = Heatmap(z=matrix_organ.T,
 #                x=matrix_organ.T.columns,
 #                y=matrix_organ.T.index,
 #                colorscale = colorscale)
@@ -178,7 +178,7 @@ colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
 #                        yaxis = dict(dtick = 1),
 #                        width = 1000,
 #                        height = 600)
-#     return go.Figure(d)
+#     return Figure(d)
 
 
 
@@ -298,10 +298,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         score = load_csv(path_scores_ewas + 'scores_EWAS.csv')
         distinct_organs = score.organ.drop_duplicates()
         score_std_env = score[score['env_dataset'] == env_dataset.replace('Clusters_', '')][['r2', 'organ', 'std']]
-        print(score_std_env)
         score_env = dict(zip(score_std_env['organ'], score_std_env['r2']))
         std_env = dict(zip(score_std_env['organ'], score_std_env['std']))
-        print(std_env)
         for organ in distinct_organs:
             if organ not in score_env.keys():
                 score_env[organ] = np.nan
@@ -318,15 +316,15 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df_env['std_1'] = df_env['organ_1'].map(std_env)
         df_env['std_2'] = df_env['organ_2'].map(std_env)
 
-        matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
+        matrix_env = pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
-        r2_score_y = pd.pivot_table(df_env, values='score_1', index=['organ_1'],
+        r2_score_y = pivot_table(df_env, values='score_1', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
-        r2_score_x = pd.pivot_table(df_env, values='score_2', index=['organ_1'],
+        r2_score_x = pivot_table(df_env, values='score_2', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
-        std_y = pd.pivot_table(df_env, values='std_1', index=['organ_1'],
+        std_y = pivot_table(df_env, values='std_1', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
-        std_x = pd.pivot_table(df_env, values='std_2', index=['organ_1'],
+        std_x = pivot_table(df_env, values='std_2', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
         customdata = np.dstack((r2_score_x, std_x, r2_score_y, std_y))
         print(customdata)
@@ -334,9 +332,9 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         try :
             colorscale =  get_colorscale(matrix_env)
         except ValueError:
-            return go.Figure(empty_graph)
+            return Figure(empty_graph)
         d = {}
-        d['data'] = go.Heatmap(z=matrix_env,
+        d['data'] = Heatmap(z=matrix_env,
                    x=matrix_env.index,
                    y=matrix_env.columns,
                    customdata =customdata,
@@ -346,9 +344,9 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                            yaxis = dict(dtick = 1),
                            width = 800,
                            height = 800)
-        return go.Figure(d)
+        return Figure(d)
     else:
-        return go.Figure()
+        return Figure()
 
 
 @app.callback(Output('Correlation Mul - Select Organ', 'figure'),
@@ -360,14 +358,14 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df['env_dataset'] = df['env_dataset'].str.replace('Clusters_', '')
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]
-        matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
+        matrix_organ = pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
         try :
             colorscale =  get_colorscale(matrix_organ)
         except ValueError:
-            return go.Figure(empty_graph)
+            return Figure(empty_graph)
         d = {}
-        d['data'] = go.Heatmap(z=matrix_organ.T,
+        d['data'] = Heatmap(z=matrix_organ.T,
                    x=matrix_organ.T.columns,
                    y=matrix_organ.T.index,
                    colorscale = colorscale)
@@ -375,6 +373,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
                            yaxis = dict(dtick = 1),
                            width = 1000,
                            height = 800)
-        return go.Figure(d)
+        return Figure(d)
     else :
-        return go.Figure()
+        return Figure()

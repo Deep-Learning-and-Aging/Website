@@ -10,5 +10,4 @@ scipy
 pandas
 gunicorn
 plotly
-matplotlib
 boto3

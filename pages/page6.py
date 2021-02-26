@@ -3,9 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
-import pandas as pd
-import plotly.graph_objs as go
-
+from pandas import pivot_table
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from app import app
 import glob
 import os
@@ -157,15 +156,15 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]
         df_organ = df_organ.fillna(0)
-        matrix_organ = pd.pivot_table(df_organ, values='corr', index=['env_dataset'],
+        matrix_organ = pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
 
         try :
             colorscale = get_colorscale(matrix_organ)
         except ValueError:
-            return go.Figure(empty_graph)
+            return Figure(empty_graph)
         d = {}
-        sample_size_matrix =  pd.pivot_table(df_organ, values='sample_size', index=['env_dataset'],
+        sample_size_matrix =  pivot_table(df_organ, values='sample_size', index=['env_dataset'],
                 columns=['organ_2']).values
         customdata = np.dstack((sample_size_matrix, matrix_organ))
         hovertemplate = 'Correlation : %{z}\
@@ -173,7 +172,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
                  <br>Organ y : %{y}\
                  <br>Sample Size : %{customdata[0]}'
 
-        d['data'] = go.Heatmap(z=matrix_organ.T,
+        d['data'] = Heatmap(z=matrix_organ.T,
                    x=matrix_organ.T.columns,
                    y=matrix_organ.T.index,
                    colorscale = colorscale,
@@ -184,9 +183,9 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
                            yaxis = dict(dtick = 1),
                            width = 1000,
                            height = 600)
-        return go.Figure(d)
+        return Figure(d)
     else :
-        return go.Figure()
+        return Figure()
 
 
 @app.callback(Output('Correlation - Select Ewas dataset', 'figure'),
@@ -197,13 +196,13 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_env = df[df.env_dataset == env_dataset]
         df_env = df_env.fillna(0)
-        matrix_env = pd.pivot_table(df_env, values='corr', index=['organ_1'],
+        matrix_env = pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'])
         try :
             colorscale =  get_colorscale(matrix_env)
         except ValueError:
-            return go.Figure(empty_graph)
-        sample_size_matrix =  pd.pivot_table(df_env, values='sample_size', index=['organ_1'],
+            return Figure(empty_graph)
+        sample_size_matrix =  pivot_table(df_env, values='sample_size', index=['organ_1'],
                         columns=['organ_2']).values
         customdata = np.dstack((sample_size_matrix, matrix_env))
         hovertemplate = 'Correlation : %{z}\
@@ -212,7 +211,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                          <br>Sample Size : %{customdata[0]}'
 
         d = {}
-        d['data'] = go.Heatmap(z=matrix_env,
+        d['data'] = Heatmap(z=matrix_env,
                    x=matrix_env.index,
                    y=matrix_env.columns,
                    colorscale = colorscale,
@@ -222,6 +221,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                            yaxis = dict(dtick = 1),
                            width = 800,
                            height = 800)
-        return go.Figure(d)
+        return Figure(d)
     else:
-        return go.Figure()
+        return Figure()

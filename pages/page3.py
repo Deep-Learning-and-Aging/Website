@@ -3,8 +3,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, load_csv, list_obj
-import pandas as pd
-import plotly.graph_objs as go
+from pandas import DataFrame
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar
 from plotly.subplots import make_subplots
 from app import app, MODE
 import glob
@@ -22,7 +22,7 @@ targets = ['Sex', 'Age']
 
 #if MODE != 'All':
 #    list_organs = [elem for elem in list_organs if MODE in elem]
-score = load_csv(path_score_scalar)
+
 
 if MODE == 'All' :
     organ_select = dbc.FormGroup([
@@ -107,7 +107,7 @@ def generate_list_view_list(value):
         return get_dataset_options(hierarchy_biomarkers[value])
 
 
-table_df = pd.DataFrame(data = {'Corr' : ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork'],
+table_df = DataFrame(data = {'Corr' : ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork'],
                                 'Correlation' : [1, 0, 0, 0],
                                 'ElasticNet' : [0, 1, 0, 0],
                                 'LightGBM': [0, 0, 1, 0],
@@ -189,6 +189,7 @@ layout =  html.Div([
               [Input('select_target', 'value'), Input('Select_organ_1', 'value'), Input('Select_view_1', 'value'), Input('Select_transf_1', 'value')])
 def _plot_r2_scores(value_target, value_organ, value_view, value_transformation):
     if value_transformation is not None :
+        score = load_csv(path_score_scalar)
         score_model = score[(score['organ'] == value_organ) & (score['view'] == value_view) & (score['transformation'] == value_transformation)][['architecture', 'R-Squared_all', 'N_all']]
         score_lightgbm = score_model[score_model['architecture'] == 'LightGBM']['R-Squared_all']
         score_nn = score_model[score_model['architecture'] == 'NeuralNetwork']['R-Squared_all']
@@ -241,42 +242,10 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         ## REORDER ASSOCIATED TABLES
         df_sd = df_sd.reindex(df_abs.index)
         df = df.reindex(df_abs.index)
-        print(df_sd)
-        print(df)
-
-
-        # list_models_mean = []
-        # for idx, elem in enumerate(list_models_mean):
-        #     df_new_sd = pd.read_csv(elem, na_filter = False).set_index('features')
-        #     _, _, _, _, _, _,  model = os.path.basename(elem).split('_')
-        #     model = model.replace('.csv', '')
-        #     list_models_sd.append(model)
-        #     df_new_mean.columns = [model]
-        #     if idx == 0:
-        #         df_mean = df_new_mean
-        #     else :
-        #         df_mean = df_mean.join(df_new_mean)
-        # df_mean = df_mean.loc[features]
-
-# 'Organ_x : %{customdata[0]}\
-#                  <br>View x: %{customdata[2]}\
-#                  <br>Transformation x : %{customdata[4]}\
-#                  <br>Architecture x : %{customdata[6]}\
-#                  <br>Score x : %{customdata[9]:.3f}\
-#                  <br>\
-#                  <br>Organ_y : %{customdata[1]}\
-#                  <br>View y : %{customdata[3]}\
-#                  <br>Transformation y : %{customdata[5]}\
-#                  <br>Architecture y : %{customdata[7]}\
-#                  <br>Score y : %{customdata[10]:.3f}\
-#                  <br>\
-#                  <br>Correlation : %{z:.3f} ± %{customdata[8]:.3f}'
-
-
         df_str = df.round(4).astype(str) + ' ± '  + df_sd.round(4).astype(str)
-        print(df_str)
 
-        d = {'data' : [go.Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata:.3f}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
+
+        d = {'data' : [Bar(name = model, x = df_abs[model], y = df_abs.index, orientation='h', hovertemplate = 'Feature Name: %{y}<br>Signed Feature importance : %{customdata:.3f}', customdata = df[model].reindex(df_abs.index)) for model in sorted(df_abs.columns)],
              'layout' : dict(height = len(df.index) * 20,
                              margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
                              xaxis_title='Feature importance')}
@@ -286,10 +255,8 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         df_str.index = df_str.index.str.replace('.0$', '', regex = True)
 
         matrix = df[sorted(list_models)].corr()
-        print(matrix)
         matrix.index.name = 'Corr'
         matrix = matrix.reset_index().round(3)
-        print(matrix)
         #print("Matrix : ", matrix)
 
         table = dbc.Card([
@@ -316,9 +283,9 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         ])
 
 
-        return df_str.iloc[::-1].to_dict(), df_abs.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], go.Figure(d), title
+        return df_str.iloc[::-1].to_dict(), df_abs.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], Figure(d), title
     else :
-        return None, None, None, go.Figure(), ''
+        return None, None, None, Figure(), ''
 
 
 
@@ -326,7 +293,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
               [Input('table_feature_imps', 'sort_by'), Input('memory', 'data')])
 
 def _sort_table(sort_by_col, data):
-    df = pd.DataFrame(data = data)
+    df = DataFrame(data = data)
     df = df[sorted(df.columns)]
     df.index.name = 'Features'
     df = df.reset_index()
@@ -341,7 +308,7 @@ def _sort_table(sort_by_col, data):
 @app.callback(Output('table_corr', 'data'),
               [Input('select correlation type', 'value'), Input('memory_no_str', 'data')])
 def _change_corr_method(value, data):
-    df = pd.DataFrame(data = data)
+    df = DataFrame(data = data)
     df = df[sorted(df.columns)]
     corr_matrix = df.corr(method=value.lower())
     corr_matrix.index.name = 'Corr'

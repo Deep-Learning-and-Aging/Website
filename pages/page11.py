@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, load_csv
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 
 from app import app, MODE
@@ -53,7 +53,7 @@ else :
 # ], style = style)
 
 d = dict()
-d['data'] = go.Bar(
+d['data'] = Bar(
     x=df['Organ'],
     y=df['h2'],
     error_y = dict(type = 'data', array = df['h2_sd']),
@@ -64,7 +64,7 @@ d['layout'] = {
                'height' : 700
                #'yaxis' : {'title' : {'text' : unit_y}}
                }
-figure = go.Figure(d)
+figure = Figure(d)
 
 layout = dbc.Container([
                 html.H1('Genetics - Heritability'),

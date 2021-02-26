@@ -15,13 +15,15 @@ from dash.exceptions import PreventUpdate
 from botocore.exceptions import ClientError
 from app import app, MODE
 import pandas as pd
-import plotly.graph_objs as go
+from plotly.graph_objs import Scattergl, Scatter, Histogram
 from plotly.subplots import make_subplots
 
 path_inputs = 'page1_biomarkers/BiomarkerDatasets'
 path_linear = 'page1_biomarkers/LinearOutput/'
 dict_data = load_csv('Data_Dictionary_Showcase.csv')
-df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
+
+
+
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
 #print(dict_feature_to_unit)
 if MODE != 'All':
@@ -194,9 +196,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
         return [{'value' : '', 'label' : ''}]
     else :
         key = (value_organ, value_view, value_transformation)
-        print(key)
         df = dict_organ_view_transf_to_id[key]
-        print(df)
         cols = load_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 1).set_index('id').columns
         if value_organ == 'Demographics':
             cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
@@ -247,7 +247,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
                              <br>Sample Size : %{customdata[3]}'
             customdata = np.stack([features_p_val['feature_name'], features_p_val['p_val'], features_p_val['corr_value'], features_p_val['size_na_dropped']], axis=-1)
             #print(customdata)
-            fig3['data'] = [go.Scatter(x = features_p_val['corr_value'],
+            fig3['data'] = [Scatter(x = features_p_val['corr_value'],
                                        y = -np.log10(features_p_val['p_val']),
                                        mode='markers',
                                        showlegend = False,
@@ -261,12 +261,12 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
                 width=0.5
                       )
             fig3['data'].append(
-                go.Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
+                Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
                            y = [-np.log((5/100)), -np.log((5/100))],
                            name = 'No Correction',
                            mode = 'lines'))
             fig3['data'].append(
-                go.Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
+                Scatter(x = [features_p_val['corr_value'].min() - features_p_val['corr_value'].std(), features_p_val['corr_value'].max() + features_p_val['corr_value'].std()],
                            y = [-np.log((5/100)/num_tests), -np.log((5/100)/num_tests)],
                            name = 'With Bonferoni Correction',
                            mode = 'lines'))
@@ -291,6 +291,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
         df_bio = load_csv((path_inputs + '/%s_short.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
         #print(value_group)
         if value_group != 'PhysicalActivity' :
+            df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
             df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
             df = df[df.columns[~df.columns.str.contains('_r')]]
             df.columns = df.columns.str.replace('.0$', '')
@@ -304,7 +305,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
         ## Generate histogram
         fig['layout']['title'] = ' %s ' % value_feature + unit
 
-        fig['data'] = [] # [go.Histogram(x = df[value_feature], name = value_feature, histnorm='percent')]
+        fig['data'] = [] # [Histogram(x = df[value_feature], name = value_feature, histnorm='percent')]
 
         ## Generate reglin all
         lin_age = LinearRegression()
@@ -318,7 +319,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
         corr_all, p_val = pearsonr(res_age, res_feature)
         slope_all, intercept_all, r_value, p_val_all, std_err = linregress(df['Age when attended assessment centre'],df[value_feature])
 
-        plot_points = go.Scattergl(x = df['Age when attended assessment centre'],
+        plot_points = Scattergl(x = df['Age when attended assessment centre'],
                                    y = df[value_feature],
                                    name = value_feature,
                                    opacity=0.3,
@@ -326,7 +327,7 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
                                        color='Grey',
                                        size=2),
                                    mode='markers')
-        lin_all = go.Scatter(x = df['Age when attended assessment centre'],
+        lin_all = Scatter(x = df['Age when attended assessment centre'],
                              y = slope_all * df['Age when attended assessment centre'] + intercept_all,
                              name = 'All',
                              line=dict(color="Black"))
@@ -343,11 +344,11 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
 
         corr_male, p_val = pearsonr(res_age, res_feature)
         slope_male, intercept_male, r_value, p_val_male, std_err = linregress(df_male['Age when attended assessment centre'],df_male[value_feature])
-        lin_male = go.Scatter(x = df_male['Age when attended assessment centre'],
+        lin_male = Scatter(x = df_male['Age when attended assessment centre'],
                               y = slope_male * df_male['Age when attended assessment centre'] + intercept_male,
                               name = 'Males',
                               line=dict(color="Blue"))
-        fig['data'].append(go.Histogram(x = df_male[value_feature],
+        fig['data'].append(Histogram(x = df_male[value_feature],
                                         name = 'Males',
                                         histnorm='percent',
                                         marker = dict(color = 'Blue')))
@@ -363,11 +364,11 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
 
         corr_female, p_val = pearsonr(res_age, res_feature)
         slope_female, intercept_female, r_value, p_val_female, std_err = linregress(df_female['Age when attended assessment centre'],df_female[value_feature])
-        lin_female = go.Scatter(x = df_female['Age when attended assessment centre'],
+        lin_female = Scatter(x = df_female['Age when attended assessment centre'],
                                 y = slope_female * df_female['Age when attended assessment centre'] + intercept_female,
                                 name = 'Females',
                                 line=dict(color="#ff93ac"))
-        fig['data'].append(go.Histogram(x = df_female[value_feature],
+        fig['data'].append(Histogram(x = df_female[value_feature],
                                         name = 'Females',
                                         histnorm='percent',
                                         marker=dict(color = '#ff93ac')))
