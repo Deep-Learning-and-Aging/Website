@@ -21,6 +21,8 @@ except FileNotFoundError:
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     bucket_name = 'age-prediction-site'
+print("SECRET KEY IS ", secret_key)
+print("ACCESS KEY IS ", access_key)
 ## S3 credentials
 client = boto3.client('s3',
                       aws_access_key_id=access_key,
