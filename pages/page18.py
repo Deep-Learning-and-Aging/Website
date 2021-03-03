@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph, load_csv
+from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, empty_graph, load_csv, list_obj
 import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from plotly.subplots import make_subplots
@@ -17,9 +17,7 @@ targets = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdom
 list_models = ['Correlation', 'ElasticNet', 'LightGBM', 'NeuralNetwork']
 path_score = 'page7_MultivariateXWASResults/Scores/Scores_'
 
-scores_nn = load_csv(path_score + 'NeuralNetwork_test.csv')
-scores_elastic = load_csv(path_score + 'ElasticNet_test.csv')
-scores_lightgbm = load_csv(path_score + 'LightGbm_test.csv')
+
 
 #list_organs = [os.path.basename(elem).replace('.csv', '').split('_')[2] for elem in glob.glob(path_feat_imps + '*.csv')]
 #list_organs = sorted(list(set(list_organs)))
@@ -54,7 +52,7 @@ if MODE == 'All' :
     organ_select = dbc.FormGroup([
         html.P("Select X dataset : "),
         dcc.Dropdown(
-            id='Select_organ_feat_imps_xwas_1',
+            id='Select_x_feat_imps_xwas',
             options = get_dataset_options(All)
             ),
         html.Br()
@@ -63,7 +61,7 @@ else:
     organ_select = dbc.FormGroup([
         html.P("Select X dataset : "),
         dcc.Dropdown(
-            id='Select_organ_feat_imps_xwas_1',
+            id='Select_x_feat_imps_xwas',
             options = get_dataset_options([MODE]),
             value= MODE
             ),
@@ -74,7 +72,7 @@ controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select a target organ : "),
         dcc.Dropdown(
-            id = 'Select_target_feat_imps',
+            id = 'Select_organ_feat_imps',
             options = get_dataset_options(targets),
             value = 'Heart'
             ),
@@ -165,17 +163,23 @@ layout =  html.Div([
 
 
 @app.callback([Output("memory_xwas_feat_imps", "data"), Output("memory_no_str_xwas_feat_imps", "data"), Output("table_feature_imps_xwas", 'columns'), Output("Plot Feature Imps XWAS", "figure"), Output("scores_xwas", "children")],
-              [Input('Select_target_feat_imps', 'value'), Input('Select_organ_feat_imps_xwas_1', 'value')])
-def _plot_r2_scores(value_target, value_organ):
-    if None not in [value_organ, value_target] :
+              [Input('Select_x_feat_imps_xwas', 'value'), Input('Select_organ_feat_imps', 'value')])
+def _plot_r2_scores(value_x, value_organ):
+    if None not in [value_x, value_organ] :
+        scores_nn = load_csv(path_score + 'NeuralNetwork_test.csv')
+        scores_elastic = load_csv(path_score + 'ElasticNet_test.csv')
+        scores_lightgbm = load_csv(path_score + 'LightGbm_test.csv')
+        print(scores_nn)
 
         list_models = []
-        list_df = glob.glob(path_feat_imps + 'FeatureImp_%s_%s_*.csv' % (value_organ, value_target))
+        if not 'medical_diagnoses_' in value_x:
+            value_x = 'Clusters_' + value_x
+        list_df = list_obj(path_feat_imps + 'FeatureImp_%s_%s_' % (value_x, value_organ))
         if len(list_df) > 0 :
             for idx, elem in enumerate(list_df):
 
-                df_new = pd.read_csv(elem, na_filter = False).set_index('features')
-                _, _, _, model = os.path.basename(elem).split('_')
+                df_new = load_csv(elem, na_filter = False).set_index('features')
+                _, _, _, _, model = os.path.basename(elem).split('_')
                 model = model.replace('.csv', '').replace('LightGbm', 'LightGBM')
                 list_models.append(model)
                 df_new.columns = [model]
@@ -184,9 +188,10 @@ def _plot_r2_scores(value_target, value_organ):
                 else :
                     df = df.join(df_new)
             df = np.abs(df)/np.abs(df).sum()
-            score_lightgbm = scores_lightgbm[(scores_lightgbm.env_dataset == value_organ) & (scores_lightgbm.organ == value_target)].iloc[0]['r2']
-            score_nn = scores_nn[(scores_nn.env_dataset == value_organ) & (scores_nn.organ == value_target)].iloc[0]['r2']
-            score_elastic = scores_elastic[(scores_elastic.env_dataset == value_organ) & (scores_elastic.organ == value_target)].iloc[0]['r2']
+            print((scores_lightgbm.env_dataset == value_x).sum(), (scores_lightgbm.organ == value_organ).sum())
+            score_lightgbm = scores_lightgbm[(scores_lightgbm.env_dataset == value_x) & (scores_lightgbm.organ == value_organ)].iloc[0]['r2']
+            score_nn = scores_nn[(scores_nn.env_dataset == value_x) & (scores_nn.organ == value_organ)].iloc[0]['r2']
+            score_elastic = scores_elastic[(scores_elastic.env_dataset == value_x) & (scores_elastic.organ == value_organ)].iloc[0]['r2']
 
             ## Sort by best model :
             if score_lightgbm > score_nn and score_lightgbm > score_elastic:
@@ -238,6 +243,8 @@ def _plot_r2_scores(value_target, value_organ):
 
 
             return df_str.iloc[::-1].to_dict(), df.iloc[::-1].to_dict(), [{"name": i, "id": i} for i in ['Features'] + sorted(df.columns)], Figure(d), title
+        else:
+            return None, None, None, Figure(empty_graph), ""
     else :
         return None, None, None, Figure(empty_graph), ""
 

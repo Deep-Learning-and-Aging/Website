@@ -11,3 +11,4 @@ pandas
 gunicorn
 plotly
 boto3
+matplotlib

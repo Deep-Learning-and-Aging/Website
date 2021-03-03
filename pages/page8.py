@@ -295,9 +295,13 @@ def _plot_with_given_env_dataset(ac_tab):
              [Input('Select_corr_type_mul_ewas1', 'value'), Input('Select_algorithm_method1', 'value'), Input('Select_env_dataset_mul_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
-        score = load_csv(path_scores_ewas + 'scores_EWAS.csv')
+        score = load_csv(path_scores_ewas + 'Scores_EWAS.csv')
+        score['env_dataset'] = score['env_dataset'].str.replace('Clusters_', '')
         distinct_organs = score.organ.drop_duplicates()
-        score_std_env = score[score['env_dataset'] == env_dataset.replace('Clusters_', '')][['r2', 'organ', 'std']]
+        print("score", score)
+        print("env_dataset", env_dataset)
+        score_std_env = score[score['env_dataset']== env_dataset][['r2', 'organ', 'std']]
+        print("SCORE : ", score_std_env)
         score_env = dict(zip(score_std_env['organ'], score_std_env['r2']))
         std_env = dict(zip(score_std_env['organ'], score_std_env['std']))
         for organ in distinct_organs:
@@ -349,30 +353,89 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         return Figure()
 
 
+
 @app.callback(Output('Correlation Mul - Select Organ', 'figure'),
              [Input('Select_corr_type_mul_ewas2', 'value'), Input('Select_algorithm_method2', 'value'), Input('Select_organ_mul_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
+        score = load_csv(path_scores_ewas + 'Scores_EWAS.csv')
+        score['env_dataset'] = score['env_dataset'].str.replace('Clusters_', '')
+        distinct_organs = score.organ.drop_duplicates()
+        score_std_organ = score[score['organ']== organ][['r2', 'organ', 'std', 'env_dataset']]
+        score_org = dict(zip(score_std_organ['env_dataset'], score_std_organ['r2']))
+        std_org = dict(zip(score_std_organ['env_dataset'], score_std_organ['std']))
+        score_env = dict(zip(score_std_organ['organ'], score_std_organ['r2']))
+        std_env = dict(zip(score_std_organ['organ'], score_std_organ['std']))
+        for organ in distinct_organs:
+            if organ not in score_org.keys():
+                score_env[organ] = np.nan
+            if organ not in std_org.keys():
+                std_env[organ] = np.nan
         df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
         df['env_dataset'] = df['env_dataset'].str.replace('Clusters_', '')
-        df_organ = df[df.organ_1 == organ]
-        df_organ = df_organ[df_organ.organ_2 != organ]
-        matrix_organ = pivot_table(df_organ, values='corr', index=['env_dataset'],
-                        columns=['organ_2'])
+        df_org = df[df.organ_2 == organ]
+        #df_env = df_env.merge(score, how = 'inner', left_on = 'organ_1', right_on = 'organ')
+        df_org['score_1'] = df_org['organ_1'].map(score_org)
+        df_org['score_env'] = df_org['env_dataset'].map(score_env)
+        df_org['std_1'] = df_org['organ_1'].map(std_org)
+        df_org['std_env'] = df_org['env_dataset'].map(std_env)
+
+        matrix_org = pivot_table(df_org, values='corr', index=['organ_1'],
+                        columns=['env_dataset'], dropna = False)
+        r2_score_y = pivot_table(df_org, values='score_1', index=['organ_1'],
+                        columns=['env_dataset'], dropna = False)
+        r2_score_x = pivot_table(df_org, values='score_env', index=['organ_1'],
+                        columns=['env_dataset'], dropna = False)
+        std_y = pivot_table(df_org, values='std_1', index=['organ_1'],
+                        columns=['env_dataset'], dropna = False)
+        std_x = pivot_table(df_org, values='std_env', index=['organ_1'],
+                        columns=['env_dataset'], dropna = False)
+        customdata = np.dstack((r2_score_x, std_x, r2_score_y, std_y))
+        hovertemplate = "Organ x : %{x}<br> Score organ x : %{customdata[0]:.3f}<br>Std organ y : %{customdata[1]:.3f}<br>Organ y : %{y}<br>Score organ y : %{customdata[2]:.3f}<br>Std organ y : %{customdata[3]:.3f}"
         try :
-            colorscale =  get_colorscale(matrix_organ)
+            colorscale =  get_colorscale(matrix_org)
         except ValueError:
             return Figure(empty_graph)
         d = {}
-        d['data'] = Heatmap(z=matrix_organ.T,
-                   x=matrix_organ.T.columns,
-                   y=matrix_organ.T.index,
+        d['data'] = Heatmap(z=matrix_org,
+                   x=matrix_org.index,
+                   y=matrix_org.columns,
+                   customdata =customdata,
+                   hovertemplate = hovertemplate,
                    colorscale = colorscale)
         d['layout'] = dict(xaxis = dict(dtick = 1),
                            yaxis = dict(dtick = 1),
-                           width = 1000,
+                           width = 800,
                            height = 800)
         return Figure(d)
-    else :
+    else:
         return Figure()
+
+# @app.callback(Output('Correlation Mul - Select Organ', 'figure'),
+#              [Input('Select_corr_type_mul_ewas2', 'value'), Input('Select_algorithm_method2', 'value'), Input('Select_organ_mul_ewas', 'value')])
+# def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
+#     if corr_type is not None and subset_method is not None:
+#         df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
+#         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
+#         df['env_dataset'] = df['env_dataset'].str.replace('Clusters_', '')
+#         df_organ = df[df.organ_1 == organ]
+#         df_organ = df_organ[df_organ.organ_2 != organ]
+#         matrix_organ = pivot_table(df_organ, values='corr', index=['env_dataset'],
+#                         columns=['organ_2'])
+#         try :
+#             colorscale =  get_colorscale(matrix_organ)
+#         except ValueError:
+#             return Figure(empty_graph)
+#         d = {}
+#         d['data'] = Heatmap(z=matrix_organ.T,
+#                    x=matrix_organ.T.columns,
+#                    y=matrix_organ.T.index,
+#                    colorscale = colorscale)
+#         d['layout'] = dict(xaxis = dict(dtick = 1),
+#                            yaxis = dict(dtick = 1),
+#                            width = 1000,
+#                            height = 800)
+#         return Figure(d)
+#     else :
+#         return Figure()
