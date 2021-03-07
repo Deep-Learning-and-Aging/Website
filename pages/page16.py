@@ -179,9 +179,9 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
         path_to_gif = path_gif + '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_%s.' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower(), sample)
         path_to_gif_img = path_to_gif + 'gif'
         path_to_jpg_img = path_to_gif + 'png'
-        frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
-        frame.seek(0)
-        frame.save('./' + app.get_asset_url(path_to_jpg_img))
+        #frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
+        #frame.seek(0)
+        #frame.save('./' + app.get_asset_url(path_to_jpg_img))
         gif_display = html.Div([
             gif.GifPlayer(
                 gif = app.get_asset_url(path_to_gif_img),
@@ -208,9 +208,9 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
         path_to_gif = path_gif + '%s/%s/%s/RawVideo_Age_Heart_MRI_%s_%s_%s_%s.' % (transformation, dict_sex_id_to_sex[sex], age_group.lower(), transformation, dict_sex_id_to_sex[sex], age_group.lower(), sample)
         path_to_gif_img = path_to_gif + 'gif'
         path_to_jpg_img = path_to_gif + 'png'
-        frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
-        frame.seek(0)
-        frame.save('./' + app.get_asset_url(path_to_jpg_img))
+        #frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
+        #frame.seek(0)
+        #frame.save('./' + app.get_asset_url(path_to_jpg_img))
         gif_display = html.Div([
             gif.GifPlayer(
                 gif = app.get_asset_url(path_to_gif_img),
