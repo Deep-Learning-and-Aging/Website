@@ -221,7 +221,6 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sam
     if None not in [organ, view, transformation, sex, age_group, aging_rate]:#, sample]:
         df = load_csv(path_attention_maps_videos + 'AttentionMaps-samples_Age_%s_%s_%s.csv' % (organ, view, transformation))
         df = df[(df.Sex == sex) & (df.age_category == age_group.lower()) & (df.aging_rate == aging_rate.lower())]
-        print(df)
         eid = df.iloc[sample].eid
         age = df.iloc[sample].Age
         res = df.iloc[sample].res
@@ -230,6 +229,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):#, sam
         path_to_gif = path_gif + path_to_gif
         path_to_jpg = df.iloc[sample].Picture.split('/')[-1]
         path_to_jpg = path_img + path_to_jpg
+        print(app.get_asset_url(path_to_gif))
         gif_display = html.Div([
             html.H3(title),
             gif.GifPlayer(

@@ -169,7 +169,6 @@ def _plot_r2_scores(value_x, value_organ):
         scores_nn = load_csv(path_score + 'NeuralNetwork_test.csv')
         scores_elastic = load_csv(path_score + 'ElasticNet_test.csv')
         scores_lightgbm = load_csv(path_score + 'LightGbm_test.csv')
-        print(scores_nn)
 
         list_models = []
         if not 'medical_diagnoses_' in value_x:
@@ -188,7 +187,6 @@ def _plot_r2_scores(value_x, value_organ):
                 else :
                     df = df.join(df_new)
             df = np.abs(df)/np.abs(df).sum()
-            print((scores_lightgbm.env_dataset == value_x).sum(), (scores_lightgbm.organ == value_organ).sum())
             score_lightgbm = scores_lightgbm[(scores_lightgbm.env_dataset == value_x) & (scores_lightgbm.organ == value_organ)].iloc[0]['r2']
             score_nn = scores_nn[(scores_nn.env_dataset == value_x) & (scores_nn.organ == value_organ)].iloc[0]['r2']
             score_elastic = scores_elastic[(scores_elastic.env_dataset == value_x) & (scores_elastic.organ == value_organ)].iloc[0]['r2']
@@ -269,7 +267,6 @@ def _sort_table(sort_by_col, data):
 @app.callback(Output('table_corr_xwas_feat_imps', 'data'),
               [Input('select correlation type feat imps xwas', 'value'), Input('memory_no_str_xwas_feat_imps', 'data')])
 def _change_corr_method(value, data):
-    print(data)
     df = pd.DataFrame(data = data)
     df = df[sorted(df.columns)]
     corr_matrix = df.corr(method=value.lower())

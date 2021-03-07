@@ -380,7 +380,6 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
             return col
         else :
             path_image = path_attention_maps + '/%s/%s/%s/%s/%s/%s/' % (organ, view, transformation, sex, age_group.lower(), aging_rate.lower()) + 'RawImage_Age_' + organ  + '_' + view + '_' + transformation + '_' + sex + '_' + age_group.lower() + '_' + aging_rate.lower() + '_%s.jpg' % sample
-            print(path_image)
             raw = read_img(path_image)
             saliency = load_npy(path_image.replace('RawImage', 'Saliency').replace('.jpg', '.npy'))
             saliency = Image.fromarray((saliency ).astype(np.uint8)).convert('RGBA')

@@ -298,10 +298,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         score = load_csv(path_scores_ewas + 'Scores_EWAS.csv')
         score['env_dataset'] = score['env_dataset'].str.replace('Clusters_', '')
         distinct_organs = score.organ.drop_duplicates()
-        print("score", score)
-        print("env_dataset", env_dataset)
         score_std_env = score[score['env_dataset']== env_dataset][['r2', 'organ', 'std']]
-        print("SCORE : ", score_std_env)
         score_env = dict(zip(score_std_env['organ'], score_std_env['r2']))
         std_env = dict(zip(score_std_env['organ'], score_std_env['std']))
         for organ in distinct_organs:
@@ -312,7 +309,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, subset_method))
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr']]
         df['env_dataset'] = df['env_dataset'].str.replace('Clusters_', '')
-        print(df)
         df_env = df[df.env_dataset == env_dataset]
         #df_env = df_env.merge(score, how = 'inner', left_on = 'organ_1', right_on = 'organ')
         df_env['score_1'] = df_env['organ_1'].map(score_env)
@@ -331,7 +327,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         std_x = pivot_table(df_env, values='std_2', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
         customdata = np.dstack((r2_score_x, std_x, r2_score_y, std_y))
-        print(customdata)
         hovertemplate = "Organ x : %{x}<br> Score organ x : %{customdata[0]:.3f}<br>Std organ y : %{customdata[1]:.3f}<br>Organ y : %{y}<br>Score organ y : %{customdata[2]:.3f}<br>Std organ y : %{customdata[3]:.3f}"
         try :
             colorscale =  get_colorscale(matrix_env)

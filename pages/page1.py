@@ -25,7 +25,7 @@ dict_data = load_csv('Data_Dictionary_Showcase.csv')
 
 
 dict_feature_to_unit = dict(zip(dict_data['Field'], dict_data['Units']))
-#print(dict_feature_to_unit)
+
 if MODE != 'All':
     organ_select = dbc.FormGroup([
         html.P("Select Organ : "),
@@ -142,7 +142,6 @@ def generate_list_view_list(value_organ, value_view):
 @app.callback(Output('select_view_biomarkers', 'options'),
               [Input('select_group_biomarkers', 'value')])
 def generate_list_view_list(value):
-    print(hierarchy_biomarkers[value])
     if value is None:
         return [{'value' : '', 'label' : ''}]
     else :
@@ -197,7 +196,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
     else :
         key = (value_organ, value_view, value_transformation)
         df = dict_organ_view_transf_to_id[key]
-        cols = load_csv((path_inputs + '/' + df + '.csv').replace('Biochemestry', 'Biochemistry'), nrows = 1).set_index('id').columns
+        cols = load_csv((path_inputs + '/' + df + '_header.csv').replace('Biochemestry', 'Biochemistry'), nrows = 1).set_index('id').columns
         if value_organ == 'Demographics':
             cols = [ re.sub('.0$', '', elem) for elem in cols if elem not in ETHNICITY_COLS + ['eid', 'Sex'] + ['Ethnicity.' + elem for elem in ETHNICITY_COLS]]
         else :
@@ -235,18 +234,17 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
                             )}
 
     if value_transformation is not None :
-
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
         try :
             features_p_val = load_csv(path_linear + 'linear_correlations_%s.csv' % id_dataset)
             features_p_val['p_val'] = features_p_val['p_val'].replace(0, 1e-323)
-            #print(features_p_val)
+
             hovertemplate = 'Feature : %{customdata[0]}\
                              <br>p_value : %{customdata[1]:.3E}\
                              <br>Correlation : %{customdata[2]:.3f}\
                              <br>Sample Size : %{customdata[3]}'
             customdata = np.stack([features_p_val['feature_name'], features_p_val['p_val'], features_p_val['corr_value'], features_p_val['size_na_dropped']], axis=-1)
-            #print(customdata)
+
             fig3['data'] = [Scatter(x = features_p_val['corr_value'],
                                        y = -np.log10(features_p_val['p_val']),
                                        mode='markers',
@@ -276,7 +274,6 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
 
 
 
-
     if value_transformation is not None and value_feature is not None:
         try :
             unit = dict_feature_to_unit[value_feature]
@@ -288,17 +285,15 @@ def plot_distribution_of_feature(value_group, value_view, value_transformation, 
             unit = ''
         ## Load Data :
         id_dataset = dict_organ_view_transf_to_id[(value_group, value_view, value_transformation)]
-        df_bio = load_csv((path_inputs + '/%s_short.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
-        #print(value_group)
+
         if value_group != 'PhysicalActivity' :
-            df_sex_age_ethnicity_eid = load_csv('page1_biomarkers/sex_age_eid_ethnicity.csv').set_index('id')
-            df = df_sex_age_ethnicity_eid.join(df_bio, rsuffix = '_r').dropna()
+            df = load_csv((path_inputs + '/%s_ethnicity.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
             df = df[df.columns[~df.columns.str.contains('_r')]]
             df.columns = df.columns.str.replace('.0$', '')
         else :
-            df = df_bio
+            df = load_csv((path_inputs + '/%s_short.csv' % id_dataset).replace('Biochemestry', 'Biochemistry'), nrows = sample_size_limit).set_index('id').dropna()
             df = df.rename(columns = dict(zip(['Ethnicity.' + elem for elem in ETHNICITY_COLS], ETHNICITY_COLS)))
-            #print(df[ETHNICITY_COLS])
+
         df = df[(df['Age when attended assessment centre'] < value_age_filter[1]) & (df['Age when attended assessment centre'] > value_age_filter[0]) ]
         if value_ethnicity is not None:
             df = df[df[value_ethnicity] == 1]

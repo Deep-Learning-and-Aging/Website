@@ -283,14 +283,13 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
     df = df.set_index(index)
     std.index.name = 'Models'
     df.index.name = 'Models'
-    #print(df.shape, std.shape, df_instances.shape)
 
     df.index = ['-'.join(elem.split('_')[:4]) for elem in df.index.values]
     df.columns = ['-'.join(elem.split('_')[:4]) for elem in df.index.values]
 
     std.index = ['-'.join(elem.split('_')[:4]) for elem in std.index.values]
     std.columns = ['-'.join(elem.split('_')[:4]) for elem in std.index.values]
-    #print(df.index)
+
     if value_eid_vs_instances != '*':
         if value_aggregate == 'bestmodels':
             scores = load_csv(path_performance + 'PERFORMANCES_bestmodels_alphabetical_%s_Age_%s.csv' % (value_eid_vs_instances, dict_value_step_value[value_step]))[['version', 'R-Squared_all']].set_index('version')
@@ -335,11 +334,11 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
             scores_eids_organs = [elem.split('_')[1] for elem in scores_eids.index.values]
             scores_eids_view = [elem.split('_')[2].replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in scores_eids.index.values]
             scores_eids.index = [organ + view for organ, view in zip(scores_eids_organs, scores_eids_view)]
-            #print(scores_eids, len(scores_eids), scores_instances, len(scores_instances))
+
             intersect = scores_instances.index.intersection(df.index)
             customdata_score_eids = scores_eids.loc[intersect]
             customdata_score_instances = scores_instances.loc[intersect]
-            #print(customdata_score_eids, len(customdata_score_eids), customdata_score_instances, len(customdata_score_instances))
+
             df = df.loc[intersect, intersect]
             std = std.loc[intersect, intersect]
             df_instances = df_instances.loc[intersect, intersect]

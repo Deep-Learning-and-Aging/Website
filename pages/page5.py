@@ -176,7 +176,6 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                 list_df.append(t)
                 if value_organ == '\\*':
                     value_organ = '*'
-                #print("Env Dataset : ", env_dataset, "Organ : ", value_organ)
             except (FileNotFoundError, ClientError):
                 continue
 
@@ -232,7 +231,6 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
 @app.callback(Output('table_ewas_linear', 'data'),
               [Input('table_ewas_linear', 'sort_by'), Input('memory_ewas', 'data'), Input('Volcano Plot - EWAS', 'restyleData')])
 def _sort_table(sort_by_col, data, restyle):
-    print(restyle)
     df = DataFrame(data = data)
     df = df.reset_index()
     if sort_by_col is not None and len(sort_by_col):
