@@ -214,12 +214,12 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
                   )
         fig['data'].append(
             Scatter(x = [res['corr_value'].min() - res['corr_value'].std(), res['corr_value'].max() + res['corr_value'].std()],
-                       y = [-np.log((5/100)), -np.log((5/100))],
+                       y = [-np.log10((5/100)), -np.log10((5/100))],
                        name = 'No Correction',
                        mode = 'lines'))
         fig['data'].append(
             Scatter(x = [res['corr_value'].min() - res['corr_value'].std(), res['corr_value'].max() + res['corr_value'].std()],
-                       y = [-np.log((5/100)/num_tests), -np.log((5/100)/num_tests)],
+                       y = [-np.log10((5/100)/num_tests), -np.log10((5/100)/num_tests)],
                        name = 'With Bonferoni Correction',
                        mode = 'lines'))
 
