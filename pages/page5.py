@@ -24,11 +24,14 @@ Environmental = sorted(['All', 'Alcohol', 'Diet', 'Education', 'ElectronicDevice
                  'SunExposure', 'EarlyLifeFactors'])
 Biomarkers = sorted(['All', 'HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
-              'UrineBiochemestry', 'BloodBiochemestry', 'BloodCount',
-              'EyeAutorefraction', 'EyeAcuity', 'EyeIntraoculaPressure',
+              'UrineBiochemistry', 'BloodBiochemistry', 'BloodCount',
+              'EyeAutorefraction', 'EyeAcuity', 'EyeIntraocularPressure',
               'BraindMRIWeightedMeans', 'Spirometry', 'BloodPressure',
               'AnthropometryBodySize', 'ArterialStiffness', 'CarotidUltrasound',
-              'BoneDensitometryOfHeel', 'HearingTest'])
+              'BoneDensitometryOfHeel', 'HearingTest', 'CognitiveFluidIntelligence',
+              'CognitiveMatrixPatternCompletion', 'CognitiveNumericMemory', 'CognitivePairedAssociativeLearning',
+              'CognitivePairsMatching', 'CognitiveProspectiveMemory', 'CognitiveReactionTime',
+              'CognitiveSymbolDigitSubstitution', 'CognitiveTowerRearranging', 'CognitiveTrailMaking'])
 Pathologies = sorted(['All'] + ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
                                                     'F', 'G', 'H', 'I', 'J',
                                                     'K', 'L', 'M', 'N', 'O',
