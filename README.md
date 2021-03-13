@@ -24,7 +24,7 @@ Each page has a layout python object, and some attributes of this layout can be 
 For instance in the page 1 : 
 We have this reset callback : 
 
-`@app.callback([Output("select_group_biomarkers", "value"),
+```@app.callback([Output("select_group_biomarkers", "value"),
                Output("select_view_biomarkers", "value"),
                Output("select_transformation_biomarkers", "value"),
                Output("select_biomarkers_of_group", "value"),
@@ -35,7 +35,7 @@ def reset(n):
         if n > 0 :
             return [None, None, None, None, None]
     else :
-        raise PreventUpdate()`
+        raise PreventUpdate()```
         
 For any input "reset_page1" (attribute of the layout) if the property "n_clicks" has been modified (user clicking on one button), it triggers the function reset 
 which takes as an input the value of the attribute "n_clicks" (number of clicks).
