@@ -24,7 +24,8 @@ Each page has a layout python object, and some attributes of this layout can be 
 For instance in the page 1 : 
 We have this reset callback : 
 
-```@app.callback([Output("select_group_biomarkers", "value"),
+```
+@app.callback([Output("select_group_biomarkers", "value"),
                Output("select_view_biomarkers", "value"),
                Output("select_transformation_biomarkers", "value"),
                Output("select_biomarkers_of_group", "value"),
