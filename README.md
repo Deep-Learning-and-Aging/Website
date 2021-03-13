@@ -1,12 +1,14 @@
 ## Instructions in order to use / modify the website.
 
-Start by creating a path to your AWS credentials. You can edit the path in the file tools.py
+Start by creating a path to your AWS credentials. You can edit the path in the file tools.py.
+
 Install the requirements : 
 `pip3 install -r requirements.txt` when you are at the root of the directory.
 
 In order to test the website locally, you can launch a server (after creating a venv): 
 `python3 main.py`
-And access the website to this adress (default port 8050): 
+
+You can access the website to this adress (default port 8050): 
 http://localhost:8050/
 
 ## Structure of the website 
