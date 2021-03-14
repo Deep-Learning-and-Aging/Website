@@ -21,7 +21,7 @@ Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'ChestPain', 'CancerScreening', 'Medication', 'Hearing',
                  'Household', 'MentalHealth', 'OtherSociodemographics',
                  'PhysicalActivity', 'SexualFactors', 'Sleep', 'SocialSupport',
-                 'SunExposure', 'EarlyLifeFactors'])
+                 'SunExposure', 'EarlyLifeFactors', 'Smoking'])
 Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemistry', 'BloodBiochemistry', 'BloodCount',
@@ -154,8 +154,11 @@ def _plot_with_given_env_dataset(ac_tab):
                         ], fluid = True)
 
 
-@app.callback([Output('Correlation - Select Organ', 'figure'), Output('scores_univ_xwas_organ', 'children')],
-             [Input('Select_corr_type_lin_ewas2', 'value'), Input('Select_subset_method2', 'value'), Input('Select_organ_lin_ewas', 'value')])
+@app.callback([Output('Correlation - Select Organ', 'figure'),
+               Output('scores_univ_xwas_organ', 'children')],
+             [Input('Select_corr_type_lin_ewas2', 'value'),
+              Input('Select_subset_method2', 'value'),
+              Input('Select_organ_lin_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
         df = load_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')

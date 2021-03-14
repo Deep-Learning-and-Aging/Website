@@ -21,7 +21,7 @@ Environmental = sorted(['All', 'Alcohol', 'Diet', 'Education', 'ElectronicDevice
                  'ChestPain', 'CancerScreening', 'Medication', 'Hearing',
                  'Household', 'MentalHealth', 'OtherSociodemographics',
                  'PhysicalActivity', 'SexualFactors', 'Sleep', 'SocialSupport',
-                 'SunExposure', 'EarlyLifeFactors'])
+                 'SunExposure', 'EarlyLifeFactors', 'Smoking'])
 Biomarkers = sorted(['All', 'HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemistry', 'BloodBiochemistry', 'BloodCount',
