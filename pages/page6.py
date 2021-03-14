@@ -120,11 +120,13 @@ def _plot_with_given_env_dataset(ac_tab):
                         html.Br(),
                         html.Br(),
                         dbc.Row([
+
                             dbc.Col([controls1,
                                      html.Br(),
                                      html.Br()], md=3),
                             dbc.Col(
                                 [dcc.Loading([
+                                    html.H2(id = 'scores_univ_xwas_X'),
                                     dcc.Graph(id='Correlation - Select Ewas dataset')
                                  ])],
                                 style={'overflowY': 'scroll', 'height': 1000, 'overflowX': 'scroll', 'width' : 1000},
@@ -137,11 +139,13 @@ def _plot_with_given_env_dataset(ac_tab):
                         html.Br(),
                         html.Br(),
                         dbc.Row([
+
                             dbc.Col([controls2,
                                      html.Br(),
                                      html.Br()], md=3),
                             dbc.Col(
                                 [dcc.Loading([
+                                    html.H2(id = 'scores_univ_xwas_organ'),
                                     dcc.Graph(id='Correlation - Select Organ')
                                  ])],
                                 style={'overflowY': 'scroll', 'height': 1000, 'overflowX': 'scroll', 'width' : 1000},
@@ -150,7 +154,7 @@ def _plot_with_given_env_dataset(ac_tab):
                         ], fluid = True)
 
 
-@app.callback(Output('Correlation - Select Organ', 'figure'),
+@app.callback([Output('Correlation - Select Organ', 'figure'), Output('scores_univ_xwas_organ', 'children')],
              [Input('Select_corr_type_lin_ewas2', 'value'), Input('Select_subset_method2', 'value'), Input('Select_organ_lin_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
     if corr_type is not None and subset_method is not None:
@@ -159,6 +163,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df[df.organ_1 == organ]
         df_organ = df_organ[df_organ.organ_2 != organ]
         df_organ = df_organ.fillna(0)
+
+        title = "Average correlation = %.3f ± %.3f" % (df_organ.mean()['corr'], df_organ.std()['corr'])
         matrix_organ = pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
 
@@ -186,12 +192,12 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
                            yaxis = dict(dtick = 1),
                            width = 1000,
                            height = 600)
-        return Figure(d)
+        return Figure(d), title
     else :
-        return Figure()
+        return Figure(), ''
 
 
-@app.callback(Output('Correlation - Select Ewas dataset', 'figure'),
+@app.callback([Output('Correlation - Select Ewas dataset', 'figure'), Output('scores_univ_xwas_X', 'children')],
              [Input('Select_corr_type_lin_ewas1', 'value'), Input('Select_subset_method1', 'value'), Input('Select_env_dataset_lin_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
     if corr_type is not None and subset_method is not None:
@@ -212,6 +218,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                          <br>Organ x : %{x}\
                          <br>Organ y : %{y}\
                          <br>Sample Size : %{customdata[0]}'
+        title = "Average correlation = %.3f ± %.3f" % (df_env.mean()['corr'], df_env.std()['corr'])
 
         d = {}
         d['data'] = Heatmap(z=matrix_env,
@@ -224,6 +231,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                            yaxis = dict(dtick = 1),
                            width = 800,
                            height = 800)
-        return Figure(d)
+        return Figure(d), title
     else:
-        return Figure()
+        return Figure(), ''

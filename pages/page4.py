@@ -238,6 +238,7 @@ def _plot(ac_tab):
                                      html.Br()], md=3),
                             dbc.Col(
                                 [dcc.Loading([
+                                    html.H2(id = 'title_corr_scores'),
                                     dcc.Graph(
                                      id='Plot Corr Heatmap'
                                      )]
@@ -248,7 +249,7 @@ def _plot(ac_tab):
                     ], fluid = True)
     elif ac_tab == 'tab_HC' :
         return dbc.Container([
-                        html.H1('Correlations between accelerated aging'),
+                        html.H1('Correlations between accelerated aging dimensions'),
                         html.Br(),
                         html.Br(),
                         dbc.Row([
@@ -427,7 +428,8 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ):
 
 
 
-@app.callback(Output('Plot Corr Heatmap', 'figure'),
+@app.callback([Output('Plot Corr Heatmap', 'figure'),
+               Output('title_corr_scores', 'children')],
               [Input('select_eid_or_instances_res', 'value'),
               Input('select_aggregate_type_res', 'value'),
               Input('Select_organ_res', 'value'),
@@ -689,6 +691,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                                    colorscale = [[0, 'rgba(128,128,128, 0.7)'], [1, 'rgba(128,128,128, 0.7)']]
                                   )
                          ]
+            title = "Average correlation = %.3f ± %.3f" % (np.nanmean(df), np.nanstd(df))
             #pdist = hierarchy.distance.pdist(df)
 
         else:
@@ -783,6 +786,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                            colorscale = [[0, 'rgba(128,128,128, 0.7)'], [1, 'rgba(128,128,128, 0.7)']]
                            )
                 ]
+            title = "Average correlation = %.3f ± %.3f" % (np.nanmean(df), np.nanstd(df))
             d['layout']['width'] = 900
             d['layout']['height'] = 800
 
@@ -813,6 +817,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ, value_
                 fig['layout']['yaxis2']['showticklabels'] = False
         else :
             fig = Figure(d)
-        return fig#, d2
+        print(title)
+        return fig, title
     else :
-        return Figure()#, Figure()
+        return Figure(), ''

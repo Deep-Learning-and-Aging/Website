@@ -9,9 +9,13 @@ import base64
 from matplotlib.image import imread
 from app import app
 
+
+### Usefull functions to load data : images, csv, gifs etc
+### They can load from AWS using the Alan_accessKeys.csv credential file
+
 import os
 try :
-    path_credentials = '/Users/samuel/Downloads/Alan_accessKeys.csv'
+    path_credentials = './Alan_accessKeys.csv'
     creds = read_csv(path_credentials)
     access_key = creds.iloc[0]['Access key ID']
     secret_key = creds.iloc[0]['Secret access key']
@@ -20,7 +24,7 @@ except FileNotFoundError:
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     bucket_name = 'age-prediction-site'
-    
+
 ## S3 credentials
 client = client('s3', aws_access_key_id=access_key,
                       aws_secret_access_key=secret_key,
