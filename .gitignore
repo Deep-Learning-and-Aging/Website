@@ -1,8 +1,11 @@
 /data
 .DS_Store
-__pycache__/
-.csv
 app.yaml
 
+
+# Local specific
 env_website/
 **/*.csv
+.csv
+.vscode
+__pycache__/

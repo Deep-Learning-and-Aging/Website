@@ -1,5 +1,7 @@
 Procfile
 app.yaml
 
-env_website/
 __pycache__/
+env_website/
+**/*.csv
+.vscode
