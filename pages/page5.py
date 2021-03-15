@@ -188,6 +188,9 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
         res['p_val'] = res['p_val'].replace(0, 1e-323)
         res['env_feature_name'] = res['env_feature_name'].str.replace('.0', '')
 
+        # Remove rows with "sample size" < 10:
+        res.drop(index=res[res['size_na_dropped'] < 10].index, inplace=True)
+
         if value_datasets != 'All' or value_datasets is None:
             res = res[res.Env_Dataset.isin(value_datasets)]
 
