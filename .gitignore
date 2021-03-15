@@ -3,3 +3,6 @@
 __pycache__/
 .csv
 app.yaml
+
+env_website/
+**/*.csv
