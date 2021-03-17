@@ -170,7 +170,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df_organ[df_organ.organ_2 != organ]
         df_organ = df_organ.fillna(0)
 
-        title = "Average correlation = %.3f ± %.3f" % (df_organ.mean()['corr'], df_organ.std()['corr'])
         matrix_organ = pivot_table(df_organ, values='corr', index=['env_dataset'],
                         columns=['organ_2'])
 
@@ -181,7 +180,9 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         d = {}
         sample_size_matrix =  pivot_table(df_organ, values='sample_size', index=['env_dataset'],
                 columns=['organ_2']).values
+        matrix_organ[sample_size_matrix < 10] = 0
         customdata = np.dstack((sample_size_matrix, matrix_organ))
+        title = "Average correlation = %.3f ± %.3f" % (np.mean(matrix_organ.values.flatten()), np.std(matrix_organ.values.flatten()))
         hovertemplate = 'Correlation : %{z}\
                  <br>Organ x : %{x}\
                  <br>Organ y : %{y}\
@@ -212,8 +213,11 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df_env = df[df.env_dataset == env_dataset]
         df_env = df_env.fillna(0)
 
+        sample_size_matrix = pivot_table(df_env, values='sample_size', index=['organ_1'], columns=['organ_2'])
+
         env_matrix = pivot_table(df_env, values='corr', index=['organ_1'], columns=['organ_2'])
-        labels = env_matrix.columns
+        env_matrix[sample_size_matrix < 10] = 0
+        labels = env_matrix.columns 
 
         fig = ff.create_dendrogram(env_matrix, orientation="bottom",distfun=lambda df: 1 - df)
         for scatter in fig['data']:
@@ -232,7 +236,10 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         except ValueError:
             return Figure(empty_graph)
 
-        sample_size_matrix = pivot_table(df_env, values='sample_size', index=['organ_1'], columns=['organ_2'])
+        heat_data = env_matrix.values[order_dendrogram,:]
+        heat_data = heat_data[:,order_dendrogram]
+        colorscale =  get_colorscale(heat_data)
+
         heat_sample_size = sample_size_matrix.values[order_dendrogram,:]
         heat_sample_size = heat_sample_size[:,order_dendrogram]
         customdata = np.dstack((heat_sample_size, heat_data))
@@ -240,7 +247,8 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                             <br>Organ x : %{x}\
                             <br>Organ y : %{y}\
                             <br>Sample Size : %{customdata[0]}'
-        title = "Average correlation = %.3f ± %.3f" % (df_env.mean()['corr'], df_env.std()['corr'])
+        idx_upper = np.triu_indices(len(heat_data))
+        title = "Average correlation = %.3f ± %.3f" % (np.mean(heat_data[idx_upper]), np.std(heat_data[idx_upper]))
 
         heatmap = Heatmap(
                 x = labels[order_dendrogram],
