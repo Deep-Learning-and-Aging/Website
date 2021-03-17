@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
 from pandas import pivot_table
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
-
+import plotly.figure_factory as ff
 from app import app
 import os
 import numpy as np
@@ -319,34 +319,65 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df_env['std_1'] = df_env['organ_1'].map(std_env)
         df_env['std_2'] = df_env['organ_2'].map(std_env)
 
-        matrix_env = pivot_table(df_env, values='corr', index=['organ_1'],
+        env_matrix = pivot_table(df_env, values='corr', index=['organ_1'],
                         columns=['organ_2'], dropna = False)
-        r2_score_y = pivot_table(df_env, values='score_1', index=['organ_1'],
-                        columns=['organ_2'], dropna = False)
-        r2_score_x = pivot_table(df_env, values='score_2', index=['organ_1'],
-                        columns=['organ_2'], dropna = False)
-        std_y = pivot_table(df_env, values='std_1', index=['organ_1'],
-                        columns=['organ_2'], dropna = False)
-        std_x = pivot_table(df_env, values='std_2', index=['organ_1'],
-                        columns=['organ_2'], dropna = False)
-        customdata = np.dstack((r2_score_x, std_x, r2_score_y, std_y))
-        hovertemplate = "Organ x : %{x}<br> Score organ x : %{customdata[0]:.3f}<br>Std organ y : %{customdata[1]:.3f}<br>Organ y : %{y}<br>Score organ y : %{customdata[2]:.3f}<br>Std organ y : %{customdata[3]:.3f}"
+        labels = env_matrix.columns  
+        
+        fig = ff.create_dendrogram(env_matrix, orientation="bottom",distfun=lambda df: 1 - df)
+        for scatter in fig['data']:
+            scatter['yaxis'] = 'y2'
+
+        order_dendrogram = list(map(int, fig["layout"]["xaxis"]["ticktext"]))
+
+        fig.update_layout(xaxis={"ticktext": labels[order_dendrogram], "mirror": False})
+        fig.update_layout(yaxis2={"domain": [0.85, 1], "showticklabels": False, "showgrid": False, "zeroline": False})
+    
+        heat_data = env_matrix.values[order_dendrogram,:]
+        heat_data = heat_data[:,order_dendrogram]
         try :
-            colorscale =  get_colorscale(matrix_env)
+            colorscale =  get_colorscale(heat_data)
         except ValueError:
             return Figure(empty_graph)
-        d = {}
-        d['data'] = Heatmap(z=matrix_env,
-                   x=matrix_env.index,
-                   y=matrix_env.columns,
-                   customdata =customdata,
-                   hovertemplate = hovertemplate,
-                   colorscale = colorscale)
-        d['layout'] = dict(xaxis = dict(dtick = 1),
-                           yaxis = dict(dtick = 1),
-                           width = 800,
-                           height = 800)
-        return Figure(d)
+
+        r2_score_y = pivot_table(df_env, values='score_1', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        r2_score_y = r2_score_y.values[order_dendrogram,:]
+        r2_score_y = r2_score_y[order_dendrogram,:]
+        r2_score_x = pivot_table(df_env, values='score_2', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        r2_score_x = r2_score_x.values[order_dendrogram,:]
+        r2_score_x = r2_score_x[:,order_dendrogram]
+        std_y = pivot_table(df_env, values='std_1', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        std_y = std_y.values[order_dendrogram,:]
+        std_y = std_y[:,order_dendrogram]
+        std_x = pivot_table(df_env, values='std_2', index=['organ_1'],
+                        columns=['organ_2'], dropna = False)
+        std_x = std_x.values[order_dendrogram,:]
+        std_x = std_x[:,order_dendrogram]
+        
+        customdata = np.dstack((r2_score_x, std_x, r2_score_y, std_y))
+        hovertemplate = "Organ x : %{x}<br> Score organ x : %{customdata[0]:.3f}<br>Std organ y : %{customdata[1]:.3f}<br>Organ y : %{y}<br>Score organ y : %{customdata[2]:.3f}<br>Std organ y : %{customdata[3]:.3f}"
+
+        heatmap = Heatmap(
+                x = labels[order_dendrogram],
+                y = labels[order_dendrogram],
+                z = heat_data,
+                colorscale = colorscale,
+                customdata = customdata,
+                hovertemplate = hovertemplate
+            )
+
+        heatmap['x'] = fig['layout']['xaxis']['tickvals']
+        heatmap['y'] = fig['layout']['xaxis']['tickvals']
+
+        fig.update_layout(yaxis={'domain': [0, .85], 'mirror': False, 'showgrid': False, 'zeroline': False, 'ticktext': labels[order_dendrogram], "tickvals":fig['layout']['xaxis']['tickvals'], 'showticklabels': True, "ticks": "outside"})
+
+        fig.add_trace(heatmap)
+
+        fig['layout']['width'] = 1100
+        fig['layout']['height'] = 1100
+        return fig
     else:
         return Figure()
 
