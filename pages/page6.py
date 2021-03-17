@@ -5,8 +5,11 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
 from pandas import pivot_table
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
+from plotly.subplots import make_subplots
 from app import app
 import glob
+import plotly.figure_factory as ff
+from scipy.spatial.distance import squareform
 import os
 import numpy as np
 from scipy.stats import pearsonr
@@ -208,32 +211,56 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_env = df[df.env_dataset == env_dataset]
         df_env = df_env.fillna(0)
-        matrix_env = pivot_table(df_env, values='corr', index=['organ_1'],
-                        columns=['organ_2'])
+
+        env_matrix = pivot_table(df_env, values='corr', index=['organ_1'], columns=['organ_2'])
+        labels = env_matrix.columns
+
+        fig = ff.create_dendrogram(env_matrix, orientation="bottom",distfun=lambda df: 1 - df)
+        for scatter in fig['data']:
+            scatter['yaxis'] = 'y2'
+
+        order_dendrogram = list(map(int, fig["layout"]["xaxis"]["ticktext"]))
+
+        fig.update_layout(xaxis={"ticktext": labels[order_dendrogram], "mirror": False})
+        fig.update_layout(yaxis2={"domain": [0.85, 1], "showticklabels": False, "showgrid": False, "zeroline": False})
+
+
+        heat_data = env_matrix.values[order_dendrogram,:]
+        heat_data = heat_data[:,order_dendrogram]
         try :
-            colorscale =  get_colorscale(matrix_env)
+            colorscale =  get_colorscale(heat_data)
         except ValueError:
             return Figure(empty_graph)
-        sample_size_matrix =  pivot_table(df_env, values='sample_size', index=['organ_1'],
-                        columns=['organ_2']).values
-        customdata = np.dstack((sample_size_matrix, matrix_env))
+
+        sample_size_matrix = pivot_table(df_env, values='sample_size', index=['organ_1'], columns=['organ_2'])
+        heat_sample_size = sample_size_matrix.values[order_dendrogram,:]
+        heat_sample_size = heat_sample_size[:,order_dendrogram]
+        customdata = np.dstack((heat_sample_size, heat_data))
         hovertemplate = 'Correlation : %{z}\
-                         <br>Organ x : %{x}\
-                         <br>Organ y : %{y}\
-                         <br>Sample Size : %{customdata[0]}'
+                            <br>Organ x : %{x}\
+                            <br>Organ y : %{y}\
+                            <br>Sample Size : %{customdata[0]}'
         title = "Average correlation = %.3f ± %.3f" % (df_env.mean()['corr'], df_env.std()['corr'])
 
-        d = {}
-        d['data'] = Heatmap(z=matrix_env,
-                   x=matrix_env.index,
-                   y=matrix_env.columns,
-                   colorscale = colorscale,
-                   customdata = customdata,
-                   hovertemplate = hovertemplate)
-        d['layout'] = dict(xaxis = dict(dtick = 1),
-                           yaxis = dict(dtick = 1),
-                           width = 800,
-                           height = 800)
-        return Figure(d), title
+        heatmap = Heatmap(
+                x = labels[order_dendrogram],
+                y = labels[order_dendrogram],
+                z = heat_data,
+                colorscale = colorscale,
+                customdata = customdata,
+                hovertemplate = hovertemplate
+            )
+
+        heatmap['x'] = fig['layout']['xaxis']['tickvals']
+        heatmap['y'] = fig['layout']['xaxis']['tickvals']
+
+        fig.update_layout(yaxis={'domain': [0, .85], 'mirror': False, 'showgrid': False, 'zeroline': False, 'ticktext': labels[order_dendrogram], "tickvals":fig['layout']['xaxis']['tickvals'], 'showticklabels': True, "ticks": "outside"})
+
+        fig.add_trace(heatmap)
+
+        fig['layout']['width'] = 1100
+        fig['layout']['height'] = 1100
+
+        return fig, title  # Figure(d), title
     else:
         return Figure(), ''
