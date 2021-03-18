@@ -9,6 +9,7 @@ import plotly.figure_factory as ff
 from app import app
 import os
 import numpy as np
+import pandas as pd
 from scipy.stats import pearsonr
 import dash_table
 import copy
@@ -246,11 +247,33 @@ controls2 = dbc.Card([
         ])
 ])
 
+controls3 = dbc.Card([
+    dbc.FormGroup([
+        dbc.Label("Select correlation type :"),
+        dcc.RadioItems(
+            id='Select_corr_type_mul_ewas3',
+            options = get_dataset_options(['Pearson', 'Spearman']),
+            value = 'Pearson',
+            labelStyle = {'display': 'inline-block', 'margin': '5px'}
+            )
+    ]),
+    dbc.FormGroup([
+        dbc.Label("Select subset method :"),
+        dcc.Dropdown(
+            id='Select_algorithm_method3',
+            options = get_dataset_options(['LightGbm', 'ElasticNet', 'NeuralNetwork']),
+            placeholder = 'LightGbm',
+            value = 'LightGbm',
+            )
+    ]),
+])
+
 layout = html.Div([
     dbc.Tabs([
         dbc.Tab(label = 'Select X', tab_id='tab_X'),
         dbc.Tab(label = 'Select Organ', tab_id = 'tab_organ'),
-    ], id = 'tab_manager_mul', active_tab = 'tab_X'),
+        dbc.Tab(label = 'Select Organ', tab_id = 'tab_average'),
+    ], id = 'tab_manager_mul', active_tab = 'tab_average'),
     html.Div(id="tab-content_mul")
 ])
 
@@ -292,6 +315,58 @@ def _plot_with_given_env_dataset(ac_tab):
                                 md=9)
                                 ])
                         ], fluid = True)
+    else:  # ac_tab == 'tab_average'
+        return  dbc.Container([
+                        html.H1('Multivariate XWAS - Correlations between accelerated aging'),
+                        html.Br(),
+                        html.Br(),
+                        dbc.Row([
+                            dbc.Col([controls3,
+                                     html.Br(),
+                                     html.Br()], md=3),
+                            dbc.Col(
+                                [dcc.Loading([
+                                    html.H2(id = 'title_average'),
+                                    dcc.Graph(id='Correlation Mul - Select Average')
+                                 ])],
+                                style={'overflowY': 'scroll', 'height': 1000, 'overflowX': 'scroll', 'width' : 1000},
+                                md=9)
+                                ])
+                        ], fluid = True)
+
+@app.callback([Output('Correlation Mul - Select Average', 'figure'), Output('title_average', 'children')],
+            [Input('Select_corr_type_mul_ewas3', 'value'), Input('Select_algorithm_method3', 'value')])
+def _plot_with_average_dataset(corr_type, algo):
+    data = load_csv(path_correlations_ewas + 'CorrelationsMultivariate_%s_%s.csv' % (corr_type, algo))
+    data['env_dataset'] = data['env_dataset'].str.replace('Clusters_', '')
+    data.loc[data.sample_size < 10, 'corr'] = 0
+    correlation_data = pd.DataFrame(None, index=data.env_dataset.drop_duplicates(), columns=["mean", "std"])
+    all_correlations = []
+
+    def fill_correlations(df):
+        correlation_data.loc[df.env_dataset.tolist()[0], "mean"] = np.round_(np.mean(df["corr"]), 3)
+        correlation_data.loc[df.env_dataset.tolist()[0], "std"] = np.round_(np.std(df["corr"]), 3)
+        
+        all_correlations.append(df["corr"].reset_index(drop=True))
+
+    data.groupby(by="env_dataset").apply(fill_correlations)
+
+    concat_all_correlations = pd.concat(all_correlations)
+    title = f"Average correlations per X dataset \n Average : {np.round_(np.mean(concat_all_correlations), 3)} +- {np.round_(np.std(concat_all_correlations), 3)}"
+
+    fig = Figure()
+    fig.add_trace(
+        Bar(
+            x=correlation_data.index,
+            y=correlation_data["mean"],
+            error_y={"array": correlation_data["std"], "type": "data"},
+            name="Average correlations",
+            marker_color="indianred",
+        )
+    )
+    fig.update_layout(xaxis_tickangle=-90)
+    fig.update_layout({"width": 1400, "height": 600})
+    return fig, title
 
 
 @app.callback(Output('Correlation Mul - Select Ewas dataset', 'figure'),
