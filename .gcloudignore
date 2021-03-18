@@ -5,3 +5,6 @@ __pycache__/
 env_website/
 **/*.csv
 .vscode
+
+data
+!data/page12_AttentionMapsVideos/
