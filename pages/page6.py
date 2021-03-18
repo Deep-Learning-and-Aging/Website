@@ -204,7 +204,6 @@ def _plot_with_given_env_dataset(ac_tab):
               Input('Select_subset_method3', 'value')])
 def _plot_with_average_correlation(corr_type, subset_method):
     data = load_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
-    data.loc[data.sample_size < 10, 'corr'] = 0
     correlation_data = pd.DataFrame(None, index=All, columns=["mean", "std"])
 
     all_correlations = []
@@ -260,7 +259,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         d = {}
         sample_size_matrix =  pivot_table(df_organ, values='sample_size', index=['env_dataset'],
                 columns=['organ_2']).values
-        matrix_organ[sample_size_matrix < 10] = 0
         customdata = np.dstack((sample_size_matrix, matrix_organ))
         title = "Average correlation = %.3f ± %.3f" % (np.mean(matrix_organ.values.flatten()), np.std(matrix_organ.values.flatten()))
         hovertemplate = 'Correlation : %{z}\
@@ -296,7 +294,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         sample_size_matrix = pivot_table(df_env, values='sample_size', index=['organ_1'], columns=['organ_2'])
 
         env_matrix = pivot_table(df_env, values='corr', index=['organ_1'], columns=['organ_2'])
-        env_matrix[sample_size_matrix < 10] = 0
         labels = env_matrix.columns 
 
         fig = ff.create_dendrogram(env_matrix, orientation="bottom",distfun=lambda df: 1 - df)
