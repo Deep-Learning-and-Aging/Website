@@ -12,6 +12,7 @@ import plotly.figure_factory as ff
 from scipy.spatial.distance import squareform
 import os
 import numpy as np
+import pandas as pd
 from scipy.stats import pearsonr
 import dash_table
 import copy
@@ -105,11 +106,32 @@ controls2 = dbc.Card([
         ], id = 'Select_organ_lin_ewas_full')
 ])
 
+controls3 = dbc.Card([
+    dbc.FormGroup([
+        dbc.Label("Select correlation type :"),
+        dcc.RadioItems(
+            id='Select_corr_type_lin_ewas3',
+            options = get_dataset_options(['Pearson', 'Spearman']),
+            value = 'Pearson',
+            labelStyle = {'display': 'inline-block', 'margin': '5px'}
+            )
+    ]),
+    dbc.FormGroup([
+        dbc.Label("Select subset method :"),
+        dcc.Dropdown(
+            id='Select_subset_method3',
+            options = get_dataset_options(['All', 'Union', 'Intersection']),
+            value = 'Union',
+            )
+    ]),
+])
+
 layout = html.Div([
     dbc.Tabs([
         dbc.Tab(label = 'Select X', tab_id='tab_X'),
         dbc.Tab(label = 'Select Organ', tab_id = 'tab_organ'),
-    ], id = 'tab_manager', active_tab = 'tab_X'),
+        dbc.Tab(label = 'Select Average', tab_id = 'tab_average')
+    ], id = 'tab_manager', active_tab = 'tab_average'),
     html.Div(id="tab-content")
 ])
 
@@ -155,6 +177,64 @@ def _plot_with_given_env_dataset(ac_tab):
                                 md=9)
                                 ])
                         ], fluid = True)
+    else:  # ac_tab == "tab_average"
+        return  dbc.Container([
+                        html.H1('Univariate XWAS - Correlations'),
+                        html.Br(),
+                        html.Br(),
+                        dbc.Row([
+                            dbc.Col([controls3,
+                                     html.Br(),
+                                     html.Br()], md=3),
+                            dbc.Col(
+                                [dcc.Loading([
+                                    html.H2(id = 'scores_univ_xwas_average'),
+                                    dcc.Graph(id='Correlation - Select Average')
+                                 ])],
+                                style={'overflowY': 'scroll', 'height': 1000, 'overflowX': 'scroll', 'width' : 1000},
+                                md=9)
+                                ])
+                        ], fluid = True)
+
+
+
+@app.callback([Output('Correlation - Select Average', 'figure'),
+               Output('scores_univ_xwas_average', 'children')],
+             [Input('Select_corr_type_lin_ewas3', 'value'),
+              Input('Select_subset_method3', 'value')])
+def _plot_with_average_correlation(corr_type, subset_method):
+    data = load_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
+    data.loc[data.sample_size < 10, 'corr'] = 0
+    correlation_data = pd.DataFrame(None, index=All, columns=["mean", "std"])
+
+    all_correlations = []
+
+    def fill_correlations(df):
+        correlation_data.loc[df.env_dataset.tolist()[0], "mean"] = np.round_(np.mean(df["corr"]), 3)
+        correlation_data.loc[df.env_dataset.tolist()[0], "std"] = np.round_(np.std(df["corr"]), 3)
+        
+        all_correlations.append(df["corr"].reset_index(drop=True))
+
+    data.groupby(by="env_dataset").apply(fill_correlations)
+
+    concat_all_correlations = pd.concat(all_correlations)
+    title = f"Average correlations per X dataset \n Average : {np.round_(np.mean(concat_all_correlations), 3)} +- {np.round_(np.std(concat_all_correlations), 3)}"
+    
+    fig = Figure()
+    fig.add_trace(
+        Bar(
+            x=correlation_data.index,
+            y=correlation_data["mean"],
+            error_y={"array": correlation_data["std"], "type": "data"},
+            name="Average correlations",
+            marker_color="indianred",
+        )
+    )
+    fig.update_layout(xaxis_tickangle=-90)
+    fig.update_layout({"width": 1400, "height": 600})
+
+    return fig, title
+
 
 
 @app.callback([Output('Correlation - Select Organ', 'figure'),
@@ -236,10 +316,6 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         except ValueError:
             return Figure(empty_graph)
 
-        heat_data = env_matrix.values[order_dendrogram,:]
-        heat_data = heat_data[:,order_dendrogram]
-        colorscale =  get_colorscale(heat_data)
-
         heat_sample_size = sample_size_matrix.values[order_dendrogram,:]
         heat_sample_size = heat_sample_size[:,order_dendrogram]
         customdata = np.dstack((heat_sample_size, heat_data))
@@ -248,7 +324,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
                             <br>Organ y : %{y}\
                             <br>Sample Size : %{customdata[0]}'
         idx_upper = np.triu_indices(len(heat_data))
-        title = "Average correlation = %.3f ± %.3f" % (np.mean(heat_data[idx_upper]), np.std(heat_data[idx_upper]))
+        title = "Average correlation = %.3f ± %.3f" % (np.mean(heat_data), np.std(heat_data))
 
         heatmap = Heatmap(
                 x = labels[order_dendrogram],
