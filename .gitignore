@@ -9,5 +9,4 @@ env_website/
 .csv
 .vscode
 __pycache__/
-Correlations_pipeline
 **/*.zip
