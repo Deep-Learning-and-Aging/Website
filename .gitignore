@@ -10,3 +10,4 @@ env_website/
 .vscode
 __pycache__/
 Correlations_pipeline
+**/*.zip
