@@ -14,14 +14,7 @@ import dash_table
 import copy
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
-Old_Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
-                 'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
-                 'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
-                 'ChestPain', 'CancerScreening', 'Medication', 'Hearing',
-                 'Household', 'MentalHealth', 'OtherSociodemographics',
-                 'PhysicalActivity', 'SexualFactors', 'Sleep', 'SocialSupport',
-                 'SunExposure', 'EarlyLifeFactors', 'Smoking'])
-Old_Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
+Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemistry', 'BloodBiochemistry', 'BloodCount',
               'EyeAutorefraction', 'EyeAcuity', 'EyeIntraocularPressure',
@@ -30,32 +23,26 @@ Old_Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSub
               'BoneDensitometryOfHeel', 'HearingTest', 'CognitiveFluidIntelligence',
               'CognitiveMatrixPatternCompletion', 'CognitiveNumericMemory', 'CognitivePairedAssociativeLearning',
               'CognitivePairsMatching', 'CognitiveProspectiveMemory', 'CognitiveReactionTime',
-              'CognitiveSymbolDigitSubstitution', 'CognitiveTowerRearranging', 'CognitiveTrailMaking'])
-Old_Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
-                                                    'F', 'G', 'H', 'I', 'J',
-                                                    'K', 'L', 'M', 'N', 'O',
-                                                    'P', 'Q', 'R', 'S', 'T',
-                                                    'U', 'V', 'W', 'X', 'Y', 'Z']]
-All = sorted(Old_Environmental + Old_Biomarkers + Old_Pathologies)
-
-
-path_linear_ewas = 'page5_LinearXWASResults/LinearOutput/'
+              'CognitiveSymbolDigitSubstitution', 'CognitiveTowerRearranging', 'CognitiveTrailMaking', 'PhysicalActivity'])
 Environmental = sorted(["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"])
 Socioeconomics = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
 Phenotypes = sorted(["Breathing", "CancerScreening", "ChestPain", "Claudication", "Eyesight", "GeneralHealth", "GeneralPain", "Hearing", "MentalHealth", "Mouth", "SexualFactors", "Sleep"])
-OtherSociodemographics = ["FamilyHistory"]
 Diseases = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
                                                     'F', 'G', 'H', 'I', 'J',
                                                     'K', 'L', 'M', 'N', 'O',
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
+All = sorted(Biomarkers + Environmental + Socioeconomics + Phenotypes + Diseases + ["FamilyHistory"])
+
+
+path_linear_ewas = 'page5_LinearXWASResults/LinearOutput/'
 
 controls = dbc.Card([
     dbc.FormGroup([
         html.P("Select data type: "),
         dcc.RadioItems(
             id='Select_data_type',
-            options = get_dataset_options(['All', 'Environmental', 'Socioeconomics', 'Phenotypes', 'OtherSociodemographics', 'Diseases']),
+            options = get_dataset_options(['All', 'Biomarkers', 'Phenotypes', 'Diseases', 'Environmental', 'Socioeconomics']),
             value = 'All',
             labelStyle = {'display': 'inline-block', 'margin': '5px'}
             ),
@@ -126,14 +113,14 @@ if MODE != 'All':
 def _select_sub_dropdown(val_data_type):
     if val_data_type == 'All':
         return get_dataset_options(All)
+    elif val_data_type == 'Biomarkers':
+        return get_dataset_options(Biomarkers)
     elif val_data_type == 'Environmental':
         return get_dataset_options(Environmental)
     elif val_data_type == 'Socioeconomics':
         return get_dataset_options(Socioeconomics)
     elif val_data_type == 'Phenotypes':
         return get_dataset_options(Phenotypes)
-    elif val_data_type == 'OtherSociodemographics':
-        return get_dataset_options(OtherSociodemographics)
     else:  # val_data_type == 'Diseases':
         return get_dataset_options(Diseases)
 

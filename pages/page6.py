@@ -16,17 +16,14 @@ import pandas as pd
 from scipy.stats import pearsonr
 import dash_table
 import copy
+from pages.page17 import create_dfs
+from pages.page4 import LoadData
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
 
-Old_Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
-                 'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
-                 'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
-                 'ChestPain', 'CancerScreening', 'Medication', 'Hearing',
-                 'Household', 'MentalHealth', 'OtherSociodemographics',
-                 'PhysicalActivity', 'SexualFactors', 'Sleep', 'SocialSupport',
-                 'SunExposure', 'EarlyLifeFactors', 'Smoking'])
-Old_Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
+
+path_correlations_ewas = 'page6_LinearXWASCorrelations/CorrelationsLinear/'
+All_Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemistry', 'BloodBiochemistry', 'BloodCount',
               'EyeAutorefraction', 'EyeAcuity', 'EyeIntraocularPressure',
@@ -35,25 +32,16 @@ Old_Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSub
               'BoneDensitometryOfHeel', 'HearingTest', 'CognitiveFluidIntelligence',
               'CognitiveMatrixPatternCompletion', 'CognitiveNumericMemory', 'CognitivePairedAssociativeLearning',
               'CognitivePairsMatching', 'CognitiveProspectiveMemory', 'CognitiveReactionTime',
-              'CognitiveSymbolDigitSubstitution', 'CognitiveTowerRearranging', 'CognitiveTrailMaking'])
-Old_Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
+              'CognitiveSymbolDigitSubstitution', 'CognitiveTowerRearranging', 'CognitiveTrailMaking', 'PhysicalActivity'])
+All_Environmental = sorted(["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"])
+All_Socioeconomics = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
+All_Phenotypes = sorted(["Breathing", "CancerScreening", "ChestPain", "Claudication", "Eyesight", "GeneralHealth", "GeneralPain", "Hearing", "MentalHealth", "Mouth", "SexualFactors", "Sleep"])
+All_Diseases = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
                                                     'F', 'G', 'H', 'I', 'J',
                                                     'K', 'L', 'M', 'N', 'O',
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
-All = sorted(Old_Environmental + Old_Biomarkers + Old_Pathologies)
-
-
-path_correlations_ewas = 'page6_LinearXWASCorrelations/CorrelationsLinear/'
-Environmental = sorted(["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"])
-Socioeconomics = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
-Phenotypes = sorted(["Breathing", "CancerScreening", "ChestPain", "Claudication", "Eyesight", "GeneralHealth", "GeneralPain", "Hearing", "MentalHealth", "Mouth", "SexualFactors", "Sleep"])
-OtherSociodemographics = ["FamilyHistory"]
-Diseases = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
-                                                    'F', 'G', 'H', 'I', 'J',
-                                                    'K', 'L', 'M', 'N', 'O',
-                                                    'P', 'Q', 'R', 'S', 'T',
-                                                    'U', 'V', 'W', 'X', 'Y', 'Z']]
+All = sorted(All_Biomarkers + All_Environmental + All_Socioeconomics + All_Phenotypes + All_Diseases + ["FamilyHistory"])
 
 colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
                [0.5, 'rgba(255, 255, 255, 0.85)'],
@@ -64,7 +52,7 @@ controls1 = dbc.Card([
         html.P("Select data type: "),
         dcc.RadioItems(
             id='Select_data_type',
-            options = get_dataset_options(['All', 'Environmental', 'Socioeconomics', 'Phenotypes', 'OtherSociodemographics', 'Diseases']),
+            options = get_dataset_options(['All', 'Biomarkers', 'Phenotypes', 'Diseases', 'Environmental', 'Socioeconomics']),
             value = 'All',
             labelStyle = {'display': 'inline-block', 'margin': '5px'}
             ),
@@ -92,8 +80,8 @@ controls1 = dbc.Card([
         dcc.Dropdown(
             id='Select_env_dataset_lin_ewas',
             options = [{'value' : '', 'label' : ''}],
-            placeholder = 'All',
-            value = 'All',
+            placeholder = 'Select a dataset...',
+            value=None
             ),
         html.Br()
         ], id = 'Select_env_dataset_lin_ewas_full')
@@ -103,17 +91,17 @@ controls1 = dbc.Card([
               [Input('Select_data_type', 'value')])
 def _select_sub_dropdown(val_data_type):
     if val_data_type == 'All':
-        return get_dataset_options(All) + [{'value': 'All', 'label': 'All'}]
+        return [{'value': 'All', 'label': 'All'}] + get_dataset_options(All)
+    elif val_data_type == 'Biomarkers':
+        return [{'value': 'All_Biomarkers', 'label': 'All_Biomarkers'}] + get_dataset_options(All_Biomarkers)
     elif val_data_type == 'Environmental':
-        return get_dataset_options(Environmental) + [{'value': 'Environmental', 'label': 'All'}]
+        return [{'value': 'All_Environmental', 'label': 'All_Environmental'}] + get_dataset_options(All_Environmental)
     elif val_data_type == 'Socioeconomics':
-        return get_dataset_options(Socioeconomics) + [{'value': 'Socioeconomics', 'label': 'All'}]
+        return [{'value': 'All_Socioeconomics', 'label': 'All_Socioeconomics'}] + get_dataset_options(All_Socioeconomics)
     elif val_data_type == 'Phenotypes':
-        return get_dataset_options(Phenotypes) + [{'value': 'Phenotypes', 'label': 'All'}]
-    elif val_data_type == 'OtherSociodemographics':
-        return get_dataset_options(OtherSociodemographics) + [{'value': 'OtherSociodemographics', 'label': 'All'}]
+        return [{'value': 'All_Phenotypes', 'label': 'All_Phenotypes'}] + get_dataset_options(All_Phenotypes)
     else:  # val_data_type == 'Diseases':
-        return get_dataset_options(Diseases) + [{'value': 'Diseases', 'label': 'All'}]
+        return [{'value': 'All_Diseases', 'label': 'All_Diseases'}] + get_dataset_options(All_Diseases)
     
 
 controls2 = dbc.Card([
@@ -244,7 +232,15 @@ def _plot_with_given_env_dataset(ac_tab):
               Input('Select_subset_method3', 'value')])
 def _plot_with_average_correlation(corr_type, subset_method):
     data = load_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
-    correlation_data = pd.DataFrame(None, index=All + ["All", "Environmental", "Socioeconomics", "Phenotypes", "Diseases"], columns=["mean", "std"])
+    correlation_data = pd.DataFrame(None, index=All + ["All", "All_Biomarkers", "All_Environmental", "All_Socioeconomics", "All_Phenotypes", "All_Diseases", "Genetics", "Phenotypic"], columns=["mean", "std"])
+
+    genetics = create_dfs()[0]
+    correlation_data.loc["Genetics", "mean"] = np.round_(np.nanmean(genetics.values), 3)
+    correlation_data.loc["Genetics", "std"] = np.round_(np.nanstd(genetics.values), 3)
+
+    phenotypic = LoadData('*', 'bestmodels', None, 'Test')[2]
+    correlation_data.loc["Phenotypic", "mean"] = np.round_(np.nanmean(phenotypic.values), 3)
+    correlation_data.loc["Phenotypic", "std"] = np.round_(np.nanstd(phenotypic.values), 3)
 
     all_correlations = []
 
@@ -327,7 +323,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
 @app.callback([Output('Correlation - Select Ewas dataset', 'figure'), Output('scores_univ_xwas_X', 'children')],
              [Input('Select_corr_type_lin_ewas1', 'value'), Input('Select_subset_method1', 'value'), Input('Select_env_dataset_lin_ewas', 'value')])
 def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
-    if corr_type is not None and subset_method is not None:
+    if corr_type is not None and subset_method is not None and env_dataset is not None:
         df = load_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
         df = df[['env_dataset', 'organ_1', 'organ_2', 'corr', 'sample_size']]
         df_env = df[df.env_dataset == env_dataset]
