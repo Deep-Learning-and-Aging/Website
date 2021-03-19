@@ -272,7 +272,7 @@ layout = html.Div([
     dbc.Tabs([
         dbc.Tab(label = 'Select X', tab_id='tab_X'),
         dbc.Tab(label = 'Select Organ', tab_id = 'tab_organ'),
-        dbc.Tab(label = 'Select Organ', tab_id = 'tab_average'),
+        dbc.Tab(label = 'Select Average', tab_id = 'tab_average'),
     ], id = 'tab_manager_mul', active_tab = 'tab_average'),
     html.Div(id="tab-content_mul")
 ])
