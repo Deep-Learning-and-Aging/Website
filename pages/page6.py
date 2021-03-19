@@ -18,15 +18,15 @@ import dash_table
 import copy
 organs = sorted([ "*", "*instances01", "*instances1.5x", "*instances23", "Abdomen", "AbdomenLiver", "AbdomenPancreas", "Arterial", "ArterialPulseWaveAnalysis", "ArterialCarotids", "Biochemistry", "BiochemistryUrine", "BiochemistryBlood", "Brain", "BrainCognitive", "BrainMRI", "Eyes", "EyesAll" ,"EyesFundus", "EyesOCT", "Hearing", "HeartMRI", "Heart", "HeartECG", "ImmuneSystem", "Lungs", "Musculoskeletal", "MusculoskeletalSpine", "MusculoskeletalHips", "MusculoskeletalKnees", "MusculoskeletalFullBody", "MusculoskeletalScalars", "PhysicalActivity" ])
 
-path_correlations_ewas = 'page6_LinearXWASCorrelations/CorrelationsLinear/'
-Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
+
+Old_Environmental = sorted(['Alcohol', 'Diet', 'Education', 'ElectronicDevices',
                  'Employment', 'FamilyHistory', 'Eyesight', 'Mouth',
                  'GeneralHealth', 'Breathing', 'Claudification', 'GeneralPain',
                  'ChestPain', 'CancerScreening', 'Medication', 'Hearing',
                  'Household', 'MentalHealth', 'OtherSociodemographics',
                  'PhysicalActivity', 'SexualFactors', 'Sleep', 'SocialSupport',
                  'SunExposure', 'EarlyLifeFactors', 'Smoking'])
-Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
+Old_Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcorticalVolumes',
               'HeartSize', 'HeartPWA', 'ECGAtRest', 'AnthropometryImpedance',
               'UrineBiochemistry', 'BloodBiochemistry', 'BloodCount',
               'EyeAutorefraction', 'EyeAcuity', 'EyeIntraocularPressure',
@@ -36,18 +36,40 @@ Biomarkers = sorted(['HandGripStrength', 'BrainGreyMatterVolumes', 'BrainSubcort
               'CognitiveMatrixPatternCompletion', 'CognitiveNumericMemory', 'CognitivePairedAssociativeLearning',
               'CognitivePairsMatching', 'CognitiveProspectiveMemory', 'CognitiveReactionTime',
               'CognitiveSymbolDigitSubstitution', 'CognitiveTowerRearranging', 'CognitiveTrailMaking'])
-Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
+Old_Pathologies = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
                                                     'F', 'G', 'H', 'I', 'J',
                                                     'K', 'L', 'M', 'N', 'O',
                                                     'P', 'Q', 'R', 'S', 'T',
                                                     'U', 'V', 'W', 'X', 'Y', 'Z']]
-All = sorted(Environmental + Biomarkers + Pathologies)
+All = sorted(Old_Environmental + Old_Biomarkers + Old_Pathologies)
+
+
+path_correlations_ewas = 'page6_LinearXWASCorrelations/CorrelationsLinear/'
+Environmental = sorted(["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"])
+Socioeconomics = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
+Phenotypes = sorted(["Breathing", "CancerScreening", "ChestPain", "Claudication", "Eyesight", "GeneralHealth", "GeneralPain", "Hearing", "MentalHealth", "Mouth", "SexualFactors", "Sleep"])
+OtherSociodemographics = ["FamilyHistory"]
+Diseases = ['medical_diagnoses_%s' % letter for letter in ['A', 'B', 'C', 'D', 'E',
+                                                    'F', 'G', 'H', 'I', 'J',
+                                                    'K', 'L', 'M', 'N', 'O',
+                                                    'P', 'Q', 'R', 'S', 'T',
+                                                    'U', 'V', 'W', 'X', 'Y', 'Z']]
 
 colorscale =  [[0, 'rgba(255, 0, 0, 0.85)'],
                [0.5, 'rgba(255, 255, 255, 0.85)'],
                [1, 'rgba(0, 0, 255, 0.85)']]
 
 controls1 = dbc.Card([
+    dbc.FormGroup([
+        html.P("Select data type: "),
+        dcc.RadioItems(
+            id='Select_data_type',
+            options = get_dataset_options(['All', 'Environmental', 'Socioeconomics', 'Phenotypes', 'OtherSociodemographics', 'Diseases']),
+            value = 'All',
+            labelStyle = {'display': 'inline-block', 'margin': '5px'}
+            ),
+        html.Br()
+    ], id = 'Select_data_type_full'),
     dbc.FormGroup([
         dbc.Label("Select correlation type :"),
         dcc.RadioItems(
@@ -69,12 +91,30 @@ controls1 = dbc.Card([
         html.P("Select X Dataset: "),
         dcc.Dropdown(
             id='Select_env_dataset_lin_ewas',
-            options = get_dataset_options(sorted(All)),
-            value = sorted(All)[0]
+            options = [{'value' : '', 'label' : ''}],
+            placeholder = 'All',
+            value = 'All',
             ),
         html.Br()
         ], id = 'Select_env_dataset_lin_ewas_full')
 ])
+
+@app.callback(Output('Select_env_dataset_lin_ewas', 'options'),
+              [Input('Select_data_type', 'value')])
+def _select_sub_dropdown(val_data_type):
+    if val_data_type == 'All':
+        return get_dataset_options(All) + [{'value': 'All', 'label': 'All'}]
+    elif val_data_type == 'Environmental':
+        return get_dataset_options(Environmental) + [{'value': 'Environmental', 'label': 'All'}]
+    elif val_data_type == 'Socioeconomics':
+        return get_dataset_options(Socioeconomics) + [{'value': 'Socioeconomics', 'label': 'All'}]
+    elif val_data_type == 'Phenotypes':
+        return get_dataset_options(Phenotypes) + [{'value': 'Phenotypes', 'label': 'All'}]
+    elif val_data_type == 'OtherSociodemographics':
+        return get_dataset_options(OtherSociodemographics) + [{'value': 'OtherSociodemographics', 'label': 'All'}]
+    else:  # val_data_type == 'Diseases':
+        return get_dataset_options(Diseases) + [{'value': 'Diseases', 'label': 'All'}]
+    
 
 controls2 = dbc.Card([
     dbc.FormGroup([
@@ -131,7 +171,7 @@ layout = html.Div([
         dbc.Tab(label = 'Select X', tab_id='tab_X'),
         dbc.Tab(label = 'Select Organ', tab_id = 'tab_organ'),
         dbc.Tab(label = 'Select Average', tab_id = 'tab_average')
-    ], id = 'tab_manager', active_tab = 'tab_average'),
+    ], id = 'tab_manager', active_tab = 'tab_X'),
     html.Div(id="tab-content")
 ])
 
@@ -204,7 +244,7 @@ def _plot_with_given_env_dataset(ac_tab):
               Input('Select_subset_method3', 'value')])
 def _plot_with_average_correlation(corr_type, subset_method):
     data = load_csv(path_correlations_ewas + 'Correlations_%s_%s.csv' % (subset_method, corr_type)).replace('\\*', '*')
-    correlation_data = pd.DataFrame(None, index=All, columns=["mean", "std"])
+    correlation_data = pd.DataFrame(None, index=All + ["All", "Environmental", "Socioeconomics", "Phenotypes", "Diseases"], columns=["mean", "std"])
 
     all_correlations = []
 
@@ -219,6 +259,8 @@ def _plot_with_average_correlation(corr_type, subset_method):
     concat_all_correlations = pd.concat(all_correlations)
     title = f"Average correlations per X dataset \n Average : {np.round_(np.mean(concat_all_correlations), 3)} +- {np.round_(np.std(concat_all_correlations), 3)}"
     
+    correlation_data.sort_values(by="mean", ascending=False, inplace=True)
+    
     fig = Figure()
     fig.add_trace(
         Bar(
@@ -230,7 +272,7 @@ def _plot_with_average_correlation(corr_type, subset_method):
         )
     )
     fig.update_layout(xaxis_tickangle=-90)
-    fig.update_layout({"width": 1400, "height": 600})
+    fig.update_layout({"width": 1800, "height": 600})
 
     return fig, title
 
