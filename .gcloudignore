@@ -5,6 +5,10 @@ __pycache__/
 env_website/
 **/*.csv
 .vscode
+**/*.zip
+.vscode 
 
+Correlations_pipeline
+linear_output_paper
 data
 !data/page12_AttentionMapsVideos/
