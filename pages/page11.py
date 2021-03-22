@@ -18,13 +18,13 @@ from PIL import Image
 import base64
 
 
-filename_heritabilty = 'page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv'
+filename_heritabilty = "page11_GWASHeritability/Heritability/GWAS_heritabilities_Age.csv"
 df = load_csv(filename_heritabilty)
-organs_gwas = df['Organ'].drop_duplicates()
-if MODE != 'All' :
-    style = {'display' : 'None'}
+organs_gwas = df["Organ"].drop_duplicates()
+if MODE != "All":
+    style = {"display": "None"}
     value = MODE
-else :
+else:
     style = {}
     value = organs_gwas[0]
 
@@ -53,31 +53,30 @@ else :
 # ], style = style)
 
 d = dict()
-d['data'] = Bar(
-    x=df['Organ'],
-    y=df['h2'],
-    error_y = dict(type = 'data', array = df['h2_sd']),
-    name='Heritability'
-)
-d['layout'] = {
-               'yaxis' : {'title' : {'text' : 'Heritability'}},
-               'height' : 700
-               #'yaxis' : {'title' : {'text' : unit_y}}
-               }
+d["data"] = Bar(x=df["Organ"], y=df["h2"], error_y=dict(type="data", array=df["h2_sd"]), name="Heritability")
+d["layout"] = {
+    "yaxis": {"title": {"text": "Heritability"}},
+    "height": 700
+    #'yaxis' : {'title' : {'text' : unit_y}}
+}
 figure = Figure(d)
 
-layout = dbc.Container([
-                html.H1('Genetics - Heritability'),
-                html.Br(),
-                html.Br(),
-                dbc.Row([
-                    dbc.Col(
-                        [dcc.Graph(
-                             id='Plot Heritability',
-                             figure = figure
-                             ),
-                         ],
-                        style={ 'overflowX': 'scroll', 'width' : 800},
-                         md=9)
-                        ])
-            ], fluid = True)
+layout = dbc.Container(
+    [
+        html.H1("Genetics - Heritability"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Graph(id="Plot Heritability", figure=figure),
+                    ],
+                    style={"overflowX": "scroll", "width": 800},
+                    md=9,
+                )
+            ]
+        ),
+    ],
+    fluid=True,
+)

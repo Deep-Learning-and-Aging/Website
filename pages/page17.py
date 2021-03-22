@@ -18,28 +18,30 @@ from PIL import Image
 import base64
 from plotly.subplots import make_subplots
 from scipy.spatial.distance import squareform
+
 ## Set performance file
-performances = 'page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv'
+performances = "page2_predictions/Performances/PERFORMANCES_bestmodels_alphabetical_eids_Age_test.csv"
 ## Set heritability file
 filename_heritabilty = heritability
 ## Set heritability file
-filename_gwas_corr = 'page17_GWASCorrelations/'
+filename_gwas_corr = "page17_GWASCorrelations/"
 
 
-
-
-def create_dfs(mode = MODE):
-    df_perf = load_csv(performances).set_index('version')
-    scores_organs = [elem.split('_')[1] for elem in df_perf.index.values]
-    scores_view = [(elem.split('_')[2]).replace('*', '').replace('HearingTest', '').replace('BloodCount', '') for elem in df_perf.index.values]
+def create_dfs(mode=MODE):
+    df_perf = load_csv(performances).set_index("version")
+    scores_organs = [elem.split("_")[1] for elem in df_perf.index.values]
+    scores_view = [
+        (elem.split("_")[2]).replace("*", "").replace("HearingTest", "").replace("BloodCount", "")
+        for elem in df_perf.index.values
+    ]
     df_perf.index = [organ + view for organ, view in zip(scores_organs, scores_view)]
-    df_perf = df_perf['R-Squared_all']
+    df_perf = df_perf["R-Squared_all"]
 
-    df_heritability = heritability.set_index('Organ')['h2']
-    corr_gwas = load_csv(filename_gwas_corr + 'GWAS_correlations_Age.csv').set_index('Unnamed: 0')
-    corr_gwas_sd = load_csv(filename_gwas_corr + 'GWAS_correlations_sd_Age.csv').set_index('Unnamed: 0')
+    df_heritability = heritability.set_index("Organ")["h2"]
+    corr_gwas = load_csv(filename_gwas_corr + "GWAS_correlations_Age.csv").set_index("Unnamed: 0")
+    corr_gwas_sd = load_csv(filename_gwas_corr + "GWAS_correlations_sd_Age.csv").set_index("Unnamed: 0")
 
-    if mode != 'All' :
+    if mode != "All":
         corr_gwas = corr_gwas[corr_gwas.columns[corr_gwas.columns.str.contains(mode)]]
         corr_gwas = corr_gwas.loc[corr_gwas.index.str.contains(mode)]
         corr_gwas_sd = corr_gwas_sd[corr_gwas_sd.columns[corr_gwas_sd.columns.str.contains(mode)]]
@@ -61,40 +63,52 @@ def create_dfs(mode = MODE):
     return corr_gwas, corr_gwas_sd, df_perf, df_heritability, organ_sorted_by_score, organ_sorted_alphabetically
 
 
-layout = dbc.Container([
-                html.H1('Genetics - Correlations'),
-                html.Br(),
-                html.Br(),
-                dbc.Row([
-                    dbc.Col([
-                        dbc.FormGroup([
-                            html.P("Order by: "),
-                            dcc.Dropdown(
-                                id='Select_ordering_gwas_',
-                                options = get_dataset_options(['Score', 'Custom', 'Clustering']),
-                                value = 'Clustering'
-                                ),
-                            html.Br()
-                        ])
-                    ],md = 3),
+layout = dbc.Container(
+    [
+        html.H1("Genetics - Correlations"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
                 dbc.Col(
-                    dcc.Loading([dcc.Graph(
-                         id='Plot_GWAS_Corr_'
-                         ),
-                     ]),
-                     md=9,
-                     style={ 'overflowX': 'scroll', 'width' : 800},
-                     )
-                    ])
-                ], fluid = True)
+                    [
+                        dbc.FormGroup(
+                            [
+                                html.P("Order by: "),
+                                dcc.Dropdown(
+                                    id="Select_ordering_gwas_",
+                                    options=get_dataset_options(["Score", "Custom", "Clustering"]),
+                                    value="Clustering",
+                                ),
+                                html.Br(),
+                            ]
+                        )
+                    ],
+                    md=3,
+                ),
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            dcc.Graph(id="Plot_GWAS_Corr_"),
+                        ]
+                    ),
+                    md=9,
+                    style={"overflowX": "scroll", "width": 800},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)
 
 
-@app.callback(Output('Plot_GWAS_Corr_', 'figure'),
-             [Input('Select_ordering_gwas_', 'value')])
+@app.callback(Output("Plot_GWAS_Corr_", "figure"), [Input("Select_ordering_gwas_", "value")])
 def _plot_heatmap_(value_ordering):
-    corr_gwas, corr_gwas_sd, df_perf, df_heritability, organ_sorted_by_score, organ_sorted_alphabetically = create_dfs(mode = MODE)
-    if value_ordering is not None :
-        if value_ordering == 'Score':
+    corr_gwas, corr_gwas_sd, df_perf, df_heritability, organ_sorted_by_score, organ_sorted_alphabetically = create_dfs(
+        mode=MODE
+    )
+    if value_ordering is not None:
+        if value_ordering == "Score":
             ## Sort by score :
             df_perf = df_perf.loc[organ_sorted_by_score]
             df_heritability = df_heritability.loc[organ_sorted_by_score]
@@ -102,7 +116,7 @@ def _plot_heatmap_(value_ordering):
             corr_gwas = corr_gwas.loc[organ_sorted_by_score, organ_sorted_by_score]
             corr_gwas_sd = corr_gwas_sd.loc[organ_sorted_by_score, organ_sorted_by_score]
 
-        elif value_ordering == 'Custom':
+        elif value_ordering == "Custom":
             ## Sort alphabetically
             df_perf = df_perf.loc[organ_sorted_alphabetically]
             df_heritability = df_heritability.loc[organ_sorted_alphabetically]
@@ -110,14 +124,14 @@ def _plot_heatmap_(value_ordering):
             corr_gwas = corr_gwas.loc[organ_sorted_alphabetically, organ_sorted_alphabetically]
             corr_gwas_sd = corr_gwas_sd.loc[organ_sorted_alphabetically, organ_sorted_alphabetically]
 
-        elif value_ordering == 'Clustering':
+        elif value_ordering == "Clustering":
             labels = corr_gwas.index
             corr_gwas = corr_gwas.fillna(0)
-            corr_gwas = ((corr_gwas + corr_gwas.T)/2)
+            corr_gwas = (corr_gwas + corr_gwas.T) / 2
             corr_gwas_den = corr_gwas.copy().values
             np.fill_diagonal(corr_gwas_den, 1)
-            d2 = ff.create_dendrogram(corr_gwas_den, labels = labels, distfun=lambda x : squareform(1 - x))
-            dendro_leaves = d2['layout']['xaxis']['ticktext']
+            d2 = ff.create_dendrogram(corr_gwas_den, labels=labels, distfun=lambda x: squareform(1 - x))
+            dendro_leaves = d2["layout"]["xaxis"]["ticktext"]
             organ_sorted_cluster = dendro_leaves
             ## Sort alphabetically
             df_perf = df_perf.loc[organ_sorted_cluster]
@@ -126,17 +140,14 @@ def _plot_heatmap_(value_ordering):
             corr_gwas = corr_gwas.loc[organ_sorted_cluster, organ_sorted_cluster]
             corr_gwas_sd = corr_gwas_sd.loc[organ_sorted_cluster, organ_sorted_cluster]
 
-        score_matrix =  np.tile(df_perf, (len(df_perf), 1))
-        score_heritability =  np.tile(df_heritability, (len(df_heritability), 1))
+        score_matrix = np.tile(df_perf, (len(df_perf), 1))
+        score_heritability = np.tile(df_heritability, (len(df_heritability), 1))
 
         score_matrix_y = score_matrix.T
         score_heritability_y = score_heritability.T
 
-
-
-
         customdata = np.dstack((score_matrix, score_heritability, score_matrix_y, score_heritability_y, corr_gwas_sd))
-        hovertemplate = 'Model x: %{x}\
+        hovertemplate = "Model x: %{x}\
                          <br>Score x : %{customdata[0]:.3f}\
                          <br>Heritability x : %{customdata[1]:.3f}\
                          <br>\
@@ -144,42 +155,42 @@ def _plot_heatmap_(value_ordering):
                          <br>Score y : %{customdata[2]:.3f}\
                          <br>Heritability y : %{customdata[3]:.3f}\
                          <br>\
-                         <br>Correlation : %{z:.3f} ± %{customdata[4]:.3f}'
+                         <br>Correlation : %{z:.3f} ± %{customdata[4]:.3f}"
         colorscale = get_colorscale(corr_gwas)
         d = {}
-        d['data'] = [
-            Heatmap(z=corr_gwas,
-                       x=corr_gwas.index,
-                       y=corr_gwas.columns,
-                       colorscale=colorscale,
-                       customdata=customdata,
-                       hovertemplate=hovertemplate,
-                       hoverongaps = False),
-            ]
-        d['layout'] = {'width' : 800, 'height' : 800}
+        d["data"] = [
+            Heatmap(
+                z=corr_gwas,
+                x=corr_gwas.index,
+                y=corr_gwas.columns,
+                colorscale=colorscale,
+                customdata=customdata,
+                hovertemplate=hovertemplate,
+                hoverongaps=False,
+            ),
+        ]
+        d["layout"] = {"width": 800, "height": 800}
 
-        if value_ordering == 'Clustering' :
-            fig = make_subplots(rows=2, cols=1,
-                                shared_xaxes=True,
-                                vertical_spacing=0.02)
-            for elem in d['data']:
-                fig.add_trace(elem, row = 2, col = 1)
-            for elem in d2['data']:
-                elem['showlegend'] = False
-                fig.add_trace(elem, row = 1, col = 1)
+        if value_ordering == "Clustering":
+            fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+            for elem in d["data"]:
+                fig.add_trace(elem, row=2, col=1)
+            for elem in d2["data"]:
+                elem["showlegend"] = False
+                fig.add_trace(elem, row=1, col=1)
 
-            fig['layout']['xaxis']['range'] = [0, 100]
-            fig['layout']['xaxis']['showgrid'] = False
-            fig['layout']['yaxis']['domain'] = [0.7, 1.0]
-            fig['layout']['yaxis']['showticklabels'] = False
-            fig['layout']['yaxis']['showgrid'] = False
-            fig['layout']['yaxis2']['domain'] = [0, 0.7]
-            fig['layout']['yaxis2']['showgrid'] = False
-            fig['layout']['width'] = 900
-            fig['layout']['height'] = 900
-            fig['layout']['xaxis']['autorange'] =  True
+            fig["layout"]["xaxis"]["range"] = [0, 100]
+            fig["layout"]["xaxis"]["showgrid"] = False
+            fig["layout"]["yaxis"]["domain"] = [0.7, 1.0]
+            fig["layout"]["yaxis"]["showticklabels"] = False
+            fig["layout"]["yaxis"]["showgrid"] = False
+            fig["layout"]["yaxis2"]["domain"] = [0, 0.7]
+            fig["layout"]["yaxis2"]["showgrid"] = False
+            fig["layout"]["width"] = 900
+            fig["layout"]["height"] = 900
+            fig["layout"]["xaxis"]["autorange"] = True
             return fig
-        else :
+        else:
             return Figure(d)
-    else :
+    else:
         return Figure(empty_graph)
