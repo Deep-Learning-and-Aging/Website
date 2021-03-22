@@ -140,5 +140,6 @@ def _(pathname):
 
 server = app.server
 
-if __name__ == "__main__":
+
+def launch_website():
     app.run_server(debug=True)
