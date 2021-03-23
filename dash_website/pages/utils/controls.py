@@ -2,7 +2,13 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-from dash_website.pages.tools import get_dataset_options
+
+def get_dataset_options(list_):
+    list_label_value = []
+    for elem in list_:
+        d = {"value": elem, "label": elem}
+        list_label_value.append(d)
+    return list_label_value
 
 
 def get_correlation_type_radio_items(id):

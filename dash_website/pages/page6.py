@@ -4,14 +4,11 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-import numpy as np
 import pandas as pd
-from plotly.graph_objs import Figure, Bar, Heatmap
-import plotly.figure_factory as ff
+import numpy as np
 
-from dash_website.pages.page17 import create_dfs
-from dash_website.pages.page4 import LoadData
 from dash_website.pages.utils.controls import (
+    get_dataset_options,
     get_correlation_type_radio_items,
     get_subset_method_radio_items,
     get_organ_drop_down,
@@ -19,7 +16,6 @@ from dash_website.pages.utils.controls import (
     get_dataset_drop_down,
 )
 from dash_website.pages.utils.aws_loader import load_csv
-from dash_website.pages.tools import get_dataset_options, get_colorscale, empty_graph
 from dash_website.pages import (
     ORGANS,
     ALL_BIOMARKERS,
@@ -31,8 +27,10 @@ from dash_website.pages import (
     CATEGORIES,
 )
 
-path_correlations_ewas = "page6_LinearXWASCorrelations/CorrelationsLinear/"
-colorscale = [[0, "rgba(255, 0, 0, 0.85)"], [0.5, "rgba(255, 255, 255, 0.85)"], [1, "rgba(0, 0, 255, 0.85)"]]
+# TO REMOVE
+from dash_website.pages.page17 import create_dfs
+from dash_website.pages.page4 import LoadData
+from plotly.graph_objs import Figure, Bar
 
 
 layout = html.Div(
@@ -123,9 +121,6 @@ def get_controls_tab_average():
     )
 
 
-CATEGORIES = ["All", "Biomarkers", "Phenotypes", "Diseases", "Environmental", "Socioeconomics"]
-
-
 @APP.callback(Output("dataset_x", "options"), Input("category_x", "value"))
 def _select_dataset(val_data_type):
     if val_data_type == "All":
@@ -153,75 +148,22 @@ def _select_dataset(val_data_type):
     ],
 )
 def _fill_graph_tab_x(correlation_type, subset_method, dataset_x):
-    df = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, correlation_type)).replace(
-        "\\*", "*"
-    )
-    df = df[["env_dataset", "organ_1", "organ_2", "corr", "sample_size"]]
-    df_env = df[df.env_dataset == dataset_x]
-    df_env = df_env.fillna(0)
+    from dash_website.pages.utils.dendrogram_heatmap import create_dendrogram_heatmap
 
-    sample_size_matrix = pd.pivot_table(df_env, values="sample_size", index=["organ_1"], columns=["organ_2"])
+    correlations_raw = load_csv(
+        f"page6_LinearXWASCorrelations/correlations/Correlations_{subset_method}_{correlation_type}.csv",
+        usecols=["env_dataset", "organ_1", "organ_2", "corr", "sample_size"],
+    ).replace("\\*", "*")
 
-    env_matrix = pd.pivot_table(df_env, values="corr", index=["organ_1"], columns=["organ_2"])
-    labels = env_matrix.columns
+    correlations = correlations_raw[correlations_raw.env_dataset == dataset_x].fillna(0)
+    sample_sizes_2d = pd.pivot_table(correlations, values="sample_size", index=["organ_1"], columns=["organ_2"])
+    correlations_2d = pd.pivot_table(correlations, values="corr", index=["organ_1"], columns=["organ_2"])
 
-    fig = ff.create_dendrogram(env_matrix, orientation="bottom", distfun=lambda df: 1 - df)
-    for scatter in fig["data"]:
-        scatter["yaxis"] = "y2"
+    fig = create_dendrogram_heatmap(correlations_2d, sample_sizes_2d)
 
-    order_dendrogram = list(map(int, fig["layout"]["xaxis"]["ticktext"]))
+    title = "Average correlation = ??? ± ???"
 
-    fig.update_layout(xaxis={"ticktext": labels[order_dendrogram], "mirror": False})
-    fig.update_layout(yaxis2={"domain": [0.85, 1], "showticklabels": False, "showgrid": False, "zeroline": False})
-
-    heat_data = env_matrix.values[order_dendrogram, :]
-    heat_data = heat_data[:, order_dendrogram]
-    try:
-        colorscale = get_colorscale(heat_data)
-    except ValueError:
-        return Figure(empty_graph)
-
-    heat_sample_size = sample_size_matrix.values[order_dendrogram, :]
-    heat_sample_size = heat_sample_size[:, order_dendrogram]
-    customdata = np.dstack((heat_sample_size, heat_data))
-    hovertemplate = "Correlation : %{z}\
-                        <br>Organ x : %{x}\
-                        <br>Organ y : %{y}\
-                        <br>Sample Size : %{customdata[0]}"
-    idx_upper = np.triu_indices(len(heat_data))
-    title = "Average correlation = %.3f ± %.3f" % (np.mean(heat_data), np.std(heat_data))
-
-    heatmap = Heatmap(
-        x=labels[order_dendrogram],
-        y=labels[order_dendrogram],
-        z=heat_data,
-        colorscale=colorscale,
-        customdata=customdata,
-        hovertemplate=hovertemplate,
-    )
-
-    heatmap["x"] = fig["layout"]["xaxis"]["tickvals"]
-    heatmap["y"] = fig["layout"]["xaxis"]["tickvals"]
-
-    fig.update_layout(
-        yaxis={
-            "domain": [0, 0.85],
-            "mirror": False,
-            "showgrid": False,
-            "zeroline": False,
-            "ticktext": labels[order_dendrogram],
-            "tickvals": fig["layout"]["xaxis"]["tickvals"],
-            "showticklabels": True,
-            "ticks": "outside",
-        }
-    )
-
-    fig.add_trace(heatmap)
-
-    fig["layout"]["width"] = 1100
-    fig["layout"]["height"] = 1100
-
-    return fig, title  # Figure(d), title
+    return fig, title
 
 
 @APP.callback(
@@ -232,49 +174,23 @@ def _fill_graph_tab_x(correlation_type, subset_method, dataset_x):
         Input("organs_organ", "value"),
     ],
 )
-def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
-    if corr_type is not None and subset_method is not None:
-        df = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace(
-            "\\*", "*"
-        )
-        df = df[["env_dataset", "organ_1", "organ_2", "corr", "sample_size"]]
-        df_organ = df[df.organ_1 == organ]
-        df_organ = df_organ[df_organ.organ_2 != organ]
-        df_organ = df_organ.fillna(0)
+def _fill_graph_tab_organ(correlation_type, subset_method, organ):
+    from dash_website.pages.utils.heatmap import create_heatmap
+    from plotly.graph_objs import Figure
 
-        matrix_organ = pd.pivot_table(df_organ, values="corr", index=["env_dataset"], columns=["organ_2"])
+    correlations_raw = load_csv(
+        f"page6_LinearXWASCorrelations/correlations/Correlations_{subset_method}_{correlation_type}.csv",
+        usecols=["env_dataset", "organ_1", "organ_2", "corr", "sample_size"],
+    ).replace("\\*", "*")
+    correlations = correlations_raw[(correlations_raw.organ_1 == organ) & (correlations_raw.organ_2 != organ)].fillna(0)
 
-        try:
-            colorscale = get_colorscale(matrix_organ)
-        except ValueError:
-            return Figure(empty_graph)
-        d = {}
-        sample_size_matrix = pd.pivot_table(
-            df_organ, values="sample_size", index=["env_dataset"], columns=["organ_2"]
-        ).values
-        customdata = np.dstack((sample_size_matrix, matrix_organ))
-        title = "Average correlation = %.3f ± %.3f" % (
-            np.mean(matrix_organ.values.flatten()),
-            np.std(matrix_organ.values.flatten()),
-        )
-        hovertemplate = "Correlation : %{z}\
-                 <br>Organ x : %{x}\
-                 <br>Organ y : %{y}\
-                 <br>Sample Size : %{customdata[0]}"
+    correlations_2d = pd.pivot_table(correlations, values="corr", index=["organ_2"], columns=["env_dataset"])
+    sample_sizes_2d = pd.pivot_table(correlations, values="sample_size", index=["organ_2"], columns=["env_dataset"])
 
-        d["data"] = Heatmap(
-            z=matrix_organ.T,
-            x=matrix_organ.T.columns,
-            y=matrix_organ.T.index,
-            colorscale=colorscale,
-            customdata=customdata,
-            hovertemplate=hovertemplate,
-        )
+    heatmap = create_heatmap(correlations_2d, sample_sizes_2d, correlations_2d.columns, correlations_2d.index)
+    title = "Average correlation = ??? ± ???"
 
-        d["layout"] = dict(xaxis=dict(dtick=1), yaxis=dict(dtick=1), width=1000, height=600)
-        return Figure(d), title
-    else:
-        return Figure(), ""
+    return Figure(heatmap), title
 
 
 @APP.callback(
