@@ -72,10 +72,6 @@ ALL_BIOMARKERS = sorted(
         "PhysicalActivity",
     ]
 )
-ALL_ENVIRONMENTAL = sorted(
-    ["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"]
-)
-ALL_SOCIOECONOMICS = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
 ALL_PHENOTYPES = sorted(
     [
         "Breathing",
@@ -123,6 +119,13 @@ ALL_DISEASES = [
         "Z",
     ]
 ]
-ALL = sorted(
-    ALL_BIOMARKERS + ALL_ENVIRONMENTAL + ALL_SOCIOECONOMICS + ALL_PHENOTYPES + ALL_DISEASES + ["FamilyHistory"]
+ALL_ENVIRONMENTAL = sorted(
+    ["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"]
 )
+ALL_SOCIOECONOMICS = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
+
+ALL = sorted(
+    ALL_BIOMARKERS + ALL_PHENOTYPES + ALL_DISEASES + ALL_ENVIRONMENTAL + ALL_SOCIOECONOMICS + ["FamilyHistory"]
+)
+
+CATEGORIES = ["All", "Biomarkers", "Phenotypes", "Diseases", "Environmental", "Socioeconomics"]
