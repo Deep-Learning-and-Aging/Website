@@ -21,6 +21,7 @@ setup(
         "boto3",
         "matplotlib",
         "black",
+        "pyyaml",
     ],
     entry_points={
         "console_scripts": [
