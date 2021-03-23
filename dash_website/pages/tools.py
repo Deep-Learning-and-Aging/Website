@@ -7,7 +7,7 @@ from botocore.client import Config
 import os
 import base64
 from matplotlib.image import imread
-from app import app
+from dash_website.app import app
 
 
 ### Usefull functions to load data : images, csv, gifs etc

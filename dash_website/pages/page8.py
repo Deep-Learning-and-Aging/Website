@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_gr
 from pandas import pivot_table
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.figure_factory as ff
-from app import app
+from dash_website.app import app
 import os
 import numpy as np
 import pandas as pd

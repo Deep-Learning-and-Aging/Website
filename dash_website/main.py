@@ -4,8 +4,8 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
-from app import app
-from pages import (
+from dash_website.app import app
+from dash_website.pages import (
     menu,
     page1,
     page2,

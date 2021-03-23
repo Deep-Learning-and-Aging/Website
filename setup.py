@@ -24,7 +24,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "launch_local_website=main:launch_website",
+            "launch_local_website=dash_website.main:launch_website",
         ]
     },
 )

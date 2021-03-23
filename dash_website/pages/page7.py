@@ -7,7 +7,7 @@ from pandas import pivot_table, concat
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from .tools import get_colorscale, empty_graph
 
-from app import app, MODE
+from dash_website.app import app, MODE
 import glob
 import os
 import numpy as np
