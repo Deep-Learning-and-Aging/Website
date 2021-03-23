@@ -13,7 +13,7 @@ import re
 from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id, load_csv
 from dash.exceptions import PreventUpdate
 from botocore.exceptions import ClientError
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram
 from plotly.subplots import make_subplots
@@ -132,7 +132,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_group_biomarkers", "value"),
         Output("select_view_biomarkers", "value"),
@@ -150,7 +150,7 @@ def reset(n):
         raise PreventUpdate()
 
 
-@app.callback(
+@APP.callback(
     Output("select_transformation_biomarkers", "options"),
     [Input("select_group_biomarkers", "value"), Input("select_view_biomarkers", "value")],
 )
@@ -161,7 +161,7 @@ def generate_list_view_list(value_organ, value_view):
         return get_dataset_options(hierarchy_biomarkers[value_organ][value_view])
 
 
-@app.callback(Output("select_view_biomarkers", "options"), [Input("select_group_biomarkers", "value")])
+@APP.callback(Output("select_view_biomarkers", "options"), [Input("select_group_biomarkers", "value")])
 def generate_list_view_list(value):
     if value is None:
         return [{"value": "", "label": ""}]
@@ -216,7 +216,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("select_biomarkers_of_group", "options"),
     [
         Input("select_group_biomarkers", "value"),
@@ -254,7 +254,7 @@ def generate_list_features_given_group_pf_biomarkers(value_organ, value_view, va
 
 
 # small test :
-@app.callback(
+@APP.callback(
     [
         Output("Plot Distribution feature", "figure"),
         Output("Plot Reglin_all", "figure"),

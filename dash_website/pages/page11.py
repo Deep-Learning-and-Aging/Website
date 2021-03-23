@@ -7,7 +7,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np

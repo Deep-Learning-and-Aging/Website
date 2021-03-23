@@ -132,7 +132,7 @@ dmypy.json
 
 /data
 .DS_Store
-app.yaml
+APP.yaml
 
 
 # Avoid pushing data

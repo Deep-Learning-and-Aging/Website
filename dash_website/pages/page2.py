@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, load_csv
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar
 from plotly.subplots import make_subplots
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import numpy as np
 
 distinct_colors = [
@@ -203,7 +203,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("Plot R2 scores", "figure"),
     [
         Input("select_eid_or_instances", "value"),

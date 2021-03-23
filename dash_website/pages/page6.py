@@ -1,4 +1,4 @@
-from dash_website.app import app
+from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -50,7 +50,7 @@ layout = html.Div(
 )
 
 
-@app.callback(Output("tab-content", "children"), Input("tab_manager", "active_tab"))
+@APP.callback(Output("tab-content", "children"), Input("tab_manager", "active_tab"))
 def _get_tab(active_tab):
     if active_tab == "tab_x":
         controls = get_controls_tab_x()
@@ -125,7 +125,7 @@ def get_controls_tab_average():
 CATEGORIES = ["All", "Biomarkers", "Phenotypes", "Diseases", "Environmental", "Socioeconomics"]
 
 
-@app.callback(Output("dataset_x", "options"), Input("category_x", "value"))
+@APP.callback(Output("dataset_x", "options"), Input("category_x", "value"))
 def _select_dataset(val_data_type):
     if val_data_type == "All":
         return [{"value": "All", "label": "All"}] + get_dataset_options(ALL)
@@ -143,7 +143,7 @@ def _select_dataset(val_data_type):
         )
 
 
-@app.callback(
+@APP.callback(
     [Output("graph_average", "figure"), Output("scores_average", "children")],
     [Input("correlation_type_average", "value"), Input("subset_method_average", "value")],
 )
@@ -204,7 +204,7 @@ def _plot_with_average_correlation(corr_type, subset_method):
     return fig, title
 
 
-@app.callback(
+@APP.callback(
     [Output("graph_organ", "figure"), Output("scores_organ", "children")],
     [
         Input("correlation_type_organ", "value"),
@@ -257,7 +257,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         return Figure(), ""
 
 
-@app.callback(
+@APP.callback(
     [Output("graph_x", "figure"), Output("scores_x", "children")],
     [
         Input("correlation_type_x", "value"),

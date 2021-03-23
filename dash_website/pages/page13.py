@@ -8,7 +8,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 from dash.exceptions import PreventUpdate
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -71,7 +71,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_organ_attention_time", "value"),
         Output("select_view_attention_time", "value"),
@@ -246,7 +246,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(Output("select_view_attention_time", "options"), [Input("select_organ_attention_time", "value")])
+@APP.callback(Output("select_view_attention_time", "options"), [Input("select_organ_attention_time", "value")])
 def _get_options_transformation(value_organ):
     if value_organ == "Arterial":
         return get_dataset_options(["PulseWaveAnalysis"])
@@ -258,7 +258,7 @@ def _get_options_transformation(value_organ):
         return []
 
 
-@app.callback(
+@APP.callback(
     Output("select_channel_time", "options"),
     [Input("select_view_attention_time", "value"), Input("select_transformation_attention_time", "value")],
 )
@@ -279,7 +279,7 @@ def _get_options_transformation(value_view, value_transformation):
         return []
 
 
-@app.callback(Output("select_transformation_attention_time", "options"), [Input("select_view_attention_time", "value")])
+@APP.callback(Output("select_transformation_attention_time", "options"), [Input("select_view_attention_time", "value")])
 def _get_options_transformation(value_view):
     if value_view == "PulseWaveAnalysis" or value_view == "ECG":
         return get_dataset_options(["TimeSeries"])
@@ -291,7 +291,7 @@ def _get_options_transformation(value_view):
         return []
 
 
-@app.callback(
+@APP.callback(
     [Output("timeseries_display_1", "figure"), Output("title_timeseries_1", "children")],
     [
         Input("select_organ_attention_time", "value"),
@@ -352,7 +352,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate, channe
         return Figure(empty_graph), ""
 
 
-@app.callback(
+@APP.callback(
     Output("score_times_series", "children"),
     [
         Input("select_organ_attention_time", "value"),
@@ -376,7 +376,7 @@ def generate_score(organ, view, transformation):
         return ""
 
 
-@app.callback(
+@APP.callback(
     [Output("timeseries_display_2", "figure"), Output("title_timeseries_2", "children")],
     [
         Input("select_organ_attention_time", "value"),

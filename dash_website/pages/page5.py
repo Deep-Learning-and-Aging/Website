@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, empty_graph, load_csv
 from pandas import concat, Index, DataFrame
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from botocore.exceptions import ClientError
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import os
 import numpy as np
 from scipy.stats import pearsonr
@@ -230,7 +230,7 @@ if MODE != "All":
     )
 
 
-@app.callback(Output("Select_dataset_ewas", "options"), [Input("Select_data_type", "value")])
+@APP.callback(Output("Select_dataset_ewas", "options"), [Input("Select_data_type", "value")])
 def _select_sub_dropdown(val_data_type):
     if val_data_type == "All":
         return get_dataset_options(All)
@@ -293,7 +293,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(
+@APP.callback(
     [Output("Volcano Plot - EWAS", "figure"), Output("memory_ewas", "data")],
     [Input("Select_organ_ewas", "value"), Input("Select_data_type", "value"), Input("Select_dataset_ewas", "value")],
 )
@@ -405,7 +405,7 @@ def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
     return Figure(fig), data
 
 
-@app.callback(
+@APP.callback(
     Output("table_ewas_linear", "data"),
     [Input("table_ewas_linear", "sort_by"), Input("memory_ewas", "data"), Input("Volcano Plot - EWAS", "restyleData")],
 )

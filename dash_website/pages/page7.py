@@ -7,7 +7,7 @@ from pandas import pivot_table, concat
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from .tools import get_colorscale, empty_graph
 
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -230,7 +230,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(
+@APP.callback(
     [Output("Plot R2 Heatmap", "figure"), Output("Plot Bar Plot", "figure")],
     [
         Input("Select_algorithm", "value"),

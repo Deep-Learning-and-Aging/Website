@@ -8,7 +8,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 from dash.exceptions import PreventUpdate
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -66,7 +66,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_organ_time", "value"),
         Output("select_view_time", "value"),
@@ -210,7 +210,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(Output("select_view_time", "options"), [Input("select_organ_time", "value")])
+@APP.callback(Output("select_view_time", "options"), [Input("select_organ_time", "value")])
 def _get_options_transformation(value_organ):
     if value_organ == "Arterial":
         return get_dataset_options(["PulseWaveAnalysis"])
@@ -222,7 +222,7 @@ def _get_options_transformation(value_organ):
         return []
 
 
-@app.callback(
+@APP.callback(
     Output("select_time_channel", "options"),
     [Input("select_view_time", "value"), Input("select_transformation_time", "value")],
 )
@@ -242,7 +242,7 @@ def _get_options_transformation(value_view, value_transformation):
         return []
 
 
-@app.callback(Output("select_transformation_time", "options"), [Input("select_view_time", "value")])
+@APP.callback(Output("select_transformation_time", "options"), [Input("select_view_time", "value")])
 def _get_options_transformation(value_view):
     if value_view == "PulseWaveAnalysis" or value_view == "ECG":
         return get_dataset_options(["TimeSeries"])
@@ -254,7 +254,7 @@ def _get_options_transformation(value_view):
         return []
 
 
-@app.callback(
+@APP.callback(
     [Output("timeseries_raw_display_1", "figure"), Output("age_1", "children")],
     [
         Input("select_organ_time", "value"),
@@ -334,7 +334,7 @@ def _display_gif(organ, view, transformation, sex, age_group, channel, sample):
         # print(numpy_arr_raw,numpy_arr_raw.shape,  numpy_attentionmap, numpy_attentionmap.shape)
 
 
-@app.callback(
+@APP.callback(
     [Output("timeseries_raw_display_2", "figure"), Output("age_2", "children")],
     [
         Input("select_organ_time", "value"),

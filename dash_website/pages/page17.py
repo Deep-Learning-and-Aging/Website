@@ -7,7 +7,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 import plotly.figure_factory as ff
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -102,7 +102,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(Output("Plot_GWAS_Corr_", "figure"), [Input("Select_ordering_gwas_", "value")])
+@APP.callback(Output("Plot_GWAS_Corr_", "figure"), [Input("Select_ordering_gwas_", "value")])
 def _plot_heatmap_(value_ordering):
     corr_gwas, corr_gwas_sd, df_perf, df_heritability, organ_sorted_by_score, organ_sorted_alphabetically = create_dfs(
         mode=MODE

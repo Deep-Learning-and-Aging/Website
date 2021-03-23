@@ -7,7 +7,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -127,7 +127,7 @@ layout = html.Div(
 )
 
 
-@app.callback(Output("tab_content_gwas", "children"), [Input("tab_manager_gwas", "active_tab")])
+@APP.callback(Output("tab_content_gwas", "children"), [Input("tab_manager_gwas", "active_tab")])
 def _plot_with_given_env_dataset(ac_tab):
     if ac_tab == "man_plot":
         return dbc.Container(
@@ -177,7 +177,7 @@ def _plot_with_given_env_dataset(ac_tab):
         )
 
 
-@app.callback(
+@APP.callback(
     [Output("mana_plot", "src"), Output("qq_plot", "src"), Output("title_man", "children")],
     [Input("select_organ", "value")],
 )
@@ -209,7 +209,7 @@ def _plot_manhattan_plot(organ):
         return "", "", ""
 
 
-@app.callback(Output("vol_plot", "figure"), [Input("select_organ2", "value")])
+@APP.callback(Output("vol_plot", "figure"), [Input("select_organ2", "value")])
 def _plot_volcano_plot(organ):
     if organ is not None:
         d = {}

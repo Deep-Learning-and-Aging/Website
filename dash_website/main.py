@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from collections import OrderedDict
 import sys
-from dash_website.app import app
+from dash_website.app import APP
 from dash_website.pages import (
     menu,
     page1,
@@ -96,7 +96,7 @@ top_bar = html.Div(
     },
 )
 
-app.layout = html.Div(
+APP.layout = html.Div(
     [
         dcc.Location(id="url", refresh=False),
         top_bar,
@@ -107,7 +107,7 @@ app.layout = html.Div(
 )
 
 
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+@APP.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def display_page(pathname):
     if "page" in pathname:
         num_page = int(pathname.split("/")[-1][4:])
@@ -118,7 +118,7 @@ def display_page(pathname):
         return "404"
 
 
-@app.callback(
+@APP.callback(
     [Output("menu-link", "active")] + [Output("page%s-link" % i, "active") for i in range(1, num_pages + 1)],
     [Input("url", "pathname")],
 )
@@ -138,8 +138,8 @@ def _(pathname):
     return output
 
 
-server = app.server
+server = APP.server
 
 
 def launch_website():
-    app.run_server(debug=True)
+    APP.run_server(debug=True)
