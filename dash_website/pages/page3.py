@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, lo
 from pandas import DataFrame
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar
 from plotly.subplots import make_subplots
-from app import app, MODE
+from dash_website.app import app, MODE
 import glob
 import os
 import numpy as np

@@ -13,7 +13,7 @@ import re
 from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, dict_organ_view_transf_to_id, load_csv
 from dash.exceptions import PreventUpdate
 from botocore.exceptions import ClientError
-from app import app, MODE
+from dash_website.app import app, MODE
 import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram
 from plotly.subplots import make_subplots

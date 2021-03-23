@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, empty_graph, load_csv
 from pandas import concat, Index, DataFrame
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from botocore.exceptions import ClientError
-from app import app, MODE
+from dash_website.app import app, MODE
 import os
 import numpy as np
 from scipy.stats import pearsonr

@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 from .tools import get_dataset_options, ETHNICITY_COLS, load_csv
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar
 from plotly.subplots import make_subplots
-from app import app, MODE
+from dash_website.app import app, MODE
 import numpy as np
 
 distinct_colors = [

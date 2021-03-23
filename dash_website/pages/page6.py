@@ -1,154 +1,30 @@
+from dash_website.app import app
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_graph, load_csv
-from pandas import pivot_table
-from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
-from plotly.subplots import make_subplots
-from app import app
-import glob
-import plotly.figure_factory as ff
-from scipy.spatial.distance import squareform
-import os
+
 import numpy as np
 import pandas as pd
-from scipy.stats import pearsonr
-import dash_table
-import copy
-from pages.page17 import create_dfs
-from pages.page4 import LoadData
+from .tools import get_dataset_options, get_colorscale, empty_graph, load_csv
+from plotly.graph_objs import Figure, Bar, Heatmap
+import plotly.figure_factory as ff
 
-organs = sorted(
-    [
-        "*",
-        "*instances01",
-        "*instances1.5x",
-        "*instances23",
-        "Abdomen",
-        "AbdomenLiver",
-        "AbdomenPancreas",
-        "Arterial",
-        "ArterialPulseWaveAnalysis",
-        "ArterialCarotids",
-        "Biochemistry",
-        "BiochemistryUrine",
-        "BiochemistryBlood",
-        "Brain",
-        "BrainCognitive",
-        "BrainMRI",
-        "Eyes",
-        "EyesAll",
-        "EyesFundus",
-        "EyesOCT",
-        "Hearing",
-        "HeartMRI",
-        "Heart",
-        "HeartECG",
-        "ImmuneSystem",
-        "Lungs",
-        "Musculoskeletal",
-        "MusculoskeletalSpine",
-        "MusculoskeletalHips",
-        "MusculoskeletalKnees",
-        "MusculoskeletalFullBody",
-        "MusculoskeletalScalars",
-        "PhysicalActivity",
-    ]
+from dash_website.pages.page17 import create_dfs
+from dash_website.pages.page4 import LoadData
+
+from dash_website.pages import (
+    ORGANS,
+    ALL_BIOMARKERS,
+    ALL_ENVIRONMENTAL,
+    ALL_SOCIOECONOMICS,
+    ALL_PHENOTYPES,
+    ALL_DISEASES,
+    ALL,
 )
-
 
 path_correlations_ewas = "page6_LinearXWASCorrelations/CorrelationsLinear/"
-All_Biomarkers = sorted(
-    [
-        "HandGripStrength",
-        "BrainGreyMatterVolumes",
-        "BrainSubcorticalVolumes",
-        "HeartSize",
-        "HeartPWA",
-        "ECGAtRest",
-        "AnthropometryImpedance",
-        "UrineBiochemistry",
-        "BloodBiochemistry",
-        "BloodCount",
-        "EyeAutorefraction",
-        "EyeAcuity",
-        "EyeIntraocularPressure",
-        "BraindMRIWeightedMeans",
-        "Spirometry",
-        "BloodPressure",
-        "AnthropometryBodySize",
-        "ArterialStiffness",
-        "CarotidUltrasound",
-        "BoneDensitometryOfHeel",
-        "HearingTest",
-        "CognitiveFluidIntelligence",
-        "CognitiveMatrixPatternCompletion",
-        "CognitiveNumericMemory",
-        "CognitivePairedAssociativeLearning",
-        "CognitivePairsMatching",
-        "CognitiveProspectiveMemory",
-        "CognitiveReactionTime",
-        "CognitiveSymbolDigitSubstitution",
-        "CognitiveTowerRearranging",
-        "CognitiveTrailMaking",
-        "PhysicalActivity",
-    ]
-)
-All_Environmental = sorted(
-    ["Alcohol", "Diet", "EarlyLifeFactors", "ElectronicDevices", "Medication", "SunExposure", "Smoking"]
-)
-All_Socioeconomics = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
-All_Phenotypes = sorted(
-    [
-        "Breathing",
-        "CancerScreening",
-        "ChestPain",
-        "Claudication",
-        "Eyesight",
-        "GeneralHealth",
-        "GeneralPain",
-        "Hearing",
-        "MentalHealth",
-        "Mouth",
-        "SexualFactors",
-        "Sleep",
-    ]
-)
-All_Diseases = [
-    "medical_diagnoses_%s" % letter
-    for letter in [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-        "M",
-        "N",
-        "O",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "U",
-        "V",
-        "W",
-        "X",
-        "Y",
-        "Z",
-    ]
-]
-All = sorted(
-    All_Biomarkers + All_Environmental + All_Socioeconomics + All_Phenotypes + All_Diseases + ["FamilyHistory"]
-)
+
 
 colorscale = [[0, "rgba(255, 0, 0, 0.85)"], [0.5, "rgba(255, 255, 255, 0.85)"], [1, "rgba(0, 0, 255, 0.85)"]]
 
@@ -210,19 +86,19 @@ controls1 = dbc.Card(
 @app.callback(Output("Select_env_dataset_lin_ewas", "options"), [Input("Select_data_type", "value")])
 def _select_sub_dropdown(val_data_type):
     if val_data_type == "All":
-        return [{"value": "All", "label": "All"}] + get_dataset_options(All)
+        return [{"value": "All", "label": "All"}] + get_dataset_options(ALL)
     elif val_data_type == "Biomarkers":
-        return [{"value": "All_Biomarkers", "label": "All_Biomarkers"}] + get_dataset_options(All_Biomarkers)
+        return [{"value": "All_Biomarkers", "label": "All_Biomarkers"}] + get_dataset_options(ALL_BIOMARKERS)
     elif val_data_type == "Environmental":
-        return [{"value": "All_Environmental", "label": "All_Environmental"}] + get_dataset_options(All_Environmental)
+        return [{"value": "All_Environmental", "label": "All_Environmental"}] + get_dataset_options(ALL_ENVIRONMENTAL)
     elif val_data_type == "Socioeconomics":
         return [{"value": "All_Socioeconomics", "label": "All_Socioeconomics"}] + get_dataset_options(
-            All_Socioeconomics
+            ALL_SOCIOECONOMICS
         )
     elif val_data_type == "Phenotypes":
-        return [{"value": "All_Phenotypes", "label": "All_Phenotypes"}] + get_dataset_options(All_Phenotypes)
+        return [{"value": "All_Phenotypes", "label": "All_Phenotypes"}] + get_dataset_options(ALL_PHENOTYPES)
     else:  # val_data_type == 'Diseases':
-        return [{"value": "All_Diseases", "label": "All_Diseases"}] + get_dataset_options(All_Diseases)
+        return [{"value": "All_Diseases", "label": "All_Diseases"}] + get_dataset_options(ALL_DISEASES)
 
 
 controls2 = dbc.Card(
@@ -254,8 +130,8 @@ controls2 = dbc.Card(
                 html.P("Select an Organ : "),
                 dcc.Dropdown(
                     id="Select_organ_lin_ewas",
-                    options=get_dataset_options(organs),
-                    value=sorted(organs)[0],
+                    options=get_dataset_options(ORGANS),
+                    value=ORGANS[0],
                 ),
                 html.Br(),
             ],
@@ -393,7 +269,7 @@ def _plot_with_average_correlation(corr_type, subset_method):
     data = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace("\\*", "*")
     correlation_data = pd.DataFrame(
         None,
-        index=All
+        index=ALL
         + [
             "All",
             "All_Biomarkers",
@@ -464,14 +340,14 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         df_organ = df_organ[df_organ.organ_2 != organ]
         df_organ = df_organ.fillna(0)
 
-        matrix_organ = pivot_table(df_organ, values="corr", index=["env_dataset"], columns=["organ_2"])
+        matrix_organ = pd.pivot_table(df_organ, values="corr", index=["env_dataset"], columns=["organ_2"])
 
         try:
             colorscale = get_colorscale(matrix_organ)
         except ValueError:
             return Figure(empty_graph)
         d = {}
-        sample_size_matrix = pivot_table(
+        sample_size_matrix = pd.pivot_table(
             df_organ, values="sample_size", index=["env_dataset"], columns=["organ_2"]
         ).values
         customdata = np.dstack((sample_size_matrix, matrix_organ))
@@ -516,9 +392,9 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         df_env = df[df.env_dataset == env_dataset]
         df_env = df_env.fillna(0)
 
-        sample_size_matrix = pivot_table(df_env, values="sample_size", index=["organ_1"], columns=["organ_2"])
+        sample_size_matrix = pd.pivot_table(df_env, values="sample_size", index=["organ_1"], columns=["organ_2"])
 
-        env_matrix = pivot_table(df_env, values="corr", index=["organ_1"], columns=["organ_2"])
+        env_matrix = pd.pivot_table(df_env, values="corr", index=["organ_1"], columns=["organ_2"])
         labels = env_matrix.columns
 
         fig = ff.create_dendrogram(env_matrix, orientation="bottom", distfun=lambda df: 1 - df)

@@ -14,7 +14,7 @@ from .tools import (
     load_npy,
 )
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
-from app import app, MODE
+from dash_website.app import app, MODE
 import glob
 import os
 import numpy as np
