@@ -14,7 +14,7 @@ from .tools import (
     load_npy,
 )
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -251,7 +251,7 @@ controls_2 = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("select_transformation_attention_image", "options"),
     [Input("select_organ_attention_image", "value"), Input("select_view_attention_image", "value")],
 )
@@ -262,7 +262,7 @@ def generate_list_view_list(value_organ, value_view):
         return get_dataset_options(dict_dataset_images_to_organ_and_view[value_organ][value_view])
 
 
-@app.callback(Output("select_view_attention_image", "options"), [Input("select_organ_attention_image", "value")])
+@APP.callback(Output("select_view_attention_image", "options"), [Input("select_organ_attention_image", "value")])
 def generate_list_view_list(value):
     if value is None:
         return [{"value": "", "label": ""}]
@@ -270,7 +270,7 @@ def generate_list_view_list(value):
         return get_dataset_options(dict_dataset_images_to_organ_and_view[value])
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_organ_attention_image", "value"),
         Output("select_view_attention_image", "value"),
@@ -363,7 +363,7 @@ layout = html.Div(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("columns_attention_map_1", "children"),
     [
         Input("select_organ_attention_image", "value"),
@@ -581,7 +581,7 @@ def _plot_manhattan_plot(organ, view, transformation, sex, age_group, aging_rate
         return [dcc.Graph(figure=Figure(empty_graph))]
 
 
-@app.callback(
+@APP.callback(
     Output("score_images", "children"),
     [
         Input("select_organ_attention_image", "value"),
@@ -604,7 +604,7 @@ def generate_score(organ, view, transformation):
         return ""
 
 
-@app.callback(
+@APP.callback(
     Output("columns_attention_map_2", "children"),
     [
         Input("select_organ_attention_image", "value"),

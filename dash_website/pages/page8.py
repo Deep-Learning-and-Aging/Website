@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, get_colorscale, empty_gr
 from pandas import pivot_table
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.figure_factory as ff
-from dash_website.app import app
+from dash_website.app import APP
 import os
 import numpy as np
 import pandas as pd
@@ -241,7 +241,7 @@ colorscale = [[0, "rgba(255, 0, 0, 0.85)"], [0.5, "rgba(255, 255, 255, 0.85)"], 
 #                 fluid = True)
 #
 #
-# @app.callback(Output('memory_corr_ewas_mul', 'data'),
+# @APP.callback(Output('memory_corr_ewas_mul', 'data'),
 #              [Input('Select_corr_type_mul_ewas', 'value'), Input('Select_algorithm_method', 'value')])
 # def _load_data_in_mem(value_corr_type, value_subset):
 #     if value_corr_type is not None and value_subset is not None:
@@ -250,7 +250,7 @@ colorscale = [[0, "rgba(255, 0, 0, 0.85)"], [0.5, "rgba(255, 255, 255, 0.85)"], 
 #         return df.to_dict('records')
 #
 #
-# @app.callback(Output('Correlation Mul - Select Ewas dataset', 'figure'),
+# @APP.callback(Output('Correlation Mul - Select Ewas dataset', 'figure'),
 #              [Input('memory_corr_ewas_mul', 'data'), Input('Select_env_dataset_mul_ewas', 'value')])
 # def _plot_with_given_env_dataset(data, env_dataset):
 #     df = pd.DataFrame(data = data)
@@ -270,7 +270,7 @@ colorscale = [[0, "rgba(255, 0, 0, 0.85)"], [0.5, "rgba(255, 255, 255, 0.85)"], 
 #
 #     return Figure(d)
 #
-# @app.callback(Output('Correlation Mul - Select Organ', 'figure'),
+# @APP.callback(Output('Correlation Mul - Select Organ', 'figure'),
 #              [Input('memory_corr_ewas_mul', 'data'), Input('Select_organ_mul_ewas', 'value')])
 # def _plot_with_given_organ_dataset(data, organ):
 #     df = pd.DataFrame(data = data)
@@ -409,7 +409,7 @@ layout = html.Div(
 )
 
 
-@app.callback(Output("tab-content_mul", "children"), [Input("tab_manager_mul", "active_tab")])
+@APP.callback(Output("tab-content_mul", "children"), [Input("tab_manager_mul", "active_tab")])
 def _plot_with_given_env_dataset(ac_tab):
     if ac_tab == "tab_X":
         return dbc.Container(
@@ -474,7 +474,7 @@ def _plot_with_given_env_dataset(ac_tab):
         )
 
 
-@app.callback(
+@APP.callback(
     [Output("Correlation Mul - Select Average", "figure"), Output("title_average", "children")],
     [Input("Select_corr_type_mul_ewas3", "value"), Input("Select_algorithm_method3", "value")],
 )
@@ -511,7 +511,7 @@ def _plot_with_average_dataset(corr_type, algo):
     return fig, title
 
 
-@app.callback(
+@APP.callback(
     Output("Correlation Mul - Select Ewas dataset", "figure"),
     [
         Input("Select_corr_type_mul_ewas1", "value"),
@@ -611,7 +611,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
         return Figure()
 
 
-@app.callback(
+@APP.callback(
     Output("Correlation Mul - Select Organ", "figure"),
     [
         Input("Select_corr_type_mul_ewas2", "value"),
@@ -670,7 +670,7 @@ def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
         return Figure()
 
 
-# @app.callback(Output('Correlation Mul - Select Organ', 'figure'),
+# @APP.callback(Output('Correlation Mul - Select Organ', 'figure'),
 #              [Input('Select_corr_type_mul_ewas2', 'value'), Input('Select_algorithm_method2', 'value'), Input('Select_organ_mul_ewas', 'value')])
 # def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
 #     if corr_type is not None and subset_method is not None:

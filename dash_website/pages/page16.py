@@ -8,7 +8,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 from dash.exceptions import PreventUpdate
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -63,7 +63,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_organ_attention_video_raw", "value"),
         Output("select_view_attention_video_raw", "value"),
@@ -214,7 +214,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(
+@APP.callback(
     [Output("gif_display_1_raw", "children"), Output("title_video_raw1", "children")],
     [
         Input("select_organ_attention_video_raw", "value"),
@@ -249,18 +249,18 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
         )
         path_to_gif_img = path_to_gif + "gif"
         path_to_jpg_img = path_to_gif + "png"
-        # frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
+        # frame = Image.open('./' + APP.get_asset_url(path_to_gif_img))
         # frame.seek(0)
-        # frame.save('./' + app.get_asset_url(path_to_jpg_img))
+        # frame.save('./' + APP.get_asset_url(path_to_jpg_img))
         gif_display = html.Div(
-            [gif.GifPlayer(gif=app.get_asset_url(path_to_gif_img), still=app.get_asset_url(path_to_jpg_img))]
+            [gif.GifPlayer(gif=APP.get_asset_url(path_to_gif_img), still=APP.get_asset_url(path_to_jpg_img))]
         )
         return gif_display, title
     else:
         return dcc.Graph(figure=Figure(empty_graph)), ""
 
 
-@app.callback(
+@APP.callback(
     [Output("gif_display_2_raw", "children"), Output("title_video_raw2", "children")],
     [
         Input("select_organ_attention_video_raw", "value"),
@@ -295,11 +295,11 @@ def _display_gif(organ, view, transformation, sex, age_group, sample):
         )
         path_to_gif_img = path_to_gif + "gif"
         path_to_jpg_img = path_to_gif + "png"
-        # frame = Image.open('./' + app.get_asset_url(path_to_gif_img))
+        # frame = Image.open('./' + APP.get_asset_url(path_to_gif_img))
         # frame.seek(0)
-        # frame.save('./' + app.get_asset_url(path_to_jpg_img))
+        # frame.save('./' + APP.get_asset_url(path_to_jpg_img))
         gif_display = html.Div(
-            [gif.GifPlayer(gif=app.get_asset_url(path_to_gif_img), still=app.get_asset_url(path_to_jpg_img))]
+            [gif.GifPlayer(gif=APP.get_asset_url(path_to_gif_img), still=APP.get_asset_url(path_to_jpg_img))]
         )
         return gif_display, title
     else:

@@ -14,7 +14,7 @@ from .tools import (
 import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -79,7 +79,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_organ_image", "value"),
         Output("select_view_image", "value"),
@@ -203,7 +203,7 @@ controls_2 = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("select_transformation_image", "options"),
     [Input("select_organ_image", "value"), Input("select_view_image", "value")],
 )
@@ -214,7 +214,7 @@ def generate_list_view_list(value_organ, value_view):
         return get_dataset_options(dict_dataset_images_to_organ_and_view[value_organ][value_view])
 
 
-@app.callback(Output("select_view_image", "options"), [Input("select_organ_image", "value")])
+@APP.callback(Output("select_view_image", "options"), [Input("select_organ_image", "value")])
 def generate_list_view_list(value):
     if value is None:
         return [{"value": "", "label": ""}]
@@ -249,7 +249,7 @@ layout = html.Div(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("row_image_1", "children"),
     [
         Input("select_organ_image", "value"),
@@ -408,7 +408,7 @@ def _plot_images_1(organ, view, transformation, sex, age_group, sample):  # , ag
         return [dcc.Graph(figure=Figure(empty_graph))]
 
 
-@app.callback(
+@APP.callback(
     Output("row_image_2", "children"),
     [
         Input("select_organ_image", "value"),

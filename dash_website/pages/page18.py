@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, em
 import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 from plotly.subplots import make_subplots
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -291,7 +291,7 @@ layout = html.Div(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("memory_xwas_feat_imps", "data"),
         Output("memory_no_str_xwas_feat_imps", "data"),
@@ -403,7 +403,7 @@ def _plot_r2_scores(value_x, value_organ):
         return None, None, None, Figure(empty_graph), ""
 
 
-@app.callback(
+@APP.callback(
     Output("table_feature_imps_xwas", "data"),
     [Input("table_feature_imps_xwas", "sort_by"), Input("memory_xwas_feat_imps", "data")],
 )
@@ -420,7 +420,7 @@ def _sort_table(sort_by_col, data):
     return df.to_dict("records")
 
 
-@app.callback(
+@APP.callback(
     Output("table_corr_xwas_feat_imps", "data"),
     [Input("select correlation type feat imps xwas", "value"), Input("memory_no_str_xwas_feat_imps", "data")],
 )

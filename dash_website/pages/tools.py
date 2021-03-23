@@ -7,7 +7,7 @@ from botocore.client import Config
 import os
 import base64
 from matplotlib.image import imread
-from dash_website.app import app
+from dash_website.app import APP
 
 
 ### Usefull functions to load data : images, csv, gifs etc
@@ -43,7 +43,7 @@ def read_img(id_path, remote=True):
         obj = client.get_object(Bucket=bucket_name, Key=id_path)
         return imread(BytesIO(obj["Body"].read()), format="jpg")
     else:
-        id_path = "./" + app.get_asset_url(id_path)
+        id_path = "./" + APP.get_asset_url(id_path)
         return imread(id_path)
 
 
@@ -52,7 +52,7 @@ def load_npy(id_path, remote=True):
         obj = client.get_object(Bucket=bucket_name, Key=id_path)
         return np.load(BytesIO(obj["Body"].read()))
     else:
-        id_path = "./" + app.get_asset_url(id_path)
+        id_path = "./" + APP.get_asset_url(id_path)
         return np.load(id_path)
 
 
@@ -61,7 +61,7 @@ def encode_img_s3(id_path, remote=True):
         obj = client.get_object(Bucket=bucket_name, Key=id_path)
         return base64.b64encode(obj["Body"].read()).decode("ascii")
     else:
-        id_path = "./" + app.get_asset_url(id_path)
+        id_path = "./" + APP.get_asset_url(id_path)
         return base64.b64encode(open(id_path, "rb").read()).decode("ascii")
 
 
@@ -73,7 +73,7 @@ def list_obj(id_path, remote=True):
         except KeyError:
             return []
     else:
-        id_path = "./" + app.get_asset_url(id_path)
+        id_path = "./" + APP.get_asset_url(id_path)
         return glob.glob(id_path + "*")
 
 

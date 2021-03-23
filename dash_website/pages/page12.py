@@ -8,7 +8,7 @@ import pandas as pd
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
 import plotly.express as px
 from dash.exceptions import PreventUpdate
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -70,7 +70,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("select_organ_attention_video", "value"),
         Output("select_view_attention_video", "value"),
@@ -241,7 +241,7 @@ layout = dbc.Container(
 )
 
 
-@app.callback(
+@APP.callback(
     Output("score_videos", "children"),
     [
         Input("select_organ_attention_video", "value"),
@@ -266,7 +266,7 @@ def generate_score(organ, view, transformation):
         return ""
 
 
-@app.callback(
+@APP.callback(
     Output("gif_display_1", "children"),
     [
         Input("select_organ_attention_video", "value"),
@@ -292,16 +292,16 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):  # , 
         path_to_gif = path_gif + path_to_gif
         path_to_jpg = df.iloc[sample].Picture.split("/")[-1]
         path_to_jpg = path_img + path_to_jpg
-        print(app.get_asset_url(path_to_gif))
+        print(APP.get_asset_url(path_to_gif))
         gif_display = html.Div(
-            [html.H3(title), gif.GifPlayer(gif=app.get_asset_url(path_to_gif), still=app.get_asset_url(path_to_jpg))]
+            [html.H3(title), gif.GifPlayer(gif=APP.get_asset_url(path_to_gif), still=APP.get_asset_url(path_to_jpg))]
         )
         return gif_display
     else:
         return dcc.Graph(figure=Figure(empty_graph))
 
 
-@app.callback(
+@APP.callback(
     Output("gif_display_2", "children"),
     [
         Input("select_organ_attention_video", "value"),
@@ -328,7 +328,7 @@ def _display_gif(organ, view, transformation, sex, age_group, aging_rate):  # , 
         path_to_jpg = df.iloc[sample].Picture.split("/")[-1]
         path_to_jpg = path_img + path_to_jpg
         gif_display = html.Div(
-            [html.H3(title), gif.GifPlayer(gif=app.get_asset_url(path_to_gif), still=app.get_asset_url(path_to_jpg))]
+            [html.H3(title), gif.GifPlayer(gif=APP.get_asset_url(path_to_gif), still=APP.get_asset_url(path_to_jpg))]
         )
         return gif_display
     else:

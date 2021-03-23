@@ -6,7 +6,7 @@ from .tools import get_dataset_options, ETHNICITY_COLS, hierarchy_biomarkers, lo
 from pandas import DataFrame
 from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar
 from plotly.subplots import make_subplots
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -78,7 +78,7 @@ controls = dbc.Card(
 )
 
 
-@app.callback(
+@APP.callback(
     [Output("Select_organ_1", "value"), Output("Select_view_1", "value"), Output("Select_transf_1", "value")],
     [Input("reset_page3", "n_clicks")],
 )
@@ -90,7 +90,7 @@ def reset(n):
         raise PreventUpdate()
 
 
-@app.callback(Output("Select_transf_1", "options"), [Input("Select_organ_1", "value"), Input("Select_view_1", "value")])
+@APP.callback(Output("Select_transf_1", "options"), [Input("Select_organ_1", "value"), Input("Select_view_1", "value")])
 def generate_list_view_list(value_organ, value_view):
     if value_view is None:
         return [{"value": "", "label": ""}]
@@ -98,7 +98,7 @@ def generate_list_view_list(value_organ, value_view):
         return get_dataset_options(hierarchy_biomarkers[value_organ][value_view])
 
 
-@app.callback(Output("Select_view_1", "options"), [Input("Select_organ_1", "value")])
+@APP.callback(Output("Select_view_1", "options"), [Input("Select_organ_1", "value")])
 def generate_list_view_list(value):
     if value is None:
         return [{"value": "", "label": ""}]
@@ -203,7 +203,7 @@ layout = html.Div(
 )
 
 
-@app.callback(
+@APP.callback(
     [
         Output("memory", "data"),
         Output("memory_no_str", "data"),
@@ -352,7 +352,7 @@ def _plot_r2_scores(value_target, value_organ, value_view, value_transformation)
         return None, None, None, Figure(), ""
 
 
-@app.callback(Output("table_feature_imps", "data"), [Input("table_feature_imps", "sort_by"), Input("memory", "data")])
+@APP.callback(Output("table_feature_imps", "data"), [Input("table_feature_imps", "sort_by"), Input("memory", "data")])
 def _sort_table(sort_by_col, data):
     df = DataFrame(data=data)
     df = df[sorted(df.columns)]
@@ -366,7 +366,7 @@ def _sort_table(sort_by_col, data):
     return df.to_dict("records")
 
 
-@app.callback(Output("table_corr", "data"), [Input("select correlation type", "value"), Input("memory_no_str", "data")])
+@APP.callback(Output("table_corr", "data"), [Input("select correlation type", "value"), Input("memory_no_str", "data")])
 def _change_corr_method(value, data):
     df = DataFrame(data=data)
     df = df[sorted(df.columns)]

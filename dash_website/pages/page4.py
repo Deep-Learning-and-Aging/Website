@@ -9,7 +9,7 @@ from scipy.cluster import hierarchy
 import plotly.figure_factory as ff
 from plotly.subplots import make_subplots
 import base64
-from dash_website.app import app, MODE
+from dash_website.app import APP, MODE
 import glob
 import os
 import numpy as np
@@ -32,9 +32,9 @@ order = [
     "ImmuneSystem",
 ]
 value_step = "Test"
-# path_performance = './' + app.get_asset_url('page2_predictions/Performances/')
-# path_residualscorr = './' + app.get_asset_url('page4_correlations/ResidualsCorrelations/')
-# path_clustering = './' + app.get_asset_url('page4_correlations/HC_final.png')
+# path_performance = './' + APP.get_asset_url('page2_predictions/Performances/')
+# path_residualscorr = './' + APP.get_asset_url('page4_correlations/ResidualsCorrelations/')
+# path_clustering = './' + APP.get_asset_url('page4_correlations/HC_final.png')
 
 path_performance = "page2_predictions/Performances/"
 path_residualscorr = "page4_correlations/ResidualsCorrelations/"
@@ -285,7 +285,7 @@ layout = html.Div(
 )
 
 
-@app.callback(Output("tab_content_corr", "children"), [Input("tab_manager_corr", "active_tab")])
+@APP.callback(Output("tab_content_corr", "children"), [Input("tab_manager_corr", "active_tab")])
 def _plot(ac_tab):
     if ac_tab == "tab_corr":
         return dbc.Container(
@@ -485,7 +485,7 @@ def LoadData(value_eid_vs_instances, value_aggregate, value_organ, value_step):
 
 
 ## Hide if value_aggreate not All :
-@app.callback(Output("select_organ_res_full", "style"), [Input("select_aggregate_type_res", "value")])
+@APP.callback(Output("select_organ_res_full", "style"), [Input("select_aggregate_type_res", "value")])
 def _hide_organ_dropdown(value_aggregate):
     if value_aggregate is not None and value_aggregate != "All":
         return {"display": "none"}
@@ -493,7 +493,7 @@ def _hide_organ_dropdown(value_aggregate):
         return {}
 
 
-@app.callback(Output("select_organ_res_full_2", "style"), [Input("select_aggregate_type_res_2", "value")])
+@APP.callback(Output("select_organ_res_full_2", "style"), [Input("select_aggregate_type_res_2", "value")])
 def _hide_organ_dropdown(value_aggregate):
     if value_aggregate is not None and value_aggregate != "All":
         return {"display": "none"}
@@ -501,7 +501,7 @@ def _hide_organ_dropdown(value_aggregate):
         return {}
 
 
-@app.callback(Output("Select_ordering", "value"), [Input("select_aggregate_type_res", "value")])
+@APP.callback(Output("Select_ordering", "value"), [Input("select_aggregate_type_res", "value")])
 def _hide_organ_dropdown(value_aggregate):
     if value_aggregate == "All":
         return "Custom"
@@ -509,7 +509,7 @@ def _hide_organ_dropdown(value_aggregate):
         return "Clustering"
 
 
-@app.callback(
+@APP.callback(
     Output("loading_plot_hc", "children"),
     [
         Input("select_eid_or_instances_res_2", "value"),
@@ -538,7 +538,7 @@ def _plot_r2_scores(value_eid_vs_instances, value_aggregate, value_organ):
         return dcc.Graph(id="plot HC", figure=d2)
 
 
-@app.callback(
+@APP.callback(
     [Output("Plot Corr Heatmap", "figure"), Output("title_corr_scores", "children")],
     [
         Input("select_eid_or_instances_res", "value"),
