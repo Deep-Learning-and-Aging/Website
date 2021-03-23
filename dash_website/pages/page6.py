@@ -6,7 +6,6 @@ from dash.dependencies import Input, Output
 
 import numpy as np
 import pandas as pd
-from .tools import get_dataset_options, get_colorscale, empty_graph, load_csv
 from plotly.graph_objs import Figure, Bar, Heatmap
 import plotly.figure_factory as ff
 
@@ -19,6 +18,8 @@ from dash_website.pages.utils.controls import (
     get_category_radio_items,
     get_dataset_drop_down,
 )
+from dash_website.pages.utils.aws_loader import load_csv
+from dash_website.pages.tools import get_dataset_options, get_colorscale, empty_graph
 from dash_website.pages import (
     ORGANS,
     ALL_BIOMARKERS,
@@ -144,6 +145,139 @@ def _select_dataset(val_data_type):
 
 
 @APP.callback(
+    [Output("graph_x", "figure"), Output("scores_x", "children")],
+    [
+        Input("correlation_type_x", "value"),
+        Input("subset_method_x", "value"),
+        Input("dataset_x", "value"),
+    ],
+)
+def _fill_graph_tab_x(correlation_type, subset_method, dataset_x):
+    df = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, correlation_type)).replace(
+        "\\*", "*"
+    )
+    df = df[["env_dataset", "organ_1", "organ_2", "corr", "sample_size"]]
+    df_env = df[df.env_dataset == dataset_x]
+    df_env = df_env.fillna(0)
+
+    sample_size_matrix = pd.pivot_table(df_env, values="sample_size", index=["organ_1"], columns=["organ_2"])
+
+    env_matrix = pd.pivot_table(df_env, values="corr", index=["organ_1"], columns=["organ_2"])
+    labels = env_matrix.columns
+
+    fig = ff.create_dendrogram(env_matrix, orientation="bottom", distfun=lambda df: 1 - df)
+    for scatter in fig["data"]:
+        scatter["yaxis"] = "y2"
+
+    order_dendrogram = list(map(int, fig["layout"]["xaxis"]["ticktext"]))
+
+    fig.update_layout(xaxis={"ticktext": labels[order_dendrogram], "mirror": False})
+    fig.update_layout(yaxis2={"domain": [0.85, 1], "showticklabels": False, "showgrid": False, "zeroline": False})
+
+    heat_data = env_matrix.values[order_dendrogram, :]
+    heat_data = heat_data[:, order_dendrogram]
+    try:
+        colorscale = get_colorscale(heat_data)
+    except ValueError:
+        return Figure(empty_graph)
+
+    heat_sample_size = sample_size_matrix.values[order_dendrogram, :]
+    heat_sample_size = heat_sample_size[:, order_dendrogram]
+    customdata = np.dstack((heat_sample_size, heat_data))
+    hovertemplate = "Correlation : %{z}\
+                        <br>Organ x : %{x}\
+                        <br>Organ y : %{y}\
+                        <br>Sample Size : %{customdata[0]}"
+    idx_upper = np.triu_indices(len(heat_data))
+    title = "Average correlation = %.3f ± %.3f" % (np.mean(heat_data), np.std(heat_data))
+
+    heatmap = Heatmap(
+        x=labels[order_dendrogram],
+        y=labels[order_dendrogram],
+        z=heat_data,
+        colorscale=colorscale,
+        customdata=customdata,
+        hovertemplate=hovertemplate,
+    )
+
+    heatmap["x"] = fig["layout"]["xaxis"]["tickvals"]
+    heatmap["y"] = fig["layout"]["xaxis"]["tickvals"]
+
+    fig.update_layout(
+        yaxis={
+            "domain": [0, 0.85],
+            "mirror": False,
+            "showgrid": False,
+            "zeroline": False,
+            "ticktext": labels[order_dendrogram],
+            "tickvals": fig["layout"]["xaxis"]["tickvals"],
+            "showticklabels": True,
+            "ticks": "outside",
+        }
+    )
+
+    fig.add_trace(heatmap)
+
+    fig["layout"]["width"] = 1100
+    fig["layout"]["height"] = 1100
+
+    return fig, title  # Figure(d), title
+
+
+@APP.callback(
+    [Output("graph_organ", "figure"), Output("scores_organ", "children")],
+    [
+        Input("correlation_type_organ", "value"),
+        Input("subset_method_organ", "value"),
+        Input("organs_organ", "value"),
+    ],
+)
+def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
+    if corr_type is not None and subset_method is not None:
+        df = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace(
+            "\\*", "*"
+        )
+        df = df[["env_dataset", "organ_1", "organ_2", "corr", "sample_size"]]
+        df_organ = df[df.organ_1 == organ]
+        df_organ = df_organ[df_organ.organ_2 != organ]
+        df_organ = df_organ.fillna(0)
+
+        matrix_organ = pd.pivot_table(df_organ, values="corr", index=["env_dataset"], columns=["organ_2"])
+
+        try:
+            colorscale = get_colorscale(matrix_organ)
+        except ValueError:
+            return Figure(empty_graph)
+        d = {}
+        sample_size_matrix = pd.pivot_table(
+            df_organ, values="sample_size", index=["env_dataset"], columns=["organ_2"]
+        ).values
+        customdata = np.dstack((sample_size_matrix, matrix_organ))
+        title = "Average correlation = %.3f ± %.3f" % (
+            np.mean(matrix_organ.values.flatten()),
+            np.std(matrix_organ.values.flatten()),
+        )
+        hovertemplate = "Correlation : %{z}\
+                 <br>Organ x : %{x}\
+                 <br>Organ y : %{y}\
+                 <br>Sample Size : %{customdata[0]}"
+
+        d["data"] = Heatmap(
+            z=matrix_organ.T,
+            x=matrix_organ.T.columns,
+            y=matrix_organ.T.index,
+            colorscale=colorscale,
+            customdata=customdata,
+            hovertemplate=hovertemplate,
+        )
+
+        d["layout"] = dict(xaxis=dict(dtick=1), yaxis=dict(dtick=1), width=1000, height=600)
+        return Figure(d), title
+    else:
+        return Figure(), ""
+
+
+@APP.callback(
     [Output("graph_average", "figure"), Output("scores_average", "children")],
     [Input("correlation_type_average", "value"), Input("subset_method_average", "value")],
 )
@@ -202,139 +336,3 @@ def _plot_with_average_correlation(corr_type, subset_method):
     fig.update_layout({"width": 1800, "height": 600})
 
     return fig, title
-
-
-@APP.callback(
-    [Output("graph_organ", "figure"), Output("scores_organ", "children")],
-    [
-        Input("correlation_type_organ", "value"),
-        Input("subset_method_organ", "value"),
-        Input("organs_organ", "value"),
-    ],
-)
-def _plot_with_given_organ_dataset(corr_type, subset_method, organ):
-    if corr_type is not None and subset_method is not None:
-        df = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace(
-            "\\*", "*"
-        )
-        df = df[["env_dataset", "organ_1", "organ_2", "corr", "sample_size"]]
-        df_organ = df[df.organ_1 == organ]
-        df_organ = df_organ[df_organ.organ_2 != organ]
-        df_organ = df_organ.fillna(0)
-
-        matrix_organ = pd.pivot_table(df_organ, values="corr", index=["env_dataset"], columns=["organ_2"])
-
-        try:
-            colorscale = get_colorscale(matrix_organ)
-        except ValueError:
-            return Figure(empty_graph)
-        d = {}
-        sample_size_matrix = pd.pivot_table(
-            df_organ, values="sample_size", index=["env_dataset"], columns=["organ_2"]
-        ).values
-        customdata = np.dstack((sample_size_matrix, matrix_organ))
-        title = "Average correlation = %.3f ± %.3f" % (
-            np.mean(matrix_organ.values.flatten()),
-            np.std(matrix_organ.values.flatten()),
-        )
-        hovertemplate = "Correlation : %{z}\
-                 <br>Organ x : %{x}\
-                 <br>Organ y : %{y}\
-                 <br>Sample Size : %{customdata[0]}"
-
-        d["data"] = Heatmap(
-            z=matrix_organ.T,
-            x=matrix_organ.T.columns,
-            y=matrix_organ.T.index,
-            colorscale=colorscale,
-            customdata=customdata,
-            hovertemplate=hovertemplate,
-        )
-
-        d["layout"] = dict(xaxis=dict(dtick=1), yaxis=dict(dtick=1), width=1000, height=600)
-        return Figure(d), title
-    else:
-        return Figure(), ""
-
-
-@APP.callback(
-    [Output("graph_x", "figure"), Output("scores_x", "children")],
-    [
-        Input("correlation_type_x", "value"),
-        Input("subset_method_x", "value"),
-        Input("dataset_x", "value"),
-    ],
-)
-def _plot_with_given_organ_dataset(corr_type, subset_method, env_dataset):
-    if corr_type is not None and subset_method is not None and env_dataset is not None:
-        df = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace(
-            "\\*", "*"
-        )
-        df = df[["env_dataset", "organ_1", "organ_2", "corr", "sample_size"]]
-        df_env = df[df.env_dataset == env_dataset]
-        df_env = df_env.fillna(0)
-
-        sample_size_matrix = pd.pivot_table(df_env, values="sample_size", index=["organ_1"], columns=["organ_2"])
-
-        env_matrix = pd.pivot_table(df_env, values="corr", index=["organ_1"], columns=["organ_2"])
-        labels = env_matrix.columns
-
-        fig = ff.create_dendrogram(env_matrix, orientation="bottom", distfun=lambda df: 1 - df)
-        for scatter in fig["data"]:
-            scatter["yaxis"] = "y2"
-
-        order_dendrogram = list(map(int, fig["layout"]["xaxis"]["ticktext"]))
-
-        fig.update_layout(xaxis={"ticktext": labels[order_dendrogram], "mirror": False})
-        fig.update_layout(yaxis2={"domain": [0.85, 1], "showticklabels": False, "showgrid": False, "zeroline": False})
-
-        heat_data = env_matrix.values[order_dendrogram, :]
-        heat_data = heat_data[:, order_dendrogram]
-        try:
-            colorscale = get_colorscale(heat_data)
-        except ValueError:
-            return Figure(empty_graph)
-
-        heat_sample_size = sample_size_matrix.values[order_dendrogram, :]
-        heat_sample_size = heat_sample_size[:, order_dendrogram]
-        customdata = np.dstack((heat_sample_size, heat_data))
-        hovertemplate = "Correlation : %{z}\
-                            <br>Organ x : %{x}\
-                            <br>Organ y : %{y}\
-                            <br>Sample Size : %{customdata[0]}"
-        idx_upper = np.triu_indices(len(heat_data))
-        title = "Average correlation = %.3f ± %.3f" % (np.mean(heat_data), np.std(heat_data))
-
-        heatmap = Heatmap(
-            x=labels[order_dendrogram],
-            y=labels[order_dendrogram],
-            z=heat_data,
-            colorscale=colorscale,
-            customdata=customdata,
-            hovertemplate=hovertemplate,
-        )
-
-        heatmap["x"] = fig["layout"]["xaxis"]["tickvals"]
-        heatmap["y"] = fig["layout"]["xaxis"]["tickvals"]
-
-        fig.update_layout(
-            yaxis={
-                "domain": [0, 0.85],
-                "mirror": False,
-                "showgrid": False,
-                "zeroline": False,
-                "ticktext": labels[order_dendrogram],
-                "tickvals": fig["layout"]["xaxis"]["tickvals"],
-                "showticklabels": True,
-                "ticks": "outside",
-            }
-        )
-
-        fig.add_trace(heatmap)
-
-        fig["layout"]["width"] = 1100
-        fig["layout"]["height"] = 1100
-
-        return fig, title  # Figure(d), title
-    else:
-        return Figure(), ""
