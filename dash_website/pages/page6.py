@@ -42,7 +42,7 @@ layout = html.Div(
                 dbc.Tab(label="Select Average", tab_id="tab_average"),
             ],
             id="tab_manager",
-            active_tab="tab_x",
+            active_tab="tab_average",
         ),
         html.Div(id="tab-content"),
     ]
@@ -102,6 +102,24 @@ def get_controls_tab_x():
     )
 
 
+@APP.callback(Output("dataset_x", "options"), Input("category_x", "value"))
+def _change_controls_x(val_data_type):
+    if val_data_type == "All":
+        return [{"value": "All", "label": "All"}] + get_dataset_options(ALL)
+    elif val_data_type == "Biomarkers":
+        return [{"value": "All_Biomarkers", "label": "All_Biomarkers"}] + get_dataset_options(ALL_BIOMARKERS)
+    elif val_data_type == "Phenotypes":
+        return [{"value": "All_Phenotypes", "label": "All_Phenotypes"}] + get_dataset_options(ALL_PHENOTYPES)
+    elif val_data_type == "Diseases":
+        return [{"value": "All_Diseases", "label": "All_Diseases"}] + get_dataset_options(ALL_DISEASES)
+    elif val_data_type == "Environmental":
+        return [{"value": "All_Environmental", "label": "All_Environmental"}] + get_dataset_options(ALL_ENVIRONMENTAL)
+    else:  # val_data_type == "Socioeconomics":
+        return [{"value": "All_Socioeconomics", "label": "All_Socioeconomics"}] + get_dataset_options(
+            ALL_SOCIOECONOMICS
+        )
+
+
 def get_controls_tab_organ():
     return dbc.Card(
         [
@@ -117,26 +135,21 @@ def get_controls_tab_average():
         [
             get_correlation_type_radio_items("correlation_type_average"),
             get_subset_method_radio_items("subset_method_average"),
+            get_organ_drop_down("organs_organ_1", ["MainDimensions", "SubDimensions"] + ORGANS, idx_organ=1),
+            html.Div(
+                [get_organ_drop_down("organs_organ_2", ["Average"] + ORGANS, idx_organ=2)],
+                id="hiden_organ_2",
+                style={"display": "block"},
+            ),
         ]
     )
 
 
-@APP.callback(Output("dataset_x", "options"), Input("category_x", "value"))
-def _select_dataset(val_data_type):
-    if val_data_type == "All":
-        return [{"value": "All", "label": "All"}] + get_dataset_options(ALL)
-    elif val_data_type == "Biomarkers":
-        return [{"value": "All_Biomarkers", "label": "All_Biomarkers"}] + get_dataset_options(ALL_BIOMARKERS)
-    elif val_data_type == "Phenotypes":
-        return [{"value": "All_Phenotypes", "label": "All_Phenotypes"}] + get_dataset_options(ALL_PHENOTYPES)
-    elif val_data_type == "Diseases":
-        return [{"value": "All_Diseases", "label": "All_Diseases"}] + get_dataset_options(ALL_DISEASES)
-    elif val_data_type == "Environmental":
-        return [{"value": "All_Environmental", "label": "All_Environmental"}] + get_dataset_options(ALL_ENVIRONMENTAL)
-    else:  # val_data_type == "Socioeconomics":
-        return [{"value": "All_Socioeconomics", "label": "All_Socioeconomics"}] + get_dataset_options(
-            ALL_SOCIOECONOMICS
-        )
+@APP.callback(Output("hiden_organ_2", component_property="style"), Input("organs_organ_1", "value"))
+def _change_controls_average(organ_1):
+    if organ_1 not in ["MainDimensions", "SubDimensions"]:
+        return {"display": "block"}
+    return {"display": "none"}
 
 
 @APP.callback(
@@ -197,58 +210,58 @@ def _fill_graph_tab_organ(correlation_type, subset_method, organ):
     [Output("graph_average", "figure"), Output("scores_average", "children")],
     [Input("correlation_type_average", "value"), Input("subset_method_average", "value")],
 )
-def _plot_with_average_correlation(corr_type, subset_method):
-    data = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace("\\*", "*")
-    correlation_data = pd.DataFrame(
-        None,
-        index=ALL
-        + [
-            "All",
-            "All_Biomarkers",
-            "All_Environmental",
-            "All_Socioeconomics",
-            "All_Phenotypes",
-            "All_Diseases",
-            "Genetics",
-            "Phenotypic",
-        ],
-        columns=["mean", "std"],
-    )
+def _fill_graph_tab_average(corr_type, subset_method):
+    # data = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace("\\*", "*")
+    # correlation_data = pd.DataFrame(
+    #     None,
+    #     index=ALL
+    #     + [
+    #         "All",
+    #         "All_Biomarkers",
+    #         "All_Environmental",
+    #         "All_Socioeconomics",
+    #         "All_Phenotypes",
+    #         "All_Diseases",
+    #         "Genetics",
+    #         "Phenotypic",
+    #     ],
+    #     columns=["mean", "std"],
+    # )
 
-    genetics = create_dfs()[0]
-    correlation_data.loc["Genetics", "mean"] = np.round_(np.nanmean(genetics.values), 3)
-    correlation_data.loc["Genetics", "std"] = np.round_(np.nanstd(genetics.values), 3)
+    # genetics = create_dfs()[0]
+    # correlation_data.loc["Genetics", "mean"] = np.round_(np.nanmean(genetics.values), 3)
+    # correlation_data.loc["Genetics", "std"] = np.round_(np.nanstd(genetics.values), 3)
 
-    phenotypic = LoadData("*", "bestmodels", None, "Test")[2]
-    correlation_data.loc["Phenotypic", "mean"] = np.round_(np.nanmean(phenotypic.values), 3)
-    correlation_data.loc["Phenotypic", "std"] = np.round_(np.nanstd(phenotypic.values), 3)
+    # phenotypic = LoadData("*", "bestmodels", None, "Test")[2]
+    # correlation_data.loc["Phenotypic", "mean"] = np.round_(np.nanmean(phenotypic.values), 3)
+    # correlation_data.loc["Phenotypic", "std"] = np.round_(np.nanstd(phenotypic.values), 3)
 
-    all_correlations = []
+    # all_correlations = []
 
-    def fill_correlations(df):
-        correlation_data.loc[df.env_dataset.tolist()[0], "mean"] = np.round_(np.mean(df["corr"]), 3)
-        correlation_data.loc[df.env_dataset.tolist()[0], "std"] = np.round_(np.std(df["corr"]), 3)
+    # def fill_correlations(df):
+    #     correlation_data.loc[df.env_dataset.tolist()[0], "mean"] = np.round_(np.mean(df["corr"]), 3)
+    #     correlation_data.loc[df.env_dataset.tolist()[0], "std"] = np.round_(np.std(df["corr"]), 3)
 
-        all_correlations.append(df["corr"].reset_index(drop=True))
+    #     all_correlations.append(df["corr"].reset_index(drop=True))
 
-    data.groupby(by="env_dataset").apply(fill_correlations)
+    # data.groupby(by="env_dataset").apply(fill_correlations)
 
-    concat_all_correlations = pd.concat(all_correlations)
-    title = f"Average correlations per X dataset \n Average : {np.round_(np.mean(concat_all_correlations), 3)} +- {np.round_(np.std(concat_all_correlations), 3)}"
+    # concat_all_correlations = pd.concat(all_correlations)
+    # title = f"Average correlations per X dataset \n Average : {np.round_(np.mean(concat_all_correlations), 3)} +- {np.round_(np.std(concat_all_correlations), 3)}"
 
-    correlation_data.sort_values(by="mean", ascending=False, inplace=True)
+    # correlation_data.sort_values(by="mean", ascending=False, inplace=True)
 
-    fig = Figure()
-    fig.add_trace(
-        Bar(
-            x=correlation_data.index,
-            y=correlation_data["mean"],
-            error_y={"array": correlation_data["std"], "type": "data"},
-            name="Average correlations",
-            marker_color="indianred",
-        )
-    )
-    fig.update_layout(xaxis_tickangle=-90)
-    fig.update_layout({"width": 1800, "height": 600})
+    # fig = Figure()
+    # fig.add_trace(
+    #     Bar(
+    #         x=correlation_data.index,
+    #         y=correlation_data["mean"],
+    #         error_y={"array": correlation_data["std"], "type": "data"},
+    #         name="Average correlations",
+    #         marker_color="indianred",
+    #     )
+    # )
+    # fig.update_layout(xaxis_tickangle=-90)
+    # fig.update_layout({"width": 1800, "height": 600})
 
-    return fig, title
+    return Figure(), "title"
