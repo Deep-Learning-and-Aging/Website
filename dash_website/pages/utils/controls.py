@@ -64,10 +64,10 @@ def get_dataset_drop_down(id):
     )
 
 
-def get_organ_drop_down(id, organs):
+def get_organ_drop_down(id, organs, idx_organ=""):
     return dbc.FormGroup(
         [
-            html.P("Select an Organ : "),
+            html.P(f"Select an Organ {idx_organ}: "),
             dcc.Dropdown(id=id, options=get_dataset_options(organs), value=organs[0]),
             html.Br(),
         ],
