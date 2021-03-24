@@ -22,6 +22,7 @@ setup(
         "matplotlib",
         "black",
         "pyyaml",
+        "openpyxl",
     ],
     entry_points={
         "console_scripts": [
