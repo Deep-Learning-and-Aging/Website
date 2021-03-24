@@ -15,7 +15,7 @@ from dash_website.pages.utils.controls import (
     get_category_radio_items,
     get_dataset_drop_down,
 )
-from dash_website.pages.utils.aws_loader import load_csv
+from dash_website.pages.utils.aws_loader import load_csv, load_excel
 from dash_website.pages import (
     ORGANS,
     ALL_BIOMARKERS,
@@ -26,11 +26,6 @@ from dash_website.pages import (
     ALL,
     CATEGORIES,
 )
-
-# TO REMOVE
-from dash_website.pages.page17 import create_dfs
-from dash_website.pages.page4 import LoadData
-from plotly.graph_objs import Figure, Bar
 
 
 layout = html.Div(
@@ -145,11 +140,32 @@ def get_controls_tab_average():
     )
 
 
-@APP.callback(Output("hiden_organ_2", component_property="style"), Input("organs_organ_1", "value"))
-def _change_controls_average(organ_1):
-    if organ_1 not in ["MainDimensions", "SubDimensions"]:
-        return {"display": "block"}
-    return {"display": "none"}
+@APP.callback(
+    [
+        Output("hiden_organ_2", component_property="style"),
+        Output("organs_organ_2", "options"),
+        Output("organs_organ_2", "value"),
+    ],
+    [
+        Input("correlation_type_average", "value"),
+        Input("subset_method_average", "value"),
+        Input("organs_organ_1", "value"),
+        Input("organs_organ_2", "value"),
+    ],
+)
+def _change_controls_average(correlation_type, subset_method, organ_1, organ_2):
+    if organ_1 in ["MainDimensions", "SubDimensions"]:
+        return {"display": "none"}, get_dataset_options(["Average"]), "Average"
+    else:
+        options_organ_2 = (
+            load_excel(
+                f"page6_LinearXWASCorrelations/average_correlations/Correlations_comparisons_{subset_method}_{correlation_type}.xlsx",
+                index_col=[0, 1],
+            )
+            .loc[organ_1]
+            .index
+        )
+        return {"display": "block"}, get_dataset_options(options_organ_2), organ_2
 
 
 @APP.callback(
@@ -188,8 +204,8 @@ def _fill_graph_tab_x(correlation_type, subset_method, dataset_x):
     ],
 )
 def _fill_graph_tab_organ(correlation_type, subset_method, organ):
-    from dash_website.pages.utils.heatmap import create_heatmap
     from plotly.graph_objs import Figure
+    from dash_website.pages.utils.heatmap import create_heatmap
 
     correlations_raw = load_csv(
         f"page6_LinearXWASCorrelations/correlations/Correlations_{subset_method}_{correlation_type}.csv",
@@ -208,60 +224,29 @@ def _fill_graph_tab_organ(correlation_type, subset_method, organ):
 
 @APP.callback(
     [Output("graph_average", "figure"), Output("scores_average", "children")],
-    [Input("correlation_type_average", "value"), Input("subset_method_average", "value")],
+    [
+        Input("correlation_type_average", "value"),
+        Input("subset_method_average", "value"),
+        Input("organs_organ_1", "value"),
+        Input("organs_organ_2", "value"),
+    ],
 )
-def _fill_graph_tab_average(corr_type, subset_method):
-    # data = load_csv(path_correlations_ewas + "Correlations_%s_%s.csv" % (subset_method, corr_type)).replace("\\*", "*")
-    # correlation_data = pd.DataFrame(
-    #     None,
-    #     index=ALL
-    #     + [
-    #         "All",
-    #         "All_Biomarkers",
-    #         "All_Environmental",
-    #         "All_Socioeconomics",
-    #         "All_Phenotypes",
-    #         "All_Diseases",
-    #         "Genetics",
-    #         "Phenotypic",
-    #     ],
-    #     columns=["mean", "std"],
-    # )
+def _fill_graph_tab_average(correlation_type, subset_method, organ_1, organ_2):
+    from plotly.graph_objs import Figure
+    from dash_website.pages.utils.bar import create_bar
 
-    # genetics = create_dfs()[0]
-    # correlation_data.loc["Genetics", "mean"] = np.round_(np.nanmean(genetics.values), 3)
-    # correlation_data.loc["Genetics", "std"] = np.round_(np.nanstd(genetics.values), 3)
+    correlations_mean = load_excel(
+        f"page6_LinearXWASCorrelations/average_correlations/Correlations_comparisons_{subset_method}_{correlation_type}.xlsx",
+        index_col=[0, 1],
+    ).loc[(organ_1, organ_2)]
+    correlations_std = load_excel(
+        f"page6_LinearXWASCorrelations/average_correlations/Correlations_sd_comparisons_{subset_method}_{correlation_type}.xlsx",
+        index_col=[0, 1],
+    ).loc[(organ_1, organ_2)]
 
-    # phenotypic = LoadData("*", "bestmodels", None, "Test")[2]
-    # correlation_data.loc["Phenotypic", "mean"] = np.round_(np.nanmean(phenotypic.values), 3)
-    # correlation_data.loc["Phenotypic", "std"] = np.round_(np.nanstd(phenotypic.values), 3)
+    fig = Figure()
+    fig.add_trace(create_bar(correlations_mean, correlations_std))
+    fig.update_layout(xaxis_tickangle=-90)
+    fig.update_layout({"width": 1800, "height": 600})
 
-    # all_correlations = []
-
-    # def fill_correlations(df):
-    #     correlation_data.loc[df.env_dataset.tolist()[0], "mean"] = np.round_(np.mean(df["corr"]), 3)
-    #     correlation_data.loc[df.env_dataset.tolist()[0], "std"] = np.round_(np.std(df["corr"]), 3)
-
-    #     all_correlations.append(df["corr"].reset_index(drop=True))
-
-    # data.groupby(by="env_dataset").apply(fill_correlations)
-
-    # concat_all_correlations = pd.concat(all_correlations)
-    # title = f"Average correlations per X dataset \n Average : {np.round_(np.mean(concat_all_correlations), 3)} +- {np.round_(np.std(concat_all_correlations), 3)}"
-
-    # correlation_data.sort_values(by="mean", ascending=False, inplace=True)
-
-    # fig = Figure()
-    # fig.add_trace(
-    #     Bar(
-    #         x=correlation_data.index,
-    #         y=correlation_data["mean"],
-    #         error_y={"array": correlation_data["std"], "type": "data"},
-    #         name="Average correlations",
-    #         marker_color="indianred",
-    #     )
-    # )
-    # fig.update_layout(xaxis_tickangle=-90)
-    # fig.update_layout({"width": 1800, "height": 600})
-
-    return Figure(), "title"
+    return fig, f"{organ_1}_{organ_2}"
