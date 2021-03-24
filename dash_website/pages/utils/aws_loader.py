@@ -25,3 +25,9 @@ def load_csv(path_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=path_in_bucket)
     df = pd.read_csv(BytesIO(obj["Body"].read()), **kwargs)
     return df
+
+
+def load_excel(path_in_bucket, **kwargs):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=path_in_bucket)
+    df = pd.read_excel(BytesIO(obj["Body"].read()), **kwargs)
+    return df
