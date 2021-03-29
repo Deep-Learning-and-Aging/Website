@@ -1,0 +1,4 @@
+for DIMENSION in "\*" "*instances01" "*instances1.5x" "*instances23" "Abdomen" "AbdomenLiver" "AbdomenPancreas" "Arterial" "ArterialCarotids" "ArterialPulseWaveAnalysis" "Biochemistry" "BiochemistryBlood" "BiochemistryUrine" "Brain" "BrainCognitive" "BrainMRI" "Eyes" "EyesAll" "EyesFundus" "EyesOCT" "Hearing" "Heart" "HeartECG" "HeartMRI" "ImmuneSystem" "Lungs" "Musculoskeletal" "MusculoskeletalFullBody" "MusculoskeletalHips" "MusculoskeletalKnees" "MusculoskeletalScalars" "MusculoskeletalSpine" "PhysicalActivity"
+do
+    aws s3 mv s3://age-prediction-site/page5_LinearXWASResults/LinearOutput/linear_correlations_Claudification_$DIMENSION.csv s3://age-prediction-site/page5_LinearXWASResults/LinearOutput/linear_correlations_Claudication_$DIMENSION.csv
+done
