@@ -17,20 +17,18 @@ import pandas as pd
 
 from dash_website.utils.controls import (
     get_dataset_options,
-    get_correlation_type_radio_items,
-    get_subset_method_radio_items,
-    get_organ_drop_down,
-    get_category_radio_items,
-    get_dataset_drop_down,
+    get_dimension_drop_down,
+    get_main_category_radio_items,
+    get_category_drop_down,
 )
-from dash_website.utils.aws_loader import load_csv, load_excel
+from dash_website.utils.aws_loader import load_csv, load_excel, load_feather
 from dash_website import (
     DIMENSIONS,
     ALL_BIOMARKERS,
-    ALL_ENVIRONMENTAL,
-    ALL_SOCIOECONOMICS,
     ALL_PHENOTYPES,
     ALL_DISEASES,
+    ALL_ENVIRONMENTAL,
+    ALL_SOCIOECONOMICS,
     ALL_CATEGORIES,
     CATEGORIES,
 )
@@ -66,10 +64,11 @@ def _get_tab(active_tab):
             html.H1("Univariate XWAS - Results"),
             html.Br(),
             html.Br(),
+            dcc.Store(id="memory_volcano"),
             dbc.Row(
                 [
                     dbc.Col([controls, html.Br(), html.Br()], md=3),
-                    dbc.Col([dcc.Store(id="memory_volcano"), dcc.Graph(id="graph_volcano")], md=9),
+                    dbc.Col([dcc.Graph(id="graph_volcano")], md=9),
                 ]
             ),
             dbc.Row(
@@ -107,44 +106,47 @@ def _get_tab(active_tab):
 def get_controls_tab_volcano():
     return dbc.Card(
         [
-            get_category_radio_items("category_volcano", CATEGORIES),
-            get_dataset_drop_down("dataset_volcano"),
-            get_organ_drop_down("organs_organ", DIMENSIONS),
+            get_main_category_radio_items("main_category_volcano", CATEGORIES),
+            get_category_drop_down("category_volcano"),
+            get_dimension_drop_down("dimension_volcano", DIMENSIONS),
         ]
     )
 
 
-@APP.callback(Output("dataset_volcano", "options"), Input("category_volcano", "value"))
-def _change_controls_x(val_data_type):
+@APP.callback(Output("category_volcano", "options"), Input("main_category_volcano", "value"))
+def _change_controls_category(val_data_type):
     if val_data_type == "All":
-        return [{"value": "All", "label": "All"}] + get_dataset_options(ALL_CATEGORIES)
+        return get_dataset_options(["All"] + ALL_CATEGORIES)
     elif val_data_type == "Biomarkers":
-        return [{"value": "All_Biomarkers", "label": "All_Biomarkers"}] + get_dataset_options(ALL_BIOMARKERS)
+        return get_dataset_options(["All_Biomarkers"] + ALL_BIOMARKERS)
     elif val_data_type == "Phenotypes":
-        return [{"value": "All_Phenotypes", "label": "All_Phenotypes"}] + get_dataset_options(ALL_PHENOTYPES)
+        return get_dataset_options(["All_Phenotypes"] + ALL_PHENOTYPES)
     elif val_data_type == "Diseases":
-        return [{"value": "All_Diseases", "label": "All_Diseases"}] + get_dataset_options(ALL_DISEASES)
+        return get_dataset_options(["All_Diseases"] + ALL_DISEASES)
     elif val_data_type == "Environmental":
-        return [{"value": "All_Environmental", "label": "All_Environmental"}] + get_dataset_options(ALL_ENVIRONMENTAL)
+        return get_dataset_options(["All_Environmental"] + ALL_ENVIRONMENTAL)
     else:  # val_data_type == "Socioeconomics":
-        return [{"value": "All_Socioeconomics", "label": "All_Socioeconomics"}] + get_dataset_options(
-            ALL_SOCIOECONOMICS
-        )
+        return get_dataset_options(["All_Socioeconomics"] + ALL_SOCIOECONOMICS)
 
 
 def get_controls_tab_summary():
     return dbc.Card(
         [
-            get_category_radio_items("category_summary", CATEGORIES),
+            get_main_category_radio_items("main_category_summary", CATEGORIES),
         ]
     )
 
 
+@APP.callback(Output("memory_volcano", "data"), Input("dimension_volcano", "value"))
+def _modify_store(dimension):
+    return load_feather(f"xwas/univariate_results/linear_correlations_{dimension}.feather")
+
+
 @APP.callback(
-    [Output("graph_volcano", "figure"), Output("memory_volcano", "data")],
-    [Input("organs_organ", "value"), Input("category_volcano", "value"), Input("dataset_volcano", "value")],
+    Output("graph_volcano", "figure"),
+    [Input("main_category_volcano", "value"), Input("category_volcano", "value"), Input("dimension_volcano", "value")],
 )
-def _modify_ewas_volcano_plot(value_organ, value_data, value_datasets):
+def _fill_volcano_and_table(value_organ, value_data, value_datasets):
     fig = {
         "layout": dict(
             title="Volcano plot", xaxis_title="Partial correlation", yaxis_title="-log(p_value)"  # title of plot
