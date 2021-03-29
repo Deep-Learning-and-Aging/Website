@@ -1,5 +1,5 @@
 Procfile
-APP.yaml
+app.yaml
 
 __pycache__/
 env_website/

@@ -1,3 +1,4 @@
+gunicorn
 dash_bootstrap_components
 dash_core_components
 dash_html_components
@@ -8,7 +9,9 @@ sklearn
 numpy
 scipy
 pandas
-gunicorn
 plotly
 boto3
 matplotlib
+black
+pyyaml
+openpyxl

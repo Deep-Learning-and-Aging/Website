@@ -11,8 +11,6 @@ from dash_website.pages import (
     page2,
     page3,
     page4,
-    page5,
-    page6,
     page7,
     page8,
     page9,
@@ -70,8 +68,14 @@ top_bar = html.Div(
                 ),
                 dbc.DropdownMenu(
                     [
-                        dbc.DropdownMenuItem("Univariate XWAS - Results", href="/pages/page5", id="page5-link"),
-                        dbc.DropdownMenuItem("Univariate XWAS - Correlations", href="/pages/page6", id="page6-link"),
+                        dbc.DropdownMenuItem(
+                            "Univariate XWAS - Results", href="/xwas/univariate_results", id="xwas_univariate_results"
+                        ),
+                        dbc.DropdownMenuItem(
+                            "Univariate XWAS - Correlations",
+                            href="/xwas/univariate_correlations",
+                            id="xwas_univariate_correlations",
+                        ),
                         dbc.DropdownMenuItem("Multivariate XWAS - Results", href="/pages/page7", id="page7-link"),
                         dbc.DropdownMenuItem("Multivariate XWAS - Correlations", href="/pages/page8", id="page8-link"),
                         dbc.DropdownMenuItem(
@@ -109,8 +113,19 @@ APP.layout = html.Div(
 
 @APP.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def display_page(pathname):
-    if "page" in pathname:
+    print(pathname)
+    if "xwas" in pathname:
+        if "univariate_correlations" in pathname:
+            from dash_website.xwas.univariate_correlations import get_layout
+
+            return get_layout()
+        elif "univariate_results" in pathname:
+            from dash_website.xwas.univariate_results import get_layout
+
+            return get_layout()
+    elif "page" in pathname:
         num_page = int(pathname.split("/")[-1][4:])
+        print(num_page)
         return getattr(globals()["page%s" % num_page], "layout")
     elif pathname == "/":
         return menu.layout
@@ -119,26 +134,34 @@ def display_page(pathname):
 
 
 @APP.callback(
-    [Output("menu-link", "active")] + [Output("page%s-link" % i, "active") for i in range(1, num_pages + 1)],
+    [Output("menu-link", "active")]
+    + [Output("xwas_univariate_correlations", "active")]
+    + [Output("xwas_univariate_results", "active")]
+    + [Output("page%s-link" % i, "active") for i in range(1, num_pages + 1) if i not in [5, 6]],
     [Input("url", "pathname")],
 )
 def _(pathname):
     map_path_name_id = OrderedDict()
     map_path_name_id["/"] = "menu-link"
+    map_path_name_id["/xwas/univariate_correlations"] = "xwas_univariate_correlations"
+    map_path_name_id["/xwas/univariate_results"] = "xwas_univariate_results"
     for i in range(1, num_pages + 1):
+        if i in [5, 6]:
+            continue
         map_path_name_id["/pages/page%s" % i] = "page%s-link" % i
 
-    output = [False] * (1 + num_pages)  # Menu + pages
+    output = [False] * (1 + num_pages)  # Menu + univariate_correlations + pages
     count = 0
-    for path_, id_ in map_path_name_id.items():
+    for path_, _ in map_path_name_id.items():
         if path_ == pathname:
             output[count] = True
         count += 1
-    # print(output)
+
     return output
 
 
-server = APP.server
+def get_server():
+    return APP.server
 
 
 def launch_website():
