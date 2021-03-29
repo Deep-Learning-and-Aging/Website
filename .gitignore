@@ -138,6 +138,7 @@ APP.yaml
 # Avoid pushing data
 **/*.csv
 **/*.zip
+**/*.feather
 
 # Local specific
 .vscode

@@ -39,7 +39,7 @@ def get_subset_method_radio_items(id):
     )
 
 
-def get_category_radio_items(id, categories):
+def get_main_category_radio_items(id, categories):
     return dbc.FormGroup(
         [
             html.P("Select category: "),
@@ -54,21 +54,21 @@ def get_category_radio_items(id, categories):
     )
 
 
-def get_dataset_drop_down(id):
+def get_category_drop_down(id):
     return dbc.FormGroup(
         [
-            html.P("Select X Dataset: "),
-            dcc.Dropdown(id=id, options=[{"value": "", "label": ""}], placeholder="Select a dataset..."),
+            html.P("Select X main category: "),
+            dcc.Dropdown(id=id, options=[{"value": "", "label": ""}], placeholder="Select a category..."),
             html.Br(),
         ]
     )
 
 
-def get_organ_drop_down(id, organs, idx_organ=""):
+def get_dimension_drop_down(id, dimension, idx_dimension=""):
     return dbc.FormGroup(
         [
-            html.P(f"Select an Organ {idx_organ}: "),
-            dcc.Dropdown(id=id, options=get_dataset_options(organs), value=organs[0]),
+            html.P(f"Select a dimension {idx_dimension}: "),
+            dcc.Dropdown(id=id, options=get_dataset_options(dimension), value=dimension[0]),
             html.Br(),
         ],
     )
