@@ -9,10 +9,10 @@ import pandas as pd
 
 from dash_website.app import APP
 from dash_website.utils.controls import (
-    get_dataset_options,
-    get_dimension_drop_down,
     get_main_category_radio_items,
     get_category_drop_down,
+    get_dimension_drop_down,
+    get_options,
 )
 from dash_website.utils.aws_loader import load_feather
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
@@ -90,7 +90,7 @@ def get_controls_tab_volcano():
     Input("main_category_volcano", "value"),
 )
 def _change_controls_category(main_category):
-    return get_dataset_options(["All"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]), "All"
+    return get_options(["All"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]), "All"
 
 
 def get_controls_tab_summary():
@@ -105,7 +105,7 @@ def get_controls_tab_summary():
 def _modify_store(dimension):
     correlations = load_feather(f"xwas/univariate_results/linear_correlations_{dimension}.feather")
 
-    return correlations.drop(index=correlations.index[(correlations["sample_size"] < 10)]).to_dict()
+    return correlations.drop(index=correlations.index[correlations["sample_size"] < 10]).to_dict()
 
 
 @APP.callback(
@@ -116,10 +116,7 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
     import plotly.express as px
     import plotly.graph_objects as go
 
-    correlations = pd.DataFrame(dict_correlations).set_index("index")
-    correlations.index = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations.index.tolist())), names=["category", "variable"]
-    )
+    correlations = pd.DataFrame(dict_correlations).set_index(["category", "variable"])
 
     if category == "All":
         correlations_category = correlations.loc[
@@ -181,10 +178,8 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
     [Input("memory_volcano", "data"), Input("category_volcano", "value"), Input("table_volcano", "sort_by")],
 )
 def _sort_table(dict_correlations, category, sort_by_col):
-    correlations = pd.DataFrame(dict_correlations).set_index("index")
-    correlations.index = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations.index.tolist())), names=["category", "variable"]
-    )
+    correlations = pd.DataFrame(dict_correlations).set_index(["category", "variable"])
+
     if category != "All":
         correlations.drop(index=correlations[correlations.index.get_level_values(0) != category].index, inplace=True)
 
