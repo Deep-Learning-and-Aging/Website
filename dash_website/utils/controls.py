@@ -42,7 +42,7 @@ def get_subset_method_radio_items(id):
 def get_main_category_radio_items(id, categories):
     return dbc.FormGroup(
         [
-            html.P("Select category: "),
+            html.P("Select X main category: "),
             dcc.RadioItems(
                 id=id,
                 options=get_dataset_options(categories),
@@ -57,8 +57,8 @@ def get_main_category_radio_items(id, categories):
 def get_category_drop_down(id):
     return dbc.FormGroup(
         [
-            html.P("Select X main category: "),
-            dcc.Dropdown(id=id, options=[{"value": "", "label": ""}], placeholder="Select a category..."),
+            html.P("Select X category: "),
+            dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All"),
             html.Br(),
         ]
     )

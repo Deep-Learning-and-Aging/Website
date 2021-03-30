@@ -138,3 +138,12 @@ ALL_CATEGORIES = sorted(
 )
 
 CATEGORIES = ["All", "Biomarkers", "Phenotypes", "Diseases", "Environmental", "Socioeconomics"]
+
+MAIN_CATEGORIES_TO_CATEGORIES = {
+    "All": ALL_CATEGORIES,
+    "Biomarkers": ALL_BIOMARKERS,
+    "Phenotypes": ALL_PHENOTYPES,
+    "Diseases": ALL_DISEASES,
+    "Environmental": ALL_ENVIRONMENTAL,
+    "Socioeconomics": ALL_SOCIOECONOMICS,
+}
