@@ -21,26 +21,26 @@ CLIENT = client(
 )
 
 
-def load_csv(path_in_bucket, **kwargs):
-    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=path_in_bucket)
+def load_csv(key_in_bucket, **kwargs):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
     df = pd.read_csv(BytesIO(obj["Body"].read()), **kwargs)
     return df
 
 
-def load_excel(path_in_bucket, **kwargs):
-    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=path_in_bucket)
+def load_excel(key_in_bucket, **kwargs):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
     df = pd.read_excel(BytesIO(obj["Body"].read()), **kwargs)
     return df
 
 
-def load_parquet(path_in_bucket, **kwargs):
-    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=path_in_bucket)
+def load_parquet(key_in_bucket, **kwargs):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
     df = pd.read_parquet(BytesIO(obj["Body"].read()), **kwargs)
     return df
 
 
-def load_feather(path_in_bucket, **kwargs):
-    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=path_in_bucket)
+def load_feather(key_in_bucket, **kwargs):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
     df = pd.read_feather(BytesIO(obj["Body"].read()), **kwargs)
     return df
 

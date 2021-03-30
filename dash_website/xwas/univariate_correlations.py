@@ -7,24 +7,15 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.controls import (
-    get_dataset_options,
-    get_correlation_type_radio_items,
+    get_main_category_radio_items,
+    get_category_drop_down,
     get_subset_method_radio_items,
-    get_organ_drop_down,
-    get_category_radio_items,
-    get_dataset_drop_down,
+    get_correlation_type_radio_items,
+    get_options,
+    get_dimension_drop_down,
 )
 from dash_website.utils.aws_loader import load_csv, load_excel
-from dash_website import (
-    DIMENSIONS,
-    ALL_BIOMARKERS,
-    ALL_ENVIRONMENTAL,
-    ALL_SOCIOECONOMICS,
-    ALL_PHENOTYPES,
-    ALL_DISEASES,
-    ALL_CATEGORIES,
-    CATEGORIES,
-)
+from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
 
 
 def get_layout():
@@ -32,8 +23,8 @@ def get_layout():
         [
             dbc.Tabs(
                 [
-                    dbc.Tab(label="Select X", tab_id="tab_x"),
-                    dbc.Tab(label="Select Organ", tab_id="tab_organ"),
+                    dbc.Tab(label="Select Category", tab_id="tab_category"),
+                    dbc.Tab(label="Select Dimension", tab_id="tab_dimension"),
                     dbc.Tab(label="Select Average", tab_id="tab_average"),
                 ],
                 id="tab_manager",
@@ -45,15 +36,15 @@ def get_layout():
 
 
 @APP.callback(Output("tab_content", "children"), Input("tab_manager", "active_tab"))
-def _get_tab(active_tab):
-    if active_tab == "tab_x":
-        controls = get_controls_tab_x()
-        title_id = "scores_x"
-        graph_id = "graph_x"
-    elif active_tab == "tab_organ":
-        controls = get_controls_tab_organ()
-        title_id = "scores_organ"
-        graph_id = "graph_organ"
+def _fill_tab(active_tab):
+    if active_tab == "tab_category":
+        controls = get_controls_tab_category()
+        title_id = "scores_category"
+        graph_id = "graph_category"
+    elif active_tab == "tab_dimension":
+        controls = get_controls_tab_dimension()
+        title_id = "scores_dimension"
+        graph_id = "graph_dimension"
     else:  # active_tab == "tab_average"
         controls = get_controls_tab_average()
         title_id = "scores_average"
@@ -86,41 +77,31 @@ def _get_tab(active_tab):
     )
 
 
-def get_controls_tab_x():
+def get_controls_tab_category():
     return dbc.Card(
         [
-            get_category_radio_items("category_x", CATEGORIES),
-            get_correlation_type_radio_items("correlation_type_x"),
-            get_subset_method_radio_items("subset_method_x"),
-            get_dataset_drop_down("dataset_x"),
+            get_main_category_radio_items("main_category_category", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
+            get_category_drop_down("category_category"),
+            get_subset_method_radio_items("subset_method_category"),
+            get_correlation_type_radio_items("correlation_type_category"),
         ]
     )
 
 
-@APP.callback(Output("dataset_x", "options"), Input("category_x", "value"))
-def _change_controls_x(val_data_type):
-    if val_data_type == "All":
-        return [{"value": "All", "label": "All"}] + get_dataset_options(ALL_CATEGORIES)
-    elif val_data_type == "Biomarkers":
-        return [{"value": "All_Biomarkers", "label": "All_Biomarkers"}] + get_dataset_options(ALL_BIOMARKERS)
-    elif val_data_type == "Phenotypes":
-        return [{"value": "All_Phenotypes", "label": "All_Phenotypes"}] + get_dataset_options(ALL_PHENOTYPES)
-    elif val_data_type == "Diseases":
-        return [{"value": "All_Diseases", "label": "All_Diseases"}] + get_dataset_options(ALL_DISEASES)
-    elif val_data_type == "Environmental":
-        return [{"value": "All_Environmental", "label": "All_Environmental"}] + get_dataset_options(ALL_ENVIRONMENTAL)
-    else:  # val_data_type == "Socioeconomics":
-        return [{"value": "All_Socioeconomics", "label": "All_Socioeconomics"}] + get_dataset_options(
-            ALL_SOCIOECONOMICS
-        )
+@APP.callback(
+    [Output("category_category", "options"), Output("category_category", "value")],
+    Input("main_category_category", "value"),
+)
+def _change_category_category(main_category):
+    return get_options(["All"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]), "All"
 
 
-def get_controls_tab_organ():
+def get_controls_tab_dimension():
     return dbc.Card(
         [
-            get_correlation_type_radio_items("correlation_type_organ"),
-            get_subset_method_radio_items("subset_method_organ"),
-            get_organ_drop_down("organs_organ", DIMENSIONS),
+            get_dimension_drop_down("dimension_dimension", DIMENSIONS),
+            get_subset_method_radio_items("subset_method_dimension"),
+            get_correlation_type_radio_items("correlation_type_dimension"),
         ]
     )
 
@@ -128,14 +109,16 @@ def get_controls_tab_organ():
 def get_controls_tab_average():
     return dbc.Card(
         [
-            get_correlation_type_radio_items("correlation_type_average"),
-            get_subset_method_radio_items("subset_method_average"),
-            get_organ_drop_down("organs_organ_1", ["MainDimensions", "SubDimensions"] + DIMENSIONS, idx_organ=1),
+            get_dimension_drop_down(
+                "dimension_1_average", ["MainDimensions", "SubDimensions"] + DIMENSIONS, idx_dimension=1
+            ),
             html.Div(
-                [get_organ_drop_down("organs_organ_2", ["Average"] + DIMENSIONS, idx_organ=2)],
-                id="hiden_organ_2",
+                [get_dimension_drop_down("dimension_2_average", ["Average"] + DIMENSIONS, idx_dimension=2)],
+                id="hiden_dimension_2_average",
                 style={"display": "block"},
             ),
+            get_subset_method_radio_items("subset_method_average"),
+            get_correlation_type_radio_items("correlation_type_average"),
         ]
     )
 

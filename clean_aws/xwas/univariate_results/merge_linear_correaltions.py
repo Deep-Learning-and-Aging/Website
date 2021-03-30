@@ -6,7 +6,6 @@ from dash_website.utils.aws_loader import load_csv
 from dash_website import DIMENSIONS, ALL_CATEGORIES
 
 if __name__ == "__main__":
-
     for dimension in tqdm(DIMENSIONS):
         list_indexes = []
         for category in ALL_CATEGORIES:
@@ -33,5 +32,4 @@ if __name__ == "__main__":
 
             correlations.loc[category] = correlation_category_dimension.values
 
-        correlations.index = map(str, correlations.index.tolist())
         correlations.reset_index().to_feather(f"data/xwas/univariate_results/linear_correlations_{dimension}.feather")
