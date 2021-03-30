@@ -27,7 +27,7 @@ For instance in the page 1 :
 We have this reset callback : 
 
 ```
-@app.callback([Output("select_group_biomarkers", "value"),
+@APP.callback([Output("select_group_biomarkers", "value"),
                Output("select_view_biomarkers", "value"),
                Output("select_transformation_biomarkers", "value"),
                Output("select_biomarkers_of_group", "value"),

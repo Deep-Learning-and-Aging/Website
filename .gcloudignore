@@ -7,6 +7,7 @@ env_website/
 .vscode
 **/*.zip
 .vscode 
+**/*.feather
 
 Correlations_pipeline
 linear_output_paper
