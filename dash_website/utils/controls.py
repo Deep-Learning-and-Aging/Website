@@ -11,6 +11,14 @@ def get_options(list_):
     return list_label_value
 
 
+def get_options_from_dict(dict_):
+    list_label_value = []
+    for key_value, label in dict_.items():
+        d = {"value": key_value, "label": label}
+        list_label_value.append(d)
+    return list_label_value
+
+
 def get_correlation_type_radio_items(id):
     return dbc.FormGroup(
         [
@@ -54,10 +62,25 @@ def get_main_category_radio_items(id, categories):
     )
 
 
+def get_item_radio_items(id, items):
+    return dbc.FormGroup(
+        [
+            html.P("Select : "),
+            dcc.RadioItems(
+                id=id,
+                options=get_options_from_dict(items),
+                value=list(items.keys())[0],
+                labelStyle={"display": "inline-block", "margin": "5px"},
+            ),
+            html.Br(),
+        ]
+    )
+
+
 def get_category_drop_down(id):
     return dbc.FormGroup(
         [
-            html.P("Select X category: "),
+            html.P("Select X subcategory: "),
             dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All"),
             html.Br(),
         ]
@@ -67,7 +90,7 @@ def get_category_drop_down(id):
 def get_dimension_drop_down(id, dimension, idx_dimension=""):
     return dbc.FormGroup(
         [
-            html.P(f"Select a dimension {idx_dimension}: "),
+            html.P(f"Select an aging dimension {idx_dimension}: "),
             dcc.Dropdown(id=id, options=get_options(dimension), value=dimension[0]),
             html.Br(),
         ],

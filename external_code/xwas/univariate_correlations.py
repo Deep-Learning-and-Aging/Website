@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
@@ -89,9 +90,8 @@ if __name__ == "__main__":
                 for method in ["all", "union", "intersection"]:
                     for correlation_type in ["pearson", "spearman"]:
                         if len(indexes[method]) <= 1:
-                            correlations.loc[(dimension_1, dimension_2, category), (method, correlation_type)] = 0
+                            correlations.loc[(dimension_1, dimension_2, category), (method, correlation_type)] = np.nan
                         else:
-                            print(category, dimension_1, dimension_2, method)
                             correlations.loc[
                                 (dimension_1, dimension_2, category), (method, correlation_type)
                             ] = correlations_1.loc[indexes[method], "correlation"].corr(
