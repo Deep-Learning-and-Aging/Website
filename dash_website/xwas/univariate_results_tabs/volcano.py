@@ -28,7 +28,7 @@ def get_volcano():
             dcc.Store(id="memory_volcano"),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_volcano(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
                     dbc.Col([dcc.Graph(id="graph_volcano")], md=9),
                 ]
             ),
@@ -53,7 +53,7 @@ def get_volcano():
     )
 
 
-def get_controls_tab_volcano():
+def get_controls_tab():
     return dbc.Card(
         [
             get_main_category_radio_items("main_category_volcano", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),

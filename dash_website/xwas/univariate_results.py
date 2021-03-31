@@ -1,5 +1,4 @@
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
@@ -16,15 +15,15 @@ def get_layout():
                     dbc.Tab(label="Volcano", tab_id="tab_volcano"),
                     dbc.Tab(label="Summary", tab_id="tab_summary"),
                 ],
-                id="tab_manager",
+                id="tab_manager_results",
                 active_tab="tab_summary",
             ),
-            html.Div(id="tab_content"),
+            html.Div(id="tab_content_results"),
         ]
     )
 
 
-@APP.callback(Output("tab_content", "children"), Input("tab_manager", "active_tab"))
+@APP.callback(Output("tab_content_results", "children"), Input("tab_manager_results", "active_tab"))
 def _get_tab(active_tab):
     if active_tab == "tab_volcano":
         return get_volcano()

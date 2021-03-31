@@ -1,5 +1,4 @@
 import numpy as np
-from plotly.graph_objs import Heatmap
 
 
 def f(x):
@@ -22,18 +21,3 @@ def get_colorscale(df):
     else:
         colorscale = [[0, f(min)], [abs, "rgba(255, 255, 255, 0.85)"], [1, f(max)]]
     return colorscale
-
-
-def create_heatmap(heat_correlations, heat_sample_sizes, labels_x, labels_y):
-    colorscale = get_colorscale(heat_correlations)
-
-    hovertemplate = "Correlation : %{z} <br>Organ x : %{x} <br>Organ y : %{y} <br>Sample Size : %{customdata}"
-
-    return Heatmap(
-        x=labels_x,
-        y=labels_y,
-        z=heat_correlations,
-        colorscale=colorscale,
-        customdata=heat_sample_sizes,
-        hovertemplate=hovertemplate,
-    )
