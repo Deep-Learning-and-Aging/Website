@@ -25,8 +25,8 @@ def get_correlation_type_radio_items(id):
             dbc.Label("Select correlation type :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["Pearson", "Spearman"]),
-                value="Pearson",
+                options=get_options(["pearson", "spearman"]),
+                value="pearson",
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
         ]
@@ -39,8 +39,8 @@ def get_subset_method_radio_items(id):
             dbc.Label("Select subset method :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["All", "Union", "Intersection"]),
-                value="Union",
+                options=get_options(["all", "union", "intersection"]),
+                value="union",
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
         ]

@@ -2,9 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import dash_table
 
-import numpy as np
 import pandas as pd
 
 from dash_website.app import APP
@@ -23,7 +21,7 @@ def get_summary():
             dcc.Store(id="memory_summary", data=get_data()),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_summary(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
                     dbc.Col([dcc.Graph(id="graph_summary")], md=9),
                 ]
             ),
@@ -36,7 +34,7 @@ def get_data():
     return load_feather(f"xwas/univariate_results/summary.feather").to_dict()
 
 
-def get_controls_tab_summary():
+def get_controls_tab():
     return dbc.Card(
         [
             get_main_category_radio_items("main_category_summary", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
