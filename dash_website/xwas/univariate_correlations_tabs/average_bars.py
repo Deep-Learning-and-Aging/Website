@@ -5,17 +5,15 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_category_drop_down,
     get_subset_method_radio_items,
     get_correlation_type_radio_items,
     get_options,
     get_dimension_drop_down,
 )
-from dash_website.utils.aws_loader import load_csv, load_excel
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website import DIMENSIONS
 
 
 def get_average_bars():
@@ -29,12 +27,8 @@ def get_average_bars():
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
                     dbc.Col(
                         [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="scores_average"),
-                                    dcc.Graph(id="graph_average"),
-                                ]
-                            )
+                            html.H2(id="title_average_test"),
+                            dcc.Graph(id="graph_average"),
                         ],
                         style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
                         md=9,
@@ -53,41 +47,82 @@ def get_controls_tab():
                 "dimension_1_average", ["MainDimensions", "SubDimensions"] + DIMENSIONS, idx_dimension=1
             ),
             html.Div(
-                [get_dimension_drop_down("dimension_2_average", ["Average"] + DIMENSIONS, idx_dimension=2)],
+                [get_dimension_drop_down("dimension_2_average", ["average"] + DIMENSIONS, idx_dimension=2)],
                 id="hiden_dimension_2_average",
-                style={"display": "block"},
+                style={"display": "none"},
             ),
-            get_subset_method_radio_items("subset_method_average"),
+            get_subset_method_radio_items("subset_method_correlations"),
             get_correlation_type_radio_items("correlation_type_average"),
         ]
     )
 
 
 @APP.callback(
-    [Output("graph_average", "figure"), Output("scores_average", "children")],
+    [
+        Output("hiden_dimension_2_average", component_property="style"),
+        Output("dimension_2_average", "options"),
+        Output("dimension_2_average", "value"),
+    ],
+    Input("dimension_1_average", "value"),
+)
+def _change_controls_average(dimension_1):
+    if dimension_1 in ["MainDimensions", "SubDimensions"]:
+        return {"display": "none"}, get_options(["average"]), "average"
+    else:
+        return (
+            {"display": "block"},
+            get_options(["average"] + pd.Index(DIMENSIONS).drop(dimension_1).tolist()),
+            "average",
+        )
+
+
+@APP.callback(
+    [Output("graph_average", "figure"), Output("title_average_test", "children")],
     [
         Input("correlation_type_average", "value"),
-        Input("subset_method_average", "value"),
-        Input("organs_organ_1", "value"),
-        Input("organs_organ_2", "value"),
+        Input("dimension_1_average", "value"),
+        Input("dimension_2_average", "value"),
+        Input("memory_correlations", "data"),
     ],
 )
-def _fill_graph_tab_average(correlation_type, subset_method, organ_1, organ_2):
-    from plotly.graph_objs import Figure
-    from dash_website.utils.graphs.bar import create_bar
+def _fill_graph_tab_average(correlation_type, dimension_1, dimension_2, data):
+    import plotly.graph_objs as go
 
-    correlations_mean = load_excel(
-        f"page6_LinearXWASCorrelations/average_correlations/Correlations_comparisons_{subset_method}_{correlation_type}.xlsx",
-        index_col=[0, 1],
-    ).loc[(organ_1, organ_2)]
-    correlations_std = load_excel(
-        f"page6_LinearXWASCorrelations/average_correlations/Correlations_sd_comparisons_{subset_method}_{correlation_type}.xlsx",
-        index_col=[0, 1],
-    ).loc[(organ_1, organ_2)]
+    correlations = pd.DataFrame(data).set_index(["dimension_1", "dimension_2", "category"])
+    correlations.columns = pd.MultiIndex.from_tuples(
+        list(map(eval, correlations.columns.tolist())), names=["subset_method", "observation"]
+    )
 
-    fig = Figure()
-    fig.add_trace(create_bar(correlations_mean, correlations_std))
-    fig.update_layout(xaxis_tickangle=-90)
-    fig.update_layout({"width": 1800, "height": 600})
+    if (
+        dimension_1 in ["MainDimensions", "SubDimensions"]
+        or dimension_2 == "average"
+        or np.nonzero(np.array(DIMENSIONS) == dimension_1)[0][0] < np.nonzero(np.array(DIMENSIONS) == dimension_2)[0][0]
+    ):
+        sorted_correlations = correlations.loc[(dimension_1, dimension_2), correlation_type].sort_values(
+            by=["mean"], ascending=False
+        )
+    else:
+        sorted_correlations = (
+            correlations.swaplevel(i=0, j=1)
+            .loc[(dimension_1, dimension_2), correlation_type]
+            .sort_values(by=["mean"], ascending=False)
+        )
 
-    return fig, f"{organ_1}_{organ_2}"
+    bars = go.Bar(
+        x=sorted_correlations.index,
+        y=sorted_correlations["mean"],
+        error_y={"array": sorted_correlations["std"], "type": "data"},
+        name="Average correlations",
+        marker_color="indianred",
+    )
+
+    fig = go.Figure(bars)
+    fig.update_layout(
+        {
+            "width": 1500,
+            "height": 500,
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
+        }
+    )
+
+    return fig, f"{dimension_1}_{dimension_2}"

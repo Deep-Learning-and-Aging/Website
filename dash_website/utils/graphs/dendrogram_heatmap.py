@@ -6,11 +6,11 @@ from dash_website.utils.graphs.colorscale import get_colorscale
 def create_dendrogram_heatmap(correlations, sample_sizes):
     """
     correlations : DataFrame
-        2d dataframe, with ones on the diagonal.
+        2d dataframe.
     samples_sizes : DataFrame
         2d dataframe.
     """
-    fig = create_dendrogram(correlations, orientation="bottom", distfun=lambda df: 1 - correlations)
+    fig = create_dendrogram(correlations, orientation="bottom", distfun=lambda df: 1 - df)
     for scatter in fig["data"]:
         scatter["yaxis"] = "y2"
 
