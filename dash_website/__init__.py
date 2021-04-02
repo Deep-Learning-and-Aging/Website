@@ -36,6 +36,14 @@ DIMENSIONS = sorted(
     ]
 )
 
+RENAME_DIMENSIONS = {
+    "set": "*",
+    "set_instances01": "*instances01",
+    "set_instances1.5x": "*instances1.5x",
+    "set_instances23": "*instances23",
+}
+
+
 ALL_BIOMARKERS = sorted(
     [
         "HandGripStrength",

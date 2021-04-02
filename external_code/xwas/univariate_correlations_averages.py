@@ -4,6 +4,7 @@ from tqdm import tqdm
 from dash_website.utils.aws_loader import load_feather
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
 
+
 MAIN_DIMENSIONS = [
     "Abdomen",
     "Musculoskeletal",
@@ -95,73 +96,56 @@ if __name__ == "__main__":
         ["dimension_1", "dimension_2", "category"]
     )
     correlations_raw.columns = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations_raw.columns.tolist())), names=["category", "variable"]
+        list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
     )
 
     list_indexes = []
-    for idx_dimension_1, dimension_1 in enumerate(DIMENSIONS + ["MainDimensions", "SubDimensions"]):
-        if dimension_1 in ["MainDimensions", "SubDimensions"]:
-            dimensions_2 = ["average"]
-        else:
-            dimensions_2 = ["average"] + DIMENSIONS[idx_dimension_1 + 1 :]
-        for dimension_2 in dimensions_2:
-            for category in FULL_CATEGORY:
-                list_indexes.append([dimension_1, dimension_2, category])
-    indexes = pd.MultiIndex.from_tuples(list_indexes, names=["dimension_1", "dimension_2", "category"])
+    for dimension in DIMENSIONS + ["MainDimensions", "SubDimensions"]:
+        for category in FULL_CATEGORY:
+            list_indexes.append([dimension, category])
+    indexes = pd.MultiIndex.from_tuples(list_indexes, names=["dimension", "category"])
 
     list_columns = []
-    for correlation_type in ["pearson", "spearman", "number_variables"]:
-        if correlation_type == "number_variables":
-            observations = ["number_variables"]
-        else:
-            observations = ["mean", "std"]
-        for observation in observations:
-            list_columns.append([correlation_type, observation])
-    columns = pd.MultiIndex.from_tuples(list_columns, names=["correlation_type", "observation"])
+    for subset_method in ["all", "union", "intersection"]:
+        for correlation_type in ["pearson", "spearman"]:
+            for observation in ["mean", "std"]:
+                list_columns.append([subset_method, correlation_type, observation])
+    columns = pd.MultiIndex.from_tuples(list_columns, names=["subset_method", "correlation_type", "observation"])
 
-    template_averages_correlations = pd.DataFrame(None, index=indexes, columns=columns)
+    averages_correlations = pd.DataFrame(None, index=indexes, columns=columns)
 
     for subset_method in tqdm(["union", "intersection", "all"]):
-        averages_correlations = template_averages_correlations.copy()
-        averages_correlations[("number_variables", "number_variables")] = correlations_raw[
-            (subset_method, "number_variables")
-        ]
-
         for correlation_type in ["pearson", "spearman"]:
-            averages_correlations[(correlation_type, "mean")] = correlations_raw[(subset_method, correlation_type)]
-
-            correlations = correlations_raw[(subset_method, correlation_type)].swaplevel().swaplevel(i=0, j=1)
+            correlations = correlations_raw[subset_method, correlation_type].swaplevel().swaplevel(i=0, j=1)
 
             for category in FULL_CATEGORY:
                 correlations_category = correlations.loc[category]
 
                 averages_correlations.loc[
-                    ("MainDimensions", "average", category), (correlation_type, "mean")
+                    ("MainDimensions", category), (subset_method, correlation_type, "mean")
                 ] = correlations_category.loc[PAIRS_MAIN_DIMENSIONS].mean()
                 averages_correlations.loc[
-                    ("MainDimensions", "average", category), (correlation_type, "std")
+                    ("MainDimensions", category), (subset_method, correlation_type, "std")
                 ] = correlations_category.loc[PAIRS_MAIN_DIMENSIONS].std()
 
                 averages_correlations.loc[
-                    ("SubDimensions", "average", category), (correlation_type, "mean")
+                    ("SubDimensions", category), (subset_method, correlation_type, "mean")
                 ] = correlations_category.loc[PAIRS_SUBDIMENSIONS].mean()
                 averages_correlations.loc[
-                    ("SubDimensions", "average", category), (correlation_type, "std")
+                    ("SubDimensions", category), (subset_method, correlation_type, "std")
                 ] = correlations_category.loc[PAIRS_SUBDIMENSIONS].std()
 
-                for dimension_1 in DIMENSIONS:
-                    correlations_independant = correlations_category.loc[dimension_1].drop(
-                        index=([dimension_1] + DIMENSIONS_TO_EXCLUDE[dimension_1])
+                for dimension in DIMENSIONS:
+                    correlations_independant = correlations_category.loc[dimension].drop(
+                        index=([dimension] + DIMENSIONS_TO_EXCLUDE[dimension])
                     )
 
                     averages_correlations.loc[
-                        (dimension_1, "average", category), (correlation_type, "mean")
+                        (dimension, category), (subset_method, correlation_type, "mean")
                     ] = correlations_independant.mean()
                     averages_correlations.loc[
-                        (dimension_1, "average", category), (correlation_type, "std")
+                        (dimension, category), (subset_method, correlation_type, "std")
                     ] = correlations_independant.std()
 
-        averages_correlations.columns = map(str, averages_correlations.columns.tolist())
-        averages_correlations.reset_index().to_feather(
-            f"data/xwas/univariate_correlations/averages_correlations_{subset_method}.feather"
-        )
+    averages_correlations.columns = map(str, averages_correlations.columns.tolist())
+    averages_correlations.reset_index().to_feather("data/xwas/univariate_correlations/averages_correlations.feather")

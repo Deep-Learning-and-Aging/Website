@@ -2,11 +2,13 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
+from dash_website import RENAME_DIMENSIONS
+
 
 def get_options(list_):
     list_label_value = []
-    for elem in list_:
-        d = {"value": elem, "label": elem}
+    for value in list_:
+        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value.capitalize())}
         list_label_value.append(d)
     return list_label_value
 
@@ -14,33 +16,33 @@ def get_options(list_):
 def get_options_from_dict(dict_):
     list_label_value = []
     for key_value, label in dict_.items():
-        d = {"value": key_value, "label": label}
+        d = {"value": key_value, "label": label.capitalize()}
         list_label_value.append(d)
     return list_label_value
 
 
-def get_correlation_type_radio_items(id):
+def get_correlation_type_radio_items(id, value="pearson"):
     return dbc.FormGroup(
         [
             dbc.Label("Select correlation type :"),
             dcc.RadioItems(
                 id=id,
                 options=get_options(["pearson", "spearman"]),
-                value="pearson",
+                value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
         ]
     )
 
 
-def get_subset_method_radio_items(id):
+def get_subset_method_radio_items(id, value="union"):
     return dbc.FormGroup(
         [
             dbc.Label("Select subset method :"),
             dcc.RadioItems(
                 id=id,
                 options=get_options(["all", "union", "intersection"]),
-                value="union",
+                value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
         ]

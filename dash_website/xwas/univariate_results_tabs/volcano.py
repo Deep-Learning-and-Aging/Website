@@ -22,14 +22,14 @@ from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 def get_volcano():
     return dbc.Container(
         [
+            dcc.Loading([dcc.Store(id="memory_volcano")]),
             html.H1("Univariate XWAS - Results"),
             html.Br(),
             html.Br(),
-            dcc.Store(id="memory_volcano"),
             dbc.Row(
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col([dcc.Graph(id="graph_volcano")], md=9),
+                    dbc.Col(dcc.Loading([dcc.Graph(id="graph_volcano")]), md=9),
                 ]
             ),
             dbc.Row(
@@ -90,14 +90,14 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
 
     if category == "All":
         correlations_category = correlations.loc[
-            correlations.index.get_level_values(0).isin(MAIN_CATEGORIES_TO_CATEGORIES[main_category])
-        ].copy()
+            correlations.index.get_level_values("category").isin(MAIN_CATEGORIES_TO_CATEGORIES[main_category])
+        ]
     else:
-        correlations_category = correlations.loc[correlations.index.get_level_values(0).isin([category])].copy()
+        correlations_category = correlations.loc[correlations.index.get_level_values("category").isin([category])]
 
     correlations_category["neg_log_p_value"] = -np.log10(correlations_category["p_value"])
-    correlations_category["category"] = correlations_category.index.get_level_values(0)
-    correlations_category["variable"] = correlations_category.index.get_level_values(1)
+    correlations_category["category"] = correlations_category.index.get_level_values("category")
+    correlations_category["variable"] = correlations_category.index.get_level_values("variable")
 
     fig = px.scatter(
         correlations_category,
@@ -145,25 +145,34 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
 
 @APP.callback(
     Output("table_volcano", "data"),
-    [Input("memory_volcano", "data"), Input("category_volcano", "value"), Input("table_volcano", "sort_by")],
+    [
+        Input("memory_volcano", "data"),
+        Input("main_category_volcano", "value"),
+        Input("category_volcano", "value"),
+        Input("table_volcano", "sort_by"),
+    ],
 )
-def _sort_table(dict_correlations, category, sort_by_col):
+def _sort_table(dict_correlations, main_category, category, sort_by_col):
     correlations = pd.DataFrame(dict_correlations).set_index(["category", "variable"])
 
-    if category != "All":
-        correlations.drop(index=correlations[correlations.index.get_level_values(0) != category].index, inplace=True)
+    if category == "All":
+        correlations_category = correlations.loc[
+            correlations.index.get_level_values("category").isin(MAIN_CATEGORIES_TO_CATEGORIES[main_category])
+        ].copy()
+    else:
+        correlations_category = correlations.loc[correlations.index.get_level_values("category").isin([category])]
 
-    correlations.reset_index(inplace=True)
+    correlations_category.reset_index(inplace=True)
 
-    correlations.rename(
+    correlations_category.rename(
         columns=VOLCANO_TABLE_COLUMNS,
         inplace=True,
     )
 
     if sort_by_col is not None and len(sort_by_col) > 0:
         is_ascending = sort_by_col[0]["direction"] == "asc"
-        correlations.sort_values(sort_by_col[0]["column_id"], ascending=is_ascending, inplace=True)
+        correlations_category.sort_values(sort_by_col[0]["column_id"], ascending=is_ascending, inplace=True)
     else:
-        correlations.sort_values(VOLCANO_TABLE_COLUMNS["p_value"], inplace=True)
+        correlations_category.sort_values(VOLCANO_TABLE_COLUMNS["p_value"], inplace=True)
 
-    return correlations.round(5).to_dict("records")
+    return correlations_category.round(5).to_dict("records")

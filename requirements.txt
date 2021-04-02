@@ -15,3 +15,5 @@ matplotlib
 black
 pyyaml
 openpyxl
+tqdm
+pyarrow

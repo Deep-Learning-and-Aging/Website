@@ -16,7 +16,7 @@ def get_layout():
                     dbc.Tab(label="Summary", tab_id="tab_summary"),
                 ],
                 id="tab_manager_results",
-                active_tab="tab_summary",
+                active_tab="tab_volcano",
             ),
             html.Div(id="tab_content_results"),
         ]
