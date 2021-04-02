@@ -8,17 +8,17 @@ import pandas as pd
 from dash_website.app import APP
 from dash_website.utils.controls import get_item_radio_items, get_main_category_radio_items
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
-from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND
+from dash_website import MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE
 
 
 def get_summary():
     return dbc.Container(
         [
+            dcc.Loading([dcc.Store(id="memory_summary", data=get_data())]),
             html.H1("Univariate XWAS - Results"),
             html.Br(),
             html.Br(),
-            dcc.Store(id="memory_summary", data=get_data()),
             dbc.Row(
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
@@ -52,7 +52,7 @@ def _fill_summary_heatmap(item, main_category, data):
 
     summary = pd.DataFrame(data).set_index(["dimension", "category"])
     summary.columns = pd.MultiIndex.from_tuples(
-        list(map(eval, summary.columns.tolist())), names=["category", "variable"]
+        list(map(eval, summary.columns.tolist())), names=["item", "observation"]
     )
 
     summary_item_percentage = (
@@ -91,6 +91,7 @@ def _fill_summary_heatmap(item, main_category, data):
         y=summary_item_percentage_category.index,
         customdata=summary_item_number_category,
         hovertemplate=hovertemplate,
+        colorscale=ITEMS_COLORSCALE[item],
     )
 
     fig = go.Figure(heatmap)

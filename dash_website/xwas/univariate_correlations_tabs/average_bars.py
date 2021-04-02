@@ -5,30 +5,37 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 import pandas as pd
-import numpy as np
 
-from dash_website.utils.controls import (
-    get_subset_method_radio_items,
-    get_correlation_type_radio_items,
-    get_options,
-    get_dimension_drop_down,
-)
-from dash_website import DIMENSIONS
+from dash_website.utils.aws_loader import load_feather
+from dash_website.utils.controls import get_dimension_drop_down, get_options
+from dash_website import DIMENSIONS, RENAME_DIMENSIONS
 
 
-def get_average_bars():
+def get_average_bars(subset_method_radio_items, correlation_type_radio_items):
     return dbc.Container(
         [
             html.H1("Univariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
+            dcc.Loading([dcc.Store(id="memory_averages", data=get_data())]),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
                     dbc.Col(
                         [
-                            html.H2(id="title_average_test"),
-                            dcc.Graph(id="graph_average"),
+                            get_controls_tab_average(subset_method_radio_items, correlation_type_radio_items),
+                            html.Br(),
+                            html.Br(),
+                        ],
+                        md=3,
+                    ),
+                    dbc.Col(
+                        [
+                            dcc.Loading(
+                                [
+                                    html.H2(id="title_average_test"),
+                                    dcc.Graph(id="graph_average"),
+                                ]
+                            )
                         ],
                         style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
                         md=9,
@@ -40,7 +47,11 @@ def get_average_bars():
     )
 
 
-def get_controls_tab():
+def get_data():
+    return load_feather(f"xwas/univariate_correlations/averages_correlations.feather").to_dict()
+
+
+def get_controls_tab_average(subset_method_radio_items, correlation_type_radio_items):
     return dbc.Card(
         [
             get_dimension_drop_down(
@@ -51,8 +62,8 @@ def get_controls_tab():
                 id="hiden_dimension_2_average",
                 style={"display": "none"},
             ),
-            get_subset_method_radio_items("subset_method_correlations"),
-            get_correlation_type_radio_items("correlation_type_average"),
+            subset_method_radio_items,
+            correlation_type_radio_items,
         ]
     )
 
@@ -79,50 +90,66 @@ def _change_controls_average(dimension_1):
 @APP.callback(
     [Output("graph_average", "figure"), Output("title_average_test", "children")],
     [
-        Input("correlation_type_average", "value"),
+        Input("subset_method_correlations", "value"),
+        Input("correlation_type_correlations", "value"),
         Input("dimension_1_average", "value"),
         Input("dimension_2_average", "value"),
         Input("memory_correlations", "data"),
+        Input("memory_averages", "data"),
     ],
 )
-def _fill_graph_tab_average(correlation_type, dimension_1, dimension_2, data):
+def _fill_graph_tab_average(
+    subset_method, correlation_type, dimension_1, dimension_2, data_correlations, data_averages
+):
     import plotly.graph_objs as go
 
-    correlations = pd.DataFrame(data).set_index(["dimension_1", "dimension_2", "category"])
-    correlations.columns = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations.columns.tolist())), names=["subset_method", "observation"]
-    )
+    if dimension_2 == "average":
+        averages = pd.DataFrame(data_averages).set_index(["dimension", "category"])
+        averages.columns = pd.MultiIndex.from_tuples(
+            list(map(eval, averages.columns.tolist())), names=["subset_method", "correlation_type", "observation"]
+        )
 
-    if (
-        dimension_1 in ["MainDimensions", "SubDimensions"]
-        or dimension_2 == "average"
-        or np.nonzero(np.array(DIMENSIONS) == dimension_1)[0][0] < np.nonzero(np.array(DIMENSIONS) == dimension_2)[0][0]
-    ):
-        sorted_correlations = correlations.loc[(dimension_1, dimension_2), correlation_type].sort_values(
+        sorted_averages = averages.loc[dimension_1, (subset_method, correlation_type)].sort_values(
             by=["mean"], ascending=False
         )
-    else:
-        sorted_correlations = (
-            correlations.swaplevel(i=0, j=1)
-            .loc[(dimension_1, dimension_2), correlation_type]
-            .sort_values(by=["mean"], ascending=False)
+
+        bars = go.Bar(
+            x=sorted_averages.index,
+            y=sorted_averages["mean"],
+            error_y={"array": sorted_averages["std"], "type": "data"},
+            name="Average correlations",
+            marker_color="indianred",
         )
 
-    bars = go.Bar(
-        x=sorted_correlations.index,
-        y=sorted_correlations["mean"],
-        error_y={"array": sorted_correlations["std"], "type": "data"},
-        name="Average correlations",
-        marker_color="indianred",
-    )
+        title = f"Average average correlation across aging dimensions and X categories = {sorted_averages['mean'].mean().round(3)} +- {sorted_averages['mean'].std().round(3)}"
+        y_label = "Average correlation"
+
+    else:
+        correlations = pd.DataFrame(data_correlations).set_index(["dimension_1", "dimension_2", "category"])
+
+        sorted_correlations = correlations.loc[(dimension_1, dimension_2)].sort_values(
+            by=["correlation"], ascending=False
+        )
+
+        bars = go.Bar(
+            x=sorted_correlations.index,
+            y=sorted_correlations["correlation"],
+            name="Correlations",
+            marker_color="indianred",
+        )
+
+        title = f"Average correlation = {sorted_correlations['correlation'].mean().round(3)} +- {sorted_correlations['correlation'].std().round(3)}"
+        y_label = "Correlation"
 
     fig = go.Figure(bars)
+
     fig.update_layout(
         {
             "width": 1500,
             "height": 500,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
+            "yaxis": {"title": y_label},
         }
     )
 
-    return fig, f"{dimension_1}_{dimension_2}"
+    return fig, title

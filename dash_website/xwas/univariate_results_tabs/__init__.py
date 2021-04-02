@@ -11,3 +11,9 @@ ITEMS_LEGEND = {
     "accelerated_aging": "accelerated aging",
     "decelerated_aging": "decelerated aging",
 }
+
+ITEMS_COLORSCALE = {
+    "significant": "greys",
+    "accelerated_aging": "reds",
+    "decelerated_aging": "blues",
+}
