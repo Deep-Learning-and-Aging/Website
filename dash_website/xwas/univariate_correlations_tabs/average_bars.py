@@ -7,8 +7,13 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_dimension_drop_down, get_options
-from dash_website import DIMENSIONS, RENAME_DIMENSIONS
+from dash_website.utils.controls import (
+    get_main_category_radio_items,
+    get_dimension_drop_down,
+    get_item_radio_items,
+    get_options,
+)
+from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, LIST_MAIN_CATEGORY_CATEGORIES
 
 
 def get_average_bars(subset_method_radio_items, correlation_type_radio_items):
@@ -54,6 +59,7 @@ def get_data():
 def get_controls_tab_average(subset_method_radio_items, correlation_type_radio_items):
     return dbc.Card(
         [
+            get_main_category_radio_items("main_category_average", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
             get_dimension_drop_down(
                 "dimension_1_average", ["MainDimensions", "SubDimensions"] + DIMENSIONS, idx_dimension=1
             ),
@@ -61,6 +67,9 @@ def get_controls_tab_average(subset_method_radio_items, correlation_type_radio_i
                 [get_dimension_drop_down("dimension_2_average", ["average"] + DIMENSIONS, idx_dimension=2)],
                 id="hiden_dimension_2_average",
                 style={"display": "none"},
+            ),
+            get_item_radio_items(
+                "display_mode_average", {"view_all": "View All", "view_per_main_category": "View per X main category"}
             ),
             subset_method_radio_items,
             correlation_type_radio_items,
@@ -92,14 +101,23 @@ def _change_controls_average(dimension_1):
     [
         Input("subset_method_correlations", "value"),
         Input("correlation_type_correlations", "value"),
+        Input("main_category_average", "value"),
         Input("dimension_1_average", "value"),
         Input("dimension_2_average", "value"),
+        Input("display_mode_average", "value"),
         Input("memory_correlations", "data"),
         Input("memory_averages", "data"),
     ],
 )
 def _fill_graph_tab_average(
-    subset_method, correlation_type, dimension_1, dimension_2, data_correlations, data_averages
+    subset_method,
+    correlation_type,
+    main_category,
+    dimension_1,
+    dimension_2,
+    display_mode,
+    data_correlations,
+    data_averages,
 ):
     import plotly.graph_objs as go
 
@@ -108,18 +126,43 @@ def _fill_graph_tab_average(
         averages.columns = pd.MultiIndex.from_tuples(
             list(map(eval, averages.columns.tolist())), names=["subset_method", "correlation_type", "observation"]
         )
+        sorted_averages = averages.loc[
+            (dimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category]), (subset_method, correlation_type)
+        ].sort_values(by=["mean"], ascending=False)
 
-        sorted_averages = averages.loc[dimension_1, (subset_method, correlation_type)].sort_values(
-            by=["mean"], ascending=False
-        )
+        if display_mode == "view_all":
+            bars = go.Bar(
+                x=sorted_averages.index.get_level_values("category"),
+                y=sorted_averages["mean"],
+                error_y={"array": sorted_averages["std"], "type": "data"},
+                name="Average correlations",
+                marker_color="indianred",
+            )
+        else:  # display_mode == view_per_main_category
+            list_main_category = []
+            list_categories = []
+            for main_category_group in MAIN_CATEGORIES_TO_CATEGORIES.keys():
+                if main_category_group == "All":
+                    continue
+                sorted_categories = (
+                    sorted_averages.swaplevel()
+                    .loc[MAIN_CATEGORIES_TO_CATEGORIES[main_category_group]]
+                    .sort_values(by=["mean"], ascending=False)
+                    .index.get_level_values("category")
+                )
+                list_categories.extend(sorted_categories)
+                list_main_category.extend([main_category_group] * len(sorted_categories))
 
-        bars = go.Bar(
-            x=sorted_averages.index,
-            y=sorted_averages["mean"],
-            error_y={"array": sorted_averages["std"], "type": "data"},
-            name="Average correlations",
-            marker_color="indianred",
-        )
+                bars = go.Bar(
+                    x=[list_main_category + [""], list_categories + ["FamilyHistory"]],
+                    y=sorted_averages["mean"].swaplevel()[list_categories + ["FamilyHistory"]],
+                    error_y={
+                        "array": sorted_averages["std"].swaplevel()[list_categories + ["FamilyHistory"]],
+                        "type": "data",
+                    },
+                    name="Correlations",
+                    marker_color="indianred",
+                )
 
         title = f"Average average correlation across aging dimensions and X categories = {sorted_averages['mean'].mean().round(3)} +- {sorted_averages['mean'].std().round(3)}"
         y_label = "Average correlation"
@@ -127,16 +170,41 @@ def _fill_graph_tab_average(
     else:
         correlations = pd.DataFrame(data_correlations).set_index(["dimension_1", "dimension_2", "category"])
 
-        sorted_correlations = correlations.loc[(dimension_1, dimension_2)].sort_values(
-            by=["correlation"], ascending=False
-        )
+        sorted_correlations = correlations.loc[
+            (dimension_1, dimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category])
+        ].sort_values(by=["correlation"], ascending=False)
 
-        bars = go.Bar(
-            x=sorted_correlations.index,
-            y=sorted_correlations["correlation"],
-            name="Correlations",
-            marker_color="indianred",
-        )
+        if display_mode == "view_all":
+            bars = go.Bar(
+                x=sorted_correlations.index.get_level_values("category"),
+                y=sorted_correlations["correlation"],
+                name="Correlations",
+                marker_color="indianred",
+            )
+        else:  # display_mode == view_per_main_category
+            list_main_category = []
+            list_categories = []
+            for main_category_group in MAIN_CATEGORIES_TO_CATEGORIES.keys():
+                if main_category_group == "All":
+                    continue
+                sorted_categories = (
+                    sorted_correlations["correlation"]
+                    .swaplevel()
+                    .swaplevel(i=0, j=1)[MAIN_CATEGORIES_TO_CATEGORIES[main_category_group]]
+                    .sort_values(ascending=False)
+                    .index.get_level_values("category")
+                )
+                list_categories.extend(sorted_categories)
+                list_main_category.extend([main_category_group] * len(sorted_categories))
+
+            bars = go.Bar(
+                x=[list_main_category + [""], list_categories + ["FamilyHistory"]],
+                y=sorted_correlations["correlation"]
+                .swaplevel()
+                .swaplevel(i=0, j=1)[list_categories + ["FamilyHistory"]],
+                name="Correlations",
+                marker_color="indianred",
+            )
 
         title = f"Average correlation = {sorted_correlations['correlation'].mean().round(3)} +- {sorted_correlations['correlation'].std().round(3)}"
         y_label = "Correlation"
@@ -145,8 +213,8 @@ def _fill_graph_tab_average(
 
     fig.update_layout(
         {
-            "width": 1500,
-            "height": 500,
+            "width": 2000,
+            "height": 800,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
             "yaxis": {"title": y_label},
         }

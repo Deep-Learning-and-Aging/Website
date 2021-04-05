@@ -8,7 +8,7 @@ import pandas as pd
 from dash_website.app import APP
 from dash_website.utils.controls import get_item_radio_items, get_main_category_radio_items
 from dash_website.utils.aws_loader import load_feather
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
 from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE
 
 
@@ -63,7 +63,7 @@ def _fill_summary_heatmap(item, main_category, data):
     ).astype(int)
     summary_item_percentage_category = summary_item_percentage[
         [f"All_{main_category}"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    ]
+    ].rename(index=RENAME_DIMENSIONS)
     summary_item_percentage_category.index.name = "dimension"
     summary_item_percentage_category.columns.name = "category"
 
@@ -72,7 +72,7 @@ def _fill_summary_heatmap(item, main_category, data):
     )
     summary_item_number_category = summary_item_number[
         [f"All_{main_category}"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    ]
+    ].rename(index=RENAME_DIMENSIONS)
     summary_item_percentage_category.index.name = "dimension"
     summary_item_percentage_category.columns.name = "category"
 
