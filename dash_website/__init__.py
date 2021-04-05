@@ -155,3 +155,14 @@ MAIN_CATEGORIES_TO_CATEGORIES = {
     "Environmental": ALL_ENVIRONMENTAL,
     "Socioeconomics": ALL_SOCIOECONOMICS,
 }
+
+
+list_main_category = []
+list_categories = []
+
+for main_category, categories in MAIN_CATEGORIES_TO_CATEGORIES.items():
+    if main_category == "All":
+        continue
+    list_main_category.extend([main_category] * len(categories))
+    list_categories.extend(categories)
+LIST_MAIN_CATEGORY_CATEGORIES = [list_main_category + ["others"], list_categories + ["FamilyHistory"]]
