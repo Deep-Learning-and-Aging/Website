@@ -8,7 +8,7 @@ from dash_website import RENAME_DIMENSIONS
 def get_options(list_):
     list_label_value = []
     for value in list_:
-        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value.capitalize())}
+        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
         list_label_value.append(d)
     return list_label_value
 

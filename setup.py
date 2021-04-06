@@ -28,7 +28,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "launch_local_website=dash_website.main:launch_website",
+            "launch_local_website=dash_website.index:launch_local_website",
             "check_missing_correlations_univariate_results=clean_aws.xwas.check_missing_correlations_univariate_results:check_missing_correlations",
         ]
     },

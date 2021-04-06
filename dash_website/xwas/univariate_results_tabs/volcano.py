@@ -14,7 +14,7 @@ from dash_website.utils.controls import (
     get_dimension_drop_down,
     get_options,
 )
-from dash_website.utils.aws_loader import load_feather
+from dash_website.utils.aws_loader import list_dir, load_feather
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
@@ -68,7 +68,11 @@ def get_controls_tab():
     Input("main_category_volcano", "value"),
 )
 def _change_controls_category(main_category):
-    return get_options(["All"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]), "All"
+    if main_category == "All":
+        list_categories = list(pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic"]))
+    else:
+        list_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
+    return get_options(["All"] + list_categories), "All"
 
 
 @APP.callback(Output("memory_volcano", "data"), Input("dimension_volcano", "value"))

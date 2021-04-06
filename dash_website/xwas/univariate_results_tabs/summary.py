@@ -50,6 +50,13 @@ def get_controls_tab():
 def _fill_summary_heatmap(item, main_category, data):
     import plotly.graph_objects as go
 
+    if main_category == "All":
+        list_categories = [f"All_{main_category}"] + list(
+            pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic"])
+        )
+    else:
+        list_categories = [f"All_{main_category}"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]
+
     summary = pd.DataFrame(data).set_index(["dimension", "category"])
     summary.columns = pd.MultiIndex.from_tuples(
         list(map(eval, summary.columns.tolist())), names=["item", "observation"]
@@ -61,18 +68,14 @@ def _fill_summary_heatmap(item, main_category, data):
             index=[("dimension", "")], columns=[("category", "")], values=(item, "percentage")
         )
     ).astype(int)
-    summary_item_percentage_category = summary_item_percentage[
-        [f"All_{main_category}"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    ].rename(index=RENAME_DIMENSIONS)
+    summary_item_percentage_category = summary_item_percentage[list_categories].rename(index=RENAME_DIMENSIONS)
     summary_item_percentage_category.index.name = "dimension"
     summary_item_percentage_category.columns.name = "category"
 
     summary_item_number = summary.reset_index().pivot(
         index=[("dimension", "")], columns=[("category", "")], values=(item, "number")
     )
-    summary_item_number_category = summary_item_number[
-        [f"All_{main_category}"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    ].rename(index=RENAME_DIMENSIONS)
+    summary_item_number_category = summary_item_number[list_categories].rename(index=RENAME_DIMENSIONS)
     summary_item_percentage_category.index.name = "dimension"
     summary_item_percentage_category.columns.name = "category"
 
