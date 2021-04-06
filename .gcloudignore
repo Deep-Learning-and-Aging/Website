@@ -8,8 +8,11 @@ env*/
 **/*.csv
 **/*.zip
 **/*.feather
+**/*.html
+**/*.ipynb
+**/*.sh
 
 clean_aws/
 external_code/
 data
-!data/page12_AttentionMapsVideos/
+!data/page12_AttentionMapsVideos/*
