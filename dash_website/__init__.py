@@ -24,7 +24,7 @@ DIMENSIONS = sorted(
         "HeartMRI",
         "Heart",
         "HeartECG",
-        "ImmuneSystem",
+        "BloodCells",
         "Lungs",
         "Musculoskeletal",
         "MusculoskeletalSpine",
@@ -36,15 +36,23 @@ DIMENSIONS = sorted(
     ]
 )
 
+RENAME_DIMENSIONS = {
+    "set": "*",
+    "set_instances01": "*instances01",
+    "set_instances1.5x": "*instances1.5x",
+    "set_instances23": "*instances23",
+}
+
+
 ALL_BIOMARKERS = sorted(
     [
         "HandGripStrength",
         "BrainGreyMatterVolumes",
         "BrainSubcorticalVolumes",
-        "HeartSize",
+        "HeartFunction",
         "HeartPWA",
         "ECGAtRest",
-        "AnthropometryImpedance",
+        "Impedance",
         "UrineBiochemistry",
         "BloodBiochemistry",
         "BloodCount",
@@ -54,7 +62,7 @@ ALL_BIOMARKERS = sorted(
         "BraindMRIWeightedMeans",
         "Spirometry",
         "BloodPressure",
-        "AnthropometryBodySize",
+        "Anthropometry",
         "ArterialStiffness",
         "CarotidUltrasound",
         "BoneDensitometryOfHeel",
@@ -72,7 +80,7 @@ ALL_BIOMARKERS = sorted(
         "PhysicalActivity",
     ]
 )
-ALL_PHENOTYPES = sorted(
+ALL_CLINICALPHENOTYPES = sorted(
     [
         "Breathing",
         "Claudication",
@@ -134,15 +142,20 @@ ALL_ENVIRONMENTAL = sorted(
 ALL_SOCIOECONOMICS = sorted(["Education", "Employment", "Household", "SocialSupport", "OtherSociodemographics"])
 
 ALL_CATEGORIES = sorted(
-    ALL_BIOMARKERS + ALL_PHENOTYPES + ALL_DISEASES + ALL_ENVIRONMENTAL + ALL_SOCIOECONOMICS + ["FamilyHistory"]
+    ALL_BIOMARKERS
+    + ALL_CLINICALPHENOTYPES
+    + ALL_DISEASES
+    + ALL_ENVIRONMENTAL
+    + ALL_SOCIOECONOMICS
+    + ["FamilyHistory", "Genetics", "Phenotypic"]
 )
 
-CATEGORIES = ["All", "Biomarkers", "Phenotypes", "Diseases", "Environmental", "Socioeconomics"]
+CATEGORIES = ["All", "Biomarkers", "ClinicalPhenotypes", "Diseases", "Environmental", "Socioeconomics"]
 
 MAIN_CATEGORIES_TO_CATEGORIES = {
     "All": ALL_CATEGORIES,
     "Biomarkers": ALL_BIOMARKERS,
-    "Phenotypes": ALL_PHENOTYPES,
+    "ClinicalPhenotypes": ALL_CLINICALPHENOTYPES,
     "Diseases": ALL_DISEASES,
     "Environmental": ALL_ENVIRONMENTAL,
     "Socioeconomics": ALL_SOCIOECONOMICS,

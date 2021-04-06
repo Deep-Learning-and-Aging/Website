@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
@@ -18,11 +19,9 @@ if __name__ == "__main__":
     list_indexes = []
     for dimension_1 in DIMENSIONS:
         for dimension_2 in DIMENSIONS:
-            for category in (
-                MAIN_CATEGORIES_TO_CATEGORIES["All"]
-                + ["Phenotypic", "Genetics"]
-                + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()]
-            ):
+            for category in MAIN_CATEGORIES_TO_CATEGORIES["All"] + [
+                f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()
+            ]:
                 list_indexes.append([dimension_1, dimension_2, category])
     indexes = pd.MultiIndex.from_tuples(list_indexes, names=["dimension_1", "dimension_2", "category"])
 
@@ -48,8 +47,13 @@ if __name__ == "__main__":
             for category in MAIN_CATEGORIES_TO_CATEGORIES["All"] + [
                 f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()
             ]:
+                if category in ["Phenotypic", "Genetics"]:
+                    continue
                 if "All" in category:
                     categories = MAIN_CATEGORIES_TO_CATEGORIES[category.split("_")[1]]
+                    if category.split("_")[1] == "All":
+                        categories.remove("Phenotypic")
+                        categories.remove("Genetics")
                 else:
                     categories = [category]
 
@@ -89,9 +93,8 @@ if __name__ == "__main__":
                 for method in ["all", "union", "intersection"]:
                     for correlation_type in ["pearson", "spearman"]:
                         if len(indexes[method]) <= 1:
-                            correlations.loc[(dimension_1, dimension_2, category), (method, correlation_type)] = 0
+                            correlations.loc[(dimension_1, dimension_2, category), (method, correlation_type)] = np.nan
                         else:
-                            print(category, dimension_1, dimension_2, method)
                             correlations.loc[
                                 (dimension_1, dimension_2, category), (method, correlation_type)
                             ] = correlations_1.loc[indexes[method], "correlation"].corr(
