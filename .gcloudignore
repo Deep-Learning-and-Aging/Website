@@ -2,14 +2,17 @@ Procfile
 app.yaml
 
 __pycache__/
-env_website/
-**/*.csv
+env*/
+*.egg-info/
 .vscode
+**/*.csv
 **/*.zip
-.vscode 
 **/*.feather
+**/*.html
+**/*.ipynb
+**/*.sh
 
-Correlations_pipeline
-linear_output_paper
+clean_aws/
+external_code/
 data
-!data/page12_AttentionMapsVideos/
+!data/page12_AttentionMapsVideos/*
