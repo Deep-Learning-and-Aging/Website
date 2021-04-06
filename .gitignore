@@ -139,6 +139,7 @@ APP.yaml
 **/*.csv
 **/*.zip
 **/*.feather
+**/*.html
 
 # Local specific
 .vscode
