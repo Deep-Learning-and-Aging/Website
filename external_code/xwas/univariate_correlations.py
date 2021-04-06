@@ -19,11 +19,9 @@ if __name__ == "__main__":
     list_indexes = []
     for dimension_1 in DIMENSIONS:
         for dimension_2 in DIMENSIONS:
-            for category in (
-                MAIN_CATEGORIES_TO_CATEGORIES["All"]
-                + ["Phenotypic", "Genetics"]
-                + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()]
-            ):
+            for category in MAIN_CATEGORIES_TO_CATEGORIES["All"] + [
+                f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()
+            ]:
                 list_indexes.append([dimension_1, dimension_2, category])
     indexes = pd.MultiIndex.from_tuples(list_indexes, names=["dimension_1", "dimension_2", "category"])
 
@@ -49,8 +47,13 @@ if __name__ == "__main__":
             for category in MAIN_CATEGORIES_TO_CATEGORIES["All"] + [
                 f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()
             ]:
+                if category in ["Phenotypic", "Genetics"]:
+                    continue
                 if "All" in category:
                     categories = MAIN_CATEGORIES_TO_CATEGORIES[category.split("_")[1]]
+                    if category.split("_")[1] == "All":
+                        categories.remove("Phenotypic")
+                        categories.remove("Genetics")
                 else:
                     categories = [category]
 
