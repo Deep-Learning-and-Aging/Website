@@ -64,16 +64,26 @@ def get_main_category_radio_items(id, categories):
     )
 
 
-def get_item_radio_items(id, items):
+def get_item_radio_items(id, items, legend):
     return dbc.FormGroup(
         [
-            html.P("Rank by : "),
+            html.P(legend),
             dcc.RadioItems(
                 id=id,
                 options=get_options_from_dict(items),
                 value=list(items.keys())[0],
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
+            html.Br(),
+        ]
+    )
+
+
+def get_drop_down(id, items, legend):
+    return dbc.FormGroup(
+        [
+            html.P(legend),
+            dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0]),
             html.Br(),
         ]
     )
