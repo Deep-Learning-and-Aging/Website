@@ -10,7 +10,6 @@ from dash_website.pages import (
     page2,
     page3,
     page4,
-    page7,
     page8,
     page9,
     page10,
@@ -103,7 +102,11 @@ def get_top_bar():
                                 id="xwas_univariate_correlations",
                             ),
                             dbc.DropdownMenuItem(divider=True),
-                            dbc.DropdownMenuItem("Multivariate XWAS - Results", href="/pages/page7", id="page7-link"),
+                            dbc.DropdownMenuItem(
+                                "Multivariate XWAS - Results",
+                                href="/xwas/multivariate_results",
+                                id="xwas_multivariate_results",
+                            ),
                             dbc.DropdownMenuItem(
                                 "Multivariate XWAS - Correlations", href="/pages/page8", id="page8-link"
                             ),
@@ -135,12 +138,12 @@ def display_page(pathname):
     if "xwas" in pathname:
         if "univariate_results" in pathname:
             from dash_website.xwas.univariate_results import get_layout
-
-            return get_layout()
         elif "univariate_correlations" in pathname:
             from dash_website.xwas.univariate_correlations import get_layout
+        elif "multivariate_results" in pathname:
+            from dash_website.xwas.multivariate_results import get_layout
 
-            return get_layout()
+        return get_layout()
     elif "page" in pathname:
         num_page = int(pathname.split("/")[-1][4:])
         return getattr(globals()["page%s" % num_page], "layout")
