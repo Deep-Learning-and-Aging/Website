@@ -22,10 +22,10 @@ from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
 def get_average_bars():
     return dbc.Container(
         [
+            dcc.Loading([dcc.Store(id="memory_average", data=get_data()), dcc.Store(id="memory_correlations")]),
             html.H1("Univariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
-            dcc.Loading([dcc.Store(id="memory_average", data=get_data()), dcc.Store(id="memory_correlations")]),
             dbc.Row(
                 [
                     dbc.Col(
