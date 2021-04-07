@@ -8,7 +8,7 @@ from dash_website import RENAME_DIMENSIONS
 def get_options(list_):
     list_label_value = []
     for value in list_:
-        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
+        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value).capitalize()}
         list_label_value.append(d)
     return list_label_value
 
@@ -67,7 +67,7 @@ def get_main_category_radio_items(id, categories):
 def get_item_radio_items(id, items):
     return dbc.FormGroup(
         [
-            html.P("Select : "),
+            html.P("Rank by : "),
             dcc.RadioItems(
                 id=id,
                 options=get_options_from_dict(items),
