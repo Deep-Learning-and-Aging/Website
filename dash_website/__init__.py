@@ -160,3 +160,10 @@ MAIN_CATEGORIES_TO_CATEGORIES = {
     "Environmental": ALL_ENVIRONMENTAL,
     "Socioeconomics": ALL_SOCIOECONOMICS,
 }
+
+ALGORITHMS_RENDERING = {
+    "best_algorithm": "Best Algorithm",
+    "elastic_net": "Elastic Net",
+    "light_gbm": "Light GBM",
+    "neural_network": "Neural Network",
+}
