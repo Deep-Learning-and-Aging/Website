@@ -5,10 +5,13 @@ import dash_html_components as html
 from dash_website import RENAME_DIMENSIONS
 
 
-def get_options(list_):
+def get_options(list_, capitalize=False):
     list_label_value = []
     for value in list_:
-        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value).capitalize()}
+        if capitalize:
+            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value).capitalize()}
+        else:
+            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
         list_label_value.append(d)
     return list_label_value
 
@@ -16,23 +19,9 @@ def get_options(list_):
 def get_options_from_dict(dict_):
     list_label_value = []
     for key_value, label in dict_.items():
-        d = {"value": key_value, "label": label.capitalize()}
+        d = {"value": key_value, "label": label}
         list_label_value.append(d)
     return list_label_value
-
-
-def get_correlation_type_radio_items(id, value="pearson"):
-    return dbc.FormGroup(
-        [
-            dbc.Label("Select correlation type :"),
-            dcc.RadioItems(
-                id=id,
-                options=get_options(["pearson", "spearman"]),
-                value=value,
-                labelStyle={"display": "inline-block", "margin": "5px"},
-            ),
-        ]
-    )
 
 
 def get_subset_method_radio_items(id, value="union"):
@@ -41,7 +30,21 @@ def get_subset_method_radio_items(id, value="union"):
             dbc.Label("Select subset method :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["all", "union", "intersection"]),
+                options=get_options(["all", "union", "intersection"], capitalize=True),
+                value=value,
+                labelStyle={"display": "inline-block", "margin": "5px"},
+            ),
+        ]
+    )
+
+
+def get_correlation_type_radio_items(id, value="pearson"):
+    return dbc.FormGroup(
+        [
+            dbc.Label("Select correlation type :"),
+            dcc.RadioItems(
+                id=id,
+                options=get_options(["pearson", "spearman"], capitalize=True),
                 value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
@@ -61,6 +64,26 @@ def get_main_category_radio_items(id, categories):
             ),
             html.Br(),
         ]
+    )
+
+
+def get_category_drop_down(id):
+    return dbc.FormGroup(
+        [
+            html.P("Select X subcategory: "),
+            dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All"),
+            html.Br(),
+        ]
+    )
+
+
+def get_dimension_drop_down(id, dimension, idx_dimension=""):
+    return dbc.FormGroup(
+        [
+            html.P(f"Select an aging dimension {idx_dimension}: "),
+            dcc.Dropdown(id=id, options=get_options(dimension), value=dimension[0]),
+            html.Br(),
+        ],
     )
 
 
@@ -86,24 +109,4 @@ def get_drop_down(id, items, legend):
             dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0]),
             html.Br(),
         ]
-    )
-
-
-def get_category_drop_down(id):
-    return dbc.FormGroup(
-        [
-            html.P("Select X subcategory: "),
-            dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All"),
-            html.Br(),
-        ]
-    )
-
-
-def get_dimension_drop_down(id, dimension, idx_dimension=""):
-    return dbc.FormGroup(
-        [
-            html.P(f"Select an aging dimension {idx_dimension}: "),
-            dcc.Dropdown(id=id, options=get_options(dimension), value=dimension[0]),
-            html.Br(),
-        ],
     )

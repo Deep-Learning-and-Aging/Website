@@ -15,7 +15,7 @@ def f(x):
 def get_colorscale(df):
     min = df.min().min()
     max = df.max().max()
-    abs = np.abs(min / (min - max))
+    abs = np.abs(min / (max - min))
     if abs > 1:
         colorscale = [[0, f(min)], [1, f(max)]]
     else:
