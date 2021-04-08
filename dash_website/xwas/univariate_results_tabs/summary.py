@@ -95,6 +95,8 @@ def _fill_summary_heatmap(item, main_category, data):
         customdata=summary_item_number_category,
         hovertemplate=hovertemplate,
         colorscale=ITEMS_COLORSCALE[item],
+        zmin=0,
+        zmax=100,
     )
 
     fig = go.Figure(heatmap)
