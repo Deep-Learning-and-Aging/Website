@@ -8,7 +8,7 @@ import dash
 import pandas as pd
 import numpy as np
 
-from dash_website.utils.controls import get_main_category_radio_items, get_drop_down
+from dash_website.utils.controls import get_main_category_radio_items, get_item_radio_items
 from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
 
 
@@ -37,7 +37,7 @@ def get_controls_tab_heatmap():
     return dbc.Card(
         [
             get_main_category_radio_items("main_category_heatmap", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_drop_down(
+            get_item_radio_items(
                 "algorithm_heatmap",
                 ALGORITHMS_RENDERING,
                 "Select an Algorithm :",
