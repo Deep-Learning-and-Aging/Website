@@ -33,7 +33,7 @@ if __name__ == "__main__":
                     "organ_1": "dimension_1",
                     "organ_2": "dimension_2",
                     "corr": "correlation",
-                    "sample_size": "number_variables",
+                    "sample_size": "number_features",
                 },
                 inplace=True,
             )
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     list_columns = []
     for algorithm in ["elastic_net", "light_gbm", "neural_network"]:
-        for correlation_type in ["pearson", "spearman", "number_variables"]:
+        for correlation_type in ["pearson", "spearman", "number_features"]:
             list_columns.append([algorithm, correlation_type])
     columns = pd.MultiIndex.from_tuples(list_columns)
     correlations_raw = pd.DataFrame(
@@ -73,10 +73,10 @@ if __name__ == "__main__":
                 .set_index(["dimension_1", "dimension_2", "category"])["correlation"]
             )
 
-            correlations_raw[(algorithm, "number_variables")] = (
+            correlations_raw[(algorithm, "number_features")] = (
                 every_correlation.loc[(algorithm, correlation_type)]
                 .reset_index(drop=True)
-                .set_index(["dimension_1", "dimension_2", "category"])["number_variables"]
+                .set_index(["dimension_1", "dimension_2", "category"])["number_features"]
             )
 
     correlations_raw.columns = map(str, correlations_raw.columns.tolist())

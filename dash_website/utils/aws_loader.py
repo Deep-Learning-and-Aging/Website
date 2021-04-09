@@ -1,5 +1,6 @@
 from io import BytesIO
-from boto3 import client
+import re
+from boto3 import client, resource
 from botocore.client import Config
 
 import os
@@ -14,6 +15,12 @@ if os.environ.get("AWS_ACCESS_KEY_ID") is None:
 
 AWS_BUCKET_NAME = "age-prediction-site"
 CLIENT = client(
+    "s3",
+    aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+    config=Config(signature_version="s3v4"),
+)
+RESOURCE = resource(
     "s3",
     aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
     aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
@@ -56,3 +63,13 @@ def list_dir(path_dir):
             list_objects.append(object["Key"])
 
     return list_objects
+
+
+def does_key_exists(key):
+    bucket = RESOURCE.Bucket(AWS_BUCKET_NAME)
+
+    objects = list(bucket.objects.filter(Prefix=key))
+    if any([w.key == key for w in objects]):
+        return True
+    else:
+        return False
