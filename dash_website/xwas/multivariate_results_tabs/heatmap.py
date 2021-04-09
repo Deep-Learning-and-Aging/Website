@@ -78,11 +78,33 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
     scores = every_score.loc[every_score["category"].isin(MAIN_CATEGORIES_TO_CATEGORIES[main_category])]
 
     r2_2d = pd.pivot(scores, index="category", columns="dimension", values="r2").rename(columns=RENAME_DIMENSIONS)
+    overall_mean = r2_2d.values.flatten().mean()
+    overall_std = r2_2d.values.flatten().std()
+    r2_2d["average"] = r2_2d.T.mean()
+    r2_2d.loc["average"] = r2_2d.mean()
+    r2_2d.loc["average", "average"] = overall_mean
+    r2_2d = r2_2d.reindex(index=np.roll(r2_2d.index, 1), columns=np.roll(r2_2d.columns, 1))
+
     std_2d = pd.pivot(scores, index="category", columns="dimension", values="std")
+    std_2d["average"] = r2_2d.T.std()
+    std_2d.loc["average"] = r2_2d.std()
+    std_2d.loc["average", "average"] = overall_std
+    std_2d = std_2d.reindex(index=np.roll(std_2d.index, 1), columns=np.roll(std_2d.columns, 1))
+
     sample_size_2d = pd.pivot(scores, index="category", columns="dimension", values="sample_size")
+    sample_size_2d["average"] = sample_size_2d.T.sum()
+    sample_size_2d.loc["average"] = sample_size_2d.sum()
+    sample_size_2d = sample_size_2d.reindex(
+        index=np.roll(sample_size_2d.index, 1), columns=np.roll(sample_size_2d.columns, 1)
+    )
+
     algorithm_2d = pd.pivot(scores, index="category", columns="dimension", values="algorithm").replace(
         ALGORITHMS_RENDERING
     )
+    algorithm_2d["average"] = "No algorithm"
+    algorithm_2d.loc["average"] = "No algorithm"
+    algorithm_2d = algorithm_2d.reindex(index=np.roll(algorithm_2d.index, 1), columns=np.roll(algorithm_2d.columns, 1))
+
     customdata = np.dstack((std_2d, sample_size_2d, algorithm_2d))
 
     hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>r²: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
@@ -138,14 +160,14 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
         return (
             fig,
-            f"Average r² = {r2_2d.values.flatten().mean().round(3)} +- {r2_2d.values.flatten().std().round(3)}",
+            f"Average r² = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "block"},
             fig_pie_chart,
         )
     else:
         return (
             fig,
-            f"Average r² = {r2_2d.values.flatten().mean().round(3)} +- {r2_2d.values.flatten().std().round(3)}",
+            f"Average r² = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "none"},
             dash.no_update,
         )
