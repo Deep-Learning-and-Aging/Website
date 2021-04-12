@@ -92,7 +92,11 @@ def get_controls_tab_average_multi():
             ),
             get_item_radio_items(
                 "algorithm_average",
-                ALGORITHMS_RENDERING,
+                {
+                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
+                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
+                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                },
                 "Select an Algorithm :",
             ),
             get_correlation_type_radio_items("correlation_type_average_multi"),

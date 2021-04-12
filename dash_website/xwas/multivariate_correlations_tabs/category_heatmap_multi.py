@@ -76,8 +76,6 @@ def _modify_store_category_multi(category):
 
 
 def get_controls_tab_category_multi():
-    if "best_algorithm" in ALGORITHMS_RENDERING.keys():
-        ALGORITHMS_RENDERING.pop("best_algorithm")
 
     return dbc.Card(
         [
@@ -85,7 +83,11 @@ def get_controls_tab_category_multi():
             get_category_drop_down("category_category_multi"),
             get_item_radio_items(
                 "algorithm_category",
-                ALGORITHMS_RENDERING,
+                {
+                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
+                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
+                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                },
                 "Select an Algorithm :",
             ),
             get_correlation_type_radio_items("correlation_type_category_multi"),

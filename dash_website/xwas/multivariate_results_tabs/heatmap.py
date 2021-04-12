@@ -34,12 +34,18 @@ def get_heatmap():
 
 
 def get_controls_tab_heatmap():
+
     return dbc.Card(
         [
             get_main_category_radio_items("main_category_heatmap", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
             get_item_radio_items(
                 "algorithm_heatmap",
-                ALGORITHMS_RENDERING,
+                {
+                    "best_algorithm": ALGORITHMS_RENDERING["best_algorithm"],
+                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
+                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
+                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                },
                 "Select an Algorithm :",
             ),
             html.Div(
@@ -131,10 +137,10 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
     if algorithm == "best_algorithm":
         percentages = pd.DataFrame(
-            None, columns=["percentage", "max_percentage"], index=list(ALGORITHMS_RENDERING.keys())[1:]
+            None, columns=["percentage", "max_percentage"], index=["elastic_net", "light_gbm", "neural_network"]
         )
         percentages.index.name = "algorithm"
-        for algorithm in list(ALGORITHMS_RENDERING.keys())[1:]:
+        for algorithm in ["elastic_net", "light_gbm", "neural_network"]:
             percentages.loc[algorithm, "percentage"] = (algorithm_2d == ALGORITHMS_RENDERING[algorithm]).sum().sum()
             percentages.loc[algorithm, "max_percentage"] = r2_2d.values[
                 algorithm_2d == ALGORITHMS_RENDERING[algorithm]

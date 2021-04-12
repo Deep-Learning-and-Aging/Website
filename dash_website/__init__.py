@@ -162,6 +162,7 @@ MAIN_CATEGORIES_TO_CATEGORIES = {
 }
 
 ALGORITHMS_RENDERING = {
+    "correlation": "Correlation",
     "best_algorithm": "Best Algorithm",
     "elastic_net": "Elastic Net",
     "light_gbm": "Light GBM",

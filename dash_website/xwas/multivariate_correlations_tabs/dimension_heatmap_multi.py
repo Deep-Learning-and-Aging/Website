@@ -59,15 +59,17 @@ def _modify_store_dimension_multi(dimension):
 
 
 def get_controls_tab_dimension_multi():
-    if "best_algorithm" in ALGORITHMS_RENDERING.keys():
-        ALGORITHMS_RENDERING.pop("best_algorithm")
 
     return dbc.Card(
         [
             get_dimension_drop_down("dimension_dimension_multi", DIMENSIONS),
             get_item_radio_items(
                 "algorithm_dimension",
-                ALGORITHMS_RENDERING,
+                {
+                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
+                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
+                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                },
                 "Select an Algorithm :",
             ),
             get_correlation_type_radio_items("correlation_type_category_multi"),
