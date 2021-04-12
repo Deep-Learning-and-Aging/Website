@@ -19,7 +19,6 @@ from dash_website.pages import (
     page15,
     page16,
     page17,
-    page18,
 )
 
 num_pages = 18
@@ -112,7 +111,9 @@ def get_top_bar():
                                 id="xwas_multivariate_correlations",
                             ),
                             dbc.DropdownMenuItem(
-                                "Multivariate XWAS - Features importances", href="/pages/page18", id="page18-link"
+                                "Multivariate XWAS - Feature importances",
+                                href="/xwas/multivariate_features",
+                                id="xwas_multivariate_features",
                             ),
                         ],
                         label="XWAS",
@@ -145,6 +146,8 @@ def display_page(pathname):
             from dash_website.xwas.multivariate_results import get_layout
         elif "multivariate_correlations" in pathname:
             from dash_website.xwas.multivariate_correlations import get_layout
+        elif "multivariate_features" in pathname:
+            from dash_website.xwas.multivariate_features import get_layout
 
         return get_layout()
     elif "page" in pathname:

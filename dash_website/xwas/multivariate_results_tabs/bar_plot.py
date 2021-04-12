@@ -1,3 +1,6 @@
+from re import A
+
+from botocore.exceptions import AliasConflictParameterError
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -38,7 +41,12 @@ def get_controls_tab_bar_plot():
             get_dimension_drop_down("dimension_bar_plot", DIMENSIONS),
             get_item_radio_items(
                 "algorithm_bar_plot",
-                ALGORITHMS_RENDERING,
+                {
+                    "best_algorithm": ALGORITHMS_RENDERING["best_algorithm"],
+                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
+                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
+                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                },
                 "Select an Algorithm :",
             ),
         ]

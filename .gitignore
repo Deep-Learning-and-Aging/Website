@@ -140,6 +140,7 @@ APP.yaml
 **/*.zip
 **/*.feather
 **/*.html
+**/*.xlsx
 
 # Local specific
 .vscode

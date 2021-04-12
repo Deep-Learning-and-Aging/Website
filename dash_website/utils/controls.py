@@ -67,11 +67,15 @@ def get_main_category_radio_items(id, categories):
     )
 
 
-def get_category_drop_down(id):
+def get_category_drop_down(id, all_first_value=True):
+    if all_first_value:
+        drop_down = dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All")
+    else:
+        drop_down = dcc.Dropdown(id=id, placeholder="Select ...")
     return dbc.FormGroup(
         [
             html.P("Select X subcategory: "),
-            dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All"),
+            drop_down,
             html.Br(),
         ]
     )
