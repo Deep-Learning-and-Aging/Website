@@ -175,10 +175,10 @@ def _fill_bar_plot_feature(dimension, category, correlation_type, data_features,
         bars.append(
             go.Bar(
                 name=ALGORITHMS_RENDERING[algorithm],
-                x=table_features[f"percentage_{algorithm}"],
-                y=sorted_variables,
+                x=table_features[f"percentage_{algorithm}"].values[::-1],
+                y=sorted_variables[::-1],
                 orientation="h",
-                customdata=table_features[f"feature_{algorithm}"],
+                customdata=table_features[f"feature_{algorithm}"].values[::-1],
                 hovertemplate=hovertemplate,
             )
         )
