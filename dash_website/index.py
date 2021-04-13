@@ -112,8 +112,8 @@ def get_top_bar():
                             ),
                             dbc.DropdownMenuItem(
                                 "Multivariate XWAS - Feature importances",
-                                href="/xwas/multivariate_features",
-                                id="xwas_multivariate_features",
+                                href="/xwas/multivariate_feature_importances",
+                                id="xwas_multivariate_feature_importances",
                             ),
                         ],
                         label="XWAS",
@@ -146,8 +146,8 @@ def display_page(pathname):
             from dash_website.xwas.multivariate_results import get_layout
         elif "multivariate_correlations" in pathname:
             from dash_website.xwas.multivariate_correlations import get_layout
-        elif "multivariate_features" in pathname:
-            from dash_website.xwas.multivariate_features import get_layout
+        elif "multivariate_feature_importances" in pathname:
+            from dash_website.xwas.multivariate_feature_importances import get_layout
 
         return get_layout()
     elif "page" in pathname:
