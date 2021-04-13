@@ -5,7 +5,6 @@ from dash.dependencies import Input, Output
 
 from dash_website.app import APP
 from dash_website.pages import (
-    menu,
     page1,
     page2,
     page3,
@@ -51,7 +50,7 @@ def get_top_bar():
         [
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink("Menu", href="/", active=True, id="menu-link")),
+                    dbc.NavItem(dbc.NavLink("Introduction", href="/", active=True, id="introduction")),
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem("Scalars", href="/pages/page1", id="page1-link"),
@@ -150,10 +149,13 @@ def display_page(pathname):
             from dash_website.xwas.multivariate_feature_importances import get_layout
 
         return get_layout()
+
     elif "page" in pathname:
         num_page = int(pathname.split("/")[-1][4:])
         return getattr(globals()["page%s" % num_page], "layout")
     elif pathname == "/":
-        return menu.layout
+        from dash_website.introduction.introduction import get_layout
+
+        return get_layout()
     else:
         return "404"
