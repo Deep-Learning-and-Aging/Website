@@ -5,7 +5,7 @@ import dash
 from dash.dependencies import Input, Output
 
 from dash_website.introduction.cards import standard_card
-from dash_website.utils.aws_loader import load_txt
+from dash_website import COLORS_SECTIONS
 
 
 def get_layout():
@@ -17,13 +17,23 @@ def get_layout():
             ),
             dbc.Row(
                 [
-                    standard_card("introduction_button", "Introduction", "primary"),
-                    standard_card("datasets_button", "Datasets", "secondary"),
-                    standard_card("age_prediction_performances_button", "Age prediction performances", "info"),
-                    standard_card("feature_importances_button", "Feature importances", "secondary"),
-                    standard_card("correlation_button", "Correlation between accelerated aging and dimensions", "info"),
-                    standard_card("genetics_button", "Genetics", "secondary"),
-                    standard_card("xwas_button", "XWAS", "info"),
+                    standard_card("introduction_button", "Introduction", COLORS_SECTIONS["introduction"]),
+                    standard_card("datasets_button", "Datasets", COLORS_SECTIONS["datasets"]),
+                    standard_card(
+                        "age_prediction_performances_button",
+                        "Age prediction performances",
+                        COLORS_SECTIONS["age_prediction_performances"],
+                    ),
+                    standard_card(
+                        "feature_importances_button", "Feature importances", COLORS_SECTIONS["feature_importances"]
+                    ),
+                    standard_card(
+                        "correlation_button",
+                        "Correlation between accelerated aging and dimensions",
+                        COLORS_SECTIONS["correlation"],
+                    ),
+                    standard_card("genetics_button", "Genetics", COLORS_SECTIONS["genetics"]),
+                    standard_card("xwas_button", "XWAS", COLORS_SECTIONS["xwas"]),
                 ],
                 className="mb-4",
                 no_gutters=False,
@@ -73,7 +83,7 @@ def _toggle_fade(
     elif clicked_card == "datasets_button":
         from dash_website.introduction.texts.datasets_text import get_text_color
     elif clicked_card == "age_prediction_performances_button":
-        from dash_website.introduction.texts.age_prediction_performances_button_text import get_text_color
+        from dash_website.introduction.texts.age_prediction_performances_text import get_text_color
     elif clicked_card == "feature_importances_button":
         from dash_website.introduction.texts.feature_importances_text import get_text_color
     elif clicked_card == "correlation_button":
