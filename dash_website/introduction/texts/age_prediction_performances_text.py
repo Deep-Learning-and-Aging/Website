@@ -1,4 +1,5 @@
 import dash_html_components as html
+from dash_website import COLORS_SECTIONS, BACKGROUND_COLORS_SECTIONS
 
 
 def get_text_color():
@@ -23,7 +24,13 @@ def get_text_color():
                 "The bar plot is interactive, hovering over a bar will display its numeric value (e.g R-squared or RMSE), along with the sample size of the dataset on which the model was built."
             ),
         ],
-        style={"background-color": "lightblue", "fontSize": 18, "padding": 30, "text-align": "justify"},
+        style={
+            "background-color": BACKGROUND_COLORS_SECTIONS["age_prediction_performances"],
+            "fontSize": 18,
+            "padding": 30,
+            "text-align": "justify",
+            "text-indent": 30,
+        },
     )
 
-    return text, "secondary"
+    return text, COLORS_SECTIONS["age_prediction_performances"]
