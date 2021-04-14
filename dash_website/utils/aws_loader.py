@@ -52,6 +52,11 @@ def load_feather(key_in_bucket, **kwargs):
     return df
 
 
+def load_txt(key_in_bucket):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
+    return BytesIO(obj["Body"].read()).read().decode("utf-8")
+
+
 def list_dir(path_dir):
     paginator = CLIENT.get_paginator("list_objects_v2")
     paginator_linear_xwas = paginator.paginate(Bucket=AWS_BUCKET_NAME, Prefix=path_dir)
