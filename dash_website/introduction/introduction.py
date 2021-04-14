@@ -1,11 +1,11 @@
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 import dash_html_components as html
 import dash
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 
-from dash_website.introduction.cards import standard_card, faded_card
+from dash_website.introduction.cards import standard_card
+from dash_website.utils.aws_loader import load_txt
 
 
 def get_layout():
@@ -29,16 +29,16 @@ def get_layout():
                 no_gutters=False,
             ),
             dbc.Row(
-                [
-                    faded_card("faded_introduction", "!!!!!This content fades in and out!!!!!", is_in=True),
-                    faded_card("faded_datasets", "This content fades in and out"),
-                    faded_card("faded_age_prediction_performances", "This content fades in and out"),
-                    faded_card("faded_feature_importances", "This content fades in and out"),
-                    faded_card("faded_correlation", "This content fades in and out"),
-                    faded_card("faded_genetics", "This content fades in and out"),
-                    faded_card("faded_xwas", "This content fades in and out"),
-                ],
-                className="mb-4",
+                dbc.Col(
+                    dbc.Card(
+                        html.P(id="core_card_text", className="card-text"),
+                        id="core_card",
+                        color="primary",
+                        outline=True,
+                    ),
+                    width=8,
+                ),
+                justify="center",
             ),
         ],
         id="id_menu",
@@ -46,15 +46,7 @@ def get_layout():
 
 
 @APP.callback(
-    [
-        Output("faded_introduction", "is_in"),
-        Output("faded_datasets", "is_in"),
-        Output("faded_age_prediction_performances", "is_in"),
-        Output("faded_feature_importances", "is_in"),
-        Output("faded_correlation", "is_in"),
-        Output("faded_genetics", "is_in"),
-        Output("faded_xwas", "is_in"),
-    ],
+    [Output("core_card_text", "children"), Output("core_card", "color")],
     [
         Input("introduction_button", "n_clicks"),
         Input("datasets_button", "n_clicks"),
@@ -63,15 +55,6 @@ def get_layout():
         Input("correlation_button", "n_clicks"),
         Input("genetics_button", "n_clicks"),
         Input("xwas_button", "n_clicks"),
-    ],
-    [
-        State("faded_introduction", "is_in"),
-        State("faded_datasets", "is_in"),
-        State("faded_age_prediction_performances", "is_in"),
-        State("faded_feature_importances", "is_in"),
-        State("faded_correlation", "is_in"),
-        State("faded_genetics", "is_in"),
-        State("faded_xwas", "is_in"),
     ],
 )
 def _toggle_fade(
@@ -82,29 +65,24 @@ def _toggle_fade(
     n_clicks_correlation,
     n_clicks_genetics,
     n_clicks_xwas,
-    is_in_introduction,
-    is_in_datasets,
-    is_in_age_prediction_performances,
-    is_in_feature_importances,
-    is_in_correlation,
-    is_in_genetics,
-    is_in_xwas,
 ):
     clicked_card = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
     if clicked_card == "introduction_button":
-        return [not is_in_introduction, False, False, False, False, False, False]
+        from dash_website.introduction.texts.introduction_text import get_text_color
     elif clicked_card == "datasets_button":
-        return [False, not is_in_datasets, False, False, False, False, False]
+        from dash_website.introduction.texts.datasets_text import get_text_color
     elif clicked_card == "age_prediction_performances_button":
-        return [False, False, not is_in_age_prediction_performances, False, False, False, False]
+        from dash_website.introduction.texts.age_prediction_performances_button_text import get_text_color
     elif clicked_card == "feature_importances_button":
-        return [False, False, False, not is_in_feature_importances, False, False, False]
+        from dash_website.introduction.texts.feature_importances_text import get_text_color
     elif clicked_card == "correlation_button":
-        return [False, False, False, False, not is_in_correlation, False, False]
+        from dash_website.introduction.texts.correlation_text import get_text_color
     elif clicked_card == "genetics_button":
-        return [False, False, False, False, False, not is_in_genetics, False]
+        from dash_website.introduction.texts.genetics_text import get_text_color
     elif clicked_card == "xwas_button":
-        return [False, False, False, False, False, False, not is_in_xwas]
+        from dash_website.introduction.texts.xwas_text import get_text_color
     else:
-        return [is_in_introduction, False, False, False, False, False, False]
+        from dash_website.introduction.texts.introduction_text import get_text_color
+
+    return get_text_color()
