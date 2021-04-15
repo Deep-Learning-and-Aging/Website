@@ -10,7 +10,7 @@ from dash_website.utils.graphs.colorscale import get_colorscale
 from dash_website.utils.controls import get_item_radio_items, get_main_category_radio_items
 from dash_website.utils.aws_loader import load_feather
 from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
-from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE
+from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE, ITEMS_TITLES
 
 
 def get_summary():
@@ -23,7 +23,7 @@ def get_summary():
             dbc.Row(
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col([dcc.Graph(id="graph_summary")], md=9),
+                    dbc.Col([html.H2(id="title_summary"), dcc.Graph(id="graph_summary")], md=9),
                 ]
             ),
         ],
@@ -45,7 +45,7 @@ def get_controls_tab():
 
 
 @APP.callback(
-    Output("graph_summary", "figure"),
+    [Output("graph_summary", "figure"), Output("title_summary", "children")],
     [Input("item_summary", "value"), Input("main_category_summary", "value"), Input("memory_summary", "data")],
 )
 def _fill_summary_heatmap(item, main_category, data):
@@ -103,7 +103,6 @@ def _fill_summary_heatmap(item, main_category, data):
     fig = go.Figure(heatmap)
     fig.update_layout(
         {
-            "title": f"Percentage of {ITEMS_LEGEND[item]}",
             "xaxis": {"title": "X subcategory", "tickangle": 90},
             "yaxis": {"title": "Aging dimension"},
             "width": max(30 * summary_item_percentage_category.shape[1], 500),
@@ -111,4 +110,4 @@ def _fill_summary_heatmap(item, main_category, data):
         }
     )
 
-    return fig
+    return fig, ITEMS_TITLES[item]

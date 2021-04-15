@@ -171,7 +171,7 @@ ALGORITHMS_RENDERING = {
 
 COLORS_SECTIONS = {
     "introduction": "primary",
-    "datasets": "success",
+    "datasets": "primary",
     "age_prediction_performances": "warning",
     "feature_importances": "danger",
     "correlation": "dark",
