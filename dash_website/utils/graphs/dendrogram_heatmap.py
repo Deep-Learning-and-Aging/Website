@@ -3,7 +3,7 @@ from plotly.figure_factory import create_dendrogram
 from dash_website.utils.graphs.colorscale import get_colorscale
 
 
-def create_dendrogram_heatmap(correlations, sample_sizes):
+def create_dendrogram_heatmap(correlations, sample_sizes, size_label_is_variable=True):
     """
     correlations : DataFrame
         2d dataframe.
@@ -23,7 +23,10 @@ def create_dendrogram_heatmap(correlations, sample_sizes):
     heat_correlations = correlations.loc[labels, labels].values
     heat_sample_sizes = sample_sizes.loc[labels, labels].values
 
-    hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
+    if size_label_is_variable:
+        hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
+    else:
+        hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number features: %{customdata} <br><extra></extra>"
 
     heatmap = Heatmap(
         x=labels,

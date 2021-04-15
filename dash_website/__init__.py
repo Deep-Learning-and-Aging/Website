@@ -160,3 +160,31 @@ MAIN_CATEGORIES_TO_CATEGORIES = {
     "Environmental": ALL_ENVIRONMENTAL,
     "Socioeconomics": ALL_SOCIOECONOMICS,
 }
+
+ALGORITHMS_RENDERING = {
+    "correlation": "Correlation",
+    "best_algorithm": "Best Algorithm",
+    "elastic_net": "Elastic Net",
+    "light_gbm": "Light GBM",
+    "neural_network": "Neural Network",
+}
+
+COLORS_SECTIONS = {
+    "introduction": "primary",
+    "datasets": "primary",
+    "age_prediction_performances": "warning",
+    "feature_importances": "danger",
+    "correlation": "dark",
+    "genetics": "secondary",
+    "xwas": "info",
+}
+
+BACKGROUND_COLORS_SECTIONS = {
+    "introduction": "lightblue",
+    "datasets": "rgba(0, 150, 0, 0.3)",
+    "age_prediction_performances": "rgba(200, 150, 0, 0.3)",
+    "feature_importances": "rgba(150, 0, 0, 0.3)",
+    "correlation": "rgba(0, 50, 50, 0.3)",
+    "genetics": "rgba(80, 80, 80, 0.3)",
+    "xwas": "rgba(0,130,200,0.3)",
+}
