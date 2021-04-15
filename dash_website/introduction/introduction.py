@@ -5,7 +5,6 @@ import dash_html_components as html
 import dash
 from dash.dependencies import Input, Output
 
-from dash_website.introduction.cards import standard_card
 from dash_website.introduction.texts.introduction_text import TEXT
 
 
@@ -26,13 +25,13 @@ def get_layout():
             ),
             dbc.Row(
                 [
-                    standard_card("introduction_button", "Introduction"),
-                    standard_card("datasets_button", "Datasets"),
-                    standard_card("age_prediction_performances_button", "Age prediction performances"),
-                    standard_card("feature_importances_button", "Feature importances"),
-                    standard_card("correlation_button", "Correlation between accelerated aging and dimensions"),
-                    standard_card("genetics_button", "Genetics"),
-                    standard_card("xwas_button", "XWAS"),
+                    standard_button("introduction_button", "Introduction"),
+                    standard_button("datasets_button", "Datasets"),
+                    standard_button("age_prediction_performances_button", "Age prediction performances"),
+                    standard_button("feature_importances_button", "Feature importances"),
+                    standard_button("correlation_button", "Correlation between accelerated aging and dimensions"),
+                    standard_button("genetics_button", "Genetics"),
+                    standard_button("xwas_button", "XWAS"),
                 ],
                 className="mb-4",
                 no_gutters=False,
@@ -44,6 +43,10 @@ def get_layout():
         ],
         id="id_menu",
     )
+
+
+def standard_button(id, name):
+    return dbc.Col(dbc.Button(name, id=id, color="Transparent", block=True))
 
 
 @APP.callback(
@@ -67,21 +70,21 @@ def _toggle_fade(
     n_clicks_genetics,
     n_clicks_xwas,
 ):
-    clicked_card = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+    clicked_button = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
 
-    if clicked_card == "introduction_button":
+    if clicked_button == "introduction_button":
         from dash_website.introduction.texts.introduction_text import TEXT
-    elif clicked_card == "datasets_button":
+    elif clicked_button == "datasets_button":
         from dash_website.introduction.texts.datasets_text import TEXT
-    elif clicked_card == "age_prediction_performances_button":
+    elif clicked_button == "age_prediction_performances_button":
         from dash_website.introduction.texts.age_prediction_performances_text import TEXT
-    elif clicked_card == "feature_importances_button":
+    elif clicked_button == "feature_importances_button":
         from dash_website.introduction.texts.feature_importances_text import TEXT
-    elif clicked_card == "correlation_button":
+    elif clicked_button == "correlation_button":
         from dash_website.introduction.texts.correlation_text import TEXT
-    elif clicked_card == "genetics_button":
+    elif clicked_button == "genetics_button":
         from dash_website.introduction.texts.genetics_text import TEXT
-    elif clicked_card == "xwas_button":
+    elif clicked_button == "xwas_button":
         from dash_website.introduction.texts.xwas_text import TEXT
     else:
         from dash_website.introduction.texts.introduction_text import TEXT

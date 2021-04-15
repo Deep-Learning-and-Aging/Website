@@ -16,4 +16,5 @@ env*/
 clean_aws/
 external_code/
 data
-!data/page12_AttentionMapsVideos/*
+!data/datasets/**/*.gif
+!data/datasets/**/*.png

@@ -16,7 +16,6 @@ from dash_website.pages import (
     page13,
     page14,
     page15,
-    page16,
     page17,
 )
 
@@ -56,7 +55,7 @@ def get_top_bar():
                             dbc.DropdownMenuItem("Scalars", href="/pages/page1", id="page1-link"),
                             dbc.DropdownMenuItem("Time Series", href="/pages/page15", id="page15-link"),
                             dbc.DropdownMenuItem("Images", href="/pages/page14", id="page14-link"),
-                            dbc.DropdownMenuItem("Videos", href="/pages/page16", id="page16-link"),
+                            dbc.DropdownMenuItem("Videos", href="/datasets/videos", id="datasets_videos"),
                         ],
                         label="Datasets",
                         nav=True,
@@ -135,8 +134,12 @@ def get_top_bar():
 
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
 def display_page(pathname):
-    print(pathname)
-    if "xwas" in pathname:
+    if "datasets" in pathname:
+        if "videos" in pathname:
+            from dash_website.datasets.videos import get_layout
+
+        return get_layout()
+    elif "xwas" in pathname:
         if "univariate_results" in pathname:
             from dash_website.xwas.univariate_results import get_layout
         elif "univariate_correlations" in pathname:
@@ -145,7 +148,7 @@ def display_page(pathname):
             from dash_website.xwas.multivariate_results import get_layout
         elif "multivariate_correlations" in pathname:
             from dash_website.xwas.multivariate_correlations import get_layout
-        elif "multivariate_feature_importances" in pathname:
+        else:  # "multivariate_feature_importances" in pathname
             from dash_website.xwas.multivariate_feature_importances import get_layout
 
         return get_layout()
