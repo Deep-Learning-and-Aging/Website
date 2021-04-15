@@ -77,7 +77,7 @@ def get_controls_tab_dimension():
         Input("memory_dimension", "data"),
     ],
 )
-def _fill_graph_tab_organ(dimension, subset_method, correlation_type, data_dimension):
+def _fill_graph_tab_dimension(dimension, subset_method, correlation_type, data_dimension):
     from dash_website.utils.graphs.colorscale import get_colorscale
     import plotly.graph_objs as go
 

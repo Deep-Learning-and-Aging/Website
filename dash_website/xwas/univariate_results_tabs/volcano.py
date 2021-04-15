@@ -29,7 +29,7 @@ def get_volcano():
             dbc.Row(
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col(dcc.Loading([dcc.Graph(id="graph_volcano")]), md=9),
+                    dbc.Col(dcc.Loading([html.H2("Volcano plot"), dcc.Graph(id="graph_volcano")]), md=9),
                 ]
             ),
             dbc.Row(
@@ -110,7 +110,6 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
         custom_data=["variable", "p_value", "sample_size"],
         color="category",
         labels={"correlation": "Partial Correlation", "neg_log_p_value": "-log(p-value)", "category": "Categories:"},
-        title="Volcano plot",
     )
     fig.update_traces(
         hovertemplate="<br>".join(

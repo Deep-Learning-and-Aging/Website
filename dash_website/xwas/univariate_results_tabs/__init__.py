@@ -17,3 +17,9 @@ ITEMS_COLORSCALE = {
     "accelerated_aging": "reds",
     "decelerated_aging": "blues",
 }
+
+ITEMS_TITLES = {
+    "significant": "Proportion of X-variables significantly associated with accelerated/decelerated aging in each aging dimension",
+    "accelerated_aging": "Proportion of X-variables significantly associated with accelerated aging in each aging dimension",
+    "decelerated_aging": "Proportion of X-variables significantly associated with decelerated aging in each aging dimension",
+}

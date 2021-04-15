@@ -5,10 +5,13 @@ import dash_html_components as html
 from dash_website import RENAME_DIMENSIONS
 
 
-def get_options(list_):
+def get_options(list_, capitalize=False):
     list_label_value = []
     for value in list_:
-        d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
+        if capitalize:
+            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value).capitalize()}
+        else:
+            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
         list_label_value.append(d)
     return list_label_value
 
@@ -16,23 +19,9 @@ def get_options(list_):
 def get_options_from_dict(dict_):
     list_label_value = []
     for key_value, label in dict_.items():
-        d = {"value": key_value, "label": label.capitalize()}
+        d = {"value": key_value, "label": label}
         list_label_value.append(d)
     return list_label_value
-
-
-def get_correlation_type_radio_items(id, value="pearson"):
-    return dbc.FormGroup(
-        [
-            dbc.Label("Select correlation type :"),
-            dcc.RadioItems(
-                id=id,
-                options=get_options(["pearson", "spearman"]),
-                value=value,
-                labelStyle={"display": "inline-block", "margin": "5px"},
-            ),
-        ]
-    )
 
 
 def get_subset_method_radio_items(id, value="union"):
@@ -41,7 +30,21 @@ def get_subset_method_radio_items(id, value="union"):
             dbc.Label("Select subset method :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["all", "union", "intersection"]),
+                options=get_options(["all", "union", "intersection"], capitalize=True),
+                value=value,
+                labelStyle={"display": "inline-block", "margin": "5px"},
+            ),
+        ]
+    )
+
+
+def get_correlation_type_radio_items(id, value="pearson"):
+    return dbc.FormGroup(
+        [
+            dbc.Label("Select correlation type :"),
+            dcc.RadioItems(
+                id=id,
+                options=get_options(["pearson", "spearman"], capitalize=True),
                 value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
@@ -64,26 +67,15 @@ def get_main_category_radio_items(id, categories):
     )
 
 
-def get_item_radio_items(id, items):
-    return dbc.FormGroup(
-        [
-            html.P("Select : "),
-            dcc.RadioItems(
-                id=id,
-                options=get_options_from_dict(items),
-                value=list(items.keys())[0],
-                labelStyle={"display": "inline-block", "margin": "5px"},
-            ),
-            html.Br(),
-        ]
-    )
-
-
-def get_category_drop_down(id):
+def get_category_drop_down(id, all_first_value=True):
+    if all_first_value:
+        drop_down = dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All")
+    else:
+        drop_down = dcc.Dropdown(id=id, placeholder="Select ...")
     return dbc.FormGroup(
         [
             html.P("Select X subcategory: "),
-            dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All"),
+            drop_down,
             html.Br(),
         ]
     )
@@ -96,4 +88,29 @@ def get_dimension_drop_down(id, dimension, idx_dimension=""):
             dcc.Dropdown(id=id, options=get_options(dimension), value=dimension[0]),
             html.Br(),
         ],
+    )
+
+
+def get_item_radio_items(id, items, legend):
+    return dbc.FormGroup(
+        [
+            html.P(legend),
+            dcc.RadioItems(
+                id=id,
+                options=get_options_from_dict(items),
+                value=list(items.keys())[0],
+                labelStyle={"display": "inline-block", "margin": "5px"},
+            ),
+            html.Br(),
+        ]
+    )
+
+
+def get_drop_down(id, items, legend):
+    return dbc.FormGroup(
+        [
+            html.P(legend),
+            dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0]),
+            html.Br(),
+        ]
     )
