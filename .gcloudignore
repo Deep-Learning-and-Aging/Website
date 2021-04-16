@@ -12,8 +12,6 @@ env*/
 **/*.sh
 **/*.xlsx
 
-/data/favicon.ico
-
 # Local specific
 clean_aws/
 external_code/
