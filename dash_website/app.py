@@ -6,8 +6,8 @@ MODE = "All"
 APP = dash.Dash(
     name=__name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
-    assets_url_path="/data",
-    assets_folder="../data/",
+    assets_url_path="data",
+    assets_folder="../data",  # from __name__
     title="Multidimensionality of aging",
 )
 

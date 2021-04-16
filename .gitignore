@@ -128,11 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
-
-/data
-.DS_Store
-APP.yaml
+app.yaml
+/data 
 
 
 # Avoid pushing data
@@ -141,6 +138,3 @@ APP.yaml
 **/*.feather
 **/*.html
 **/*.xlsx
-
-# Local specific
-.vscode
