@@ -1,11 +1,14 @@
-from io import BytesIO
-import re
 from boto3 import client, resource
 from botocore.client import Config
 
 import os
+from io import BytesIO
+import re
+import base64
 import pandas as pd
 import yaml
+from matplotlib.image import imread
+
 
 if os.environ.get("AWS_ACCESS_KEY_ID") is None:
     with open("app.yaml", "r") as app_yaml:
@@ -52,9 +55,10 @@ def load_feather(key_in_bucket, **kwargs):
     return df
 
 
-def load_txt(key_in_bucket):
+def load_src_png(key_in_bucket):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    return BytesIO(obj["Body"].read()).read().decode("utf-8")
+    encoded_image = base64.b64encode(BytesIO(obj["Body"].read()).read())
+    return f"data:image/png;base64,{encoded_image.decode()}"
 
 
 def list_dir(path_dir):
