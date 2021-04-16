@@ -101,7 +101,8 @@ def _display_left_gif(chamber_type, sex, age_group, sample, data_video):
         gif.GifPlayer(
             gif=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.gif",
             still=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.png",
-        )
+        ),
+        style={"padding-left": 400},
     )
     return gif_display, title
 
@@ -129,7 +130,8 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
         gif.GifPlayer(
             gif=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.gif",
             still=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.png",
-        )
+        ),
+        style={"padding-left": 400},
     )
 
     return gif_display, title
