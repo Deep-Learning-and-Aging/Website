@@ -132,21 +132,4 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
         )
     )
 
-    import os
-
-    import __main__
-
-    title = (
-        "cwd :  "
-        + str(os.getcwd())
-        + "   assert_url : "
-        + APP.get_asset_url("img.png")
-        + "  list_dir . : "
-        + " - ".join(os.listdir("."))
-        + "  list_dir ../ : "
-        + " - ".join(os.listdir("../"))
-        + "  list_dir ../.. : "
-        + " - ".join(os.listdir("../../"))
-    )
-
-    return gif_display, title  # APP.__dict__
+    return gif_display, title

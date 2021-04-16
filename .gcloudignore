@@ -12,10 +12,10 @@ env*/
 **/*.sh
 **/*.xlsx
 
-clean_aws/
-external_code/
 /data/favicon.ico
 
 # Local specific
+clean_aws/
+external_code/
 .vscode
 /all_data

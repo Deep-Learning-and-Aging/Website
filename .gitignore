@@ -128,8 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.DS_Store
-APP.yaml
+app.yaml
 /data 
 
 
@@ -139,7 +138,3 @@ APP.yaml
 **/*.feather
 **/*.html
 **/*.xlsx
-
-# Local specific
-.vscode
-/all_data
