@@ -4,7 +4,6 @@ app.yaml
 __pycache__/
 env*/
 *.egg-info/
-.vscode
 **/*.csv
 **/*.zip
 **/*.feather
@@ -13,7 +12,8 @@ env*/
 **/*.sh
 **/*.xlsx
 
+# Local specific
 clean_aws/
 external_code/
-data
-!data/page12_AttentionMapsVideos/*
+.vscode
+/all_data
