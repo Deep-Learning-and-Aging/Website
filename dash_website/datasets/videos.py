@@ -9,11 +9,7 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_options_from_dict, get_item_radio_items, get_drop_down
-from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND
-
-
-from plotly.graph_objs import Scattergl, Scatter, Histogram, Figure, Bar, Heatmap
-from dash_website.pages.tools import empty_graph
+from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND, SEX_TO_PRONOUN
 
 
 def get_layout():
@@ -99,7 +95,7 @@ def _display_left_gif(chamber_type, sex, age_group, sample, data_video):
         .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age", "ethnicity"]]
         .tolist()
     )
-    title = f"Participants of {chronological_age} years old, his/her ethnicity is {ethnicity}."
+    title = f"Participants of {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
 
     gif_display = html.Div(
         gif.GifPlayer(
@@ -127,7 +123,7 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
         .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age", "ethnicity"]]
         .tolist()
     )
-    title = f"Participants of {chronological_age} years old, his/her ethnicity is {ethnicity}."
+    title = f"Participants of {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
 
     gif_display = html.Div(
         gif.GifPlayer(
@@ -135,4 +131,22 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
             still=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.png",
         )
     )
-    return gif_display, title
+
+    import os
+
+    import __main__
+
+    title = (
+        "cwd :  "
+        + str(os.getcwd())
+        + "   assert_url : "
+        + APP.get_asset_url("img.png")
+        + "  list_dir . : "
+        + " - ".join(os.listdir("."))
+        + "  list_dir ../ : "
+        + " - ".join(os.listdir("../"))
+        + "  list_dir ../.. : "
+        + " - ".join(os.listdir("../../"))
+    )
+
+    return gif_display, title  # APP.__dict__

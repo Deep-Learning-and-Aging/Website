@@ -4,7 +4,6 @@ app.yaml
 __pycache__/
 env*/
 *.egg-info/
-.vscode
 **/*.csv
 **/*.zip
 **/*.feather
@@ -15,6 +14,8 @@ env*/
 
 clean_aws/
 external_code/
-data
-!data/datasets/**/*.gif
-!data/datasets/**/*.png
+/data/favicon.ico
+
+# Local specific
+.vscode
+/all_data
