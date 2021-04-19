@@ -19,8 +19,6 @@ from dash_website.pages import (
     page17,
 )
 
-num_pages = 18
-
 
 def get_server():
     add_layout(APP)
