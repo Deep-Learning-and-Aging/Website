@@ -168,7 +168,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sam
     )
     title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
 
-    if dimension in SIDES_DIMENSION and sub_subdimension not in SIDES_SUBDIMENSION_EXCEPTION:
+    if dimension in SIDES_DIMENSION and subdimension not in SIDES_SUBDIMENSION_EXCEPTION:
         left_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_range}/normal/left_sample_{sample}.jpg"
         right_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_range}/normal/right_sample_{sample}.jpg"
 
@@ -177,7 +177,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sam
         if does_key_exists(left_path_to_image):
             left_image = html.Img(
                 src=load_src_image(left_path_to_image),
-                style={"height": 600, "margin": "2px"},
+                style={"height": 400, "margin": "2px"},
             )
         else:
             left_image = html.Div()
@@ -186,7 +186,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sam
         if does_key_exists(right_path_to_image):
             right_image = html.Img(
                 src=load_src_image(right_path_to_image),
-                style={"height": 600, "margin": "2px", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
+                style={"height": 400, "margin": "2px", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
             )
         else:
             right_image = html.Div()
@@ -196,7 +196,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sam
             image = html.Div()
             title = "The image was not provided by the UK Biobank dataset, please choose another sample."
         else:
-            image = html.Div([left_image, right_image], style={"margin": "15px", "padding-left": 100})
+            image = html.Div([left_image, right_image], style={"margin": "15px", "padding-left": 50})
 
     else:
         path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_range}/normal/sample_{sample}.jpg"
