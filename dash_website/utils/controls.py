@@ -69,9 +69,9 @@ def get_main_category_radio_items(id, categories):
 
 def get_category_drop_down(id, all_first_value=True):
     if all_first_value:
-        drop_down = dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All")
+        drop_down = dcc.Dropdown(id=id, options=[{"value": "All", "label": "All"}], value="All", clearable=False)
     else:
-        drop_down = dcc.Dropdown(id=id, placeholder="Select ...")
+        drop_down = dcc.Dropdown(id=id, placeholder="Select ...", clearable=False)
     return dbc.FormGroup(
         [
             html.P("Select X subcategory: "),
@@ -85,32 +85,58 @@ def get_dimension_drop_down(id, dimension, idx_dimension=""):
     return dbc.FormGroup(
         [
             html.P(f"Select an aging dimension {idx_dimension}: "),
-            dcc.Dropdown(id=id, options=get_options(dimension), value=dimension[0]),
+            dcc.Dropdown(id=id, options=get_options(dimension), value=dimension[0], clearable=False),
             html.Br(),
         ],
     )
 
 
-def get_item_radio_items(id, items, legend):
-    return dbc.FormGroup(
-        [
-            html.P(legend),
-            dcc.RadioItems(
-                id=id,
-                options=get_options_from_dict(items),
-                value=list(items.keys())[0],
-                labelStyle={"display": "inline-block", "margin": "5px"},
-            ),
-            html.Br(),
-        ]
-    )
+def get_item_radio_items(id, items, legend, from_dict=True):
+    if from_dict:
+        control = dbc.FormGroup(
+            [
+                html.P(legend),
+                dcc.RadioItems(
+                    id=id,
+                    options=get_options_from_dict(items),
+                    value=list(items.keys())[0],
+                    labelStyle={"display": "inline-block", "margin": "5px"},
+                ),
+                html.Br(),
+            ]
+        )
+    else:
+        control = dbc.FormGroup(
+            [
+                html.P(legend),
+                dcc.RadioItems(
+                    id=id,
+                    options=get_options(items),
+                    value=items[0],
+                    labelStyle={"display": "inline-block", "margin": "5px"},
+                ),
+                html.Br(),
+            ]
+        )
+
+    return control
 
 
-def get_drop_down(id, items, legend):
-    return dbc.FormGroup(
-        [
-            html.P(legend),
-            dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0]),
-            html.Br(),
-        ]
-    )
+def get_drop_down(id, items, legend, from_dict=True):
+    if from_dict:
+        control = dbc.FormGroup(
+            [
+                html.P(legend),
+                dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0], clearable=False),
+                html.Br(),
+            ]
+        )
+    else:
+        control = dbc.FormGroup(
+            [
+                html.P(legend),
+                dcc.Dropdown(id=id, options=get_options(items), value=items[0], clearable=False),
+                html.Br(),
+            ]
+        )
+    return control

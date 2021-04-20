@@ -15,7 +15,7 @@ from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND,
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_video", data=get_data())]),
+            dcc.Loading([dcc.Store(id="memory_videos", data=get_data())]),
             html.H1("Datasets - Videos"),
             html.Br(),
             html.Br(),
@@ -85,7 +85,7 @@ def get_controls_right_video():
         Input("sex_left_video", "value"),
         Input("age_left_video", "value"),
         Input("sample_left_video", "value"),
-        Input("memory_video", "data"),
+        Input("memory_videos", "data"),
     ],
 )
 def _display_left_gif(chamber_type, sex, age_group, sample, data_video):
@@ -114,7 +114,7 @@ def _display_left_gif(chamber_type, sex, age_group, sample, data_video):
         Input("sex_right_video", "value"),
         Input("age_right_video", "value"),
         Input("sample_right_video", "value"),
-        Input("memory_video", "data"),
+        Input("memory_videos", "data"),
     ],
 )
 def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
