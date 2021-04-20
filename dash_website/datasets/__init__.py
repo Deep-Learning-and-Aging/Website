@@ -1,3 +1,46 @@
+# For images
+TREE_CHOICES = {
+    "Abdomen": {"Liver": ["Raw", "Contrast"], "Pancreas": ["Raw", "Contrast"]},
+    "Arterial": {"Carotids": ["CIMT120", "CIMT150", "LongAxis", "Mixed", "ShortAxis"]},
+    "Brain": {
+        "MRI": [
+            "SagittalRaw",
+            "SagittalReference",
+            "CoronalRaw",
+            "CoronalReference",
+            "TransverseRaw",
+            "TransverseReference",
+        ]
+    },
+    "Eyes": {"Fundus": ["Raw"], "OCT": ["Raw"]},
+    "Heart": {
+        "MRI": [
+            "2chambersRaw",
+            "2chambersContrast",
+            "3chambersRaw",
+            "3chambersContrast",
+            "4chambersRaw",
+            "4chambersContrast",
+        ]
+    },
+    "Musculoskeletal": {
+        "FullBody": ["Figure", "Flesh", "Mixed", "Skeleton"],
+        "Knees": ["DXA"],
+        "Hips": ["DXA"],
+        "Spine": ["Coronal", "Sagittal"],
+    },
+    "PhysicalActivity": {
+        "FullWeek": [
+            "GramianAngularField1minDifference",
+            "GramianAngularField1minSummation",
+            "MarkovTransitionField1min",
+            "RecurrencePlots1min",
+        ]
+    },
+}
+
+
+# For videos
 CHAMBERS_LEGEND = {"3": "3 chambers", "4": "4 chambers"}
 
 SEX_LEGEND = {"male": "Male", "female": "Female"}
