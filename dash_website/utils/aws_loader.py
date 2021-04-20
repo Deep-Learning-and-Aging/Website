@@ -55,9 +55,10 @@ def load_feather(key_in_bucket, **kwargs):
     return df
 
 
-def load_src_png(key_in_bucket):
+def load_src_image(key_in_bucket):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    encoded_image = base64.b64encode(BytesIO(obj["Body"].read()).read())
+    image = BytesIO(obj["Body"].read())
+    encoded_image = base64.b64encode(image.read())
     return f"data:image/png;base64,{encoded_image.decode()}"
 
 
