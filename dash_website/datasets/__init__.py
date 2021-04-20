@@ -1,5 +1,5 @@
 # For images
-TREE_CHOICES = {
+TREE_DIMENSIONS = {
     "Abdomen": {"Liver": ["Raw", "Contrast"], "Pancreas": ["Raw", "Contrast"]},
     "Arterial": {"Carotids": ["CIMT120", "CIMT150", "LongAxis", "Mixed", "ShortAxis"]},
     "Brain": {
@@ -38,6 +38,9 @@ TREE_CHOICES = {
         ]
     },
 }
+
+SIDES_DIMENSION = ["Arterial", "Eyes", "Musculoskeletal"]
+SIDES_SUBDIMENSION_EXCEPTION = ["FullBody", "Spine"]
 
 
 # For videos
