@@ -1,7 +1,7 @@
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_csv
-from dash_website.datasets import TREE_DIMENSIONS
+from dash_website.datasets import TREE_IMAGES
 
 
 columns_to_take = [
@@ -42,9 +42,9 @@ columns_to_take = [
 if __name__ == "__main__":
     list_information = []
 
-    for DIMENSION in list(TREE_DIMENSIONS.keys()):
-        for SUBDIMENSION in list(TREE_DIMENSIONS[DIMENSION].keys()):
-            for SUB_SUBDIMENSION in TREE_DIMENSIONS[DIMENSION][SUBDIMENSION]:
+    for DIMENSION in list(TREE_IMAGES.keys()):
+        for SUBDIMENSION in list(TREE_IMAGES[DIMENSION].keys()):
+            for SUB_SUBDIMENSION in TREE_IMAGES[DIMENSION][SUBDIMENSION]:
                 if DIMENSION == "Musculoskeletal" and SUB_SUBDIMENSION == "DXA":
                     SUB_SUBDIMENSION_OLD = "MRI"
                 else:
@@ -77,7 +77,7 @@ if __name__ == "__main__":
                 information["age_group"] = information_raw["age_category"]
                 information["aging_rate"] = information_raw["aging_rate"]
                 information["sample"] = information_raw["sample"]
-                information["chronological_age"] = information_raw["Age"].astype(int)
+                information["chronological_age"] = information_raw["Age"].round(0).astype(int)
                 information["biological_age"] = information_raw["Biological_Age"]
 
                 for id_participant in information_raw.index:

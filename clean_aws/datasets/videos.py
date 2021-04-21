@@ -56,7 +56,7 @@ if __name__ == "__main__":
         information["sex"] = information_raw["sex"].str.lower()
         information["age_group"] = information_raw["age_category"]
         information["sample"] = information_raw["sample"]
-        information["chronological_age"] = information_raw["Age"].astype(int)
+        information["chronological_age"] = information_raw["Age"].round(0).astype(int)
         information["biological_age"] = information_raw["Biological_Age"]
 
         for id_participant in information_raw.index:

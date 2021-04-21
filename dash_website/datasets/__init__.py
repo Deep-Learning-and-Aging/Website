@@ -1,5 +1,13 @@
+# For time series
+TREE_TIME_SERIES = {
+    "Arterial": {"PulseWaveAnalysis": ["TimeSeries"]},
+    "Heart": {"ECG": ["TimeSeries"]},
+    "PhysicalActivity": {"FullWeek": ["Acceleration", "TimeSeriesFeatures"], "Walking": ["3D"]},
+}
+
+
 # For images
-TREE_DIMENSIONS = {
+TREE_IMAGES = {
     "Abdomen": {"Liver": ["Raw", "Contrast"], "Pancreas": ["Raw", "Contrast"]},
     "Arterial": {"Carotids": ["CIMT120", "CIMT150", "LongAxis", "Mixed", "ShortAxis"]},
     "Brain": {
