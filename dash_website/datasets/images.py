@@ -111,7 +111,7 @@ def _change_subdimensions(dimension, subdimension):
 def get_controls_left_image():
     return [
         get_item_radio_items("sex_left_image", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_range_left_image", AGE_GROUP_LEGEND, "Select age group :"),
+        get_item_radio_items("age_group_left_image", AGE_GROUP_LEGEND, "Select age group :"),
         get_drop_down("sample_left_image", SAMPLE_LEGEND, "Select sample :"),
     ]
 
@@ -119,7 +119,7 @@ def get_controls_left_image():
 def get_controls_right_image():
     return [
         get_item_radio_items("sex_right_image", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_range_right_image", AGE_GROUP_LEGEND, "Select age group :"),
+        get_item_radio_items("age_group_right_image", AGE_GROUP_LEGEND, "Select age group :"),
         get_drop_down("sample_right_image", SAMPLE_LEGEND, "Select sample :"),
     ]
 
@@ -131,13 +131,13 @@ def get_controls_right_image():
         Input("subdimension_images", "value"),
         Input("sub_subdimension_images", "value"),
         Input("sex_left_image", "value"),
-        Input("age_range_left_image", "value"),
+        Input("age_group_left_image", "value"),
         Input("sample_left_image", "value"),
         Input("memory_images", "data"),
     ],
 )
-def _display_left_image(dimension, subdimension, sub_subdimension, sex, age_range, sample, data_images):
-    return display_image(dimension, subdimension, sub_subdimension, sex, age_range, sample, data_images)
+def _display_left_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images):
+    return display_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images)
 
 
 @APP.callback(
@@ -147,21 +147,21 @@ def _display_left_image(dimension, subdimension, sub_subdimension, sex, age_rang
         Input("subdimension_images", "value"),
         Input("sub_subdimension_images", "value"),
         Input("sex_right_image", "value"),
-        Input("age_range_right_image", "value"),
+        Input("age_group_right_image", "value"),
         Input("sample_right_image", "value"),
         Input("memory_images", "data"),
     ],
 )
-def _display_right_image(dimension, subdimension, sub_subdimension, sex, age_range, sample, data_images):
-    return display_image(dimension, subdimension, sub_subdimension, sex, age_range, sample, data_images)
+def _display_right_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images):
+    return display_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images)
 
 
-def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sample, data_images):
+def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images):
     chronological_age, ethnicity = (
         pd.DataFrame(data_images)
         .set_index(["dimension", "subdimension", "sub_subdimension", "sex", "age_group", "aging_rate", "sample"])
         .loc[
-            (dimension, subdimension, sub_subdimension, sex, age_range, "normal", int(sample)),
+            (dimension, subdimension, sub_subdimension, sex, age_group, "normal", int(sample)),
             ["chronological_age", "ethnicity"],
         ]
         .tolist()
@@ -169,8 +169,8 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sam
     title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
 
     if dimension in SIDES_DIMENSION and subdimension not in SIDES_SUBDIMENSION_EXCEPTION:
-        left_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_range}/normal/left_sample_{sample}.jpg"
-        right_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_range}/normal/right_sample_{sample}.jpg"
+        left_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_group}/normal/left_sample_{sample}.jpg"
+        right_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_group}/normal/right_sample_{sample}.jpg"
 
         missing_left = False
         missing_right = False
@@ -199,7 +199,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_range, sam
             image = html.Div([left_image, right_image], style={"margin": "15px", "padding-left": 50})
 
     else:
-        path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_range}/normal/sample_{sample}.jpg"
+        path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_group}/normal/sample_{sample}.jpg"
 
         if does_key_exists(path_to_image):
             image = html.Img(

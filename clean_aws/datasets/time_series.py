@@ -1,7 +1,7 @@
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_csv
-from dash_website.datasets import TREE_IMAGES
+from dash_website.datasets import TREE_TIME_SERIES
 
 
 columns_to_take = [
@@ -42,15 +42,11 @@ columns_to_take = [
 if __name__ == "__main__":
     list_information = []
 
-    for DIMENSION in list(TREE_IMAGES.keys()):
-        for SUBDIMENSION in list(TREE_IMAGES[DIMENSION].keys()):
-            for SUB_SUBDIMENSION in TREE_IMAGES[DIMENSION][SUBDIMENSION]:
-                if DIMENSION == "Musculoskeletal" and SUB_SUBDIMENSION == "DXA":
-                    SUB_SUBDIMENSION_OLD = "MRI"
-                else:
-                    SUB_SUBDIMENSION_OLD = SUB_SUBDIMENSION
+    for DIMENSION in list(TREE_TIME_SERIES.keys()):
+        for SUBDIMENSION in list(TREE_TIME_SERIES[DIMENSION].keys()):
+            for SUB_SUBDIMENSION in TREE_TIME_SERIES[DIMENSION][SUBDIMENSION]:
                 information_raw = load_csv(
-                    f"page9_AttentionMaps/Attention_maps_infos/AttentionMaps-samples_Age_{DIMENSION}_{SUBDIMENSION}_{SUB_SUBDIMENSION_OLD}.csv",
+                    f"page9_AttentionMaps/Attention_maps_infos/AttentionMaps-samples_Age_{DIMENSION}_{SUBDIMENSION}_{SUB_SUBDIMENSION}.csv",
                     usecols=columns_to_take,
                 )[columns_to_take].set_index("id")
 
@@ -91,4 +87,4 @@ if __name__ == "__main__":
 
                 list_information.append(information.reset_index())
 
-    pd.concat(list_information).reset_index(drop=True).to_feather("all_data/datasets/images/information.feather")
+    pd.concat(list_information).reset_index(drop=True).to_feather("all_data/datasets/time_series/information.feather")
