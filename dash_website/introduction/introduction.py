@@ -61,6 +61,13 @@ def get_layout():
                             dbc.Col(
                                 html.Img(
                                     src=load_src_image("introduction/logo_hms.png"),
+                                    style={"height": 200, "float": "right", "margin": "15px"},
+                                ),
+                                style={"width": 4},
+                            ),
+                            dbc.Col(
+                                html.Img(
+                                    src=load_src_image("introduction/logo_hms.png"),
                                     style={"height": 200, "float": "right", "margin": "90px"},
                                 ),
                                 style={"width": 2},
