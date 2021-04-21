@@ -21,26 +21,10 @@ def get_layout():
                         html.Div([html.Br(), html.Br()]),
                     ),
                     dbc.Row(
-                        [
-                            dbc.Col(
-                                html.Img(
-                                    src=load_src_image("introduction/logo_harvard.png"),
-                                    style={"height": 200, "margin": "15px"},
-                                ),
-                                style={"width": 4},
-                            ),
-                            dbc.Col(
-                                html.H1("Multi-Dimensionality of Aging", style={"padding-top": "100px"}),
-                                style={"width": 4, "text-align": "center"},
-                            ),
-                            dbc.Col(
-                                html.Img(
-                                    src=load_src_image("introduction/logo_hms.png"),
-                                    style={"height": 200, "float": "right", "margin": "15px"},
-                                ),
-                                style={"width": 4},
-                            ),
-                        ],
+                        dbc.Col(
+                            html.H1("Multi-Dimensionality of Aging", style={"padding-top": "100px"}),
+                            style={"width": 4, "text-align": "center"},
+                        ),
                         className="mb-4",
                     ),
                     dbc.Row(
@@ -64,7 +48,26 @@ def get_layout():
                     dbc.Row(
                         html.Div([html.Br(), html.Br()]),
                     ),
-                    dbc.Row(dbc.Col(id="core_div", children=TEXT, width=8), justify="center"),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                html.Img(
+                                    src=load_src_image("introduction/logo_harvard.png"),
+                                    style={"height": 200, "margin": "90px"},
+                                ),
+                                style={"width": 2},
+                            ),
+                            dbc.Col(id="core_div", children=TEXT, width=8),
+                            dbc.Col(
+                                html.Img(
+                                    src=load_src_image("introduction/logo_hms.png"),
+                                    style={"height": 200, "float": "right", "margin": "90px"},
+                                ),
+                                style={"width": 2},
+                            ),
+                        ],
+                        justify="center",
+                    ),
                 ],
                 style={"padding-bottom": 100},
             ),
@@ -120,7 +123,8 @@ def get_layout():
                                 style={"color": "white"},
                             ),
                             html.Sup("1*"),
-                        ]
+                        ],
+                        style={"font-size": "18px"},
                     ),
                     html.H5(
                         [
@@ -142,7 +146,8 @@ def get_layout():
                             "Co-second authors, ",
                             html.Sup("*"),
                             "Corresponding author",
-                        ]
+                        ],
+                        style={"font-size": "13px"},
                     ),
                 ],
                 style={
