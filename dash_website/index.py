@@ -5,7 +5,6 @@ from dash.dependencies import Input, Output
 
 from dash_website.app import APP
 from dash_website.pages import (
-    page1,
     page2,
     page3,
     page4,
@@ -47,7 +46,7 @@ def get_top_bar():
                     dbc.NavItem(dbc.NavLink("Introduction", href="/", active=True, id="introduction")),
                     dbc.DropdownMenu(
                         [
-                            dbc.DropdownMenuItem("Scalars", href="/pages/page1", id="page1-link"),
+                            dbc.DropdownMenuItem("Scalars", href="/datasets/scalars", id="datasets_scalars"),
                             dbc.DropdownMenuItem(
                                 "Time Series", href="/datasets/time_series", id="datasets_time_series"
                             ),
@@ -134,7 +133,9 @@ def get_top_bar():
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
 def display_page(pathname):
     if "datasets" in pathname:
-        if "time_series" in pathname:
+        if "scalars" in pathname:
+            from dash_website.datasets.scalars import get_layout
+        elif "time_series" in pathname:
             from dash_website.datasets.time_series import get_layout
         elif "images" in pathname:
             from dash_website.datasets.images import get_layout

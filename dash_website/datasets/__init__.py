@@ -1,3 +1,41 @@
+# For scalars
+TREE_SCALARS = {
+    "Brain": {
+        "MRI": ["GreyMatterVolumes", "SubcorticalVolumes", "dMRIWeightedMeans", "AllScalars"],
+        "Cognitive": [
+            "ReactionTime",
+            "MatrixPatternCompletion",
+            "TowerRearranging",
+            "SymbolDigitSubstitution",
+            "PairedAssociativeLearning",
+            "ProspectiveMemory",
+            "NumericMemory",
+            "FluidIntelligence",
+            "TrailMaking",
+            "PairsMatching",
+            "AllScalars",
+        ],
+        "All": ["Scalars"],
+    },
+    "Eyes": {
+        "Autorefraction": ["Scalars"],
+        "Acuity": ["Scalars"],
+        "IntraocularPressure": ["Scalars"],
+        "All": ["Scalars"],
+    },
+    "Hearing": {"HearingTest": ["Scalars"]},
+    "Lungs": {"Spirometry": ["Scalars"]},
+    "Arterial": {"BloodPressure": ["Scalars"], "Carotids": ["Scalars"], "PWA": ["Scalars"], "All": ["Scalars"]},
+    "Heart": {"All": ["Scalars"], "MRI": ["Size", "PWA", "AllScalars"], "ECG": ["Scalars"]},
+    "Musculoskeletal": {
+        "Scalars": ["Impedance", "Anthropometry", "HeelBoneDensitometry", "HandGripStrength", "AllScalars"]
+    },
+    "Biochemistry": {"Blood": ["Scalars"], "Urine": ["Scalars"], "All": ["Scalars"]},
+    "ImmuneSystem": {"BloodCount": ["Scalars"]},
+    "PhysicalActivity": {"FullWeek": ["Scalars"]},
+    "Demographics": {"All": ["Scalars"]},
+}
+
 # For time series
 TREE_TIME_SERIES = {
     "Arterial": {"PulseWaveAnalysis": ["TimeSeries"]},
@@ -27,7 +65,7 @@ INFORMATION_TIME_SERIES = {
     "PhysicalActivity": {
         "FullWeek": {
             "Acceleration": {
-                "nb_channel": 10080,
+                "nb_channel": 1,
                 "y_label": "miligravity",
                 "x_label": "Time (1 min / unit)",
             },
