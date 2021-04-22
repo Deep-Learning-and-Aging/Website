@@ -1,12 +1,9 @@
 from typing import Text
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
 import dash_html_components as html
 import dash
 from dash.dependencies import Input, Output
-
-import base64
 
 from dash_website.utils.aws_loader import load_src_image
 from dash_website.introduction.texts.introduction_text import TEXT
@@ -61,13 +58,6 @@ def get_layout():
                             dbc.Col(
                                 html.Img(
                                     src=load_src_image("introduction/logo_hms.png"),
-                                    style={"height": 200, "float": "right", "margin": "15px"},
-                                ),
-                                style={"width": 4},
-                            ),
-                            dbc.Col(
-                                html.Img(
-                                    src=load_src_image("introduction/logo_hms.png"),
                                     style={"height": 200, "float": "right", "margin": "90px"},
                                 ),
                                 style={"width": 2},
@@ -115,14 +105,14 @@ def get_layout():
                                 href="https://www.linkedin.com/in/mhamed-jabri/",
                                 style={"color": "white"},
                             ),
-                            html.Sup("1+"),
+                            html.Sup("1"),
                             ", ",
                             html.A(
                                 "Théo Vincent",
                                 href="https://www.linkedin.com/in/theo-vincent/",
                                 style={"color": "white"},
                             ),
-                            html.Sup("1+"),
+                            html.Sup("1"),
                             " and ",
                             html.A(
                                 "Chirag J. Patel",

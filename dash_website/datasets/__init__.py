@@ -5,6 +5,47 @@ TREE_TIME_SERIES = {
     "PhysicalActivity": {"FullWeek": ["Acceleration", "TimeSeriesFeatures"], "Walking": ["3D"]},
 }
 
+LEGEND_TIME_SERIES = {
+    "Arterial": {
+        "PulseWaveAnalysis": {
+            "TimeSeries": {
+                "nb_channel": 0,
+                "y_label": "blood pressure [normalized]",
+                "x_label": "Time (10 min / unit)",
+            }
+        }
+    },
+    "Heart": {
+        "ECG": {
+            "TimeSeries": {
+                "nb_channel": 0,
+                "y_label": "5 uV / Lsb",
+                "x_label": "Time (2 min / unit)",
+            }
+        }
+    },
+    "PhysicalActivity": {
+        "FullWeek": {
+            "Acceleration": {
+                "nb_channel": 0,
+                "y_label": "miligravity",
+                "x_label": "Time (1 min / unit)",
+            },
+            "TimeSeriesFeatures": {
+                "nb_channel": 0,
+                "y_label": "Acceleration",
+                "x_label": "Time (5 min / unit)",
+            },
+        },
+        "Walking": {
+            "3D": {
+                "nb_channel": 0,
+                "y_label": "5 uV / Lsb",
+                "x_label": "Time (2 min / unit)",
+            }
+        },
+    },
+}
 
 # For images
 TREE_IMAGES = {
