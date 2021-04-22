@@ -56,7 +56,7 @@ if __name__ == "__main__":
         information["sex"] = information_raw["sex"].str.lower()
         information["age_group"] = information_raw["age_category"]
         information["sample"] = information_raw["sample"]
-        information["chronological_age"] = information_raw["Age"].round(0).astype(int)
+        information["chronological_age"] = information_raw["Age"].round(1)
         information["biological_age"] = information_raw["Biological_Age"]
 
         for id_participant in information_raw.index:
@@ -70,4 +70,4 @@ if __name__ == "__main__":
 
         list_information.append(information.reset_index())
 
-    pd.concat(list_information).reset_index(drop=True).to_feather("data/datasets/videos/information.feather")
+    pd.concat(list_information).reset_index(drop=True).to_feather("all_data/datasets/videos/information.feather")

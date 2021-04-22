@@ -10,7 +10,7 @@ import pandas as pd
 from dash_website.utils.aws_loader import load_feather, load_src_image, does_key_exists
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
 from dash_website.datasets import (
-    TREE_DIMENSIONS,
+    TREE_IMAGES,
     SIDES_DIMENSION,
     SIDES_SUBDIMENSION_EXCEPTION,
     SEX_LEGEND,
@@ -57,22 +57,22 @@ def get_data():
 
 
 def get_controls_images():
-    first_dimension = list(TREE_DIMENSIONS.keys())[0]
-    first_subdimension = list(TREE_DIMENSIONS[first_dimension].keys())[0]
+    first_dimension = list(TREE_IMAGES.keys())[0]
+    first_subdimension = list(TREE_IMAGES[first_dimension].keys())[0]
 
     return [
         get_item_radio_items(
-            "dimension_images", list(TREE_DIMENSIONS.keys()), "Select main aging dimesion :", from_dict=False
+            "dimension_images", list(TREE_IMAGES.keys()), "Select main aging dimesion :", from_dict=False
         ),
         get_item_radio_items(
             "subdimension_images",
-            list(TREE_DIMENSIONS[first_dimension].keys()),
+            list(TREE_IMAGES[first_dimension].keys()),
             "Select subdimension :",
             from_dict=False,
         ),
         get_drop_down(
             "sub_subdimension_images",
-            TREE_DIMENSIONS[first_dimension][first_subdimension],
+            TREE_IMAGES[first_dimension][first_subdimension],
             "Select sub-subdimension :",
             from_dict=False,
         ),
@@ -92,19 +92,19 @@ def _change_subdimensions(dimension, subdimension):
     context = dash.callback_context.triggered
 
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_images":
-        first_subdimension = list(TREE_DIMENSIONS[dimension].keys())[0]
+        first_subdimension = list(TREE_IMAGES[dimension].keys())[0]
         return (
-            get_options(list(TREE_DIMENSIONS[dimension].keys())),
-            list(TREE_DIMENSIONS[dimension].keys())[0],
-            get_options(TREE_DIMENSIONS[dimension][first_subdimension]),
-            TREE_DIMENSIONS[dimension][first_subdimension][0],
+            get_options(list(TREE_IMAGES[dimension].keys())),
+            list(TREE_IMAGES[dimension].keys())[0],
+            get_options(TREE_IMAGES[dimension][first_subdimension]),
+            TREE_IMAGES[dimension][first_subdimension][0],
         )
     else:
         return (
-            get_options(list(TREE_DIMENSIONS[dimension].keys())),
+            get_options(list(TREE_IMAGES[dimension].keys())),
             subdimension,
-            get_options(TREE_DIMENSIONS[dimension][subdimension]),
-            TREE_DIMENSIONS[dimension][subdimension][0],
+            get_options(TREE_IMAGES[dimension][subdimension]),
+            TREE_IMAGES[dimension][subdimension][0],
         )
 
 
