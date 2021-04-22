@@ -3,11 +3,10 @@ from botocore.client import Config
 
 import os
 from io import BytesIO
-import re
 import base64
 import pandas as pd
+import numpy as np
 import yaml
-from matplotlib.image import imread
 
 
 if os.environ.get("AWS_ACCESS_KEY_ID") is None:
@@ -33,26 +32,22 @@ RESOURCE = resource(
 
 def load_csv(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_csv(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_csv(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_excel(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_excel(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_excel(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_parquet(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_parquet(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_parquet(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_feather(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_feather(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_feather(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_src_image(key_in_bucket):
@@ -60,6 +55,11 @@ def load_src_image(key_in_bucket):
     image = BytesIO(obj["Body"].read())
     encoded_image = base64.b64encode(image.read())
     return f"data:image/png;base64,{encoded_image.decode()}"
+
+
+def load_npy(key_in_bucket):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
+    return np.load(BytesIO(obj["Body"].read()))
 
 
 def list_dir(path_dir):

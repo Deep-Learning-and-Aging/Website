@@ -25,6 +25,7 @@ setup(
         "openpyxl",
         "tqdm",
         "pyarrow",
+        "nbformat",
     ],
     entry_points={
         "console_scripts": [
