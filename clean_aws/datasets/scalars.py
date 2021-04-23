@@ -71,7 +71,7 @@ if __name__ == "__main__":
         for feature in raw_scalars.columns[raw_scalars.columns.str.contains(".0")]:
             rename_columns[feature] = feature.replace(".0", "")
 
-        scalars = pd.DataFrame(None, index=raw_scalars.index, columns=list(rename_columns.keys()) + ["ethnicity"])
+        scalars = pd.DataFrame(None, index=raw_scalars.index, columns=list(rename_columns.keys()))
 
         scalars[list(rename_columns.keys())] = raw_scalars[list(rename_columns.keys())]
 
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
             scalars.columns = change_second_pulse_rate
 
-            scalars.reset_index().reset_index().to_feather(
+            scalars.reset_index().to_feather(
                 f"all_data/datasets/scalars/{new_dimension}_{subdimension}_{sub_subdimension}.feather"
             )
         else:

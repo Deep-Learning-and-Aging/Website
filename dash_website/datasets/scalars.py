@@ -1,3 +1,4 @@
+from re import S
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -9,30 +10,32 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website.datasets import TREE_SCALARS
+from dash_website.datasets import TREE_SCALARS, ETHNICITIES, SEX_VALUE
 
 
 def get_layout():
     return dbc.Container(
         [
-            # dcc.Loading([dcc.Store(id="memory_scalars", data=get_data())]),
+            dcc.Loading(dcc.Store(id="memory_scalars")),
             html.H1("Datasets - Scalars"),
             html.Br(),
             html.Br(),
             dbc.Row(dbc.Col(dbc.Card(get_controls_scalars())), justify="center"),
+            dbc.Row(dbc.Col(dbc.Card(get_subcontrols_scalars())), justify="center"),
             dbc.Row(html.Br()),
             dbc.Row(
                 dcc.Loading(
                     [
-                        html.H3(id="title_distribution_scalars"),
+                        html.H4(id="title_distribution_scalars"),
                         dcc.Graph(id="scalars_distribution_scalars"),
                     ]
-                )
+                ),
+                justify="center",
             ),
             dbc.Row(
                 dcc.Loading(
                     [
-                        html.H3(id="title_values_scalars"),
+                        html.H4(id="title_values_scalars"),
                         dcc.Graph(id="scalars_values_scalars"),
                     ]
                 )
@@ -40,7 +43,7 @@ def get_layout():
             dbc.Row(
                 dcc.Loading(
                     [
-                        html.H3(id="title_volcano_scalars"),
+                        html.H4(id="title_volcano_scalars"),
                         dcc.Graph(id="scalars_volcano_scalars"),
                     ]
                 )
@@ -50,8 +53,16 @@ def get_layout():
     )
 
 
-# def get_data():
-#     return load_feather("datasets/scalars/information.feather").to_dict()
+@APP.callback(
+    Output("memory_scalars", "data"),
+    [
+        Input("dimension_scalars", "value"),
+        Input("subdimension_scalars", "value"),
+        Input("sub_subdimension_scalars", "value"),
+    ],
+)
+def _modify_store_scalars(dimension, subdimension, sub_subdimension):
+    return load_feather(f"datasets/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather").to_dict()
 
 
 def get_controls_scalars():
@@ -104,3 +115,52 @@ def _change_subdimensions(dimension, subdimension):
             get_options(TREE_SCALARS[dimension][subdimension]),
             TREE_SCALARS[dimension][subdimension][0],
         )
+
+
+def get_subcontrols_scalars():
+    return [
+        get_drop_down(
+            "feature_scalars",
+            [""],
+            "Select feature :",
+            from_dict=False,
+        ),
+    ]
+
+
+@APP.callback(
+    [Output("feature_scalars", "options"), Output("feature_scalars", "value")], Input("memory_scalars", "data")
+)
+def _change_feature(scalars_data):
+    features = pd.DataFrame(scalars_data).columns.drop(["id", "sex", "chronological_age"] + ETHNICITIES)
+
+    return get_options(features), features[0]
+
+
+@APP.callback(
+    [Output("scalars_distribution_scalars", "figure"), Output("title_distribution_scalars", "children")],
+    [
+        Input("feature_scalars", "value"),
+        Input("memory_scalars", "data"),
+    ],
+)
+def _change_figure(feature, data_scalars):
+    import plotly.graph_objs as go
+
+    scalars = pd.DataFrame(data_scalars).set_index(["sex", "id"])
+
+    fig = go.Figure()
+
+    fig.add_histogram(
+        x=scalars.loc[SEX_VALUE["female"], feature], name="Females", histnorm="percent", marker=dict(color="pink")
+    )
+
+    fig.add_histogram(
+        x=scalars.loc[SEX_VALUE["male"], feature], name="Males", histnorm="percent", marker=dict(color="blue")
+    )
+
+    fig.update_layout(
+        width=2000, height=500, xaxis_title_text="Value", yaxis_title_text="Count", bargap=0.2, bargroupgap=0.1
+    )
+
+    return fig, feature
