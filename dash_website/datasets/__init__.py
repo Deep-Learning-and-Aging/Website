@@ -1,8 +1,20 @@
 # For scalars
+from dash_website.pages.tools import ETHNICITY_COLS
+
+
 TREE_SCALARS = {
+    "Arterial": {
+        "All": ["Scalars"],
+        "BloodPressure": ["Scalars"],
+        "Carotids": ["Scalars"],
+        "PWA": ["Scalars"],
+    },
+    "Biochemistry": {"All": ["Scalars"], "Blood": ["Scalars"], "Urine": ["Scalars"]},
+    "BloodCells": {"BloodCount": ["Scalars"]},
     "Brain": {
-        "MRI": ["GreyMatterVolumes", "SubcorticalVolumes", "dMRIWeightedMeans", "AllScalars"],
+        "All": ["Scalars"],
         "Cognitive": [
+            "AllScalars",
             "ReactionTime",
             "MatrixPatternCompletion",
             "TowerRearranging",
@@ -13,28 +25,53 @@ TREE_SCALARS = {
             "FluidIntelligence",
             "TrailMaking",
             "PairsMatching",
-            "AllScalars",
         ],
-        "All": ["Scalars"],
+        "MRI": ["AllScalars", "dMRIWeightedMeans", "GreyMatterVolumes", "SubcorticalVolumes"],
     },
+    "Demographics": {"All": ["Scalars"]},
     "Eyes": {
-        "Autorefraction": ["Scalars"],
         "Acuity": ["Scalars"],
-        "IntraocularPressure": ["Scalars"],
         "All": ["Scalars"],
+        "Autorefraction": ["Scalars"],
+        "IntraocularPressure": ["Scalars"],
     },
     "Hearing": {"HearingTest": ["Scalars"]},
+    "Heart": {"All": ["Scalars"], "ECG": ["Scalars"], "MRI": ["Size", "PWA", "AllScalars"]},
     "Lungs": {"Spirometry": ["Scalars"]},
-    "Arterial": {"BloodPressure": ["Scalars"], "Carotids": ["Scalars"], "PWA": ["Scalars"], "All": ["Scalars"]},
-    "Heart": {"All": ["Scalars"], "MRI": ["Size", "PWA", "AllScalars"], "ECG": ["Scalars"]},
     "Musculoskeletal": {
-        "Scalars": ["Impedance", "Anthropometry", "HeelBoneDensitometry", "HandGripStrength", "AllScalars"]
+        "Scalars": ["AllScalars", "Anthropometry", "Impedance", "HeelBoneDensitometry", "HandGripStrength"]
     },
-    "Biochemistry": {"Blood": ["Scalars"], "Urine": ["Scalars"], "All": ["Scalars"]},
-    "ImmuneSystem": {"BloodCount": ["Scalars"]},
     "PhysicalActivity": {"FullWeek": ["Scalars"]},
-    "Demographics": {"All": ["Scalars"]},
 }
+
+ETHNICITIES = [
+    "Do_not_know",
+    "Prefer_not_to_answer",
+    "NA",
+    "White",
+    "British",
+    "Irish",
+    "White_Other",
+    "Mixed",
+    "White_and_Black_Caribbean",
+    "White_and_Black_African",
+    "White_and_Asian",
+    "Mixed_Other",
+    "Asian",
+    "Indian",
+    "Pakistani",
+    "Bangladeshi",
+    "Asian_Other",
+    "Black",
+    "Caribbean",
+    "African",
+    "Black_Other",
+    "Chinese",
+    "Other_ethnicity",
+    "Other",
+]
+
+SEX_VALUE = {"female": 0, "male": 1}
 
 # For time series
 TREE_TIME_SERIES = {
