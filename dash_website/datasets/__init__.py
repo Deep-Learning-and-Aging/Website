@@ -72,6 +72,7 @@ ETHNICITIES = [
 ]
 
 SEX_VALUE = {"female": 0, "male": 1}
+SEX_COLOR = {"female": "Pink", "male": "Blue"}
 
 # For time series
 TREE_TIME_SERIES = {
