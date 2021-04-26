@@ -140,3 +140,20 @@ def get_drop_down(id, items, legend, from_dict=True):
             ]
         )
     return control
+
+
+def get_range_slider(id, min, max, legend):
+    return dbc.FormGroup(
+        [
+            html.P(legend),
+            dcc.RangeSlider(
+                id=id,
+                min=min,
+                max=max,
+                value=[min, max],
+                marks=dict(zip(range(min, max + 1, 5), [str(elem) for elem in range(min, max + 1, 5)])),
+                step=None,
+            ),
+            html.Br(),
+        ]
+    )
