@@ -39,6 +39,7 @@ def get_layout():
                 dcc.Loading(
                     [
                         html.H4(id="title_values_scalars"),
+                        html.H6(id="subtitle_values_scalars"),
                         dcc.Graph(id="figure_values_scalars"),
                     ]
                 ),
@@ -252,7 +253,11 @@ def _change_distribution(feature, age_range, data_scalars):
 
 
 @APP.callback(
-    [Output("figure_values_scalars", "figure"), Output("title_values_scalars", "children")],
+    [
+        Output("figure_values_scalars", "figure"),
+        Output("title_values_scalars", "children"),
+        Output("subtitle_values_scalars", "children"),
+    ],
     [
         Input("feature_scalars", "value"),
         Input("age_range_scalars", "value"),
@@ -306,7 +311,11 @@ def _change_scatter(feature, age_range, data_linear_regresion, data_scalars):
 
     fig.update_layout(width=2000, height=500, xaxis_title_text="Chronological Age")
 
-    return fig, "Scatter plot of " + feature
+    return (
+        fig,
+        f"Scatter plot of {feature}",
+        f"p-value : {linear_regression.loc[('all', 'p_value'), feature].round(3)}, correlation : {linear_regression.loc[('all', 'correlation'), feature].round(3)} and regression coefficient : {linear_regression.loc[('all', 'slope'), feature].round(3)}",
+    )
 
 
 @APP.callback(
@@ -324,7 +333,7 @@ def _change_volcano(data_linear_regresion, feature):
                         <br>p-value : %{customdata[1]:.3f}\
                         <br>Correlation : %{x:.3f}\
                         <br>Sample Size : %{customdata[2]}\
-                        <br>Slope : %{customdata[3]:.3f}"
+                        <br>Regression coefficient : %{customdata[3]:.3f}"
     customdata = np.stack(
         [
             linear_regression.columns,
@@ -337,7 +346,7 @@ def _change_volcano(data_linear_regresion, feature):
 
     fig.add_scatter(
         x=linear_regression.loc[("all", "correlation")],
-        y=-np.log10((linear_regression.loc[("all", "p_value")] + 1e-16).to_list()),
+        y=-np.log10((linear_regression.loc[("all", "p_value")] + 1e-323).to_list()),
         mode="markers",
         name="all",
         hovertemplate=hovertemplate,
@@ -350,7 +359,7 @@ def _change_volcano(data_linear_regresion, feature):
                             <br>p-value : %{customdata[1]:.3f}\
                             <br>Correlation : %{x:.3f}\
                             <br>Sample Size : %{customdata[2]}\
-                            <br>Slope : %{customdata[3]:.3f}"
+                            <br>Regression coefficient : %{customdata[3]:.3f}"
         customdata_sex = np.stack(
             [
                 linear_regression.columns,
@@ -363,7 +372,7 @@ def _change_volcano(data_linear_regresion, feature):
 
         fig.add_scatter(
             x=linear_regression.loc[(sex, "correlation")],
-            y=-np.log10((linear_regression.loc[(sex, "p_value")] + 1e-16).to_list()),
+            y=-np.log10((linear_regression.loc[(sex, "p_value")] + 1e-323).to_list()),
             mode="markers",
             name=sex.capitalize(),
             hovertemplate=hovertemplate_sex,
@@ -397,7 +406,4 @@ def _change_volcano(data_linear_regresion, feature):
 
     fig.update_layout(width=2000, height=500, yaxis_title_text="-log(p_value)", xaxis_title_text="Pearson correlation")
 
-    return (
-        fig,
-        f"Volcano plot, for {feature}, p-value : {linear_regression.loc[('all', 'p_value'), feature].round(3)}, correlation : {linear_regression.loc[('all', 'correlation'), feature].round(3)} and slope : {linear_regression.loc[('all', 'correlation'), feature].round(3)}",
-    )
+    return fig, "Volcano plot for all features"
