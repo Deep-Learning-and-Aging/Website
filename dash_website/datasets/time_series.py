@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import dash
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
@@ -15,7 +16,7 @@ from dash_website.datasets import (
     SEX_LEGEND,
     AGE_GROUP_LEGEND,
     SAMPLE_LEGEND,
-    SEX_TO_PRONOUN,
+    AGE_RANGES,
 )
 
 
@@ -195,16 +196,18 @@ def _display_right_time_series(
 def display_time_series(dimension, subdimension, sub_subdimension, sex, age_group, sample, channel, data_time_series):
     import plotly.graph_objs as go
 
-    chronological_age, ethnicity = (
+    chronological_age = (
         pd.DataFrame(data_time_series)
         .set_index(["dimension", "subdimension", "sub_subdimension", "sex", "age_group", "aging_rate", "sample"])
         .loc[
             (dimension, subdimension, sub_subdimension, sex, age_group, "normal", int(sample)),
-            ["chronological_age", "ethnicity"],
+            ["chronological_age"],
         ]
         .tolist()
     )
-    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    index_in_age_ranges = np.searchsorted(AGE_RANGES, chronological_age)
+
+    title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
     path_to_time_series = (
         f"datasets/time_series/{dimension}/{subdimension}/{sub_subdimension}/{sex}/{age_group}/sample_{sample}.npy"

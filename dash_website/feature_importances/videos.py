@@ -115,7 +115,7 @@ def display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
         .loc[(int(chamber_type), sex, age_group, aging_rate), ["chronological_age", "biological_age"]]
         .tolist()
     )
-    title = f"The difference between the chronological age and the biological age of the participant is {np.round_(chronological_age - biological_age, 1)}."
+    title = f"The participant is an {aging_rate} ager: {np.round_(biological_age - chronological_age, 1)} years"
 
     gif_display = html.Div(
         gif.GifPlayer(
