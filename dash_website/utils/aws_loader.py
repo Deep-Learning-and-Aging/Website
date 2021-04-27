@@ -1,11 +1,13 @@
-from io import BytesIO
-import re
 from boto3 import client, resource
 from botocore.client import Config
 
 import os
+from io import BytesIO
+import base64
 import pandas as pd
+import numpy as np
 import yaml
+
 
 if os.environ.get("AWS_ACCESS_KEY_ID") is None:
     with open("app.yaml", "r") as app_yaml:
@@ -30,31 +32,34 @@ RESOURCE = resource(
 
 def load_csv(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_csv(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_csv(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_excel(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_excel(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_excel(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_parquet(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_parquet(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_parquet(BytesIO(obj["Body"].read()), **kwargs)
 
 
 def load_feather(key_in_bucket, **kwargs):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    df = pd.read_feather(BytesIO(obj["Body"].read()), **kwargs)
-    return df
+    return pd.read_feather(BytesIO(obj["Body"].read()), **kwargs)
 
 
-def load_txt(key_in_bucket):
+def load_src_image(key_in_bucket):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
-    return BytesIO(obj["Body"].read()).read().decode("utf-8")
+    image = BytesIO(obj["Body"].read())
+    encoded_image = base64.b64encode(image.read())
+    return f"data:image/png;base64,{encoded_image.decode()}"
+
+
+def load_npy(key_in_bucket):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
+    return np.load(BytesIO(obj["Body"].read()))
 
 
 def list_dir(path_dir):
@@ -78,3 +83,11 @@ def does_key_exists(key):
         return True
     else:
         return False
+
+
+def copy_file(source_key, target_key):
+    RESOURCE.Object(AWS_BUCKET_NAME, target_key).copy({"Bucket": AWS_BUCKET_NAME, "Key": source_key})
+
+
+def upload_file(source_file_path, target_key):
+    RESOURCE.Object(AWS_BUCKET_NAME, target_key).upload_file(Filename=source_file_path)

@@ -15,7 +15,7 @@ from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND,
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_video", data=get_data())]),
+            dcc.Loading([dcc.Store(id="memory_videos", data=get_data())]),
             html.H1("Datasets - Videos"),
             html.Br(),
             html.Br(),
@@ -85,26 +85,11 @@ def get_controls_right_video():
         Input("sex_left_video", "value"),
         Input("age_left_video", "value"),
         Input("sample_left_video", "value"),
-        Input("memory_video", "data"),
+        Input("memory_videos", "data"),
     ],
 )
-def _display_left_gif(chamber_type, sex, age_group, sample, data_video):
-    chronological_age, ethnicity = (
-        pd.DataFrame(data_video)
-        .set_index(["chamber", "sex", "age_group", "sample"])
-        .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age", "ethnicity"]]
-        .tolist()
-    )
-    title = f"Participants of {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
-
-    gif_display = html.Div(
-        gif.GifPlayer(
-            gif=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.gif",
-            still=f"../data/datasets/videos/{chamber_type}_chambers/{sex}/{age_group}/sample_{sample}.png",
-        ),
-        style={"padding-left": 400},
-    )
-    return gif_display, title
+def _display_left_gif(chamber_type, sex, age_group, sample, data_videos):
+    return display_gif(chamber_type, sex, age_group, sample, data_videos)
 
 
 @APP.callback(
@@ -114,17 +99,21 @@ def _display_left_gif(chamber_type, sex, age_group, sample, data_video):
         Input("sex_right_video", "value"),
         Input("age_right_video", "value"),
         Input("sample_right_video", "value"),
-        Input("memory_video", "data"),
+        Input("memory_videos", "data"),
     ],
 )
-def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
+def _display_right_gif(chamber_type, sex, age_group, sample, data_videos):
+    return display_gif(chamber_type, sex, age_group, sample, data_videos)
+
+
+def display_gif(chamber_type, sex, age_group, sample, data_videos):
     chronological_age, ethnicity = (
-        pd.DataFrame(data_video)
+        pd.DataFrame(data_videos)
         .set_index(["chamber", "sex", "age_group", "sample"])
         .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age", "ethnicity"]]
         .tolist()
     )
-    title = f"Participants of {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
 
     gif_display = html.Div(
         gif.GifPlayer(
@@ -133,5 +122,4 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_video):
         ),
         style={"padding-left": 400},
     )
-
     return gif_display, title

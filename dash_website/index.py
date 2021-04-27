@@ -5,21 +5,15 @@ from dash.dependencies import Input, Output
 
 from dash_website.app import APP
 from dash_website.pages import (
-    page1,
     page2,
     page3,
     page4,
     page9,
     page10,
     page11,
-    page12,
     page13,
-    page14,
-    page15,
     page17,
 )
-
-num_pages = 18
 
 
 def get_server():
@@ -52,9 +46,11 @@ def get_top_bar():
                     dbc.NavItem(dbc.NavLink("Introduction", href="/", active=True, id="introduction")),
                     dbc.DropdownMenu(
                         [
-                            dbc.DropdownMenuItem("Scalars", href="/pages/page1", id="page1-link"),
-                            dbc.DropdownMenuItem("Time Series", href="/pages/page15", id="page15-link"),
-                            dbc.DropdownMenuItem("Images", href="/pages/page14", id="page14-link"),
+                            dbc.DropdownMenuItem("Scalars", href="/datasets/scalars", id="datasets_scalars"),
+                            dbc.DropdownMenuItem(
+                                "Time Series", href="/datasets/time_series", id="datasets_time_series"
+                            ),
+                            dbc.DropdownMenuItem("Images", href="/datasets/images", id="datasets_images"),
                             dbc.DropdownMenuItem("Videos", href="/datasets/videos", id="datasets_videos"),
                         ],
                         label="Datasets",
@@ -66,9 +62,11 @@ def get_top_bar():
                             dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
                             dbc.DropdownMenuItem("Time Series", href="/pages/page13", id="page13-link"),
                             dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
-                            dbc.DropdownMenuItem("Videos", href="/pages/page12", id="page12-link"),
+                            dbc.DropdownMenuItem(
+                                "Videos", href="/feature_importances/videos", id="feature_importances_videos"
+                            ),
                         ],
-                        label="Features importances",
+                        label="Feature importances",
                         nav=True,
                     ),
                     dbc.NavItem(
@@ -135,8 +133,19 @@ def get_top_bar():
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
 def display_page(pathname):
     if "datasets" in pathname:
-        if "videos" in pathname:
+        if "scalars" in pathname:
+            from dash_website.datasets.scalars import get_layout
+        elif "time_series" in pathname:
+            from dash_website.datasets.time_series import get_layout
+        elif "images" in pathname:
+            from dash_website.datasets.images import get_layout
+        elif "videos" in pathname:
             from dash_website.datasets.videos import get_layout
+
+        return get_layout()
+    elif "feature_importances" in pathname:
+        if "videos" in pathname:
+            from dash_website.feature_importances.videos import get_layout
 
         return get_layout()
     elif "xwas" in pathname:
