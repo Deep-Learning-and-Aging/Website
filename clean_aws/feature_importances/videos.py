@@ -1,3 +1,4 @@
+from os import terminal_size
 import pandas as pd
 from tqdm import tqdm
 
@@ -42,14 +43,16 @@ if __name__ == "__main__":
             old_key_gif = f"page12_AttentionMapsVideos/gif/{information_for_storage.loc[id_to_store, 'name_gif']}"
             new_key_gif = f"feature_importances/videos/{chamber}_chambers/{information_for_storage.loc[id_to_store, 'Sex']}/{information_for_storage.loc[id_to_store, 'age_category']}/{information_for_storage.loc[id_to_store, 'aging_rate']}.gif"
 
-            copy_file(old_key_gif, new_key_gif)
+            # copy_file(old_key_gif, new_key_gif)
 
             old_key_jpg = f"page12_AttentionMapsVideos/img/{information_for_storage.loc[id_to_store, 'name_picture']}"
             new_key_jpg = f"feature_importances/videos/{chamber}_chambers/{information_for_storage.loc[id_to_store, 'Sex']}/{information_for_storage.loc[id_to_store, 'age_category']}/{information_for_storage.loc[id_to_store, 'aging_rate']}.jpg"
 
-            copy_file(old_key_jpg, new_key_jpg)
+            # copy_file(old_key_jpg, new_key_jpg)
 
-    pd.concat(list_information).reset_index().to_feather("all_data/feature_importances/videos/information.feather")
+    pd.concat(list_information).reset_index(drop=True).to_feather(
+        "all_data/feature_importances/videos/information.feather"
+    )
     upload_file(
         "all_data/feature_importances/videos/information.feather", "feature_importances/videos/information.feather"
     )

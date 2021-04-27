@@ -6,17 +6,18 @@ from dash.dependencies import Input, Output
 import dash
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_src_image, does_key_exists
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
 from dash_website.datasets import (
+    AGE_RANGES,
     TREE_IMAGES,
     SIDES_DIMENSION,
     SIDES_SUBDIMENSION_EXCEPTION,
     SEX_LEGEND,
     AGE_GROUP_LEGEND,
     SAMPLE_LEGEND,
-    SEX_TO_PRONOUN,
 )
 
 
@@ -157,16 +158,18 @@ def _display_right_image(dimension, subdimension, sub_subdimension, sex, age_gro
 
 
 def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images):
-    chronological_age, ethnicity = (
+    chronological_age = (
         pd.DataFrame(data_images)
         .set_index(["dimension", "subdimension", "sub_subdimension", "sex", "age_group", "aging_rate", "sample"])
         .loc[
             (dimension, subdimension, sub_subdimension, sex, age_group, "normal", int(sample)),
-            ["chronological_age", "ethnicity"],
+            ["chronological_age"],
         ]
         .tolist()
     )
-    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    index_in_age_ranges = np.searchsorted(AGE_RANGES, chronological_age)
+
+    title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
     if dimension in SIDES_DIMENSION and subdimension not in SIDES_SUBDIMENSION_EXCEPTION:
         left_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_group}/normal/left_sample_{sample}.jpg"

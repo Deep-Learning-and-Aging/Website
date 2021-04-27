@@ -6,10 +6,11 @@ import dash_gif_component as gif
 from dash.dependencies import Input, Output
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_options_from_dict, get_item_radio_items, get_drop_down
-from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND, SEX_TO_PRONOUN
+from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND, AGE_RANGES
 
 
 def get_layout():
@@ -107,13 +108,15 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_videos):
 
 
 def display_gif(chamber_type, sex, age_group, sample, data_videos):
-    chronological_age, ethnicity = (
+    chronological_age = (
         pd.DataFrame(data_videos)
         .set_index(["chamber", "sex", "age_group", "sample"])
-        .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age", "ethnicity"]]
+        .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age"]]
         .tolist()
     )
-    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    index_in_age_ranges = np.searchsorted(AGE_RANGES, chronological_age)
+
+    title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
     gif_display = html.Div(
         gif.GifPlayer(

@@ -1,3 +1,8 @@
+import numpy as np
+
+# Shared
+AGE_RANGES = np.arange(0, 100, 5)
+
 # For scalars
 from dash_website.pages.tools import ETHNICITY_COLS
 
