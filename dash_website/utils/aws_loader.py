@@ -83,3 +83,11 @@ def does_key_exists(key):
         return True
     else:
         return False
+
+
+def copy_file(source_key, target_key):
+    RESOURCE.Object(AWS_BUCKET_NAME, target_key).copy({"Bucket": AWS_BUCKET_NAME, "Key": source_key})
+
+
+def upload_file(source_file_path, target_key):
+    RESOURCE.Object(AWS_BUCKET_NAME, target_key).upload_file(Filename=source_file_path)
