@@ -8,7 +8,6 @@ from dash_website.pages import (
     page2,
     page3,
     page4,
-    page9,
     page10,
     page11,
     page13,
@@ -61,7 +60,9 @@ def get_top_bar():
                         [
                             dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
                             dbc.DropdownMenuItem("Time Series", href="/pages/page13", id="page13-link"),
-                            dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
+                            dbc.DropdownMenuItem(
+                                "Images", href="/feature_importances/images", id="feature_importances_images"
+                            ),
                             dbc.DropdownMenuItem(
                                 "Videos", href="/feature_importances/videos", id="feature_importances_videos"
                             ),
@@ -144,7 +145,9 @@ def display_page(pathname):
 
         return get_layout()
     elif "feature_importances" in pathname:
-        if "videos" in pathname:
+        if "images" in pathname:
+            from dash_website.feature_importances.images import get_layout
+        elif "videos" in pathname:
             from dash_website.feature_importances.videos import get_layout
 
         return get_layout()

@@ -157,3 +157,13 @@ def get_range_slider(id, min, max, legend):
             html.Br(),
         ]
     )
+
+
+def get_check_list(id, items, legend):
+    return dbc.FormGroup(
+        [
+            html.P(legend),
+            dcc.Checklist(id=id, options=get_options(items), value=items, labelStyle={"display": "inline-block"}),
+            html.Br(),
+        ]
+    )
