@@ -6,6 +6,8 @@ from io import BytesIO
 import base64
 import pandas as pd
 import numpy as np
+from matplotlib.image import imread
+
 import yaml
 
 
@@ -60,6 +62,11 @@ def load_src_image(key_in_bucket):
 def load_npy(key_in_bucket):
     obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
     return np.load(BytesIO(obj["Body"].read()))
+
+
+def load_jpg(key_in_bucket):
+    obj = CLIENT.get_object(Bucket=AWS_BUCKET_NAME, Key=key_in_bucket)
+    return imread(BytesIO(obj["Body"].read()), format="jpg")
 
 
 def list_dir(path_dir):
