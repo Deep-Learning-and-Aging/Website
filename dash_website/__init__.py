@@ -188,3 +188,5 @@ BACKGROUND_COLORS_SECTIONS = {
     "genetics": "rgba(80, 80, 80, 0.3)",
     "xwas": "rgba(0,130,200,0.3)",
 }
+
+CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
