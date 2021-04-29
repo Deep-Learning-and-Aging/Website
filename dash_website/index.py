@@ -1,3 +1,4 @@
+from os import path
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -10,7 +11,6 @@ from dash_website.pages import (
     page4,
     page10,
     page11,
-    page13,
     page17,
 )
 
@@ -59,7 +59,11 @@ def get_top_bar():
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
-                            dbc.DropdownMenuItem("Time Series", href="/pages/page13", id="page13-link"),
+                            dbc.DropdownMenuItem(
+                                "Time Series",
+                                href="/feature_importances/time_series",
+                                id="feature_importances_time_series",
+                            ),
                             dbc.DropdownMenuItem(
                                 "Images", href="/feature_importances/images", id="feature_importances_images"
                             ),
@@ -145,7 +149,9 @@ def display_page(pathname):
 
         return get_layout()
     elif "feature_importances" in pathname:
-        if "images" in pathname:
+        if "time_series" in pathname:
+            from dash_website.feature_importances.time_series import get_layout
+        elif "images" in pathname:
             from dash_website.feature_importances.images import get_layout
         elif "videos" in pathname:
             from dash_website.feature_importances.videos import get_layout

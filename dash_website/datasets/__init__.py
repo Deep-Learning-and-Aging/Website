@@ -99,7 +99,7 @@ INFORMATION_TIME_SERIES = {
     "Heart": {
         "ECG": {
             "TimeSeries": {
-                "nb_channel": 12,
+                "nb_channel": 15,
                 "y_label": "5 uV / Lsb",
                 "x_label": "Time (2 min / unit)",
             }

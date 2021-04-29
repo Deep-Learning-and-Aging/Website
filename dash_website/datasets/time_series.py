@@ -209,18 +209,11 @@ def display_time_series(dimension, subdimension, sub_subdimension, sex, age_grou
 
     title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
-    path_to_time_series = (
-        f"datasets/time_series/{dimension}/{subdimension}/{sub_subdimension}/{sex}/{age_group}/sample_{sample}.npy"
-    )
+    path_to_time_series = f"datasets/time_series/{dimension}/{subdimension}/{sub_subdimension}/{sex}/{age_group}/normal/sample_{sample}.npy"
 
-    time_series = load_npy(path_to_time_series)
+    time_series = load_npy(path_to_time_series)[int(channel), 0]
 
-    if time_series.ndim > 1:
-        channel_time_series = time_series[int(channel)]
-    else:
-        channel_time_series = time_series
-
-    scatter = go.Scatter(y=channel_time_series, mode="markers", marker={"size": 5})
+    scatter = go.Scatter(y=time_series, mode="markers", marker={"size": 5})
 
     fig = go.Figure(scatter)
 
