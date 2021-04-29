@@ -7,7 +7,6 @@ from dash.dependencies import Input, Output
 from dash_website.app import APP
 from dash_website.pages import (
     page2,
-    page3,
     page4,
     page10,
     page11,
@@ -58,7 +57,9 @@ def get_top_bar():
                     dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
                     dbc.DropdownMenu(
                         [
-                            dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
+                            dbc.DropdownMenuItem(
+                                "Scalars", href="/feature_importances/scalars", id="feature_importances_scalars"
+                            ),
                             dbc.DropdownMenuItem(
                                 "Time Series",
                                 href="/feature_importances/time_series",
@@ -137,36 +138,38 @@ def get_top_bar():
 
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
 def display_page(pathname):
-    if "datasets" in pathname:
-        if "scalars" in pathname:
+    if "datasets" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
             from dash_website.datasets.scalars import get_layout
-        elif "time_series" in pathname:
+        elif "time_series" == pathname.split("/")[2]:
             from dash_website.datasets.time_series import get_layout
-        elif "images" in pathname:
+        elif "images" == pathname.split("/")[2]:
             from dash_website.datasets.images import get_layout
-        elif "videos" in pathname:
+        elif "videos" == pathname.split("/")[2]:
             from dash_website.datasets.videos import get_layout
 
         return get_layout()
-    elif "feature_importances" in pathname:
-        if "time_series" in pathname:
+    elif "feature_importances" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
+            from dash_website.feature_importances.scalars import get_layout
+        elif "time_series" == pathname.split("/")[2]:
             from dash_website.feature_importances.time_series import get_layout
-        elif "images" in pathname:
+        elif "images" == pathname.split("/")[2]:
             from dash_website.feature_importances.images import get_layout
-        elif "videos" in pathname:
+        elif "videos" == pathname.split("/")[2]:
             from dash_website.feature_importances.videos import get_layout
 
         return get_layout()
-    elif "xwas" in pathname:
-        if "univariate_results" in pathname:
+    elif "xwas" == pathname.split("/")[1]:
+        if "univariate_results" == pathname.split("/")[2]:
             from dash_website.xwas.univariate_results import get_layout
-        elif "univariate_correlations" in pathname:
+        elif "univariate_correlations" == pathname.split("/")[2]:
             from dash_website.xwas.univariate_correlations import get_layout
-        elif "multivariate_results" in pathname:
+        elif "multivariate_results" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_results import get_layout
-        elif "multivariate_correlations" in pathname:
+        elif "multivariate_correlations" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_correlations import get_layout
-        else:  # "multivariate_feature_importances" in pathname
+        elif "multivariate_feature_importances" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_feature_importances import get_layout
 
         return get_layout()
@@ -174,7 +177,7 @@ def display_page(pathname):
     elif "page" in pathname:
         num_page = int(pathname.split("/")[-1][4:])
         return getattr(globals()["page%s" % num_page], "layout")
-    elif pathname == "/":
+    elif "/" == pathname:
         from dash_website.introduction.introduction import get_layout
 
         return get_layout()
