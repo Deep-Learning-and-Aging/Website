@@ -10,9 +10,8 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_options
-from dash_website import CORRELATION_TYPES
-from dash_website.datasets import TREE_SCALARS, ETHNICITIES, SEX_VALUE, SEX_COLOR
-from dash_website.xwas import BAR_PLOT_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
+from dash_website import CORRELATION_TYPES, ALGORITHMS_RENDERING
+from dash_website.feature_importances import TREE_SCALARS, BAR_PLOT_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
 
 def get_layout():
@@ -134,95 +133,86 @@ def get_controls_table_scalars_features():
     ]
 
 
-# @APP.callback(
-#     [
-#         Output("bar_plot_scalars_features", "figure"),
-#         Output("table_scalars_features", "data"),
-#         Output("table_correlation_scalars_features", "data"),
-#     ],
-#     [
-#         Input("dimension_scalars_features", "value"),
-#         Input("subdimension_scalars_features", "value"),
-#         Input("sub_subdimension_scalars_features", "value"),
-#         Input("correlation_type_scalars_features", "value"),
-#     ],
-# )
-# def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlation_type):
-#     import plotly.graph_objects as go
+@APP.callback(
+    [
+        Output("bar_plot_scalars_features", "figure"),
+        Output("table_scalars_features", "data"),
+        Output("table_correlation_scalars_features", "data"),
+    ],
+    [
+        Input("dimension_scalars_features", "value"),
+        Input("subdimension_scalars_features", "value"),
+        Input("sub_subdimension_scalars_features", "value"),
+        Input("correlation_type_scalars_features", "value"),
+    ],
+)
+def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlation_type):
+    import plotly.graph_objects as go
 
-#     features = load_feather(
-#         f"feature_importances/scalars/{dimension}/{subdimension}/{sub_subdimension}.feather"
-#     ).set_index("feature")
-#     features.columns = pd.MultiIndex.from_tuples(
-#         list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
-#     )
-#     features.reset_index(inplace=True).set_index(["algorithm"])
+    features = load_feather(
+        f"feature_importances/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather"
+    ).set_index("feature")
+    features.columns = pd.MultiIndex.from_tuples(
+        list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
+    )
+    best_algorithm = "light_gbm"
 
-#     features = pd.DataFrame(data_features).set_index(["algorithm", "variable"])
-#     sorted_variables = (
-#         (features.loc[best_algorithm].abs() / features.loc[best_algorithm].abs().sum())
-#         .sort_values(by=["feature_importance"], ascending=False)
-#         .index
-#     )
+    sorted_features = features.abs().sort_values(by=[(best_algorithm, "mean")], ascending=False).index
 
-#     algorithms = features.index.get_level_values("algorithm").drop_duplicates()
+    table_features = pd.DataFrame(None, columns=BAR_PLOT_TABLE_COLUMNS.keys())
+    table_features["feature"] = sorted_features
 
-#     table_features = pd.DataFrame(None, columns=BAR_PLOT_TABLE_COLUMNS.keys())
-#     table_features["variable"] = sorted_variables
+    for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
+        table_features[f"percentage_{algorithm}"] = (
+            features.loc[sorted_features, (algorithm, "mean")].round(3).astype(str).values
+            + " +- "
+            + features.loc[sorted_features, (algorithm, "std")].round(3).astype(str).values
+        )
 
-#     for algorithm in algorithms:
-#         sorted_algorithm_variable = [[algorithm, variable] for variable in sorted_variables]
+    fig = go.Figure()
+    hovertemplate = (
+        "Feature: %{y} <br>Percentage of overall feature importance: %{x:.3f} +- %{customdata:.3f}<br><extra></extra>"
+    )
 
-#         table_features[f"feature_{algorithm}"] = features.loc[sorted_algorithm_variable].values
-#         table_features[f"percentage_{algorithm}"] = (
-#             features.loc[sorted_algorithm_variable].abs() / features.loc[sorted_algorithm_variable].abs().sum()
-#         )["feature_importance"].values
+    for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
+        fig.add_bar(
+            name=ALGORITHMS_RENDERING[algorithm],
+            x=features.loc[sorted_features, (algorithm, "mean")].abs().values[::-1],
+            y=sorted_features[::-1],
+            error_x={
+                "array": features.loc[sorted_features, (algorithm, "std")].values[::-1],
+                "type": "data",
+            },
+            orientation="h",
+            hovertemplate=hovertemplate,
+            customdata=features.loc[sorted_features, (algorithm, "std")].values[::-1],
+        )
 
-#     bars = []
-#     hovertemplate = "Variable: %{y} <br>Percentage of overall feature importance: %{x:.3f} <br>Feature importance: %{customdata:.3f} <br><extra></extra>"
+    fig.update_layout(
+        {
+            "width": 800,
+            "height": int(25 * len(sorted_features)),
+            "xaxis": {"title": "Percentage of overall feature importance", "showgrid": False},
+            "yaxis": {"title": "Features", "showgrid": False},
+        }
+    )
+    table_correlations_raw = pd.DataFrame(
+        None, index=features.index, columns=pd.Index(FEATURES_CORRELATIONS_TABLE_COLUMNS.keys()).drop("index")
+    )
 
-#     for algorithm in algorithms:
-#         bars.append(
-#             go.Bar(
-#                 name=ALGORITHMS_RENDERING[algorithm],
-#                 x=table_features[f"percentage_{algorithm}"].values[::-1],
-#                 y=sorted_variables[::-1],
-#                 orientation="h",
-#                 customdata=table_features[f"feature_{algorithm}"].values[::-1],
-#                 hovertemplate=hovertemplate,
-#             )
-#         )
+    for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
+        table_correlations_raw[f"percentage_{algorithm}"] = features[(algorithm, "mean")]
 
-#     fig = go.Figure(bars)
+    table_correlations = (
+        table_correlations_raw.corr(method=correlation_type)
+        .round(3)
+        .rename(index=FEATURES_CORRELATIONS_TABLE_COLUMNS)
+        .reset_index()
+    )
 
-#     fig.update_layout(
-#         {
-#             "width": 800,
-#             "height": int(25 * len(sorted_variables)),
-#             "xaxis": {"title": "Percentage of overall feature importance", "showgrid": False},
-#             "yaxis": {"title": "Variables", "showgrid": False},
-#         }
-#     )
-
-#     table_correlations_raw = table_features[
-#         [
-#             f"percentage_{'correlation'}",
-#             f"percentage_{'elastic_net'}",
-#             f"percentage_{'light_gbm'}",
-#             f"percentage_{'neural_network'}",
-#         ]
-#     ]
-
-#     table_correlations = (
-#         table_correlations_raw.corr(method=correlation_type)
-#         .round(3)
-#         .rename(index=FEATURES_CORRELATIONS_TABLE_COLUMNS)
-#         .reset_index()
-#     )
-
-#     return (
-#         fig,
-#         table_features.round(3).rename(columns=BAR_PLOT_TABLE_COLUMNS).to_dict("records"),
-#         table_correlations.rename(columns=FEATURES_CORRELATIONS_TABLE_COLUMNS).to_dict("records"),
-#         title,
-#     )
+    return (
+        fig,
+        table_features.rename(columns=BAR_PLOT_TABLE_COLUMNS).to_dict("records"),
+        table_correlations.rename(columns=FEATURES_CORRELATIONS_TABLE_COLUMNS).to_dict("records"),
+        # title,
+    )
