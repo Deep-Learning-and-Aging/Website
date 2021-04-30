@@ -35,6 +35,8 @@ def create_dendrogram_heatmap(correlations, sample_sizes, size_label_is_variable
         colorscale=get_colorscale(heat_correlations),
         customdata=heat_sample_sizes,
         hovertemplate=hovertemplate,
+        zmin=-1,
+        zmax=1,
     )
     heatmap["x"] = fig["layout"]["xaxis"]["tickvals"]
     heatmap["y"] = fig["layout"]["xaxis"]["tickvals"]

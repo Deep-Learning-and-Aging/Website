@@ -108,6 +108,8 @@ def _fill_graph_tab_dimension(dimension, subset_method, correlation_type, data_d
         colorscale=get_colorscale(correlations_2d),
         customdata=numbers_variables_2d,
         hovertemplate=hovertemplate,
+        zmin=-1,
+        zmax=1,
     )
 
     fig = go.Figure(heatmap)

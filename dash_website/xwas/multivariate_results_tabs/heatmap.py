@@ -127,6 +127,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         colorscale=get_colorscale(r2_2d),
         customdata=customdata,
         hovertemplate=hovertemplate,
+        zmax=1,
     )
 
     fig = go.Figure(heatmap)
