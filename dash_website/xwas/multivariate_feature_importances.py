@@ -8,14 +8,8 @@ import dash_table
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_category_drop_down,
-    get_dimension_drop_down,
-    get_correlation_type_radio_items,
-    get_options,
-)
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
 from dash_website.xwas import BAR_PLOT_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
 
@@ -73,9 +67,19 @@ def _modify_store_features(dimension, category):
 def get_controls_features():
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_features", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_category_drop_down("category_features", all_first_value=False),
-            get_dimension_drop_down("dimension_features", DIMENSIONS),
+            get_item_radio_items(
+                "main_category_features",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_drop_down("category_features", ["..."], "Select X subcategory: ", from_dict=False),
+            get_drop_down(
+                "dimension_features",
+                DIMENSIONS,
+                "Select an aging dimension: ",
+                from_dict=False,
+            ),
         ]
     )
 
@@ -99,7 +103,7 @@ def _change_controls_category(main_category):
 def get_controls_table_features():
     return dbc.Card(
         [
-            get_correlation_type_radio_items("correlation_type_features"),
+            get_item_radio_items("correlation_type_features", CORRELATION_TYPES, "Select correlation type :"),
             dbc.FormGroup(
                 [
                     html.P("Correlation between feature importances/correlation : "),

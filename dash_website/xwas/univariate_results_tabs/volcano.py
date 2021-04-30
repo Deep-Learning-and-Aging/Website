@@ -9,12 +9,11 @@ import pandas as pd
 
 from dash_website.app import APP
 from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_category_drop_down,
-    get_dimension_drop_down,
+    get_item_radio_items,
+    get_drop_down,
     get_options,
 )
-from dash_website.utils.aws_loader import list_dir, load_feather
+from dash_website.utils.aws_loader import load_feather
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
@@ -56,9 +55,14 @@ def get_volcano():
 def get_controls_tab():
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_volcano", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_category_drop_down("category_volcano"),
-            get_dimension_drop_down("dimension_volcano", DIMENSIONS),
+            get_item_radio_items(
+                "main_category_volcano",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_drop_down("category_volcano", ["All"], "Select X subcategory: ", from_dict=False),
+            get_drop_down("dimension_volcano", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
         ]
     )
 

@@ -23,10 +23,12 @@ def get_layout():
             html.Br(),
             dbc.Row(get_controls_videos(), justify="center"),
             dbc.Row(html.Br()),
+            dbc.Row(html.H2(id="title_time_series_features"), justify="center"),
+            dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_left_video()), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_right_video()), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("left")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("right")), style={"width": 6}),
                 ]
             ),
             dbc.Row(
@@ -64,19 +66,21 @@ def get_controls_videos():
     ]
 
 
-def get_controls_left_video():
-    return [
-        get_item_radio_items("sex_left_video_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_left_video_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items("aging_rate_left_video_features", AGING_RATE_LEGEND, "Select aging rate :"),
-    ]
+@APP.callback(
+    Output("title_time_series_features", "children"),
+    [
+        Input("chamber_type_features", "value"),
+    ],
+)
+def _display_score(chamber_type):
+    return "To put the score"
 
 
-def get_controls_right_video():
+def get_controls_side_video(side):
     return [
-        get_item_radio_items("sex_right_video_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_right_video_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items("aging_rate_right_video_features", AGING_RATE_LEGEND, "Select aging rate :"),
+        get_item_radio_items(f"sex_{side}_video_features", SEX_LEGEND, "Select sex :"),
+        get_item_radio_items(f"age_{side}_video_features", AGE_GROUP_LEGEND, "Select age group :"),
+        get_item_radio_items(f"aging_rate_{side}_video_features", AGING_RATE_LEGEND, "Select aging rate :"),
     ]
 
 

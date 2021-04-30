@@ -138,6 +138,7 @@ def get_controls_table_scalars_features():
         Output("bar_plot_scalars_features", "figure"),
         Output("table_scalars_features", "data"),
         Output("table_correlation_scalars_features", "data"),
+        Output("title_scalars_features", "children"),
     ],
     [
         Input("dimension_scalars_features", "value"),
@@ -214,5 +215,5 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlatio
         fig,
         table_features.rename(columns=BAR_PLOT_TABLE_COLUMNS).to_dict("records"),
         table_correlations.rename(columns=FEATURES_CORRELATIONS_TABLE_COLUMNS).to_dict("records"),
-        # title,
+        "To put the score",
     )

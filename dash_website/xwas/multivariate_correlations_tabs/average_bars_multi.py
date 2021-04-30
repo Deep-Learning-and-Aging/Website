@@ -8,14 +8,9 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_dimension_drop_down,
-    get_item_radio_items,
-    get_correlation_type_radio_items,
-    get_options,
-)
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, ALGORITHMS_RENDERING
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, ALGORITHMS_RENDERING, CORRELATION_TYPES
+from dash_website.xwas import DISPLAY_MODE
 
 
 def get_average_bars():
@@ -76,18 +71,33 @@ def _modify_store_correlations(dimension_1, dimension_2):
 def get_controls_tab_average_multi():
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_average_multi", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_dimension_drop_down(
-                "dimension_1_average_multi", ["MainDimensions", "SubDimensions"] + DIMENSIONS, idx_dimension=1
+            get_item_radio_items(
+                "main_category_average_multi",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_drop_down(
+                "dimension_1_average_multi",
+                ["MainDimensions", "SubDimensions"] + DIMENSIONS,
+                "Select an aging dimension 1: ",
+                from_dict=False,
             ),
             html.Div(
-                [get_dimension_drop_down("dimension_2_average_multi", ["average"] + DIMENSIONS, idx_dimension=2)],
+                [
+                    get_drop_down(
+                        "dimension_2_average_multi",
+                        ["average"] + DIMENSIONS,
+                        "Select an aging dimension 2: ",
+                        from_dict=False,
+                    )
+                ],
                 id="hiden_dimension_2_average_multi",
                 style={"display": "none"},
             ),
             get_item_radio_items(
                 "display_mode_average_multi",
-                {"view_all": "Decreasing correlation", "view_per_main_category": "X main category"},
+                DISPLAY_MODE,
                 "Rank by : ",
             ),
             get_item_radio_items(
@@ -99,7 +109,7 @@ def get_controls_tab_average_multi():
                 },
                 "Select an Algorithm :",
             ),
-            get_correlation_type_radio_items("correlation_type_average_multi"),
+            get_item_radio_items("correlation_type_average_multi", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 

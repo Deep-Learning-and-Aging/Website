@@ -5,14 +5,10 @@ import dash_html_components as html
 from dash_website import RENAME_DIMENSIONS
 
 
-def get_options(list_, capitalize=False):
+def get_options(list_):
     list_label_value = []
     for value in list_:
-        if capitalize:
-            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value).capitalize()}
-        else:
-            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
-        list_label_value.append(d)
+        list_label_value.append({"value": value, "label": RENAME_DIMENSIONS.get(value, value)})
     return list_label_value
 
 
@@ -30,7 +26,7 @@ def get_subset_method_radio_items(id, value="union"):
             dbc.Label("Select subset method :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["all", "union", "intersection"], capitalize=True),
+                options=get_options(["all", "union", "intersection"]),
                 value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
@@ -44,7 +40,7 @@ def get_correlation_type_radio_items(id, value="pearson"):
             dbc.Label("Select correlation type :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["pearson", "spearman"], capitalize=True),
+                options=get_options(["pearson", "spearman"]),
                 value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),

@@ -32,8 +32,8 @@ def get_layout():
             dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_left_image()), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_right_image()), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image("left")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image("right")), style={"width": 6}),
                 ]
             ),
             dbc.Row(
@@ -109,19 +109,11 @@ def _change_subdimensions(dimension, subdimension):
         )
 
 
-def get_controls_left_image():
+def get_controls_side_image(side):
     return [
-        get_item_radio_items("sex_left_image", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_group_left_image", AGE_GROUP_LEGEND, "Select age group :"),
-        get_drop_down("sample_left_image", SAMPLE_LEGEND, "Select sample :"),
-    ]
-
-
-def get_controls_right_image():
-    return [
-        get_item_radio_items("sex_right_image", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_group_right_image", AGE_GROUP_LEGEND, "Select age group :"),
-        get_drop_down("sample_right_image", SAMPLE_LEGEND, "Select sample :"),
+        get_item_radio_items(f"sex_{side}_image", SEX_LEGEND, "Select sex :"),
+        get_item_radio_items(f"age_group_{side}_image", AGE_GROUP_LEGEND, "Select age group :"),
+        get_drop_down(f"sample_{side}_image", SAMPLE_LEGEND, "Select sample :"),
     ]
 
 

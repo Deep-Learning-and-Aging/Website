@@ -10,14 +10,8 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, does_key_exists
-from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_category_drop_down,
-    get_item_radio_items,
-    get_correlation_type_radio_items,
-    get_options,
-)
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
 
 
 def get_category_heatmap():
@@ -79,8 +73,13 @@ def get_controls_tab_category_multi():
 
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_category_multi", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_category_drop_down("category_category_multi"),
+            get_item_radio_items(
+                "main_category_category_multi",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_drop_down("category_category_multi", ["All"], "Select X subcategory: ", from_dict=False),
             get_item_radio_items(
                 "algorithm_category",
                 {
@@ -90,7 +89,7 @@ def get_controls_tab_category_multi():
                 },
                 "Select an Algorithm :",
             ),
-            get_correlation_type_radio_items("correlation_type_category_multi"),
+            get_item_radio_items("correlation_type_category_multi", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 
