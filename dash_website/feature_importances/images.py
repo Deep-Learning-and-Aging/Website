@@ -27,7 +27,12 @@ from dash_website.feature_importances import AGING_RATE_LEGEND, DISPLAY_MODE
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_images_features", data=get_data_features())]),
+            dcc.Loading(
+                [
+                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
+                    dcc.Store(id="memory_images_features", data=get_data_features()),
+                ]
+            ),
             html.H1("Feature importances - Images"),
             html.Br(),
             html.Br(),
@@ -56,6 +61,10 @@ def get_layout():
         ],
         fluid=True,
     )
+
+
+def get_data_scores():
+    return load_feather("feature_importances/scores_all_samples.feather").to_dict()
 
 
 def get_data_features():
@@ -94,28 +103,40 @@ def get_controls_images_features():
         Output("sub_subdimension_images_features", "value"),
         Output("title_images_features", "children"),
     ],
-    [Input("dimension_images_features", "value"), Input("subdimension_images_features", "value")],
+    [
+        Input("dimension_images_features", "value"),
+        Input("subdimension_images_features", "value"),
+        Input("memory_scores_features", "data"),
+    ],
 )
-def _change_subdimensions_features(dimension, subdimension):
+def _change_subdimensions_features(dimension, subdimension, data_scores):
     context = dash.callback_context.triggered
 
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_images_features":
         first_subdimension = list(TREE_IMAGES[dimension].keys())[0]
-        return (
-            get_options(list(TREE_IMAGES[dimension].keys())),
-            list(TREE_IMAGES[dimension].keys())[0],
-            get_options(TREE_IMAGES[dimension][first_subdimension]),
-            TREE_IMAGES[dimension][first_subdimension][0],
-            "To put the score",
-        )
+
+        option_subdimension = get_options(list(TREE_IMAGES[dimension].keys()))
+        value_subdimension = list(TREE_IMAGES[dimension].keys())[0]
+        option_sub_subdimension = get_options(TREE_IMAGES[dimension][first_subdimension])
+        value_sub_subdimension = TREE_IMAGES[dimension][first_subdimension][0]
     else:
-        return (
-            get_options(list(TREE_IMAGES[dimension].keys())),
-            subdimension,
-            get_options(TREE_IMAGES[dimension][subdimension]),
-            TREE_IMAGES[dimension][subdimension][0],
-            "To put the score",
-        )
+        option_subdimension = get_options(list(TREE_IMAGES[dimension].keys()))
+        value_subdimension = subdimension
+        option_sub_subdimension = get_options(TREE_IMAGES[dimension][subdimension])
+        value_sub_subdimension = TREE_IMAGES[dimension][subdimension][0]
+
+    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
+    scores = (
+        scores_raw.loc[(dimension, value_subdimension, value_sub_subdimension)]
+        .set_index("algorithm")
+        .sort_values("r2", ascending=False)
+    )
+
+    title = ""
+    for algorithm in scores.index:
+        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+
+    return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
 
 def get_controls_side_image_features(side):
