@@ -73,6 +73,7 @@ if __name__ == "__main__":
         feature_for_index["feature"] = (
             feature_for_index["feature"].astype(str).apply(lambda feature: feature.split(".0")[0])
         )
+        feature_for_index.drop(index=feature_for_index.index[feature_for_index["feature"].duplicated()], inplace=True)
 
         features = pd.DataFrame(None, columns=columns, index=feature_for_index["feature"])
         features.index.name = "feature"
@@ -82,15 +83,15 @@ if __name__ == "__main__":
                 f"page3_featureImp/FeatureImp/FeatureImp_Age_{dimension}_{subdimension}_{sub_subdimension}_{ALGORITHM_NAMING[algorithm]}.csv"
             ).rename(columns={"features": "feature"})
             mean_feature["feature"] = mean_feature["feature"].astype(str).apply(lambda feature: feature.split(".0")[0])
+            mean_feature.drop(index=mean_feature.index[mean_feature["feature"].duplicated()], inplace=True)
             mean_feature.set_index("feature", inplace=True)
-            mean_feature.drop(index=mean_feature.index[mean_feature.index.duplicated()], inplace=True)
 
             std_feature = load_csv(
                 f"page3_featureImp/FeatureImp/FeatureImp_sd_Age_{dimension}_{subdimension}_{sub_subdimension}_{ALGORITHM_NAMING[algorithm]}.csv"
             ).rename(columns={"features": "feature"})
             std_feature["feature"] = std_feature["feature"].astype(str).apply(lambda feature: feature.split(".0")[0])
+            std_feature.drop(index=std_feature.index[std_feature["feature"].duplicated()], inplace=True)
             std_feature.set_index("feature", inplace=True)
-            std_feature.drop(index=std_feature.index[std_feature.index.duplicated()], inplace=True)
 
             features[(algorithm, "mean")] = mean_feature["weight"] / mean_feature["weight"].abs().sum()
             features[(algorithm, "std")] = std_feature["weight"] / (mean_feature["weight"].abs().sum() ** 2)
