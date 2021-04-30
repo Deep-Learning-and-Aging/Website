@@ -7,12 +7,9 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_dimension_drop_down,
-    get_subset_method_radio_items,
-    get_correlation_type_radio_items,
-)
-from dash_website import DIMENSIONS, RENAME_DIMENSIONS
+from dash_website.utils.controls import get_drop_down, get_item_radio_items
+from dash_website import DIMENSIONS, RENAME_DIMENSIONS, CORRELATION_TYPES
+from dash_website.xwas import SUBSET_METHODS
 
 
 def get_dimension_heatmap():
@@ -61,9 +58,9 @@ def _modify_store_dimension(dimension):
 def get_controls_tab_dimension():
     return dbc.Card(
         [
-            get_dimension_drop_down("dimension_dimension", DIMENSIONS),
-            get_subset_method_radio_items("subset_method_category"),
-            get_correlation_type_radio_items("correlation_type_category"),
+            get_drop_down("dimension_dimension", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
+            get_item_radio_items("subset_method_dimension", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items("correlation_type_dimension", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 
@@ -72,8 +69,8 @@ def get_controls_tab_dimension():
     [Output("graph_dimension", "figure"), Output("title_dimension", "children")],
     [
         Input("dimension_dimension", "value"),
-        Input("subset_method_category", "value"),
-        Input("correlation_type_category", "value"),
+        Input("subset_method_dimension", "value"),
+        Input("correlation_type_dimension", "value"),
         Input("memory_dimension", "data"),
     ],
 )

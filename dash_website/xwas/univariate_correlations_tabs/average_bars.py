@@ -9,14 +9,12 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_dimension_drop_down,
+    get_drop_down,
     get_item_radio_items,
-    get_subset_method_radio_items,
-    get_correlation_type_radio_items,
     get_options,
 )
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, CORRELATION_TYPES
+from dash_website.xwas import SUBSET_METHODS, DISPLAY_MODE
 
 
 def get_average_bars():
@@ -75,22 +73,37 @@ def _modify_store_correlations(dimension_1, dimension_2):
 def get_controls_tab_average():
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_average", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_dimension_drop_down(
-                "dimension_1_average", ["MainDimensions", "SubDimensions"] + DIMENSIONS, idx_dimension=1
+            get_item_radio_items(
+                "main_category_average",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_drop_down(
+                "dimension_1_average",
+                ["MainDimensions", "SubDimensions"] + DIMENSIONS,
+                "Select an aging dimension 1: ",
+                from_dict=False,
             ),
             html.Div(
-                [get_dimension_drop_down("dimension_2_average", ["average"] + DIMENSIONS, idx_dimension=2)],
+                [
+                    get_drop_down(
+                        "dimension_2_average",
+                        ["average"] + DIMENSIONS,
+                        "Select an aging dimension 2: ",
+                        from_dict=False,
+                    )
+                ],
                 id="hiden_dimension_2_average",
                 style={"display": "none"},
             ),
             get_item_radio_items(
                 "display_mode_average",
-                {"view_all": "Decreasing correlation", "view_per_main_category": "X main category"},
+                DISPLAY_MODE,
                 "Rank by : ",
             ),
-            get_subset_method_radio_items("subset_method_average"),
-            get_correlation_type_radio_items("correlation_type_average"),
+            get_item_radio_items("subset_method_average", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items("correlation_type_average", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 

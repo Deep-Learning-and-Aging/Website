@@ -7,12 +7,8 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_dimension_drop_down,
-    get_item_radio_items,
-    get_correlation_type_radio_items,
-)
-from dash_website import DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website.utils.controls import get_drop_down, get_item_radio_items
+from dash_website import DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
 
 
 def get_dimension_heatmap():
@@ -62,7 +58,7 @@ def get_controls_tab_dimension_multi():
 
     return dbc.Card(
         [
-            get_dimension_drop_down("dimension_dimension_multi", DIMENSIONS),
+            get_drop_down("dimension_dimension_multi", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
             get_item_radio_items(
                 "algorithm_dimension",
                 {
@@ -72,7 +68,7 @@ def get_controls_tab_dimension_multi():
                 },
                 "Select an Algorithm :",
             ),
-            get_correlation_type_radio_items("correlation_type_category_multi"),
+            get_item_radio_items("correlation_type_category_multi", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 

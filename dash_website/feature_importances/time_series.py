@@ -29,6 +29,8 @@ def get_layout():
             html.Br(),
             dbc.Row(dbc.Col(dbc.Card(get_controls_time_series_features())), justify="center"),
             dbc.Row(html.Br()),
+            dbc.Row(html.H2(id="title_time_series_features"), justify="center"),
+            dbc.Row(html.Br()),
             dbc.Row(
                 [
                     dbc.Col(dbc.Card(get_controls_side_time_series_features("left")), style={"width": 6}),
@@ -98,6 +100,7 @@ def get_controls_time_series_features():
         Output("subdimension_time_series_features", "value"),
         Output("sub_subdimension_time_series_features", "options"),
         Output("sub_subdimension_time_series_features", "value"),
+        Output("title_time_series_features", "children"),
     ],
     [Input("dimension_time_series_features", "value"), Input("subdimension_time_series_features", "value")],
 )
@@ -111,6 +114,7 @@ def _change_subdimensions_features(dimension, subdimension):
             list(TREE_TIME_SERIES[dimension].keys())[0],
             get_options(TREE_TIME_SERIES[dimension][first_subdimension]),
             TREE_TIME_SERIES[dimension][first_subdimension][0],
+            "To put the score",
         )
     else:
         return (
@@ -118,6 +122,7 @@ def _change_subdimensions_features(dimension, subdimension):
             subdimension,
             get_options(TREE_TIME_SERIES[dimension][subdimension]),
             TREE_TIME_SERIES[dimension][subdimension][0],
+            "To put the score",
         )
 
 

@@ -33,10 +33,12 @@ def get_layout():
             html.Br(),
             dbc.Row(dbc.Col(dbc.Card(get_controls_images_features())), justify="center"),
             dbc.Row(html.Br()),
+            dbc.Row(html.H2(id="title_images_features"), justify="center"),
+            dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_left_image_features()), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_right_image_features()), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image_features("left")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image_features("right")), style={"width": 6}),
                 ]
             ),
             dbc.Row(
@@ -90,6 +92,7 @@ def get_controls_images_features():
         Output("subdimension_images_features", "value"),
         Output("sub_subdimension_images_features", "options"),
         Output("sub_subdimension_images_features", "value"),
+        Output("title_images_features", "children"),
     ],
     [Input("dimension_images_features", "value"), Input("subdimension_images_features", "value")],
 )
@@ -103,6 +106,7 @@ def _change_subdimensions_features(dimension, subdimension):
             list(TREE_IMAGES[dimension].keys())[0],
             get_options(TREE_IMAGES[dimension][first_subdimension]),
             TREE_IMAGES[dimension][first_subdimension][0],
+            "To put the score",
         )
     else:
         return (
@@ -110,24 +114,16 @@ def _change_subdimensions_features(dimension, subdimension):
             subdimension,
             get_options(TREE_IMAGES[dimension][subdimension]),
             TREE_IMAGES[dimension][subdimension][0],
+            "To put the score",
         )
 
 
-def get_controls_left_image_features():
+def get_controls_side_image_features(side):
     return [
-        get_item_radio_items("sex_left_image_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_group_left_image_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items("aging_rate_left_image_features", AGING_RATE_LEGEND, "Select aging rate :"),
-        get_drop_down("sample_left_image_features", SAMPLE_LEGEND, "Select sample :"),
-    ]
-
-
-def get_controls_right_image_features():
-    return [
-        get_item_radio_items("sex_right_image_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_group_right_image_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items("aging_rate_right_image_features", AGING_RATE_LEGEND, "Select aging rate :"),
-        get_drop_down("sample_right_image_features", SAMPLE_LEGEND, "Select sample :"),
+        get_item_radio_items(f"sex_{side}_image_features", SEX_LEGEND, "Select sex :"),
+        get_item_radio_items(f"age_group_{side}_image_features", AGE_GROUP_LEGEND, "Select age group :"),
+        get_item_radio_items(f"aging_rate_{side}_image_features", AGING_RATE_LEGEND, "Select aging rate :"),
+        get_drop_down(f"sample_{side}_image_features", SAMPLE_LEGEND, "Select sample :"),
     ]
 
 
