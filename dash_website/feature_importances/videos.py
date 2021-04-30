@@ -17,7 +17,12 @@ from dash_website.feature_importances import AGING_RATE_LEGEND
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_videos_features", data=get_data())]),
+            dcc.Loading(
+                [
+                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
+                    dcc.Store(id="memory_videos_features", data=get_data_features()),
+                ]
+            ),
             html.H1("Feature importances - Videos"),
             html.Br(),
             html.Br(),
@@ -48,7 +53,11 @@ def get_layout():
     )
 
 
-def get_data():
+def get_data_scores():
+    return load_feather("feature_importances/scores_all_samples.feather").to_dict()
+
+
+def get_data_features():
     return load_feather("feature_importances/videos/information.feather").to_dict()
 
 
@@ -70,10 +79,22 @@ def get_controls_videos():
     Output("title_time_series_features", "children"),
     [
         Input("chamber_type_features", "value"),
+        Input("memory_scores_features", "data"),
     ],
 )
-def _display_score(chamber_type):
-    return "To put the score"
+def _display_score(chamber_type, data_scores):
+    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
+    scores = (
+        scores_raw.loc[("Heart", "MRI", f"{chamber_type}chambersRaw")]
+        .set_index("algorithm")
+        .sort_values("r2", ascending=False)
+    )
+
+    title = ""
+    for algorithm in scores.index:
+        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+
+    return title
 
 
 def get_controls_side_video(side):

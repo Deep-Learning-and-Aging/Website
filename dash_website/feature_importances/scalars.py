@@ -17,7 +17,7 @@ from dash_website.feature_importances import TREE_SCALARS, BAR_PLOT_TABLE_COLUMN
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_scores_scalars", data=get_data_scores())]),
+            dcc.Loading([dcc.Store(id="memory_scores_features", data=get_data_scores())]),
             html.H1("Feature importances - Scalars"),
             html.Br(),
             html.Br(),
@@ -157,25 +157,25 @@ def get_controls_table_scalars_features():
         Input("subdimension_scalars_features", "value"),
         Input("sub_subdimension_scalars_features", "value"),
         Input("correlation_type_scalars_features", "value"),
-        Input("memory_scores_scalars", "data"),
+        Input("memory_scores_features", "data"),
     ],
 )
 def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlation_type, data_scores):
     import plotly.graph_objects as go
 
-    score_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    score = (
-        score_raw.loc[(dimension, subdimension, sub_subdimension)]
+    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
+    scores = (
+        scores_raw.loc[(dimension, subdimension, sub_subdimension)]
         .set_index("algorithm")
         .sort_values("r2", ascending=False)
     )
 
-    best_algorithm = score.index[0]
-    best_score = score.loc[best_algorithm]
+    best_algorithm = scores.index[0]
+    best_score = scores.loc[best_algorithm]
 
     title = f"The best algorithm is the {ALGORITHMS_RENDERING[best_algorithm]}. The r² is {best_score['r2']} +- {best_score['r2_std']} with a RMSE of {best_score['rmse']} +- {best_score['rmse_std']} for a sample size of {int(best_score['sample_size'])} participants"
 
-    other_scores = score.drop(index=best_algorithm)
+    other_scores = scores.drop(index=best_algorithm)
     subtitle = ""
     for other_algorithm in other_scores.index:
         subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a r² of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "

@@ -96,6 +96,8 @@ if __name__ == "__main__":
             features[(algorithm, "mean")] = mean_feature["weight"] / mean_feature["weight"].abs().sum()
             features[(algorithm, "std")] = std_feature["weight"] / (mean_feature["weight"].abs().sum() ** 2)
 
+        if dimension == "ImmuneSystem":
+            dimension = "BloodCells"
         features.columns = map(str, features.columns.tolist())
         features.reset_index().to_feather(
             f"all_data/feature_importances/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather"

@@ -11,7 +11,6 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website import ALGORITHMS_RENDERING
 from dash_website.datasets import (
     TREE_TIME_SERIES,
     INFORMATION_TIME_SERIES,
@@ -27,7 +26,7 @@ def get_layout():
         [
             dcc.Loading(
                 [
-                    dcc.Store(id="memory_scores_scalars", data=get_data_scores()),
+                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
                     dcc.Store(id="memory_time_series_features", data=get_data_features()),
                 ]
             ),
@@ -37,7 +36,6 @@ def get_layout():
             dbc.Row(dbc.Col(dbc.Card(get_controls_time_series_features())), justify="center"),
             dbc.Row(html.Br()),
             dbc.Row(html.H3(id="title_time_series_features"), justify="center"),
-            dbc.Row(html.H5(id="subtitle_time_series_features"), justify="center"),
             dbc.Row(html.Br()),
             dbc.Row(
                 [
@@ -113,12 +111,11 @@ def get_controls_time_series_features():
         Output("sub_subdimension_time_series_features", "options"),
         Output("sub_subdimension_time_series_features", "value"),
         Output("title_time_series_features", "children"),
-        Output("subtitle_time_series_features", "children"),
     ],
     [
         Input("dimension_time_series_features", "value"),
         Input("subdimension_time_series_features", "value"),
-        Input("memory_scores_scalars", "data"),
+        Input("memory_scores_features", "data"),
     ],
 )
 def _change_subdimensions_features(dimension, subdimension, data_scores):
@@ -137,24 +134,18 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
         option_sub_subdimension = get_options(TREE_TIME_SERIES[dimension][subdimension])
         value_sub_subdimension = TREE_TIME_SERIES[dimension][subdimension][0]
 
-    score_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    score = (
-        score_raw.loc[(dimension, value_subdimension, value_sub_subdimension)]
+    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
+    scores = (
+        scores_raw.loc[(dimension, value_subdimension, value_sub_subdimension)]
         .set_index("algorithm")
         .sort_values("r2", ascending=False)
     )
 
-    best_algorithm = score.index[0]
-    best_score = score.loc[best_algorithm]
+    title = ""
+    for algorithm in scores.index:
+        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
-    title = f"The best algorithm is the {ALGORITHMS_RENDERING[best_algorithm]}. The r² is {best_score['r2']} +- {best_score['r2_std']} with a RMSE of {best_score['rmse']} +- {best_score['rmse_std']} for a sample size of {int(best_score['sample_size'])} participants"
-
-    other_scores = score.drop(index=best_algorithm)
-    subtitle = ""
-    for other_algorithm in other_scores.index:
-        subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a r² of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
-
-    return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, subtitle, title
+    return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
 
 def get_controls_side_time_series_features(side):

@@ -21,6 +21,6 @@ for data_type in ["instances"]:  # ["eids", "instances"]:
 
     scores = scores_raw[COLUMNS_TO_TAKE.keys()].rename(columns=COLUMNS_TO_TAKE)
 
-    scores.drop(index=scores.index[~scores["algorithm"].isin(ALGORITHMS_NAMING.keys())]).replace(
-        ALGORITHMS_NAMING
-    ).reset_index(drop=True).to_feather(f"all_data/feature_importances/scores_{DATA_TYPE_NAMING[data_type]}.feather")
+    scores.replace(ALGORITHMS_NAMING).replace({"ImmuneSystem": "BloodCells"}).reset_index(drop=True).to_feather(
+        f"all_data/feature_importances/scores_{DATA_TYPE_NAMING[data_type]}.feather"
+    )
