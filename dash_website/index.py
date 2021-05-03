@@ -77,7 +77,14 @@ def get_top_bar():
                     ),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "Correlation between accelerated aging dimensions", href="/pages/page4", id="page4-link"
+                            "Correlation between accelerated aging dimensions",
+                            href="/correlation_between",
+                            id="correlation_between",
+                        )
+                    ),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Correlation between accelerated aging dimensions bis", href="/pages/page4", id="page4-link"
                         )
                     ),
                     dbc.DropdownMenu(
@@ -158,6 +165,10 @@ def display_page(pathname):
             from dash_website.feature_importances.images import get_layout
         elif "videos" == pathname.split("/")[2]:
             from dash_website.feature_importances.videos import get_layout
+
+        return get_layout()
+    elif "correlation_between" == pathname.split("/")[1]:
+        from dash_website.correlation_between.correlation_between import get_layout
 
         return get_layout()
     elif "xwas" == pathname.split("/")[1]:
