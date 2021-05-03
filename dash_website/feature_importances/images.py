@@ -64,7 +64,7 @@ def get_layout():
 
 
 def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples.feather").to_dict()
+    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
 
 
 def get_data_features():

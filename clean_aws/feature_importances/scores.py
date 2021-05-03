@@ -12,7 +12,7 @@ COLUMNS_TO_TAKE = {
     "R-Squared_sd_all": "r2_std",
 }
 
-DATA_TYPE_NAMING = {"instances": "all_samples", "eids": "average_per_participant"}
+DATA_TYPE_NAMING = {"instances": "all_samples_per_participant", "eids": "average_per_participant"}
 ALGORITHMS_NAMING = {"ElasticNet": "elastic_net", "LightGBM": "light_gbm", "NeuralNetwork": "neural_network"}
 
 
