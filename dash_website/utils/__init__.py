@@ -1,9 +1,1 @@
-EMPTY_GRAPH = {
-    "layout": {
-        "xaxis": {"visible": False},
-        "yaxis": {"visible": False},
-        "annotations": [
-            {"text": "No data", "xref": "paper", "yref": "paper", "showarrow": False, "font": {"size": 28}}
-        ],
-    }
-}
+BLUE_GREY_RED = [[0, "rgb(255,0,0)"], [0.5, "rgb(255, 255, 255)"], [1, "rgb(0,0,255)"]]

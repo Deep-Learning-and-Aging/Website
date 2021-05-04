@@ -19,8 +19,10 @@ ALGORITHMS_NAMING = {"ElasticNet": "elastic_net", "LightGBM": "light_gbm", "Neur
 for data_type in ["instances"]:  # ["eids", "instances"]:
     scores_raw = load_csv(f"page2_predictions/Performances/PERFORMANCES_tuned_alphabetical_{data_type}_Age_test.csv")
 
-    scores = scores_raw[COLUMNS_TO_TAKE.keys()].rename(columns=COLUMNS_TO_TAKE)
+    scores_ = scores_raw[COLUMNS_TO_TAKE.keys()].rename(columns=COLUMNS_TO_TAKE)
+    scores = scores_.replace(ALGORITHMS_NAMING).replace({"ImmuneSystem": "BloodCells"}).reset_index(drop=True)
+    scores.loc[
+        (scores["dimension"] == "Musculoskeletal") & (scores["sub_subdimension"] == "MRI"), "sub_subdimension"
+    ] = "DXA"
 
-    scores.replace(ALGORITHMS_NAMING).replace({"ImmuneSystem": "BloodCells"}).reset_index(drop=True).to_feather(
-        f"all_data/feature_importances/scores_{DATA_TYPE_NAMING[data_type]}.feather"
-    )
+    scores.to_feather(f"all_data/feature_importances/scores_{DATA_TYPE_NAMING[data_type]}.feather")
