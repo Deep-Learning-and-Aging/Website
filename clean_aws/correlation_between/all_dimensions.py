@@ -14,6 +14,7 @@ COLUMNS_TO_TAKE = {
     "R-Squared_all": "r2",
     "R-Squared_sd_all": "r2_std",
 }
+DICT_TO_CHANGE_DIMENSIONS = {"ImmuneSystem": "BloodCells"}
 
 
 if __name__ == "__main__":
@@ -90,6 +91,17 @@ if __name__ == "__main__":
         correlations.set_index(["dimension_2", "subdimension_2", "sub_subdimension_2", "algorithm_2"], inplace=True)
         correlations[["r2_2", "r2_std_2"]] = scores_raw[["r2", "r2_std"]]
 
-        correlations.reset_index().to_feather(
-            f"all_data/correlation_between_accelerated_aging_dimensions/all_models_{DATA_TYPE_NAMING[data_type]}.feather"
+        correlations.reset_index(inplace=True)
+
+        correlations.loc[
+            (correlations["dimension_1"] == "Musculoskeletal") & (correlations["sub_subdimension_1"] == "MRI"),
+            "sub_subdimension_1",
+        ] = "DXA"
+        correlations.loc[
+            (correlations["dimension_2"] == "Musculoskeletal") & (correlations["sub_subdimension_2"] == "MRI"),
+            "sub_subdimension_2",
+        ] = "DXA"
+
+        correlations.replace({"ImmuneSystem": "BloodCells"}).to_feather(
+            f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING[data_type]}.feather"
         )

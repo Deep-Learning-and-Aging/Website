@@ -1,9 +1,27 @@
-DATA_TYPES = {
-    "all_samples_per_participant": "All samples per participant",
-    "average_per_participant": "Average per participant",
-    "all_possible_samples": "All possible samples",
+SAMPLE_DEFINITION = {
+    "all_samples_per_participant": "Participant and time of examination",
+    "average_per_participant": "Participant (average on the time of examination)",
+    "all_samples_when_possible_otherwise_average": "Participant and time when possible otherwise average",
 }
 
-AGGREGATE_TYPES = ["all_models", "best_models"]
+DIMENSION_SELECTION = {"all_dimensions": "All dimensions", "custom_selection": "Custom selection"}
 
 ORDER_TYPES = {"clustering": "Clustering", "custom": "Custom", "r2": "r²"}
+
+CUSTOM_ORDER = [
+    "*",
+    "*instances01",
+    "*instances1.5x",
+    "*instances23",
+    "Brain",
+    "Eyes",
+    "Hearing",
+    "Lungs",
+    "Arterial",
+    "Heart",
+    "Abdomen",
+    "Musculoskeletal",
+    "PhysicalActivity",
+    "Biochemistry",
+    "BloodCells",
+]

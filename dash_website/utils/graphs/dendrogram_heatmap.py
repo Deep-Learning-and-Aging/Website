@@ -1,16 +1,18 @@
+import numpy as np
 from plotly.graph_objs import Heatmap
 from plotly.figure_factory import create_dendrogram
-from dash_website.utils.graphs.colorscale import get_colorscale
+
+from dash_website.utils import BLUE_GREY_RED
 
 
-def create_dendrogram_heatmap(correlations, sample_sizes, size_label_is_variable=True):
+def create_dendrogram_heatmap(correlations, hovertemplate, customdata=None):
     """
     correlations : DataFrame
         2d dataframe.
     samples_sizes : DataFrame
         2d dataframe.
     """
-    fig = create_dendrogram(correlations, orientation="bottom", distfun=lambda df: 1 - df)
+    fig = create_dendrogram(correlations.replace(np.nan, 0), orientation="bottom", distfun=lambda df: 1 - df)
     for scatter in fig["data"]:
         scatter["yaxis"] = "y2"
 
@@ -21,25 +23,21 @@ def create_dendrogram_heatmap(correlations, sample_sizes, size_label_is_variable
     fig.update_layout(yaxis2={"domain": [0.85, 1], "showticklabels": False, "showgrid": False, "zeroline": False})
 
     heat_correlations = correlations.loc[labels, labels].values
-    heat_sample_sizes = sample_sizes.loc[labels, labels].values
-
-    if size_label_is_variable:
-        hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
+    if customdata is not None:
+        heat_customdata = customdata.loc[labels, labels].values
     else:
-        hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number features: %{customdata} <br><extra></extra>"
+        heat_customdata = None
 
     heatmap = Heatmap(
-        x=labels,
-        y=labels,
+        x=fig["layout"]["xaxis"]["tickvals"],
+        y=fig["layout"]["xaxis"]["tickvals"],
         z=heat_correlations,
-        colorscale=get_colorscale(heat_correlations),
-        customdata=heat_sample_sizes,
+        colorscale=BLUE_GREY_RED,
+        customdata=heat_customdata,
         hovertemplate=hovertemplate,
         zmin=-1,
         zmax=1,
     )
-    heatmap["x"] = fig["layout"]["xaxis"]["tickvals"]
-    heatmap["y"] = fig["layout"]["xaxis"]["tickvals"]
 
     fig.update_layout(
         yaxis={
