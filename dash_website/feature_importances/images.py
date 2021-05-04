@@ -140,10 +140,17 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
 
 
 def get_controls_side_image_features(side):
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
+
     return [
-        get_item_radio_items(f"sex_{side}_image_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items(f"age_group_{side}_image_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items(f"aging_rate_{side}_image_features", AGING_RATE_LEGEND, "Select aging rate :"),
+        get_item_radio_items(f"sex_{side}_image_features", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_group_{side}_image_features", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
+        get_item_radio_items(
+            f"aging_rate_{side}_image_features", AGING_RATE_LEGEND, "Select aging rate :", value_idx=1
+        ),
         get_drop_down(f"sample_{side}_image_features", SAMPLE_LEGEND, "Select sample :"),
     ]
 

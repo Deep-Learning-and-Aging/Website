@@ -87,7 +87,7 @@ def get_dimension_drop_down(id, dimension, idx_dimension=""):
     )
 
 
-def get_item_radio_items(id, items, legend, from_dict=True):
+def get_item_radio_items(id, items, legend, from_dict=True, value_idx=0):
     if from_dict:
         control = dbc.FormGroup(
             [
@@ -95,7 +95,7 @@ def get_item_radio_items(id, items, legend, from_dict=True):
                 dcc.RadioItems(
                     id=id,
                     options=get_options_from_dict(items),
-                    value=list(items.keys())[0],
+                    value=list(items.keys())[value_idx],
                     labelStyle={"display": "inline-block", "margin": "5px"},
                 ),
                 html.Br(),
