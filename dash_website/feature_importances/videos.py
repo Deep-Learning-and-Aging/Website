@@ -68,7 +68,7 @@ def get_controls_videos():
             dcc.RadioItems(
                 id="chamber_type_features",
                 options=get_options_from_dict(CHAMBERS_LEGEND),
-                value=list(CHAMBERS_LEGEND.keys())[0],
+                value=list(CHAMBERS_LEGEND.keys())[1],
                 labelStyle={"display": "inline-block", "margin": "5px"},
             )
         ),
@@ -98,10 +98,17 @@ def _display_score(chamber_type, data_scores):
 
 
 def get_controls_side_video(side):
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
+
     return [
-        get_item_radio_items(f"sex_{side}_video_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items(f"age_{side}_video_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items(f"aging_rate_{side}_video_features", AGING_RATE_LEGEND, "Select aging rate :"),
+        get_item_radio_items(f"sex_{side}_video_features", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_{side}_video_features", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
+        get_item_radio_items(
+            f"aging_rate_{side}_video_features", AGING_RATE_LEGEND, "Select aging rate :", value_idx=1
+        ),
     ]
 
 

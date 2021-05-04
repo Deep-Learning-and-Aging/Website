@@ -64,9 +64,14 @@ def get_controls_videos():
 
 
 def get_controls_side_video(side):
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
+
     return [
-        get_item_radio_items(f"sex_{side}_video", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items(f"age_{side}_video", AGE_GROUP_LEGEND, "Select age group :"),
+        get_item_radio_items(f"sex_{side}_video", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_{side}_video", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
         get_drop_down(f"sample_{side}_video", SAMPLE_LEGEND, "Select sample :"),
     ]
 

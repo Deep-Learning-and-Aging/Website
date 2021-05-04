@@ -154,10 +154,18 @@ def get_controls_side_time_series_features(side):
     first_sub_subdimension = TREE_TIME_SERIES[first_dimension][first_subdimension][0]
     nb_channel = INFORMATION_TIME_SERIES[first_dimension][first_subdimension][first_sub_subdimension]["nb_channel"]
 
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
     return [
-        get_item_radio_items(f"sex_{side}_time_series_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items(f"age_group_{side}_time_series_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items(f"aging_rate_{side}_time_series_features", AGING_RATE_LEGEND, "Select aging rate :"),
+        get_item_radio_items(f"sex_{side}_time_series_features", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(
+            f"age_group_{side}_time_series_features", AGE_GROUP_LEGEND, "Select age group :", value_idx=1
+        ),
+        get_item_radio_items(
+            f"aging_rate_{side}_time_series_features", AGING_RATE_LEGEND, "Select aging rate :", value_idx=1
+        ),
         get_drop_down(f"sample_{side}_time_series_features", SAMPLE_LEGEND, "Select sample :"),
         get_drop_down(f"channel_{side}_time_series_features", range(nb_channel), "Select channel :", from_dict=False),
     ]
