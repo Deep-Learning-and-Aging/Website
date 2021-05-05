@@ -142,7 +142,9 @@ def _fill_graph_tab_category_multi(algorithm, correlation_type, data_category, d
     ).fillna(0)
     numbers_features_2d.rename(index=RENAME_DIMENSIONS, columns=RENAME_DIMENSIONS, inplace=True)
 
-    fig = create_dendrogram_heatmap(correlations_2d, numbers_features_2d, size_label_is_variable=False)
+    hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number features: %{customdata} <br><extra></extra>"
+
+    fig = create_dendrogram_heatmap(correlations_2d, hovertemplate, numbers_features_2d)
 
     fig.update_layout(
         {

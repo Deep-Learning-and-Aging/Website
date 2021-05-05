@@ -4,7 +4,7 @@ SAMPLE_DEFINITION = {
     "all_samples_when_possible_otherwise_average": "Participant and time when possible otherwise average",
 }
 
-ORDER_TYPES = {"clustering": "Clustering", "custom": "Custom", "r2": "r²"}
+ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "r²"}
 
 CUSTOM_ORDER = [
     "*",
