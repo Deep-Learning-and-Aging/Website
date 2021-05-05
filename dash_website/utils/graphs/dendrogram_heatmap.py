@@ -2,7 +2,7 @@ import numpy as np
 from plotly.graph_objs import Heatmap
 from plotly.figure_factory import create_dendrogram
 
-from dash_website.utils import BLUE_GREY_RED
+from dash_website.utils import BLUE_WHITE_RED
 
 
 def create_dendrogram_heatmap(correlations, hovertemplate, customdata=None):
@@ -32,7 +32,7 @@ def create_dendrogram_heatmap(correlations, hovertemplate, customdata=None):
         x=fig["layout"]["xaxis"]["tickvals"],
         y=fig["layout"]["xaxis"]["tickvals"],
         z=heat_correlations,
-        colorscale=BLUE_GREY_RED,
+        colorscale=BLUE_WHITE_RED,
         customdata=heat_customdata,
         hovertemplate=hovertemplate,
         zmin=-1,

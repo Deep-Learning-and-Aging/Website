@@ -8,11 +8,8 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_drop_down,
-    get_item_radio_items,
-    get_options,
-)
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website import DOWNLOAD_CONFIG
 from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, CORRELATION_TYPES
 from dash_website.xwas import SUBSET_METHODS, DISPLAY_MODE
 
@@ -39,7 +36,7 @@ def get_average_bars():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_average_test"),
-                                    dcc.Graph(id="graph_average"),
+                                    dcc.Graph(id="graph_average", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],

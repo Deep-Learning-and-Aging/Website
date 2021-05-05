@@ -10,6 +10,7 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_options
+from dash_website import DOWNLOAD_CONFIG
 from dash_website import CORRELATION_TYPES, ALGORITHMS_RENDERING
 from dash_website.feature_importances import TREE_SCALARS, BAR_PLOT_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
@@ -37,7 +38,7 @@ def get_layout():
                             [
                                 html.H3(id="title_scalars_features"),
                                 html.H5(id="sub_title_scalars_features"),
-                                dcc.Graph(id="bar_plot_scalars_features"),
+                                dcc.Graph(id="bar_plot_scalars_features", config=DOWNLOAD_CONFIG),
                             ]
                         ),
                         md=7,

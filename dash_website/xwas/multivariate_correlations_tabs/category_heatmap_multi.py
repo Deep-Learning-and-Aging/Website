@@ -11,7 +11,13 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, does_key_exists
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
+from dash_website import (
+    DOWNLOAD_CONFIG,
+    MAIN_CATEGORIES_TO_CATEGORIES,
+    RENAME_DIMENSIONS,
+    ALGORITHMS_RENDERING,
+    CORRELATION_TYPES,
+)
 
 
 def get_category_heatmap():
@@ -37,7 +43,7 @@ def get_category_heatmap():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_category_multi"),
-                                    dcc.Graph(id="graph_category_multi"),
+                                    dcc.Graph(id="graph_category_multi", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],

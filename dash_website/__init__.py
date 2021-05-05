@@ -170,3 +170,5 @@ ALGORITHMS_RENDERING = {
 }
 
 CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
+
+DOWNLOAD_CONFIG = {"toImageButtonOptions": {"format": "svg"}}

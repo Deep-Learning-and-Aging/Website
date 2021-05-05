@@ -10,7 +10,8 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
-from dash_website.utils import BLUE_GREY_RED
+from dash_website import DOWNLOAD_CONFIG
+from dash_website.utils import BLUE_WHITE_RED
 from dash_website.correlation_between import SAMPLE_DEFINITION, ORDER_TYPES, CUSTOM_ORDER
 
 
@@ -36,7 +37,7 @@ def get_custom_dimensions():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_custom_dimensions"),
-                                    dcc.Graph(id="graph_custom_dimensions"),
+                                    dcc.Graph(id="graph_custom_dimensions", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -122,7 +123,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
             x=[" - ".join(elem) for elem in sorted_table_correlations.columns.values],
             y=[" - ".join(elem) for elem in sorted_table_correlations.index.values],
             z=sorted_table_correlations,
-            colorscale=BLUE_GREY_RED,
+            colorscale=BLUE_WHITE_RED,
             customdata=sorted_customdata,
             hovertemplate=hovertemplate,
             zmin=-1,
@@ -143,7 +144,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
             x=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
             y=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
             z=sorted_table_correlations,
-            colorscale=BLUE_GREY_RED,
+            colorscale=BLUE_WHITE_RED,
             customdata=sorted_customdata,
             hovertemplate=hovertemplate,
             zmin=-1,

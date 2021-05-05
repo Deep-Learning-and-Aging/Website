@@ -8,16 +8,8 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_item_radio_items,
-    get_drop_down,
-    get_main_category_radio_items,
-    get_category_drop_down,
-    get_subset_method_radio_items,
-    get_correlation_type_radio_items,
-    get_options,
-)
-from dash_website import CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
 from dash_website.xwas import SUBSET_METHODS
 
 
@@ -43,7 +35,7 @@ def get_category_heatmap():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_category"),
-                                    dcc.Graph(id="graph_category"),
+                                    dcc.Graph(id="graph_category", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],

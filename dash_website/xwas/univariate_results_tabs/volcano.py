@@ -14,7 +14,7 @@ from dash_website.utils.controls import (
     get_options,
 )
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
 
@@ -28,7 +28,10 @@ def get_volcano():
             dbc.Row(
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col(dcc.Loading([html.H2("Volcano plot"), dcc.Graph(id="graph_volcano")]), md=9),
+                    dbc.Col(
+                        dcc.Loading([html.H2("Volcano plot"), dcc.Graph(id="graph_volcano", config=DOWNLOAD_CONFIG)]),
+                        md=9,
+                    ),
                 ]
             ),
             dbc.Row(
