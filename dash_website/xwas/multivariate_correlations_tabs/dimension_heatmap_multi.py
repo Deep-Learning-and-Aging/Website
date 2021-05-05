@@ -8,7 +8,8 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
+from dash_website.utils import BLUE_WHITE_RED
 
 
 def get_dimension_heatmap():
@@ -33,7 +34,7 @@ def get_dimension_heatmap():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_dimension_multi"),
-                                    dcc.Graph(id="graph_dimension_multi"),
+                                    dcc.Graph(id="graph_dimension_multi", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -83,7 +84,6 @@ def get_controls_tab_dimension_multi():
     ],
 )
 def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data_dimension):
-    from dash_website.utils.graphs.colorscale import get_colorscale
     import plotly.graph_objs as go
 
     correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "category"])
@@ -113,7 +113,7 @@ def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data
         x=correlations_2d.columns,
         y=correlations_2d.index,
         z=correlations_2d,
-        colorscale=get_colorscale(correlations_2d),
+        colorscale=BLUE_WHITE_RED,
         customdata=numbers_features_2d,
         hovertemplate=hovertemplate,
         zmin=-1,

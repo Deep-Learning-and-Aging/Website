@@ -9,7 +9,13 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
+from dash_website import (
+    DOWNLOAD_CONFIG,
+    MAIN_CATEGORIES_TO_CATEGORIES,
+    DIMENSIONS,
+    ALGORITHMS_RENDERING,
+    CORRELATION_TYPES,
+)
 from dash_website.xwas import BAR_PLOT_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
 
@@ -24,7 +30,13 @@ def get_layout():
                 [
                     dbc.Col([get_controls_features(), html.Br(), html.Br(), get_controls_table_features()], md=5),
                     dbc.Col(
-                        dcc.Loading([html.H2(id="title_feature_importances"), dcc.Graph(id="bar_plot_features")]), md=7
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_feature_importances"),
+                                dcc.Graph(id="bar_plot_features", config=DOWNLOAD_CONFIG),
+                            ]
+                        ),
+                        md=7,
                     ),
                 ]
             ),

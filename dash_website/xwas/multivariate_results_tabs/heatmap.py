@@ -9,7 +9,8 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.controls import get_item_radio_items
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website.utils import BLUE_WHITE_RED
 
 
 def get_heatmap():
@@ -22,7 +23,11 @@ def get_heatmap():
                 [
                     dbc.Col([get_controls_tab_heatmap(), html.Br(), html.Br()], md=3),
                     dbc.Col(
-                        [dcc.Loading([html.H2(id="title_heatmap"), dcc.Graph(id="heatmap_heatmap")])],
+                        [
+                            dcc.Loading(
+                                [html.H2(id="title_heatmap"), dcc.Graph(id="heatmap_heatmap", config=DOWNLOAD_CONFIG)]
+                            )
+                        ],
                         style={"overflowX": "scroll", "width": 1000},
                         md=9,
                     ),
@@ -54,7 +59,7 @@ def get_controls_tab_heatmap():
                 "Select an Algorithm :",
             ),
             html.Div(
-                [dcc.Loading(dcc.Graph(id="pie_chart_heatmap"))],
+                [dcc.Loading(dcc.Graph(id="pie_chart_heatmap", config=DOWNLOAD_CONFIG))],
                 id="div_pie_chart_heatmap",
                 style={"display": "none"},
             ),
@@ -72,7 +77,6 @@ def get_controls_tab_heatmap():
     [Input("main_category_heatmap", "value"), Input("algorithm_heatmap", "value"), Input("memory_scores", "data")],
 )
 def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
-    from dash_website.utils.graphs.colorscale import get_colorscale
     import plotly.graph_objs as go
 
     if algorithm == "best_algorithm":
@@ -124,7 +128,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         x=r2_2d.columns,
         y=r2_2d.index,
         z=r2_2d,
-        colorscale=get_colorscale(r2_2d),
+        colorscale=BLUE_WHITE_RED,
         customdata=customdata,
         hovertemplate=hovertemplate,
         zmax=1,

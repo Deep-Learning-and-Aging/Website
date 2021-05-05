@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING
 
 
 def get_bar_plot():
@@ -23,7 +23,14 @@ def get_bar_plot():
                 [
                     dbc.Col([get_controls_tab_bar_plot(), html.Br(), html.Br()], md=3),
                     dbc.Col(
-                        [dcc.Loading([html.H2(id="title_bar_plot"), dcc.Graph(id="bar_plot_bar_plot")])],
+                        [
+                            dcc.Loading(
+                                [
+                                    html.H2(id="title_bar_plot"),
+                                    dcc.Graph(id="bar_plot_bar_plot", config=DOWNLOAD_CONFIG),
+                                ]
+                            )
+                        ],
                         style={"overflowX": "scroll", "width": 1000},
                         md=9,
                     ),

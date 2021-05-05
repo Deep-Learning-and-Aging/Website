@@ -10,6 +10,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import (
     TREE_TIME_SERIES,
     INFORMATION_TIME_SERIES,
@@ -41,7 +42,7 @@ def get_layout():
                         dcc.Loading(
                             [
                                 html.H3(id="title_left_time_series"),
-                                dcc.Graph(id="time_series_left_time_series"),
+                                dcc.Graph(id="time_series_left_time_series", config=DOWNLOAD_CONFIG),
                             ]
                         ),
                         style={"width": 6},
@@ -50,7 +51,7 @@ def get_layout():
                         dcc.Loading(
                             [
                                 html.H3(id="title_right_time_series"),
-                                dcc.Graph(id="time_series_right_time_series"),
+                                dcc.Graph(id="time_series_right_time_series", config=DOWNLOAD_CONFIG),
                             ]
                         ),
                         style={"width": 6},

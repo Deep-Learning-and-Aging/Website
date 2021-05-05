@@ -13,6 +13,7 @@ from sklearn.linear_model import LinearRegression
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_range_slider, get_options
+from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import TREE_SCALARS, ETHNICITIES, SEX_VALUE, SEX_COLOR
 
 
@@ -30,7 +31,7 @@ def get_layout():
                 dcc.Loading(
                     [
                         html.H4(id="title_distribution_scalars"),
-                        dcc.Graph(id="figure_distribution_scalars"),
+                        dcc.Graph(id="figure_distribution_scalars", config=DOWNLOAD_CONFIG),
                     ]
                 ),
                 justify="center",
@@ -40,7 +41,7 @@ def get_layout():
                     [
                         html.H4(id="title_values_scalars"),
                         html.H6(id="subtitle_values_scalars"),
-                        dcc.Graph(id="figure_values_scalars"),
+                        dcc.Graph(id="figure_values_scalars", config=DOWNLOAD_CONFIG),
                     ]
                 ),
                 justify="center",
@@ -49,7 +50,7 @@ def get_layout():
                 dcc.Loading(
                     [
                         html.H4(id="title_volcano_scalars"),
-                        dcc.Graph(id="figure_volcano_scalars"),
+                        dcc.Graph(id="figure_volcano_scalars", config=DOWNLOAD_CONFIG),
                     ]
                 ),
                 justify="center",
