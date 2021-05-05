@@ -18,12 +18,12 @@ DICT_TO_CHANGE_DIMENSIONS = {"ImmuneSystem": "BloodCells"}
 
 
 if __name__ == "__main__":
-    for data_type in ["instances", "eids"]:
+    for sample_definition in ["instances", "eids"]:
         correlations_raw_ = load_csv(
-            f"page4_correlations/ResidualsCorrelations/ResidualsCorrelations_{data_type}_Age_test.csv"
+            f"page4_correlations/ResidualsCorrelations/ResidualsCorrelations_{sample_definition}_Age_test.csv"
         )
         correlations_std_raw_ = load_csv(
-            f"page4_correlations/ResidualsCorrelations/ResidualsCorrelations_sd_{data_type}_Age_test.csv"
+            f"page4_correlations/ResidualsCorrelations/ResidualsCorrelations_sd_{sample_definition}_Age_test.csv"
         )
 
         correlations_raw = correlations_raw_.melt(
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         correlations["correlation_std"] = correlations_std_raw["correlation"]
 
         scores_raw = load_csv(
-            f"page2_predictions/Performances/PERFORMANCES_withEnsembles_alphabetical_{data_type}_Age_test.csv"
+            f"page2_predictions/Performances/PERFORMANCES_withEnsembles_alphabetical_{sample_definition}_Age_test.csv"
         )[COLUMNS_TO_TAKE].rename(columns=COLUMNS_TO_TAKE)
         scores_raw.set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"], inplace=True)
 
@@ -102,8 +102,8 @@ if __name__ == "__main__":
             "sub_subdimension_2",
         ] = "DXA"
 
-        correlations.replace({"ImmuneSystem": "BloodCells"}).to_feather(
-            f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING[data_type]}.feather"
+        correlations.replace(DICT_TO_CHANGE_DIMENSIONS).to_feather(
+            f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING[sample_definition]}.feather"
         )
 
     correlation_all_samples_per_participant = pd.read_feather(

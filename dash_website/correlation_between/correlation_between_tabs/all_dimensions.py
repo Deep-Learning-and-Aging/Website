@@ -9,6 +9,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down
+from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
 from dash_website.utils import BLUE_GREY_RED
 from dash_website.correlation_between import SAMPLE_DEFINITION, ORDER_TYPES, CUSTOM_ORDER
 
@@ -126,12 +127,15 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
             .index.drop_duplicates()
         )
 
+        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
+        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
+
         heatmap = go.Heatmap(
-            x=[" - ".join(elem) for elem in table_correlations.columns.values],
-            y=[" - ".join(elem) for elem in table_correlations.index.values],
-            z=table_correlations.loc[sorted_dimensions, sorted_dimensions],
+            x=[" - ".join(elem) for elem in sorted_table_correlations],
+            y=[" - ".join(elem) for elem in sorted_table_correlations],
+            z=sorted_table_correlations,
             colorscale=BLUE_GREY_RED,
-            customdata=customdata.loc[sorted_dimensions, sorted_dimensions],
+            customdata=sorted_customdata,
             hovertemplate=hovertemplate,
             zmin=-1,
             zmax=1,
@@ -149,12 +153,15 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         else:
             sorted_dimensions = [selected_dimension]
 
+        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
+        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
+
         heatmap = go.Heatmap(
-            x=np.arange(5, 10 * table_correlations.shape[1] + 5, 10),
-            y=np.arange(5, 10 * table_correlations.shape[1] + 5, 10),
-            z=table_correlations.loc[sorted_dimensions, sorted_dimensions],
+            x=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
+            y=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
+            z=sorted_table_correlations,
             colorscale=BLUE_GREY_RED,
-            customdata=customdata.loc[sorted_dimensions, sorted_dimensions],
+            customdata=sorted_customdata,
             hovertemplate=hovertemplate,
             zmin=-1,
             zmax=1,
@@ -164,24 +171,17 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
 
         fig.update_layout(
             xaxis={
-                "tickvals": np.arange(5, 10 * table_correlations.shape[1] + 5, 10),
-                "ticktext": [
-                    " - ".join(elem)
-                    for elem in table_correlations.loc[sorted_dimensions, sorted_dimensions].columns.values
-                ],
+                "tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
+                "ticktext": [" - ".join(elem) for elem in sorted_table_correlations.columns.values],
             },
             yaxis={
-                "tickvals": np.arange(5, 10 * table_correlations.shape[0] + 5, 10),
-                "ticktext": [
-                    " - ".join(elem)
-                    for elem in table_correlations.loc[sorted_dimensions, sorted_dimensions].index.values
-                ],
+                "tickvals": np.arange(5, 10 * sorted_table_correlations.shape[0] + 5, 10),
+                "ticktext": [" - ".join(elem) for elem in sorted_table_correlations.index.values],
             },
         )
 
         dimensions = (
-            table_correlations.loc[sorted_dimensions, sorted_dimensions]
-            .index.to_frame()[["dimension_1", "subdimension_1", "sub_subdimension_1"]]
+            sorted_table_correlations.index.to_frame()[["dimension_1", "subdimension_1", "sub_subdimension_1"]]
             .reset_index(drop=True)
             .rename(
                 columns={
@@ -331,37 +331,4 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     return (
         fig,
         f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation_std'].std().round(3)}",
-    )
-
-
-def add_line_and_annotation(
-    text, first_axis, second_axis, min_position, max_position, inner_margin, outer_margin, textangle, size, final=False
-):
-    if not final:
-        to_match_heatmap = -10 / 2
-        position = min_position
-    else:
-        to_match_heatmap = +10 / 2
-        position = max_position
-    return (
-        {
-            "type": "line",
-            "xref": "x",
-            "yref": "y",
-            f"{first_axis}0": float(position + to_match_heatmap),
-            f"{second_axis}0": inner_margin,
-            f"{first_axis}1": float(position + to_match_heatmap),
-            f"{second_axis}1": outer_margin,
-            "line": {"color": "Black", "width": 0.5},
-        },
-        {
-            "text": text,
-            "xref": "x",
-            "yref": "y",
-            first_axis: float((min_position + max_position) / 2),
-            second_axis: (inner_margin + outer_margin) / 2,
-            "showarrow": False,
-            "textangle": textangle,
-            "font": {"size": size},
-        },
     )
