@@ -4,8 +4,6 @@ SAMPLE_DEFINITION = {
     "all_samples_when_possible_otherwise_average": "Participant and time when possible otherwise average",
 }
 
-DIMENSION_SELECTION = {"all_dimensions": "All dimensions", "custom_selection": "Custom selection"}
-
 ORDER_TYPES = {"clustering": "Clustering", "custom": "Custom", "r2": "r²"}
 
 CUSTOM_ORDER = [

@@ -9,15 +9,14 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down
-from dash_website import DIMENSIONS
 from dash_website.utils import BLUE_GREY_RED
-from dash_website.correlation_between import DIMENSION_SELECTION, SAMPLE_DEFINITION, ORDER_TYPES, CUSTOM_ORDER
+from dash_website.correlation_between import SAMPLE_DEFINITION, ORDER_TYPES, CUSTOM_ORDER
 
 
-def get_heatmap():
+def get_all_dimensions():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_heatmap")),
+            dcc.Loading(dcc.Store(id="memory_all_dimensions")),
             html.H1("Correlation between accelerated aging dimensions"),
             html.Br(),
             html.Br(),
@@ -25,7 +24,7 @@ def get_heatmap():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_heatmap(),
+                            get_controls_tab_all_dimensions(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -35,8 +34,8 @@ def get_heatmap():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_heatmap"),
-                                    dcc.Graph(id="graph_heatmap"),
+                                    html.H2(id="title_all_dimensions"),
+                                    dcc.Graph(id="graph_all_dimensions"),
                                 ]
                             )
                         ],
@@ -51,58 +50,45 @@ def get_heatmap():
 
 
 @APP.callback(
-    Output("memory_heatmap", "data"),
-    [Input("dimension_selection_heatmap", "value"), Input("sample_definition_heatmap", "value")],
+    Output("memory_all_dimensions", "data"),
+    Input("sample_definition_all_dimensions", "value"),
 )
-def _modify_store_heatmap(dimension_selection, sample_definition):
+def _modify_store_all_dimensions(sample_definition):
     return load_feather(
-        f"correlation_between_accelerated_aging_dimensions/{dimension_selection}_{sample_definition}.feather"
+        f"correlation_between_accelerated_aging_dimensions/all_dimensions_{sample_definition}.feather"
     ).to_dict()
 
 
-def get_controls_tab_heatmap():
+def get_controls_tab_all_dimensions():
     return dbc.Card(
         [
-            get_item_radio_items("dimension_selection_heatmap", DIMENSION_SELECTION, "Select select dimensions: "),
-            get_item_radio_items("sample_definition_heatmap", SAMPLE_DEFINITION, "Select the way we define a sample: "),
-            get_item_radio_items("order_type_heatmap", ORDER_TYPES, "Order by:"),
-            html.Div(
-                [
-                    get_drop_down(
-                        "dimension_heatmap",
-                        ["all"]
-                        + list(pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"])),
-                        "Select an aging dimension: ",
-                        from_dict=False,
-                    )
-                ],
-                id="hiden_dimension_heatmap",
-                style={"display": "none"},
+            get_item_radio_items(
+                "sample_definition_all_dimensions", SAMPLE_DEFINITION, "Select the way we define a sample: "
+            ),
+            get_item_radio_items("order_type_all_dimensions", ORDER_TYPES, "Order by:"),
+            get_drop_down(
+                "dimension_all_dimensions",
+                ["all"] + list(pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"])),
+                "Select an aging dimension: ",
+                from_dict=False,
             ),
         ]
     )
 
 
 @APP.callback(
-    Output("hiden_dimension_heatmap", component_property="style"),
-    Input("dimension_selection_heatmap", "value"),
+    [Output("graph_all_dimensions", "figure"), Output("title_all_dimensions", "children")],
+    [
+        Input("order_type_all_dimensions", "value"),
+        Input("dimension_all_dimensions", "value"),
+        Input("memory_all_dimensions", "data"),
+    ],
 )
-def _change_controls_dimension(dimension_selection):
-    if dimension_selection == "all_dimensions":
-        return {"display": "block"}
-    else:
-        return {"display": "none"}
-
-
-@APP.callback(
-    [Output("graph_heatmap", "figure"), Output("title_heatmap", "children")],
-    [Input("order_type_heatmap", "value"), Input("dimension_heatmap", "value"), Input("memory_heatmap", "data")],
-)
-def _fill_graph_tab_heatmap(order_by, selected_dimension, data_heatmap):
+def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimensions):
     from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
     import plotly.graph_objs as go
 
-    correlations = pd.DataFrame(data_heatmap)
+    correlations = pd.DataFrame(data_all_dimensions)
     if selected_dimension != "all":
         correlations = correlations[
             (correlations["dimension_1"] == selected_dimension) & (correlations["dimension_2"] == selected_dimension)

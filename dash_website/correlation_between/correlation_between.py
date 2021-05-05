@@ -3,8 +3,8 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from dash_website.correlation_between.correlation_between_tabs.heatmap import get_heatmap
-from dash_website.correlation_between.correlation_between_tabs.clustering import get_clustering
+from dash_website.correlation_between.correlation_between_tabs.all_dimensions import get_all_dimensions
+from dash_website.correlation_between.correlation_between_tabs.custom_dimensions import get_custom_dimensions
 
 
 def get_layout():
@@ -12,11 +12,11 @@ def get_layout():
         [
             dbc.Tabs(
                 [
-                    dbc.Tab(label="Select Heatmap", tab_id="tab_heatmap_correlation_between"),
-                    dbc.Tab(label="Select Clustering", tab_id="tab_clustering_correlation_between"),
+                    dbc.Tab(label="Select all dimensions", tab_id="tab_all_dimensions_correlation_between"),
+                    dbc.Tab(label="Select custom dimensions", tab_id="tab_custom_dimensions_correlation_between"),
                 ],
                 id="tab_manager_correlation_between",
-                active_tab="tab_heatmap_correlation_between",
+                active_tab="tab_all_dimensions_correlation_between",
             ),
             html.Div(id="tab_content_correlation_between"),
         ]
@@ -29,7 +29,7 @@ def get_layout():
 def _fill_tab(
     active_tab,
 ):
-    if active_tab == "tab_heatmap_correlation_between":
-        return get_heatmap()
+    if active_tab == "tab_all_dimensions_correlation_between":
+        return get_all_dimensions()
     else:  # active_tab == "tab_clustering_correlation_between":
-        return get_clustering()
+        return get_custom_dimensions()

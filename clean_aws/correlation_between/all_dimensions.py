@@ -4,7 +4,7 @@ from dash_website.utils.aws_loader import load_csv
 DATA_TYPE_NAMING = {
     "instances": "all_samples_per_participant",
     "eids": "average_per_participant",
-    "*": "all_possible_samples",
+    "*": "all_samples_when_possible_otherwise_average",
 }
 COLUMNS_TO_TAKE = {
     "organ": "dimension",
@@ -105,3 +105,43 @@ if __name__ == "__main__":
         correlations.replace({"ImmuneSystem": "BloodCells"}).to_feather(
             f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING[data_type]}.feather"
         )
+
+    correlation_all_samples_per_participant = pd.read_feather(
+        f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_all_samples_per_participant.feather"
+    ).set_index(
+        [
+            "dimension_1",
+            "subdimension_1",
+            "sub_subdimension_1",
+            "algorithm_1",
+            "dimension_2",
+            "subdimension_2",
+            "sub_subdimension_2",
+            "algorithm_2",
+        ]
+    )
+    correlation_average_per_participant = pd.read_feather(
+        f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_average_per_participant.feather"
+    ).set_index(
+        [
+            "dimension_1",
+            "subdimension_1",
+            "sub_subdimension_1",
+            "algorithm_1",
+            "dimension_2",
+            "subdimension_2",
+            "sub_subdimension_2",
+            "algorithm_2",
+        ]
+    )
+
+    index_to_replace = correlation_all_samples_per_participant[
+        correlation_all_samples_per_participant["correlation"].isna()
+    ].index
+    all_samples_when_possible_otherwise_average = correlation_all_samples_per_participant.copy()
+    all_samples_when_possible_otherwise_average.loc[index_to_replace] = correlation_average_per_participant.loc[
+        index_to_replace
+    ]
+    all_samples_when_possible_otherwise_average.reset_index().to_feather(
+        f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING['*']}.feather"
+    )
