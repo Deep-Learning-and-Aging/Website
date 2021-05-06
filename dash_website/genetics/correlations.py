@@ -12,21 +12,21 @@ from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG
 from dash_website.utils import BLUE_WHITE_RED
-from dash_website.correlation_between import SAMPLE_DEFINITION, ORDER_TYPES, CUSTOM_ORDER
+from dash_website.correlation_between import ORDER_TYPES, CUSTOM_ORDER
 
 
-def get_custom_dimensions():
+def get_layout():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_custom_dimensions")),
-            html.H1("Correlation between accelerated aging dimensions"),
+            dcc.Loading(dcc.Store(id="memory_genetics_correlations", data=get_data())),
+            html.H1("Genetics - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_custom_dimensions(),
+                            get_controls_tab_genetics_correlations(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -36,8 +36,8 @@ def get_custom_dimensions():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_custom_dimensions"),
-                                    dcc.Graph(id="graph_custom_dimensions", config=DOWNLOAD_CONFIG),
+                                    html.H2(id="title_genetics_correlations"),
+                                    dcc.Graph(id="graph_genetics_correlations", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -51,39 +51,26 @@ def get_custom_dimensions():
     )
 
 
-@APP.callback(
-    Output("memory_custom_dimensions", "data"),
-    Input("sample_definition_custom_dimensions", "value"),
-)
-def _modify_store_custom_dimensions(sample_definition):
-    return load_feather(
-        f"correlation_between_accelerated_aging_dimensions/custom_dimensions_{sample_definition}.feather"
-    ).to_dict()
+def get_data():
+    return load_feather(f"genetics/correlations/correlations.feather").to_dict()
 
 
-def get_controls_tab_custom_dimensions():
-    return dbc.Card(
-        [
-            get_item_radio_items(
-                "sample_definition_custom_dimensions", SAMPLE_DEFINITION, "Select the way we define a sample: "
-            ),
-            get_item_radio_items("order_type_custom_dimensions", ORDER_TYPES, "Order by:"),
-        ]
-    )
+def get_controls_tab_genetics_correlations():
+    return dbc.Card(get_item_radio_items("order_type_genetics_correlations", ORDER_TYPES, "Order by:"))
 
 
 @APP.callback(
-    [Output("graph_custom_dimensions", "figure"), Output("title_custom_dimensions", "children")],
+    [Output("graph_genetics_correlations", "figure"), Output("title_genetics_correlations", "children")],
     [
-        Input("order_type_custom_dimensions", "value"),
-        Input("memory_custom_dimensions", "data"),
+        Input("order_type_genetics_correlations", "value"),
+        Input("memory_genetics_correlations", "data"),
     ],
 )
-def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
+def _fill_graph_tab_custom_dimensions(order_by, data_genetics_correlations):
     from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
     import plotly.graph_objs as go
 
-    correlations = pd.DataFrame(data_custom_dimensions)
+    correlations = pd.DataFrame(data_genetics_correlations)
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],
@@ -92,7 +79,17 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
     )
 
     customdata_list = []
-    for customdata_item in ["correlation_std", "r2_1", "r2_std_1", "r2_2", "r2_std_2"]:
+    for customdata_item in [
+        "correlation_std",
+        "r2_1",
+        "r2_std_1",
+        "h2_1",
+        "h2_std_1",
+        "r2_2",
+        "r2_std_2",
+        "h2_2",
+        "h2_std_2",
+    ]:
         customdata_list.append(
             correlations.pivot(
                 index=["dimension_1", "subdimension_1"],
@@ -105,11 +102,11 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
     customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>r²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>r²: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
 
-    if order_by == "clustering":
+    if order_by == "clustering" or 0 != 0:
         fig = create_dendrogram_heatmap(table_correlations, hovertemplate, customdata)
-    elif order_by == "r2":
+    elif order_by == "r2" or 0 != 0:
         sorted_dimensions = (
             correlations.set_index(["dimension_1", "subdimension_1"])
             .sort_values(by="r2_1", ascending=False)
