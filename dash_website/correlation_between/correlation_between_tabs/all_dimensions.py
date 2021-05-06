@@ -331,5 +331,5 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
 
     return (
         fig,
-        f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation_std'].std().round(3)}",
+        f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
     )

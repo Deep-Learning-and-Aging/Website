@@ -107,9 +107,9 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>r²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
-    if order_by == "clustering" or 0 != 0:
+    if order_by == "clustering":
         fig = create_dendrogram_heatmap(table_correlations, hovertemplate, customdata)
-    elif order_by == "r2" or 0 != 0:
+    elif order_by == "r2":
         sorted_dimensions = (
             correlations.set_index(["dimension_1", "subdimension_1"])
             .sort_values(by="r2_1", ascending=False)
@@ -250,10 +250,9 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
 
         fig["layout"]["shapes"] = lines
         fig["layout"]["annotations"] = annotations
-
-    if order_by == "custom":
         fig.update_layout(yaxis={"showticklabels": False}, xaxis={"showticklabels": False})
-    else:
+
+    if order_by != "custom":
         fig.update_layout(font={"size": 8})
 
     fig.update_layout(
@@ -265,5 +264,5 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
 
     return (
         fig,
-        f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation_std'].std().round(3)}",
+        f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
     )

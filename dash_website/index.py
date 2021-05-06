@@ -7,10 +7,8 @@ from dash.dependencies import Input, Output
 from dash_website.app import APP
 from dash_website.pages import (
     page2,
-    page4,
     page10,
     page11,
-    page17,
 )
 
 
@@ -82,16 +80,13 @@ def get_top_bar():
                             id="correlation_between",
                         )
                     ),
-                    dbc.NavItem(
-                        dbc.NavLink(
-                            "Correlation between accelerated aging dimensions bis", href="/pages/page4", id="page4-link"
-                        )
-                    ),
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem("Genetics - GWAS", href="/pages/page10", id="page10-link"),
                             dbc.DropdownMenuItem("Genetics - Heritability", href="/pages/page11", id="page11-link"),
-                            dbc.DropdownMenuItem("Genetics - Correlation", href="/pages/page17", id="page17-link"),
+                            dbc.DropdownMenuItem(
+                                "Genetics - Correlation", href="/genetics/correlations", id="genetics_correlations"
+                            ),
                         ],
                         label="Genetics",
                         nav=True,
@@ -169,6 +164,10 @@ def display_page(pathname):
         return get_layout()
     elif "correlation_between" == pathname.split("/")[1]:
         from dash_website.correlation_between.correlation_between import get_layout
+
+        return get_layout()
+    elif "genetics" == pathname.split("/")[1]:
+        from dash_website.genetics.correlations import get_layout
 
         return get_layout()
     elif "xwas" == pathname.split("/")[1]:
