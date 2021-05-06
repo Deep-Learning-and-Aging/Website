@@ -2,12 +2,7 @@ import pandas as pd
 from dash_website.utils.aws_loader import load_csv
 
 
-COLUMNS_TO_TAKE = {
-    "organ": "dimension",
-    "view": "subdimension",
-    "R-Squared_all": "r2",
-    "R-Squared_sd_all": "r2_std",
-}
+COLUMNS_TO_TAKE = {"organ": "dimension", "view": "subdimension", "R-Squared_all": "r2", "R-Squared_sd_all": "r2_std"}
 DICT_TO_CHANGE_DIMENSIONS = {"ImmuneSystem": "BloodCells"}
 
 

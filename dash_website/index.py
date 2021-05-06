@@ -8,7 +8,6 @@ from dash_website.app import APP
 from dash_website.pages import (
     page2,
     page10,
-    page11,
 )
 
 
@@ -83,7 +82,9 @@ def get_top_bar():
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem("Genetics - GWAS", href="/pages/page10", id="page10-link"),
-                            dbc.DropdownMenuItem("Genetics - Heritability", href="/pages/page11", id="page11-link"),
+                            dbc.DropdownMenuItem(
+                                "Genetics - Heritability", href="/genetics/heritability", id="genetics_heritability"
+                            ),
                             dbc.DropdownMenuItem(
                                 "Genetics - Correlation", href="/genetics/correlations", id="genetics_correlations"
                             ),
@@ -167,7 +168,10 @@ def display_page(pathname):
 
         return get_layout()
     elif "genetics" == pathname.split("/")[1]:
-        from dash_website.genetics.correlations import get_layout
+        if "correlations" == pathname.split("/")[2]:
+            from dash_website.genetics.correlations import get_layout
+        elif "heritability" == pathname.split("/")[2]:
+            from dash_website.genetics.heritability import get_layout
 
         return get_layout()
     elif "xwas" == pathname.split("/")[1]:

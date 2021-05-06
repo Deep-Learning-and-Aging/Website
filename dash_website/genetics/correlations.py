@@ -10,9 +10,8 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
-from dash_website import DOWNLOAD_CONFIG
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
 from dash_website.utils import BLUE_WHITE_RED
-from dash_website.correlation_between import ORDER_TYPES, CUSTOM_ORDER
 
 
 def get_layout():
@@ -26,7 +25,7 @@ def get_layout():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_genetics_correlations(),
+                            get_controls_genetics_correlations(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -55,7 +54,7 @@ def get_data():
     return load_feather(f"genetics/correlations/correlations.feather").to_dict()
 
 
-def get_controls_tab_genetics_correlations():
+def get_controls_genetics_correlations():
     return dbc.Card(get_item_radio_items("order_type_genetics_correlations", ORDER_TYPES, "Order by:"))
 
 
@@ -66,7 +65,7 @@ def get_controls_tab_genetics_correlations():
         Input("memory_genetics_correlations", "data"),
     ],
 )
-def _fill_graph_tab_custom_dimensions(order_by, data_genetics_correlations):
+def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
     from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
     import plotly.graph_objs as go
 
@@ -104,9 +103,9 @@ def _fill_graph_tab_custom_dimensions(order_by, data_genetics_correlations):
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>r²: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
 
-    if order_by == "clustering" or 0 != 0:
+    if order_by == "clustering":
         fig = create_dendrogram_heatmap(table_correlations, hovertemplate, customdata)
-    elif order_by == "r2" or 0 != 0:
+    elif order_by == "r2":
         sorted_dimensions = (
             correlations.set_index(["dimension_1", "subdimension_1"])
             .sort_values(by="r2_1", ascending=False)
@@ -151,14 +150,8 @@ def _fill_graph_tab_custom_dimensions(order_by, data_genetics_correlations):
         fig = go.Figure(heatmap)
 
         fig.update_layout(
-            xaxis={
-                "tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
-                "ticktext": [" - ".join(elem) for elem in sorted_table_correlations.columns.values],
-            },
-            yaxis={
-                "tickvals": np.arange(5, 10 * sorted_table_correlations.shape[0] + 5, 10),
-                "ticktext": [" - ".join(elem) for elem in sorted_table_correlations.index.values],
-            },
+            xaxis={"tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10)},
+            yaxis={"tickvals": np.arange(5, 10 * sorted_table_correlations.shape[0] + 5, 10)},
         )
 
         dimensions = (

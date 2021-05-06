@@ -172,3 +172,23 @@ ALGORITHMS_RENDERING = {
 CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
 
 DOWNLOAD_CONFIG = {"toImageButtonOptions": {"format": "svg"}}
+
+ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "r²"}
+
+CUSTOM_ORDER = [
+    "*",
+    "*instances01",
+    "*instances1.5x",
+    "*instances23",
+    "Brain",
+    "Eyes",
+    "Hearing",
+    "Lungs",
+    "Arterial",
+    "Heart",
+    "Abdomen",
+    "Musculoskeletal",
+    "PhysicalActivity",
+    "Biochemistry",
+    "BloodCells",
+]
