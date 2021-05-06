@@ -8,7 +8,7 @@ COLUMNS_TO_TAKE = {
     "R-Squared_sd_all": "r2_std",
 }
 
-DATA_TYPE_NAMING = {
+SAMPLE_DEFINITION_NAMING = {
     "instances": "all_samples_per_participant",
     "eids": "average_per_participant",
     "*": "all_samples_when_possible_otherwise_average",
@@ -115,7 +115,7 @@ if __name__ == "__main__":
         correlations["correlation_std"] = correlations_std_raw["correlation_std"]
 
         correlations.reset_index(drop=True).replace(DICT_TO_CHANGE_DIMENSIONS).to_feather(
-            f"all_data/correlation_between_accelerated_aging_dimensions/custom_dimensions_{DATA_TYPE_NAMING[sample_definition]}.feather"
+            f"all_data/correlation_between_accelerated_aging_dimensions/custom_dimensions_{SAMPLE_DEFINITION_NAMING[sample_definition]}.feather"
         )
 
     correlation_all_samples_per_participant = pd.read_feather(
@@ -147,5 +147,5 @@ if __name__ == "__main__":
         index_to_replace
     ]
     all_samples_when_possible_otherwise_average.reset_index().to_feather(
-        f"all_data/correlation_between_accelerated_aging_dimensions/custom_dimensions_{DATA_TYPE_NAMING['*']}.feather"
+        f"all_data/correlation_between_accelerated_aging_dimensions/custom_dimensions_{SAMPLE_DEFINITION_NAMING['*']}.feather"
     )

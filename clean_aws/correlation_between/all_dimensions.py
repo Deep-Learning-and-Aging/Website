@@ -1,7 +1,7 @@
 import pandas as pd
 from dash_website.utils.aws_loader import load_csv
 
-DATA_TYPE_NAMING = {
+SAMPLE_DEFINITION_NAMING = {
     "instances": "all_samples_per_participant",
     "eids": "average_per_participant",
     "*": "all_samples_when_possible_otherwise_average",
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         ] = "DXA"
 
         correlations.replace(DICT_TO_CHANGE_DIMENSIONS).to_feather(
-            f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING[sample_definition]}.feather"
+            f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{SAMPLE_DEFINITION_NAMING[sample_definition]}.feather"
         )
 
     correlation_all_samples_per_participant = pd.read_feather(
@@ -143,5 +143,5 @@ if __name__ == "__main__":
         index_to_replace
     ]
     all_samples_when_possible_otherwise_average.reset_index().to_feather(
-        f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{DATA_TYPE_NAMING['*']}.feather"
+        f"all_data/correlation_between_accelerated_aging_dimensions/all_dimensions_{SAMPLE_DEFINITION_NAMING['*']}.feather"
     )
