@@ -25,7 +25,7 @@
 		"editor.fontFamily": "Fira Code",
 		"python.languageServer": "Pylance",
 		"python.analysis.typeCheckingMode": "basic",
-		"window.zoomLevel": 3.5,
+		"window.zoomLevel": 3.3,
 		"editor.fontSize": 15,
 		"terminal.integrated.fontWeight": null,
 		"editor.minimap.enabled": false,
