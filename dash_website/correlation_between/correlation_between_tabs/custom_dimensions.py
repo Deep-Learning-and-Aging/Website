@@ -198,8 +198,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
                 annotations.append(annotation)
 
                 for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-                    subdimension_inner_margin = 0
-                    subdimension_outer_margin = -30
+                    subdimension_margin = 0
 
                     submin_position = dimensions.loc[(dimension, subdimension)].min()
                     submax_position = dimensions.loc[(dimension, subdimension)].max()
@@ -216,8 +215,8 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
                             second_axis,
                             submin_position,
                             submax_position,
-                            subdimension_inner_margin,
-                            subdimension_outer_margin,
+                            subdimension_margin,
+                            dimension_inner_margin,
                             textangle,
                             8,
                         )

@@ -226,11 +226,9 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
 
                 for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
                     if selected_dimension == "all":
-                        subdimension_inner_margin = 0
-                        subdimension_outer_margin = -400
+                        subdimension_margin = 0
                     else:
-                        subdimension_inner_margin = -200
-                        subdimension_outer_margin = -400
+                        subdimension_margin = -200
 
                     submin_position = dimensions.loc[(dimension, subdimension)].min()
                     submax_position = dimensions.loc[(dimension, subdimension)].max()
@@ -247,8 +245,8 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             second_axis,
                             submin_position,
                             submax_position,
-                            subdimension_inner_margin,
-                            subdimension_outer_margin,
+                            subdimension_margin,
+                            dimension_inner_margin,
                             textangle,
                             8,
                         )
@@ -264,8 +262,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             .index.get_level_values("sub_subdimension")
                             .drop_duplicates()
                         ):
-                            sub_subdimension_inner_margin = 0
-                            sub_subdimension_outer_margin = -200
+                            sub_subdimension_margin = 0
 
                             sub_submin_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].min()
                             sub_submax_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].max()
@@ -282,8 +279,8 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                                     second_axis,
                                     sub_submin_position,
                                     sub_submax_position,
-                                    sub_subdimension_inner_margin,
-                                    sub_subdimension_outer_margin,
+                                    sub_subdimension_margin,
+                                    subdimension_margin,
                                     textangle,
                                     8,
                                 )

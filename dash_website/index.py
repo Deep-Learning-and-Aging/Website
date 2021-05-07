@@ -5,10 +5,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 from dash_website.app import APP
-from dash_website.pages import (
-    page2,
-    page10,
-)
+from dash_website.pages import page10
 
 
 def get_server():
@@ -58,7 +55,6 @@ def get_top_bar():
                             id="age_prediction_performances",
                         )
                     ),
-                    dbc.NavItem(dbc.NavLink("Age prediction performances bis", href="/pages/page2", id="page2-link")),
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem(
@@ -88,7 +84,8 @@ def get_top_bar():
                     ),
                     dbc.DropdownMenu(
                         [
-                            dbc.DropdownMenuItem("Genetics - GWAS", href="/pages/page10", id="page10-link"),
+                            dbc.DropdownMenuItem("Genetics - GWAS", href="/genetics/gwas", id="genetics_gwas"),
+                            dbc.DropdownMenuItem("Genetics - GWAS bis", href="/pages/page10", id="page10-link"),
                             dbc.DropdownMenuItem(
                                 "Genetics - Heritability", href="/genetics/heritability", id="genetics_heritability"
                             ),
@@ -179,7 +176,9 @@ def display_page(pathname):
 
         return get_layout()
     elif "genetics" == pathname.split("/")[1]:
-        if "correlations" == pathname.split("/")[2]:
+        if "gwas" == pathname.split("/")[2]:
+            from dash_website.genetics.gwas import get_layout
+        elif "correlations" == pathname.split("/")[2]:
             from dash_website.genetics.correlations import get_layout
         elif "heritability" == pathname.split("/")[2]:
             from dash_website.genetics.heritability import get_layout
