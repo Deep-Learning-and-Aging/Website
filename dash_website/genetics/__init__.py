@@ -1,3 +1,6 @@
+from dash_website import DIMENSIONS
+
+
 ORDER_TYPES_HERITABILITY = {"custom": "Custom", "h2": "h²"}
 
 DIMENSIONS_GWAS = [
@@ -24,6 +27,35 @@ DIMENSIONS_GWAS = [
     "HeartECG",
     "HeartMRI",
     "BloodCells",
+    "Lungs",
+    "Musculoskeletal",
+    "MusculoskeletalFullBody",
+    "MusculoskeletalHips",
+    "MusculoskeletalKnees",
+    "MusculoskeletalScalars",
+    "MusculoskeletalSpine",
+    "PhysicalActivity",
+]
+
+
+DIMENSIONS_GWAS_VOLCANO = [
+    "*instances1.5x",
+    "Abdomen",
+    "AbdomenLiver",
+    "ArterialPulseWaveAnalysis",
+    "Biochemistry",
+    "BiochemistryBlood",
+    "BiochemistryUrine",
+    "Brain",
+    "BrainCognitive",
+    "BrainMRI",
+    "Eyes",
+    "EyesFundus",
+    "EyesOCT",
+    "Hearing",
+    "Heart",
+    "HeartMRI",
+    "ImmuneSystem",
     "Lungs",
     "Musculoskeletal",
     "MusculoskeletalFullBody",
