@@ -26,6 +26,7 @@ setup(
         "tqdm",
         "pyarrow",
         "nbformat",
+        "ipykernel",
     ],
     entry_points={
         "console_scripts": [

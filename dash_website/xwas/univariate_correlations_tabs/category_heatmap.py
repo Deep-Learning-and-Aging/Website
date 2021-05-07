@@ -8,14 +8,9 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_main_category_radio_items,
-    get_category_drop_down,
-    get_subset_method_radio_items,
-    get_correlation_type_radio_items,
-    get_options,
-)
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website.xwas import SUBSET_METHODS
 
 
 def get_category_heatmap():
@@ -40,7 +35,7 @@ def get_category_heatmap():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_category"),
-                                    dcc.Graph(id="graph_category"),
+                                    dcc.Graph(id="graph_category", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -69,10 +64,15 @@ def _modify_store_category(main_category, category):
 def get_controls_tab_category():
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_category", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_category_drop_down("category_category"),
-            get_subset_method_radio_items("subset_method_category"),
-            get_correlation_type_radio_items("correlation_type_category"),
+            get_item_radio_items(
+                "main_category_category",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_drop_down("category_category", ["All"], "Select X subcategory: ", from_dict=False),
+            get_item_radio_items("subset_method_category", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items("correlation_type_category", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 
@@ -114,7 +114,9 @@ def _fill_graph_tab_category(subset_method, correlation_type, data_category):
     ).fillna(0)
     numbers_variables_2d.rename(index=RENAME_DIMENSIONS, columns=RENAME_DIMENSIONS, inplace=True)
 
-    fig = create_dendrogram_heatmap(correlations_2d, numbers_variables_2d)
+    hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
+
+    fig = create_dendrogram_heatmap(correlations_2d, hovertemplate, numbers_variables_2d)
 
     fig.update_layout(
         {

@@ -17,16 +17,23 @@ from dash_website.feature_importances import AGING_RATE_LEGEND
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_videos_features", data=get_data())]),
+            dcc.Loading(
+                [
+                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
+                    dcc.Store(id="memory_videos_features", data=get_data_features()),
+                ]
+            ),
             html.H1("Feature importances - Videos"),
             html.Br(),
             html.Br(),
             dbc.Row(get_controls_videos(), justify="center"),
             dbc.Row(html.Br()),
+            dbc.Row(html.H2(id="title_time_series_features"), justify="center"),
+            dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_left_video()), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_right_video()), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("left")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("right")), style={"width": 6}),
                 ]
             ),
             dbc.Row(
@@ -46,7 +53,11 @@ def get_layout():
     )
 
 
-def get_data():
+def get_data_scores():
+    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
+
+
+def get_data_features():
     return load_feather("feature_importances/videos/information.feather").to_dict()
 
 
@@ -57,26 +68,47 @@ def get_controls_videos():
             dcc.RadioItems(
                 id="chamber_type_features",
                 options=get_options_from_dict(CHAMBERS_LEGEND),
-                value=list(CHAMBERS_LEGEND.keys())[0],
+                value=list(CHAMBERS_LEGEND.keys())[1],
                 labelStyle={"display": "inline-block", "margin": "5px"},
             )
         ),
     ]
 
 
-def get_controls_left_video():
-    return [
-        get_item_radio_items("sex_left_video_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_left_video_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items("aging_rate_left_video_features", AGING_RATE_LEGEND, "Select aging rate :"),
-    ]
+@APP.callback(
+    Output("title_time_series_features", "children"),
+    [
+        Input("chamber_type_features", "value"),
+        Input("memory_scores_features", "data"),
+    ],
+)
+def _display_score(chamber_type, data_scores):
+    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
+    scores = (
+        scores_raw.loc[("Heart", "MRI", f"{chamber_type}chambersRaw")]
+        .set_index("algorithm")
+        .sort_values("r2", ascending=False)
+    )
+
+    title = ""
+    for algorithm in scores.index:
+        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+
+    return title
 
 
-def get_controls_right_video():
+def get_controls_side_video(side):
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
+
     return [
-        get_item_radio_items("sex_right_video_features", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_right_video_features", AGE_GROUP_LEGEND, "Select age group :"),
-        get_item_radio_items("aging_rate_right_video_features", AGING_RATE_LEGEND, "Select aging rate :"),
+        get_item_radio_items(f"sex_{side}_video_features", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_{side}_video_features", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
+        get_item_radio_items(
+            f"aging_rate_{side}_video_features", AGING_RATE_LEGEND, "Select aging rate :", value_idx=1
+        ),
     ]
 
 
@@ -115,7 +147,7 @@ def display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
         .loc[(int(chamber_type), sex, age_group, aging_rate), ["chronological_age", "biological_age"]]
         .tolist()
     )
-    title = f"The difference between the chronological age and the biological age of the participant is {np.round_(chronological_age - biological_age, 1)}."
+    title = f"The participant is an {aging_rate} ager: {np.round_(biological_age - chronological_age, 1)} years"
 
     gif_display = html.Div(
         gif.GifPlayer(

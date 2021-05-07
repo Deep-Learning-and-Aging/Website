@@ -122,12 +122,12 @@ layout = html.Div(
             id="tab_manager_gwas",
             active_tab="man_plot",
         ),
-        html.Div(id="tab_content_gwas"),
+        html.Div(id="tab_content_gwas_bis"),
     ]
 )
 
 
-@APP.callback(Output("tab_content_gwas", "children"), [Input("tab_manager_gwas", "active_tab")])
+@APP.callback(Output("tab_content_gwas_bis", "children"), [Input("tab_manager_gwas", "active_tab")])
 def _plot_with_given_env_dataset(ac_tab):
     if ac_tab == "man_plot":
         return dbc.Container(

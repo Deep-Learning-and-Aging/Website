@@ -5,14 +5,10 @@ import dash_html_components as html
 from dash_website import RENAME_DIMENSIONS
 
 
-def get_options(list_, capitalize=False):
+def get_options(list_):
     list_label_value = []
     for value in list_:
-        if capitalize:
-            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value).capitalize()}
-        else:
-            d = {"value": value, "label": RENAME_DIMENSIONS.get(value, value)}
-        list_label_value.append(d)
+        list_label_value.append({"value": value, "label": RENAME_DIMENSIONS.get(value, value)})
     return list_label_value
 
 
@@ -30,7 +26,7 @@ def get_subset_method_radio_items(id, value="union"):
             dbc.Label("Select subset method :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["all", "union", "intersection"], capitalize=True),
+                options=get_options(["all", "union", "intersection"]),
                 value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
@@ -44,7 +40,7 @@ def get_correlation_type_radio_items(id, value="pearson"):
             dbc.Label("Select correlation type :"),
             dcc.RadioItems(
                 id=id,
-                options=get_options(["pearson", "spearman"], capitalize=True),
+                options=get_options(["pearson", "spearman"]),
                 value=value,
                 labelStyle={"display": "inline-block", "margin": "5px"},
             ),
@@ -91,7 +87,7 @@ def get_dimension_drop_down(id, dimension, idx_dimension=""):
     )
 
 
-def get_item_radio_items(id, items, legend, from_dict=True):
+def get_item_radio_items(id, items, legend, from_dict=True, value_idx=0):
     if from_dict:
         control = dbc.FormGroup(
             [
@@ -99,7 +95,7 @@ def get_item_radio_items(id, items, legend, from_dict=True):
                 dcc.RadioItems(
                     id=id,
                     options=get_options_from_dict(items),
-                    value=list(items.keys())[0],
+                    value=list(items.keys())[value_idx],
                     labelStyle={"display": "inline-block", "margin": "5px"},
                 ),
                 html.Br(),
@@ -154,6 +150,16 @@ def get_range_slider(id, min, max, legend):
                 marks=dict(zip(range(min, max + 1, 5), [str(elem) for elem in range(min, max + 1, 5)])),
                 step=None,
             ),
+            html.Br(),
+        ]
+    )
+
+
+def get_check_list(id, items, legend):
+    return dbc.FormGroup(
+        [
+            html.P(legend),
+            dcc.Checklist(id=id, options=get_options(items), value=items, labelStyle={"display": "inline-block"}),
             html.Br(),
         ]
     )

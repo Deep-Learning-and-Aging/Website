@@ -11,10 +11,16 @@ do
         do
             for SAMPLE in "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
             do
-                NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
-                OLD_PATH=age-prediction-site/page15_AttentionMapsTimeSeries/img/Age/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/normal/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_normal\_$SAMPLE.npy
+                FORMER_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
+                aws s3 rm s3://$FORMER_PATH
 
-                aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                for AGING_RATE in "accelerated" "normal" "decelerated"
+                do
+                    OLD_PATH=age-prediction-site/page9_AttentionMaps/Images/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/$AGING_RATE/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_$AGING_RATE\_$SAMPLE.npy
+                    NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/$AGING_RATE/sample_$SAMPLE.npy
+
+                    aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                done
             done 
         done 
     done
@@ -32,10 +38,16 @@ do
         do
             for SAMPLE in "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
             do
-                NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
-                OLD_PATH=age-prediction-site/page15_AttentionMapsTimeSeries/img/Age/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/normal/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_normal\_$SAMPLE.npy
+                FORMER_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
+                aws s3 rm s3://$FORMER_PATH
 
-                aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                for AGING_RATE in "accelerated" "normal" "decelerated"
+                do
+                    OLD_PATH=age-prediction-site/page9_AttentionMaps/Images/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/$AGING_RATE/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_$AGING_RATE\_$SAMPLE.npy
+                    NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/$AGING_RATE/sample_$SAMPLE.npy
+                    
+                    aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                done
             done 
         done 
     done
@@ -53,10 +65,16 @@ do
         do
             for SAMPLE in "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
             do
-                NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
-                OLD_PATH=age-prediction-site/page15_AttentionMapsTimeSeries/img/Age/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/normal/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_normal\_$SAMPLE.npy
+                FORMER_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
+                aws s3 rm s3://$FORMER_PATH
 
-                aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                for AGING_RATE in "accelerated" "normal" "decelerated"
+                do
+                    OLD_PATH=age-prediction-site/page9_AttentionMaps/Images/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/$AGING_RATE/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_$AGING_RATE\_$SAMPLE.npy
+                    NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/$AGING_RATE/sample_$SAMPLE.npy
+                
+                    aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                done
             done 
         done 
     done
@@ -74,10 +92,16 @@ do
         do
             for SAMPLE in "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
             do
-                NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
-                OLD_PATH=age-prediction-site/page15_AttentionMapsTimeSeries/img/Age/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/normal/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_normal\_$SAMPLE.npy
+                FORMER_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
+                aws s3 rm s3://$FORMER_PATH
 
-                aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                for AGING_RATE in "accelerated" "normal" "decelerated"
+                do
+                    OLD_PATH=age-prediction-site/page9_AttentionMaps/Images/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/$AGING_RATE/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_$AGING_RATE\_$SAMPLE.npy
+                    NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/$AGING_RATE/sample_$SAMPLE.npy
+                
+                    aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                done
             done 
         done 
     done
@@ -95,10 +119,16 @@ do
         do
             for SAMPLE in "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
             do
-                NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
-                OLD_PATH=age-prediction-site/page15_AttentionMapsTimeSeries/img/Age/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/normal/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_normal\_$SAMPLE.npy
+                FORMER_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/sample_$SAMPLE.npy
+                aws s3 rm s3://$FORMER_PATH
 
-                aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                for AGING_RATE in "accelerated" "normal" "decelerated"
+                do
+                    OLD_PATH=age-prediction-site/page9_AttentionMaps/Images/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX_OLD/$AGE_GROUP/$AGING_RATE/Saliency_Age_$DIMENSION\_$SUBDIMENSION\_$SUB_SUBDIMENSION\_$SEX_OLD\_$AGE_GROUP\_$AGING_RATE\_$SAMPLE.npy
+                    NEW_PATH=age-prediction-site/datasets/time_series/$DIMENSION/$SUBDIMENSION/$SUB_SUBDIMENSION/$SEX/$AGE_GROUP/$AGING_RATE/sample_$SAMPLE.npy
+                
+                    aws s3 cp s3://$OLD_PATH s3://$NEW_PATH
+                done
             done 
         done 
     done

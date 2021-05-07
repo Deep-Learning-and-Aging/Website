@@ -6,17 +6,18 @@ from dash.dependencies import Input, Output
 import dash
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_src_image, does_key_exists
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
 from dash_website.datasets import (
+    AGE_RANGES,
     TREE_IMAGES,
     SIDES_DIMENSION,
     SIDES_SUBDIMENSION_EXCEPTION,
     SEX_LEGEND,
     AGE_GROUP_LEGEND,
     SAMPLE_LEGEND,
-    SEX_TO_PRONOUN,
 )
 
 
@@ -31,8 +32,8 @@ def get_layout():
             dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_left_image()), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_right_image()), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image("left")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image("right")), style={"width": 6}),
                 ]
             ),
             dbc.Row(
@@ -108,19 +109,16 @@ def _change_subdimensions(dimension, subdimension):
         )
 
 
-def get_controls_left_image():
-    return [
-        get_item_radio_items("sex_left_image", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_group_left_image", AGE_GROUP_LEGEND, "Select age group :"),
-        get_drop_down("sample_left_image", SAMPLE_LEGEND, "Select sample :"),
-    ]
+def get_controls_side_image(side):
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
 
-
-def get_controls_right_image():
     return [
-        get_item_radio_items("sex_right_image", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_group_right_image", AGE_GROUP_LEGEND, "Select age group :"),
-        get_drop_down("sample_right_image", SAMPLE_LEGEND, "Select sample :"),
+        get_item_radio_items(f"sex_{side}_image", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_group_{side}_image", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
+        get_drop_down(f"sample_{side}_image", SAMPLE_LEGEND, "Select sample :"),
     ]
 
 
@@ -157,16 +155,18 @@ def _display_right_image(dimension, subdimension, sub_subdimension, sex, age_gro
 
 
 def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sample, data_images):
-    chronological_age, ethnicity = (
+    chronological_age = (
         pd.DataFrame(data_images)
         .set_index(["dimension", "subdimension", "sub_subdimension", "sex", "age_group", "aging_rate", "sample"])
         .loc[
             (dimension, subdimension, sub_subdimension, sex, age_group, "normal", int(sample)),
-            ["chronological_age", "ethnicity"],
+            ["chronological_age"],
         ]
         .tolist()
     )
-    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    index_in_age_ranges = np.searchsorted(AGE_RANGES, chronological_age)
+
+    title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
     if dimension in SIDES_DIMENSION and subdimension not in SIDES_SUBDIMENSION_EXCEPTION:
         left_path_to_image = f"datasets/images/{dimension}/{subdimension}/{sub_subdimension}/Raw/{sex}/{age_group}/normal/left_sample_{sample}.jpg"

@@ -7,12 +7,10 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import (
-    get_dimension_drop_down,
-    get_subset_method_radio_items,
-    get_correlation_type_radio_items,
-)
-from dash_website import DIMENSIONS, RENAME_DIMENSIONS
+from dash_website.utils.controls import get_drop_down, get_item_radio_items
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, RENAME_DIMENSIONS, CORRELATION_TYPES
+from dash_website.utils import BLUE_WHITE_RED
+from dash_website.xwas import SUBSET_METHODS
 
 
 def get_dimension_heatmap():
@@ -37,7 +35,7 @@ def get_dimension_heatmap():
                             dcc.Loading(
                                 [
                                     html.H2(id="title_dimension"),
-                                    dcc.Graph(id="graph_dimension"),
+                                    dcc.Graph(id="graph_dimension", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -61,9 +59,9 @@ def _modify_store_dimension(dimension):
 def get_controls_tab_dimension():
     return dbc.Card(
         [
-            get_dimension_drop_down("dimension_dimension", DIMENSIONS),
-            get_subset_method_radio_items("subset_method_category"),
-            get_correlation_type_radio_items("correlation_type_category"),
+            get_drop_down("dimension_dimension", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
+            get_item_radio_items("subset_method_dimension", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items("correlation_type_dimension", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 
@@ -72,13 +70,12 @@ def get_controls_tab_dimension():
     [Output("graph_dimension", "figure"), Output("title_dimension", "children")],
     [
         Input("dimension_dimension", "value"),
-        Input("subset_method_category", "value"),
-        Input("correlation_type_category", "value"),
+        Input("subset_method_dimension", "value"),
+        Input("correlation_type_dimension", "value"),
         Input("memory_dimension", "data"),
     ],
 )
 def _fill_graph_tab_dimension(dimension, subset_method, correlation_type, data_dimension):
-    from dash_website.utils.graphs.colorscale import get_colorscale
     import plotly.graph_objs as go
 
     correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "category"])
@@ -108,9 +105,11 @@ def _fill_graph_tab_dimension(dimension, subset_method, correlation_type, data_d
         x=correlations_2d.columns,
         y=correlations_2d.index,
         z=correlations_2d,
-        colorscale=get_colorscale(correlations_2d),
+        colorscale=BLUE_WHITE_RED,
         customdata=numbers_variables_2d,
         hovertemplate=hovertemplate,
+        zmin=-1,
+        zmax=1,
     )
 
     fig = go.Figure(heatmap)

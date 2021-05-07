@@ -4,16 +4,6 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 from dash_website.app import APP
-from dash_website.pages import (
-    page2,
-    page3,
-    page4,
-    page9,
-    page10,
-    page11,
-    page13,
-    page17,
-)
 
 
 def get_server():
@@ -56,12 +46,26 @@ def get_top_bar():
                         label="Datasets",
                         nav=True,
                     ),
-                    dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Age prediction performances",
+                            href="/age_prediction_performances",
+                            id="age_prediction_performances",
+                        )
+                    ),
                     dbc.DropdownMenu(
                         [
-                            dbc.DropdownMenuItem("Scalars", href="/pages/page3", id="page3-link"),
-                            dbc.DropdownMenuItem("Time Series", href="/pages/page13", id="page13-link"),
-                            dbc.DropdownMenuItem("Images", href="/pages/page9", id="page9-link"),
+                            dbc.DropdownMenuItem(
+                                "Scalars", href="/feature_importances/scalars", id="feature_importances_scalars"
+                            ),
+                            dbc.DropdownMenuItem(
+                                "Time Series",
+                                href="/feature_importances/time_series",
+                                id="feature_importances_time_series",
+                            ),
+                            dbc.DropdownMenuItem(
+                                "Images", href="/feature_importances/images", id="feature_importances_images"
+                            ),
                             dbc.DropdownMenuItem(
                                 "Videos", href="/feature_importances/videos", id="feature_importances_videos"
                             ),
@@ -71,14 +75,20 @@ def get_top_bar():
                     ),
                     dbc.NavItem(
                         dbc.NavLink(
-                            "Correlation between accelerated aging dimensions", href="/pages/page4", id="page4-link"
+                            "Correlation between accelerated aging dimensions",
+                            href="/correlation_between",
+                            id="correlation_between",
                         )
                     ),
                     dbc.DropdownMenu(
                         [
-                            dbc.DropdownMenuItem("Genetics - GWAS", href="/pages/page10", id="page10-link"),
-                            dbc.DropdownMenuItem("Genetics - Heritability", href="/pages/page11", id="page11-link"),
-                            dbc.DropdownMenuItem("Genetics - Correlation", href="/pages/page17", id="page17-link"),
+                            dbc.DropdownMenuItem("Genetics - GWAS", href="/genetics/gwas", id="genetics_gwas"),
+                            dbc.DropdownMenuItem(
+                                "Genetics - Heritability", href="/genetics/heritability", id="genetics_heritability"
+                            ),
+                            dbc.DropdownMenuItem(
+                                "Genetics - Correlation", href="/genetics/correlations", id="genetics_correlations"
+                            ),
                         ],
                         label="Genetics",
                         nav=True,
@@ -132,42 +142,56 @@ def get_top_bar():
 
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
 def display_page(pathname):
-    if "datasets" in pathname:
-        if "scalars" in pathname:
+    if "datasets" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
             from dash_website.datasets.scalars import get_layout
-        elif "time_series" in pathname:
+        elif "time_series" == pathname.split("/")[2]:
             from dash_website.datasets.time_series import get_layout
-        elif "images" in pathname:
+        elif "images" == pathname.split("/")[2]:
             from dash_website.datasets.images import get_layout
-        elif "videos" in pathname:
+        elif "videos" == pathname.split("/")[2]:
             from dash_website.datasets.videos import get_layout
 
-        return get_layout()
-    elif "feature_importances" in pathname:
-        if "videos" in pathname:
+    if "age_prediction_performances" == pathname.split("/")[1]:
+        from dash_website.age_prediction_performances.age_prediction_performances import get_layout
+
+    elif "feature_importances" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
+            from dash_website.feature_importances.scalars import get_layout
+        elif "time_series" == pathname.split("/")[2]:
+            from dash_website.feature_importances.time_series import get_layout
+        elif "images" == pathname.split("/")[2]:
+            from dash_website.feature_importances.images import get_layout
+        elif "videos" == pathname.split("/")[2]:
             from dash_website.feature_importances.videos import get_layout
 
-        return get_layout()
-    elif "xwas" in pathname:
-        if "univariate_results" in pathname:
+    elif "correlation_between" == pathname.split("/")[1]:
+        from dash_website.correlation_between.correlation_between import get_layout
+
+    elif "genetics" == pathname.split("/")[1]:
+        if "gwas" == pathname.split("/")[2]:
+            from dash_website.genetics.gwas import get_layout
+        elif "correlations" == pathname.split("/")[2]:
+            from dash_website.genetics.correlations import get_layout
+        elif "heritability" == pathname.split("/")[2]:
+            from dash_website.genetics.heritability import get_layout
+
+    elif "xwas" == pathname.split("/")[1]:
+        if "univariate_results" == pathname.split("/")[2]:
             from dash_website.xwas.univariate_results import get_layout
-        elif "univariate_correlations" in pathname:
+        elif "univariate_correlations" == pathname.split("/")[2]:
             from dash_website.xwas.univariate_correlations import get_layout
-        elif "multivariate_results" in pathname:
+        elif "multivariate_results" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_results import get_layout
-        elif "multivariate_correlations" in pathname:
+        elif "multivariate_correlations" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_correlations import get_layout
-        else:  # "multivariate_feature_importances" in pathname
+        elif "multivariate_feature_importances" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_feature_importances import get_layout
 
-        return get_layout()
-
-    elif "page" in pathname:
-        num_page = int(pathname.split("/")[-1][4:])
-        return getattr(globals()["page%s" % num_page], "layout")
-    elif pathname == "/":
+    elif "/" == pathname:
         from dash_website.introduction.introduction import get_layout
 
-        return get_layout()
     else:
         return "404"
+
+    return get_layout()
