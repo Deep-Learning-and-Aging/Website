@@ -51,7 +51,14 @@ def get_top_bar():
                         label="Datasets",
                         nav=True,
                     ),
-                    dbc.NavItem(dbc.NavLink("Age prediction performances", href="/pages/page2", id="page2-link")),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Age prediction performances",
+                            href="/age_prediction_performances",
+                            id="age_prediction_performances",
+                        )
+                    ),
+                    dbc.NavItem(dbc.NavLink("Age prediction performances bis", href="/pages/page2", id="page2-link")),
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem(
@@ -150,6 +157,10 @@ def display_page(pathname):
             from dash_website.datasets.images import get_layout
         elif "videos" == pathname.split("/")[2]:
             from dash_website.datasets.videos import get_layout
+
+        return get_layout()
+    if "age_prediction_performances" == pathname.split("/")[1]:
+        from dash_website.age_prediction_performances.age_prediction_performances import get_layout
 
         return get_layout()
     elif "feature_importances" == pathname.split("/")[1]:

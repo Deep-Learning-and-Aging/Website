@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
 from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
@@ -51,7 +51,7 @@ def get_layout():
 
 
 @APP.callback(
-    [Output("graph_age_prediction_performances", "figure"), Output("title_age_prediction_performances", "children")],
+    Output("memory_age_prediction_performances", "data"),
     [
         Input("sample_definition_age_prediction_performances", "value"),
         Input("dimensions_selection_age_prediction_performances", "value"),
@@ -77,13 +77,13 @@ def get_controls_age_prediction_performances():
                 "Select a group of dimensions: ",
             ),
             get_drop_down(
-                "dimension_age_prediction_performances",
+                "selected_dimension_age_prediction_performances",
                 ["all"] + CUSTOM_ORDER,
                 "Select an aging dimension: ",
                 from_dict=False,
             ),
             get_item_radio_items(
-                "score_age_prediction_performances",
+                "metric_age_prediction_performances",
                 SCORES,
                 "Select a metric: ",
             ),
@@ -92,134 +92,203 @@ def get_controls_age_prediction_performances():
 
 
 @APP.callback(
+    [
+        Output("selected_dimension_age_prediction_performances", "options"),
+        Output("selected_dimension_age_prediction_performances", "value"),
+    ],
+    Input("dimensions_selection_age_prediction_performances", "value"),
+)
+def _change_dimensions_age_prediction_performances(dimensions_selection):
+    if dimensions_selection != "without_ensemble_models":
+        return get_options(["all"] + CUSTOM_ORDER), "all"
+    else:
+        return (
+            get_options(
+                ["all"] + list(pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"]))
+            ),
+            "all",
+        )
+
+
+@APP.callback(
     [Output("graph_age_prediction_performances", "figure"), Output("title_age_prediction_performances", "children")],
     [
-        Input("order_type_heritability", "value"),
+        Input("dimensions_selection_age_prediction_performances", "value"),
+        Input("selected_dimension_age_prediction_performances", "value"),
+        Input("metric_age_prediction_performances", "value"),
         Input("memory_age_prediction_performances", "data"),
     ],
 )
-def _fill_graph_heritability(order_by, data_age_prediction_performances):
-    pass
-    # import plotly.graph_objs as go
+def _fill_graph_age_prediction_performances(
+    dimensions_selection, selected_dimension, metric, data_age_prediction_performances
+):
+    import plotly.graph_objs as go
 
-    # heritability = pd.DataFrame(data_heritability).set_index(["dimension", "subdimension"])
+    scores = pd.DataFrame(data_age_prediction_performances)
 
-    # if order_by == "h2":
-    #     sorted_dimensions = heritability.sort_values(by="h2", ascending=False).index
+    scores.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
 
-    #     sorted_heritability = heritability.loc[sorted_dimensions]
+    if selected_dimension != "all":
+        scores = scores.loc[[selected_dimension]]
+        sorted_dimensions = scores.loc[[selected_dimension]].index.drop_duplicates()
+    else:
+        if dimensions_selection != "without_ensemble_models":
+            sorted_dimensions = scores.loc[CUSTOM_ORDER].index.drop_duplicates()
+        else:
+            sorted_dimensions = scores.loc[
+                pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"])
+            ].index.drop_duplicates()
 
-    #     bars = go.Bar(
-    #         x=[" - ".join(elem) for elem in sorted_dimensions.values],
-    #         y=sorted_heritability["h2"],
-    #         error_y={"array": sorted_heritability["h2_std"], "type": "data"},
-    #         name="Heritability",
-    #         marker_color="indianred",
-    #     )
+    x_positions = pd.DataFrame(
+        np.arange(5, 10 * len(sorted_dimensions) + 5, 10), index=sorted_dimensions, columns=["x_position"]
+    )
 
-    #     fig = go.Figure(bars)
-    #     fig.update_layout(font={"size": 15})
+    fig = go.Figure()
+    fig.update_layout(
+        xaxis={
+            "tickvals": np.arange(5, 10 * len(sorted_dimensions) + 5, 10),
+            "ticktext": [" - ".join(elem) for elem in sorted_dimensions.values],
+        },
+    )
 
-    # else:  # order_by == "custom"
-    #     sorted_dimensions = heritability.loc[pd.Index(CUSTOM_ORDER).drop(["*", "*instances01"])].index
+    algorithms = scores["algorithm"].drop_duplicates()
 
-    #     sorted_heritability = heritability.loc[sorted_dimensions]
+    hovertemplate = (
+        "%{x}, score: %{y:.3f} +- %{customdata[0]:.3f}, sample size: %{customdata[1]} <extra>%{customdata[2]}</extra>"
+    )
 
-    #     bars = go.Bar(
-    #         x=np.arange(5, 10 * sorted_heritability.shape[0] + 5, 10),
-    #         y=sorted_heritability["h2"],
-    #         error_y={"array": sorted_heritability["h2_std"], "type": "data"},
-    #         name="Heritability",
-    #         marker_color="indianred",
-    #     )
+    min_score = min(scores[metric].min(), 0)
 
-    #     fig = go.Figure(bars)
+    for algorithm in algorithms:
+        scores_algorithm = scores[scores["algorithm"] == algorithm]
+        x_positions.loc[scores_algorithm.index]
 
-    #     fig.update_layout(
-    #         xaxis={
-    #             "tickvals": np.arange(5, 10 * sorted_heritability.shape[0] + 5, 10),
-    #             "ticktext": [" - ".join(elem) for elem in sorted_dimensions.values],
-    #         },
-    #     )
+        customdata = np.dstack(
+            (
+                scores_algorithm[f"{metric}_std"].values.flatten(),
+                scores_algorithm["sample_size"].values.flatten(),
+                [algorithm] * len(scores_algorithm.index),
+            )
+        )[0]
+        fig.add_bar(
+            x=x_positions.loc[scores_algorithm.index].values.flatten(),
+            y=scores_algorithm[metric],
+            error_y={"array": scores_algorithm[f"{metric}_std"], "type": "data"},
+            name=algorithm,
+            hovertemplate=hovertemplate,
+            customdata=customdata,
+        )
 
-    #     dimensions = sorted_heritability.index.to_frame()[["dimension", "subdimension"]].reset_index(drop=True)
-    #     dimensions["position"] = fig["layout"]["xaxis"]["tickvals"]
-    #     dimensions.set_index(["dimension", "subdimension"], inplace=True)
+    dimensions = sorted_dimensions.to_frame()[["dimension", "subdimension", "sub_subdimension"]].reset_index(drop=True)
+    dimensions["position"] = fig["layout"]["xaxis"]["tickvals"]
+    dimensions.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
 
-    #     lines = []
-    #     annotations = []
+    lines = []
+    annotations = []
 
-    #     for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
-    #         dimension_inner_margin = -0.25
-    #         dimension_outer_margin = -0.5
+    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
+        if metric == "r2":
+            dimension_inner_margin = min_score - 1
+            dimension_outer_margin = min_score - 1.4
+        else:
+            dimension_inner_margin = min_score - 10
+            dimension_outer_margin = min_score - 14
 
-    #         min_position = dimensions.loc[dimension].min()
-    #         max_position = dimensions.loc[dimension].max()
+        min_position = dimensions.loc[dimension].min()
+        max_position = dimensions.loc[dimension].max()
 
-    #         line, annotation = add_line_and_annotation(
-    #             dimension,
-    #             "x",
-    #             "y",
-    #             min_position,
-    #             max_position,
-    #             dimension_inner_margin,
-    #             dimension_outer_margin,
-    #             90,
-    #             18,
-    #         )
+        line, annotation = add_line_and_annotation(
+            dimension,
+            "x",
+            "y",
+            min_position,
+            max_position,
+            dimension_inner_margin,
+            dimension_outer_margin,
+            90,
+            13,
+        )
 
-    #         lines.append(line)
-    #         annotations.append(annotation)
+        lines.append(line)
+        annotations.append(annotation)
 
-    #         for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-    #             subdimension_inner_margin = 0
-    #             subdimension_outer_margin = -0.25
+        for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
+            if metric == "r2":
+                subdimension_margin = min_score - 0.6
+            else:
+                subdimension_margin = min_score - 6
 
-    #             submin_position = dimensions.loc[(dimension, subdimension)].min()
-    #             submax_position = dimensions.loc[(dimension, subdimension)].max()
+            submin_position = dimensions.loc[(dimension, subdimension)].min()
+            submax_position = dimensions.loc[(dimension, subdimension)].max()
 
-    #             line, annotation = add_line_and_annotation(
-    #                 subdimension,
-    #                 "x",
-    #                 "y",
-    #                 submin_position,
-    #                 submax_position,
-    #                 subdimension_inner_margin,
-    #                 subdimension_outer_margin,
-    #                 90,
-    #                 15,
-    #             )
+            line, annotation = add_line_and_annotation(
+                subdimension,
+                "x",
+                "y",
+                submin_position,
+                submax_position,
+                subdimension_margin,
+                dimension_inner_margin,
+                90,
+                11,
+            )
 
-    #             lines.append(line)
-    #             annotations.append(annotation)
+            lines.append(line)
+            annotations.append(annotation)
+            for sub_subdimension in (
+                dimensions.loc[(dimension, subdimension)].index.get_level_values("sub_subdimension").drop_duplicates()
+            ):
+                if metric == "r2":
+                    sub_subdimension_margin = min_score - 0.1
+                else:
+                    sub_subdimension_margin = min_score - 1
 
-    #     # The final top/right line
-    #     line, _ = add_line_and_annotation(
-    #         dimension,
-    #         "x",
-    #         "y",
-    #         min_position,
-    #         max_position,
-    #         0,
-    #         dimension_outer_margin,
-    #         0,
-    #         10,
-    #         final=True,
-    #     )
+                sub_submin_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].min()
+                sub_submax_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].max()
 
-    #     lines.append(line)
+                line, annotation = add_line_and_annotation(
+                    sub_subdimension,
+                    "x",
+                    "y",
+                    sub_submin_position,
+                    sub_submax_position,
+                    sub_subdimension_margin,
+                    subdimension_margin,
+                    90,
+                    9,
+                )
 
-    #     fig["layout"]["shapes"] = lines
-    #     fig["layout"]["annotations"] = annotations
-    #     fig.update_layout(xaxis={"showticklabels": False})
+                lines.append(line)
+                annotations.append(annotation)
 
-    # fig.update_layout(
-    #     yaxis={"showgrid": False, "zeroline": False},
-    #     xaxis={"showgrid": False, "zeroline": False},
-    #     height=800,
-    # )
+    # The final top/right line
+    line, _ = add_line_and_annotation(
+        dimension,
+        "x",
+        "y",
+        min_position,
+        max_position,
+        sub_subdimension_margin,
+        dimension_outer_margin,
+        0,
+        10,
+        final=True,
+    )
 
-    # return (
-    #     fig,
-    #     f"Average heritability = {heritability['h2'].mean().round(3)} +- {heritability['h2'].std().round(3)}",
-    # )
+    lines.append(line)
+
+    fig["layout"]["shapes"] = lines
+    fig["layout"]["annotations"] = annotations
+    fig.update_layout(xaxis={"showticklabels": False})
+
+    fig.update_layout(
+        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False},
+        xaxis={"showgrid": False, "zeroline": False},
+        height=800,
+        width=400 + 20 * scores.shape[0],
+    )
+
+    return (
+        fig,
+        f"Average {SCORES[metric]} = {scores[metric].mean().round(3)} +- {scores[metric].std().round(3)}",
+    )
