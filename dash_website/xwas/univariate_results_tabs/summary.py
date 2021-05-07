@@ -6,10 +6,9 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.app import APP
-from dash_website.utils.graphs.colorscale import get_colorscale
-from dash_website.utils.controls import get_item_radio_items, get_main_category_radio_items
+from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.aws_loader import load_feather
-from dash_website import MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
 from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE, ITEMS_TITLES
 
 
@@ -23,7 +22,7 @@ def get_summary():
             dbc.Row(
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col([html.H2(id="title_summary"), dcc.Graph(id="graph_summary")], md=9),
+                    dbc.Col([html.H2(id="title_summary"), dcc.Graph(id="graph_summary", config=DOWNLOAD_CONFIG)], md=9),
                 ]
             ),
         ],
@@ -38,8 +37,13 @@ def get_data():
 def get_controls_tab():
     return dbc.Card(
         [
-            get_main_category_radio_items("main_category_summary", list(MAIN_CATEGORIES_TO_CATEGORIES.keys())),
-            get_item_radio_items("item_summary", ITEMS_LEGEND, legend="Select :"),
+            get_item_radio_items(
+                "main_category_summary",
+                list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
+                "Select X main category: ",
+                from_dict=False,
+            ),
+            get_item_radio_items("item_summary", ITEMS_LEGEND, "Select :"),
         ]
     )
 

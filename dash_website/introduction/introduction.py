@@ -47,21 +47,21 @@ def get_layout():
                     ),
                     dbc.Row(
                         [
-                            dbc.Col(
-                                html.Img(
-                                    src=load_src_image("introduction/logo_harvard.png"),
-                                    style={"height": 200, "margin": "90px"},
-                                ),
-                                style={"width": 2},
-                            ),
+                            # dbc.Col(
+                            #     html.Img(
+                            #         src=load_src_image("introduction/logo_harvard.png"),
+                            #         style={"height": 200, "margin": "90px"},
+                            #     ),
+                            #     style={"width": 2},
+                            # ),
                             dbc.Col(id="core_div", children=TEXT, width=8),
-                            dbc.Col(
-                                html.Img(
-                                    src=load_src_image("introduction/logo_hms.png"),
-                                    style={"height": 200, "float": "right", "margin": "90px"},
-                                ),
-                                style={"width": 2},
-                            ),
+                            # dbc.Col(
+                            #     html.Img(
+                            #         src=load_src_image("introduction/logo_hms.png"),
+                            #         style={"height": 200, "float": "right", "margin": "90px"},
+                            #     ),
+                            #     style={"width": 2},
+                            # ),
                         ],
                         justify="center",
                     ),

@@ -6,10 +6,11 @@ import dash_gif_component as gif
 from dash.dependencies import Input, Output
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_options_from_dict, get_item_radio_items, get_drop_down
-from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND, SEX_TO_PRONOUN
+from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND, AGE_RANGES
 
 
 def get_layout():
@@ -23,8 +24,8 @@ def get_layout():
             dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_left_video()), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_right_video()), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("left")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("right")), style={"width": 6}),
                 ]
             ),
             dbc.Row(
@@ -62,19 +63,16 @@ def get_controls_videos():
     ]
 
 
-def get_controls_left_video():
-    return [
-        get_item_radio_items("sex_left_video", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_left_video", AGE_GROUP_LEGEND, "Select age group :"),
-        get_drop_down("sample_left_video", SAMPLE_LEGEND, "Select sample :"),
-    ]
+def get_controls_side_video(side):
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
 
-
-def get_controls_right_video():
     return [
-        get_item_radio_items("sex_right_video", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items("age_right_video", AGE_GROUP_LEGEND, "Select age group :"),
-        get_drop_down("sample_right_video", SAMPLE_LEGEND, "Select sample :"),
+        get_item_radio_items(f"sex_{side}_video", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_{side}_video", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
+        get_drop_down(f"sample_{side}_video", SAMPLE_LEGEND, "Select sample :"),
     ]
 
 
@@ -107,13 +105,15 @@ def _display_right_gif(chamber_type, sex, age_group, sample, data_videos):
 
 
 def display_gif(chamber_type, sex, age_group, sample, data_videos):
-    chronological_age, ethnicity = (
+    chronological_age = (
         pd.DataFrame(data_videos)
         .set_index(["chamber", "sex", "age_group", "sample"])
-        .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age", "ethnicity"]]
+        .loc[(int(chamber_type), sex, age_group, int(sample)), ["chronological_age"]]
         .tolist()
     )
-    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    index_in_age_ranges = np.searchsorted(AGE_RANGES, chronological_age)
+
+    title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
     gif_display = html.Div(
         gif.GifPlayer(

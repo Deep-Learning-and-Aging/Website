@@ -1,3 +1,5 @@
+SUBSET_METHODS = {"union": "Union", "all": "All", "intersection": "Intersection"}
+
 BAR_PLOT_TABLE_COLUMNS = {
     "variable": "Variable",
     "feature_correlation": "Feature Correlation",
@@ -18,3 +20,5 @@ FEATURES_CORRELATIONS_TABLE_COLUMNS = {
     "percentage_light_gbm": "Percentage Light GBM",
     "percentage_neural_network": "Percentage Neural Network",
 }
+
+DISPLAY_MODE = {"view_all": "Decreasing correlation", "view_per_main_category": "X main category"}

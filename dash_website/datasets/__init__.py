@@ -1,7 +1,9 @@
+import numpy as np
+
+# Shared
+AGE_RANGES = np.arange(0, 100, 5)
+
 # For scalars
-from dash_website.pages.tools import ETHNICITY_COLS
-
-
 TREE_SCALARS = {
     "Arterial": {
         "All": ["Scalars"],
@@ -94,7 +96,7 @@ INFORMATION_TIME_SERIES = {
     "Heart": {
         "ECG": {
             "TimeSeries": {
-                "nb_channel": 12,
+                "nb_channel": 15,
                 "y_label": "5 uV / Lsb",
                 "x_label": "Time (2 min / unit)",
             }
@@ -169,12 +171,10 @@ SIDES_SUBDIMENSION_EXCEPTION = ["FullBody", "Spine"]
 
 
 # For videos
-CHAMBERS_LEGEND = {"3": "3 chambers", "4": "4 chambers"}
+CHAMBERS_LEGEND = {"3": "3 chamber", "4": "4 chamber"}
 
 SEX_LEGEND = {"male": "Male", "female": "Female"}
 
 AGE_GROUP_LEGEND = {"young": "Young", "middle": "Middle", "old": "Old"}
 
 SAMPLE_LEGEND = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9}
-
-SEX_TO_PRONOUN = {"male": "his", "female": "her"}

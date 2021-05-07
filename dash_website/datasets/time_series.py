@@ -6,16 +6,18 @@ from dash.dependencies import Input, Output
 import dash
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import (
     TREE_TIME_SERIES,
     INFORMATION_TIME_SERIES,
     SEX_LEGEND,
     AGE_GROUP_LEGEND,
     SAMPLE_LEGEND,
-    SEX_TO_PRONOUN,
+    AGE_RANGES,
 )
 
 
@@ -40,7 +42,7 @@ def get_layout():
                         dcc.Loading(
                             [
                                 html.H3(id="title_left_time_series"),
-                                dcc.Graph(id="time_series_left_time_series"),
+                                dcc.Graph(id="time_series_left_time_series", config=DOWNLOAD_CONFIG),
                             ]
                         ),
                         style={"width": 6},
@@ -49,7 +51,7 @@ def get_layout():
                         dcc.Loading(
                             [
                                 html.H3(id="title_right_time_series"),
-                                dcc.Graph(id="time_series_right_time_series"),
+                                dcc.Graph(id="time_series_right_time_series", config=DOWNLOAD_CONFIG),
                             ]
                         ),
                         style={"width": 6},
@@ -123,9 +125,14 @@ def get_controls_side_time_series(side):
     first_sub_subdimension = TREE_TIME_SERIES[first_dimension][first_subdimension][0]
     nb_channel = INFORMATION_TIME_SERIES[first_dimension][first_subdimension][first_sub_subdimension]["nb_channel"]
 
+    if side == "left":
+        value_idx = 0
+    else:  # side == "right":
+        value_idx = 1
+
     return [
-        get_item_radio_items(f"sex_{side}_time_series", SEX_LEGEND, "Select sex :"),
-        get_item_radio_items(f"age_group_{side}_time_series", AGE_GROUP_LEGEND, "Select age group :"),
+        get_item_radio_items(f"sex_{side}_time_series", SEX_LEGEND, "Select sex :", value_idx=value_idx),
+        get_item_radio_items(f"age_group_{side}_time_series", AGE_GROUP_LEGEND, "Select age group :", value_idx=1),
         get_drop_down(f"sample_{side}_time_series", SAMPLE_LEGEND, "Select sample :"),
         get_drop_down(f"channel_{side}_time_series", range(nb_channel), "Select channel :", from_dict=False),
     ]
@@ -195,29 +202,24 @@ def _display_right_time_series(
 def display_time_series(dimension, subdimension, sub_subdimension, sex, age_group, sample, channel, data_time_series):
     import plotly.graph_objs as go
 
-    chronological_age, ethnicity = (
+    chronological_age = (
         pd.DataFrame(data_time_series)
         .set_index(["dimension", "subdimension", "sub_subdimension", "sex", "age_group", "aging_rate", "sample"])
         .loc[
             (dimension, subdimension, sub_subdimension, sex, age_group, "normal", int(sample)),
-            ["chronological_age", "ethnicity"],
+            ["chronological_age"],
         ]
         .tolist()
     )
-    title = f"The participant is {chronological_age} years old, {SEX_TO_PRONOUN[sex]} ethnicity is {ethnicity}."
+    index_in_age_ranges = np.searchsorted(AGE_RANGES, chronological_age)
 
-    path_to_time_series = (
-        f"datasets/time_series/{dimension}/{subdimension}/{sub_subdimension}/{sex}/{age_group}/sample_{sample}.npy"
-    )
+    title = f"The participant is between {AGE_RANGES[index_in_age_ranges - 1][0]} and {AGE_RANGES[index_in_age_ranges][0]} years old"
 
-    time_series = load_npy(path_to_time_series)
+    path_to_time_series = f"datasets/time_series/{dimension}/{subdimension}/{sub_subdimension}/{sex}/{age_group}/normal/sample_{sample}.npy"
 
-    if time_series.ndim > 1:
-        channel_time_series = time_series[int(channel)]
-    else:
-        channel_time_series = time_series
+    time_series = load_npy(path_to_time_series)[int(channel), 0]
 
-    scatter = go.Scatter(y=channel_time_series, mode="markers", marker={"size": 5})
+    scatter = go.Scatter(y=time_series, mode="markers", marker={"size": 5})
 
     fig = go.Figure(scatter)
 

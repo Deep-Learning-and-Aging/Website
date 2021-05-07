@@ -169,22 +169,26 @@ ALGORITHMS_RENDERING = {
     "neural_network": "Neural Network",
 }
 
-COLORS_SECTIONS = {
-    "introduction": "primary",
-    "datasets": "primary",
-    "age_prediction_performances": "warning",
-    "feature_importances": "danger",
-    "correlation": "dark",
-    "genetics": "secondary",
-    "xwas": "info",
-}
+CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
 
-BACKGROUND_COLORS_SECTIONS = {
-    "introduction": "lightblue",
-    "datasets": "rgba(0, 150, 0, 0.3)",
-    "age_prediction_performances": "rgba(200, 150, 0, 0.3)",
-    "feature_importances": "rgba(150, 0, 0, 0.3)",
-    "correlation": "rgba(0, 50, 50, 0.3)",
-    "genetics": "rgba(80, 80, 80, 0.3)",
-    "xwas": "rgba(0,130,200,0.3)",
-}
+DOWNLOAD_CONFIG = {"toImageButtonOptions": {"format": "svg"}}
+
+ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "r²"}
+
+CUSTOM_ORDER = [
+    "*",
+    "*instances01",
+    "*instances1.5x",
+    "*instances23",
+    "Brain",
+    "Eyes",
+    "Hearing",
+    "Lungs",
+    "Arterial",
+    "Heart",
+    "Abdomen",
+    "Musculoskeletal",
+    "PhysicalActivity",
+    "Biochemistry",
+    "BloodCells",
+]
