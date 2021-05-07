@@ -1,11 +1,9 @@
-from os import path
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 from dash_website.app import APP
-from dash_website.pages import page10
 
 
 def get_server():
@@ -85,7 +83,6 @@ def get_top_bar():
                     dbc.DropdownMenu(
                         [
                             dbc.DropdownMenuItem("Genetics - GWAS", href="/genetics/gwas", id="genetics_gwas"),
-                            dbc.DropdownMenuItem("Genetics - GWAS bis", href="/pages/page10", id="page10-link"),
                             dbc.DropdownMenuItem(
                                 "Genetics - Heritability", href="/genetics/heritability", id="genetics_heritability"
                             ),
@@ -155,11 +152,9 @@ def display_page(pathname):
         elif "videos" == pathname.split("/")[2]:
             from dash_website.datasets.videos import get_layout
 
-        return get_layout()
     if "age_prediction_performances" == pathname.split("/")[1]:
         from dash_website.age_prediction_performances.age_prediction_performances import get_layout
 
-        return get_layout()
     elif "feature_importances" == pathname.split("/")[1]:
         if "scalars" == pathname.split("/")[2]:
             from dash_website.feature_importances.scalars import get_layout
@@ -170,11 +165,9 @@ def display_page(pathname):
         elif "videos" == pathname.split("/")[2]:
             from dash_website.feature_importances.videos import get_layout
 
-        return get_layout()
     elif "correlation_between" == pathname.split("/")[1]:
         from dash_website.correlation_between.correlation_between import get_layout
 
-        return get_layout()
     elif "genetics" == pathname.split("/")[1]:
         if "gwas" == pathname.split("/")[2]:
             from dash_website.genetics.gwas import get_layout
@@ -183,7 +176,6 @@ def display_page(pathname):
         elif "heritability" == pathname.split("/")[2]:
             from dash_website.genetics.heritability import get_layout
 
-        return get_layout()
     elif "xwas" == pathname.split("/")[1]:
         if "univariate_results" == pathname.split("/")[2]:
             from dash_website.xwas.univariate_results import get_layout
@@ -196,14 +188,10 @@ def display_page(pathname):
         elif "multivariate_feature_importances" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_feature_importances import get_layout
 
-        return get_layout()
-
-    elif "page" in pathname:
-        num_page = int(pathname.split("/")[-1][4:])
-        return getattr(globals()["page%s" % num_page], "layout")
     elif "/" == pathname:
         from dash_website.introduction.introduction import get_layout
 
-        return get_layout()
     else:
         return "404"
+
+    return get_layout()
