@@ -28,7 +28,7 @@ def get_volcano():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -39,8 +39,7 @@ def get_volcano():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 6},
                     ),
                 ]
             ),
@@ -95,7 +94,7 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
         size = 5
     else:
         size = 3
-        
+
     for chromosome in size_effects["chromosome"].drop_duplicates():
         customdata = size_effects.loc[
             [chromosome], ["SNP", "dimension", "p_value", "Gene", "Gene_type", "chromosome"]

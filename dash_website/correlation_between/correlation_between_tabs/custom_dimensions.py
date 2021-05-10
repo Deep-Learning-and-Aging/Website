@@ -29,7 +29,7 @@ def get_custom_dimensions():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -40,8 +40,7 @@ def get_custom_dimensions():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),
@@ -79,9 +78,6 @@ def get_controls_tab_custom_dimensions():
     ],
 )
 def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
-    from dash_website.utils.graphs import heatmap_by_clustering
-    import plotly.graph_objs as go
-
     correlations = pd.DataFrame(data_custom_dimensions)
 
     table_correlations = correlations.pivot(

@@ -27,10 +27,10 @@ def get_volcano():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         dcc.Loading([html.H2("Volcano plot"), dcc.Graph(id="graph_volcano", config=DOWNLOAD_CONFIG)]),
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),

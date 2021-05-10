@@ -21,7 +21,7 @@ def get_bar_plot():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_bar_plot(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab_bar_plot(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         [
                             dcc.Loading(
@@ -31,8 +31,8 @@ def get_bar_plot():
                                 ]
                             )
                         ],
-                        style={"overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
+                        style={"overflowX": "scroll"},
                     ),
                 ]
             ),

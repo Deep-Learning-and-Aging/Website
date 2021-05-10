@@ -204,3 +204,16 @@ def add_line_and_annotation(
             "font": {"size": size},
         },
     )
+
+
+def histogram_correlation(table_correlations):
+    correlations = table_correlations.values[np.triu_indices(table_correlations.shape[0])]
+    histogram = go.Histogram(
+        x=correlations,
+        histnorm="percent",
+    )
+
+    fig = go.Figure(histogram)
+
+    fig.update_layout(xaxis_title_text="Correlation", yaxis_title_text="Count (in %)", bargap=0.2, bargroupgap=0.1)
+    return fig

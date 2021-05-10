@@ -27,7 +27,7 @@ def get_dimension_heatmap():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -38,8 +38,8 @@ def get_dimension_heatmap():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
+                        style={"overflowX": "scroll"},
                     ),
                 ]
             ),

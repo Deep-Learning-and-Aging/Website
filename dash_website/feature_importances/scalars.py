@@ -31,7 +31,7 @@ def get_layout():
                             html.Br(),
                             dbc.Card(get_controls_table_scalars_features()),
                         ],
-                        md=5,
+                        width={"size": 5},
                     ),
                     dbc.Col(
                         dcc.Loading(
@@ -41,7 +41,7 @@ def get_layout():
                                 dcc.Graph(id="bar_plot_scalars_features", config=DOWNLOAD_CONFIG),
                             ]
                         ),
-                        md=7,
+                        width={"size": 7},
                     ),
                 ]
             ),

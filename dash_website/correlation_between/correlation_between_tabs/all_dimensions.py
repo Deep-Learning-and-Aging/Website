@@ -9,9 +9,8 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down
-from dash_website.utils.graphs import add_line_and_annotation
+from dash_website.utils.graphs import heatmap_by_clustering, heatmap_by_sorted_dimensions, add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
-from dash_website.utils import BLUE_WHITE_RED
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -30,7 +29,7 @@ def get_all_dimensions():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -42,7 +41,7 @@ def get_all_dimensions():
                             )
                         ],
                         style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),
@@ -87,9 +86,6 @@ def get_controls_tab_all_dimensions():
     ],
 )
 def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimensions):
-    from dash_website.utils.graphs import heatmap_by_clustering
-    import plotly.graph_objs as go
-
     correlations = pd.DataFrame(data_all_dimensions)
     if selected_dimension != "all":
         correlations = correlations[
@@ -131,18 +127,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
         sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
 
-        heatmap = go.Heatmap(
-            x=[" - ".join(elem) for elem in sorted_table_correlations],
-            y=[" - ".join(elem) for elem in sorted_table_correlations],
-            z=sorted_table_correlations,
-            colorscale=BLUE_WHITE_RED,
-            customdata=sorted_customdata,
-            hovertemplate=hovertemplate,
-            zmin=-1,
-            zmax=1,
-        )
-
-        fig = go.Figure(heatmap)
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
     else:  # order_by == "custom"
         if selected_dimension == "all":
@@ -157,18 +142,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
         sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
 
-        heatmap = go.Heatmap(
-            x=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
-            y=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
-            z=sorted_table_correlations,
-            colorscale=BLUE_WHITE_RED,
-            customdata=sorted_customdata,
-            hovertemplate=hovertemplate,
-            zmin=-1,
-            zmax=1,
-        )
-
-        fig = go.Figure(heatmap)
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
         fig.update_layout(
             xaxis={"tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10)},

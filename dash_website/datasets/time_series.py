@@ -32,8 +32,8 @@ def get_layout():
             dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_side_time_series("left")), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_time_series("right")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_time_series("left")), width={"size": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_time_series("right")), width={"size": 6}),
                 ]
             ),
             dbc.Row(
@@ -45,7 +45,7 @@ def get_layout():
                                 dcc.Graph(id="time_series_left_time_series", config=DOWNLOAD_CONFIG),
                             ]
                         ),
-                        style={"width": 6},
+                        width={"size": 6},
                     ),
                     dbc.Col(
                         dcc.Loading(
@@ -54,7 +54,7 @@ def get_layout():
                                 dcc.Graph(id="time_series_right_time_series", config=DOWNLOAD_CONFIG),
                             ]
                         ),
-                        style={"width": 6},
+                        width={"size": 6},
                     ),
                 ]
             ),
