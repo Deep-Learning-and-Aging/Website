@@ -173,7 +173,7 @@ CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
 
 DOWNLOAD_CONFIG = {"toImageButtonOptions": {"format": "svg"}}
 
-ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "r²"}
+ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "r2"}
 
 CUSTOM_ORDER = [
     "*",

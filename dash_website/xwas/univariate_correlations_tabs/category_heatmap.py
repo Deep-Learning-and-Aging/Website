@@ -9,7 +9,12 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website.utils.graphs import heatmap_by_clustering, heatmap_by_sorted_dimensions, add_custom_legend_axis
+from dash_website.utils.graphs import (
+    heatmap_by_clustering,
+    heatmap_by_sorted_dimensions,
+    add_custom_legend_axis,
+    histogram_correlation,
+)
 from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, ORDER_TYPES, CUSTOM_ORDER
 from dash_website.xwas import SUBSET_METHODS
 
@@ -41,6 +46,21 @@ def get_category_heatmap():
                             )
                         ],
                         width={"size": 9},
+                    ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dcc.Loading(
+                                [
+                                    html.H4("Histogram of the above correlations"),
+                                    dcc.Graph(id="histogram_category", config=DOWNLOAD_CONFIG),
+                                ]
+                            )
+                        ],
+                        width={"size": 6, "offset": 3},
                     ),
                 ]
             ),
@@ -87,7 +107,7 @@ def _change_category_category(main_category):
 
 
 @APP.callback(
-    [Output("graph_category", "figure"), Output("title_category", "children")],
+    [Output("graph_category", "figure"), Output("title_category", "children"), Output("histogram_category", "figure")],
     [
         Input("order_type_category", "value"),
         Input("subset_method_category", "value"),
@@ -126,7 +146,7 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
     customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>r²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>r2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
@@ -167,4 +187,5 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
     return (
         fig,
         f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
+        histogram_correlation(table_correlations),
     )
