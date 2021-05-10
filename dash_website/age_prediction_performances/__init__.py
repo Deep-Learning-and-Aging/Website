@@ -3,9 +3,9 @@ SAMPLE_DEFINITION = {
     "average_per_participant": "Participant (average on the time of examination)",
 }
 DIMENSIONS_SELECTION = {
+    "custom_dimensions": "Custom dimensions",
     "all_dimensions": "All dimensions",
     "without_ensemble_models": "Without ensemble models",
-    "custom_dimensions": "Custom dimensions",
 }
 
-SCORES = {"r2": "r²", "rmse": "RMSE"}
+SCORES = {"r2": "r2", "rmse": "RMSE"}

@@ -94,19 +94,17 @@ def add_custom_legend_axis(fig, sorted_table_correlations):
     lines = []
     annotations = []
 
-    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
-        dimension_inner_margin = -30
-        dimension_outer_margin = -60
+    dimension_inner_margin = -30
+    dimension_outer_margin = -60
+    subdimension_margin = 0
 
+    textangles = {"x": 90, "y": 0}
+
+    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
         min_position = dimensions.loc[dimension].min()
         max_position = dimensions.loc[dimension].max()
 
         for first_axis, second_axis in [("x", "y"), ("y", "x")]:
-            if first_axis == "x":
-                textangle = 90
-            else:  # first_axis == "y"
-                textangle = 0
-
             line, annotation = add_line_and_annotation(
                 dimension,
                 first_axis,
@@ -115,7 +113,7 @@ def add_custom_legend_axis(fig, sorted_table_correlations):
                 max_position,
                 dimension_inner_margin,
                 dimension_outer_margin,
-                textangle,
+                textangles[first_axis],
                 10,
             )
 
@@ -123,17 +121,10 @@ def add_custom_legend_axis(fig, sorted_table_correlations):
             annotations.append(annotation)
 
             for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-                subdimension_margin = 0
-
                 submin_position = dimensions.loc[(dimension, subdimension)].min()
                 submax_position = dimensions.loc[(dimension, subdimension)].max()
 
                 for first_axis, second_axis in [("x", "y"), ("y", "x")]:
-                    if first_axis == "x":
-                        textangle = 90
-                    else:  # first_axis == "y"
-                        textangle = 0
-
                     line, annotation = add_line_and_annotation(
                         subdimension,
                         first_axis,
@@ -142,7 +133,7 @@ def add_custom_legend_axis(fig, sorted_table_correlations):
                         submax_position,
                         subdimension_margin,
                         dimension_inner_margin,
-                        textangle,
+                        textangles[first_axis],
                         8,
                     )
 

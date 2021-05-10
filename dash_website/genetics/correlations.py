@@ -120,7 +120,7 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
     customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>r²: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>r2: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)

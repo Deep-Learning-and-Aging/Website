@@ -134,7 +134,7 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {algorithm} has a r2 of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 

@@ -126,6 +126,9 @@ def _fill_graph_age_prediction_performances(
 
     scores = pd.DataFrame(data_age_prediction_performances)
 
+    if dimensions_selection == "custom_dimensions":
+        scores.replace("1DCNN", "*", inplace=True)  # since it is the only one that is different
+
     scores.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
 
     if selected_dimension != "all":
@@ -186,14 +189,32 @@ def _fill_graph_age_prediction_performances(
     lines = []
     annotations = []
 
-    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
+    if dimensions_selection == "custom_dimensions":
         if metric == "r2":
-            dimension_inner_margin = min_score - 1
-            dimension_outer_margin = min_score - 1.4
-        else:
-            dimension_inner_margin = min_score - 10
-            dimension_outer_margin = min_score - 14
+            dimension_outer_margin = min_score - 0.9
+            dimension_inner_margin = min_score - 0.5
+            subdimension_margin = min_score - 0.1
+            sub_subdimension_margin = min_score - 0.1
 
+        else:
+            dimension_outer_margin = min_score - 9
+            dimension_inner_margin = min_score - 5
+            subdimension_margin = min_score - 1
+            sub_subdimension_margin = min_score - 1
+    else:
+        if metric == "r2":
+            dimension_outer_margin = min_score - 1.4
+            dimension_inner_margin = min_score - 1
+            subdimension_margin = min_score - 0.6
+            sub_subdimension_margin = min_score - 0.1
+
+        else:
+            dimension_outer_margin = min_score - 14
+            dimension_inner_margin = min_score - 10
+            subdimension_margin = min_score - 6
+            sub_subdimension_margin = min_score - 1
+
+    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
         min_position = dimensions.loc[dimension].min()
         max_position = dimensions.loc[dimension].max()
 
@@ -213,11 +234,6 @@ def _fill_graph_age_prediction_performances(
         annotations.append(annotation)
 
         for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-            if metric == "r2":
-                subdimension_margin = min_score - 0.6
-            else:
-                subdimension_margin = min_score - 6
-
             submin_position = dimensions.loc[(dimension, subdimension)].min()
             submax_position = dimensions.loc[(dimension, subdimension)].max()
 
@@ -235,14 +251,13 @@ def _fill_graph_age_prediction_performances(
 
             lines.append(line)
             annotations.append(annotation)
+
+            if dimensions_selection == "custom_dimensions":
+                continue
+
             for sub_subdimension in (
                 dimensions.loc[(dimension, subdimension)].index.get_level_values("sub_subdimension").drop_duplicates()
             ):
-                if metric == "r2":
-                    sub_subdimension_margin = min_score - 0.1
-                else:
-                    sub_subdimension_margin = min_score - 1
-
                 sub_submin_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].min()
                 sub_submax_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].max()
 

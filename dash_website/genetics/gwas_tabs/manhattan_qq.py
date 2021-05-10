@@ -22,7 +22,7 @@ def get_manhattan_qq():
             dbc.Row(dbc.Col([get_controls_manhattan_qq_gwas(), html.Br(), html.Br()], width={"size": 3})),
             dbc.Row(
                 [
-                    dbc.Col([html.H2("Manhatton plot"), dcc.Loading(id="image_manhattan_gwas")]),
+                    dbc.Col([html.H2("Manhattan plot"), dcc.Loading(id="image_manhattan_gwas")]),
                     dbc.Col([html.H2("QQ plot"), dcc.Loading(id="image_qq_gwas")]),
                 ]
             ),
