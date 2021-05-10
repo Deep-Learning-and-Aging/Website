@@ -21,8 +21,11 @@ def get_summary():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col([html.H2(id="title_summary"), dcc.Graph(id="graph_summary", config=DOWNLOAD_CONFIG)], md=9),
+                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], width={"size": 3}),
+                    dbc.Col(
+                        [html.H2(id="title_summary"), dcc.Graph(id="graph_summary", config=DOWNLOAD_CONFIG)],
+                        width={"size": 9},
+                    ),
                 ]
             ),
         ],

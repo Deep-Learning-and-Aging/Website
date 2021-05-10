@@ -21,15 +21,14 @@ def get_heatmap():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_heatmap(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab_heatmap(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         [
                             dcc.Loading(
                                 [html.H2(id="title_heatmap"), dcc.Graph(id="heatmap_heatmap", config=DOWNLOAD_CONFIG)]
                             )
                         ],
-                        style={"overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),

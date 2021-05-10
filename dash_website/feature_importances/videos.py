@@ -32,19 +32,19 @@ def get_layout():
             dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_side_video("left")), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_video("right")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("left")), width={"size": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_video("right")), width={"size": 6}),
                 ]
             ),
             dbc.Row(
                 [
                     dbc.Col(
                         [html.H3(id="title_left_video_features"), dcc.Loading(id="gif_display_left_video_features")],
-                        style={"width": 6},
+                        width={"size": 6},
                     ),
                     dbc.Col(
                         [html.H3(id="title_right_video_features"), dcc.Loading(id="gif_display_right_video_features")],
-                        style={"width": 6},
+                        width={"size": 6},
                     ),
                 ]
             ),

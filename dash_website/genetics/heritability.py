@@ -9,7 +9,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
-from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
+from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
 from dash_website.genetics import ORDER_TYPES_HERITABILITY
 
@@ -29,7 +29,7 @@ def get_layout():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -40,8 +40,7 @@ def get_layout():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),

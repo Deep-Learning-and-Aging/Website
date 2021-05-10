@@ -42,19 +42,19 @@ def get_layout():
             dbc.Row(html.Br()),
             dbc.Row(
                 [
-                    dbc.Col(dbc.Card(get_controls_side_image_features("left")), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_image_features("right")), style={"width": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image_features("left")), width={"size": 6}),
+                    dbc.Col(dbc.Card(get_controls_side_image_features("right")), width={"size": 6}),
                 ]
             ),
             dbc.Row(
                 [
                     dbc.Col(
                         [html.H3(id="title_left_image_features"), dcc.Loading(id="image_left_image_features")],
-                        style={"width": 6},
+                        width={"size": 6},
                     ),
                     dbc.Col(
                         [html.H3(id="title_right_image_features"), dcc.Loading(id="image_right_image_features")],
-                        style={"width": 6},
+                        width={"size": 6},
                     ),
                 ]
             ),

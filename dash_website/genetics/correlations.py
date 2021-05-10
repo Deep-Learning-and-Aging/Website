@@ -9,7 +9,12 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
-from dash_website.utils.graphs import heatmap_by_clustering, heatmap_by_sorted_dimensions, add_custom_legend_axis
+from dash_website.utils.graphs import (
+    heatmap_by_clustering,
+    heatmap_by_sorted_dimensions,
+    add_custom_legend_axis,
+    histogram_correlation,
+)
 from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
 
 
@@ -28,7 +33,7 @@ def get_layout():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -39,8 +44,22 @@ def get_layout():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
+                    ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dcc.Loading(
+                                [
+                                    html.H4("Histogram of the above correlations"),
+                                    dcc.Graph(id="histogram_correlations", config=DOWNLOAD_CONFIG),
+                                ]
+                            )
+                        ],
+                        width={"size": 6, "offset": 3},
                     ),
                 ]
             ),
@@ -58,7 +77,11 @@ def get_controls_genetics_correlations():
 
 
 @APP.callback(
-    [Output("graph_genetics_correlations", "figure"), Output("title_genetics_correlations", "children")],
+    [
+        Output("graph_genetics_correlations", "figure"),
+        Output("title_genetics_correlations", "children"),
+        Output("histogram_correlations", "figure"),
+    ],
     [
         Input("order_type_genetics_correlations", "value"),
         Input("memory_genetics_correlations", "data"),
@@ -138,4 +161,5 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
     return (
         fig,
         f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
+        histogram_correlation(table_correlations),
     )

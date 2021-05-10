@@ -36,7 +36,7 @@ def get_category_heatmap():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -47,8 +47,7 @@ def get_category_heatmap():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),
@@ -118,7 +117,7 @@ def _change_category_category_multi(main_category):
     ],
 )
 def _fill_graph_tab_category_multi(algorithm, correlation_type, data_category, data_exists):
-    from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
+    from dash_website.utils.graphs import heatmap_by_clustering
     import plotly.graph_objs as go
 
     if not data_exists:
@@ -144,7 +143,7 @@ def _fill_graph_tab_category_multi(algorithm, correlation_type, data_category, d
 
     hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number features: %{customdata} <br><extra></extra>"
 
-    fig = create_dendrogram_heatmap(correlations_2d, hovertemplate, numbers_features_2d)
+    fig = heatmap_by_clustering(correlations_2d, hovertemplate, numbers_features_2d)
 
     fig.update_layout(
         {

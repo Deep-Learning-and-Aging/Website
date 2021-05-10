@@ -28,7 +28,10 @@ def get_layout():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_features(), html.Br(), html.Br(), get_controls_table_features()], md=5),
+                    dbc.Col(
+                        [get_controls_features(), html.Br(), html.Br(), get_controls_table_features()],
+                        width={"size": 5},
+                    ),
                     dbc.Col(
                         dcc.Loading(
                             [
@@ -36,7 +39,7 @@ def get_layout():
                                 dcc.Graph(id="bar_plot_features", config=DOWNLOAD_CONFIG),
                             ]
                         ),
-                        md=7,
+                        width={"size": 7},
                     ),
                 ]
             ),
