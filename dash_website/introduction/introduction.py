@@ -25,6 +25,31 @@ def get_layout():
                         className="mb-4",
                     ),
                     dbc.Row(
+                        dbc.Col(
+                            html.H5(
+                                "WEBSITE UNDER CONSTRUCTION - YOU MIGHT NEED TO REFRESH SOME PAGES SEVERAL TIMES ?",
+                                style={"padding-top": "100px"},
+                            ),
+                            style={"text-align": "center"},
+                        ),
+                    ),
+                    dbc.Row(
+                        dbc.Col(
+                            html.H6(
+                                [
+                                    "You can report some errors or give us some feedback on this ",
+                                    html.A(
+                                        "document",
+                                        href="https://docs.google.com/document/d/1uJdVu6KVOoi1plpxAz1oAs8cDX-fNDPsqYmFyBxud1w/edit?usp=sharing",
+                                    ),
+                                    ".",
+                                ],
+                                style={"padding-top": "100px"},
+                            ),
+                            style={"text-align": "center"},
+                        ),
+                    ),
+                    dbc.Row(
                         html.Div([html.Br(), html.Br()]),
                     ),
                     dbc.Row(

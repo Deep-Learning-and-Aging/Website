@@ -152,7 +152,7 @@ def display_page(pathname):
         elif "videos" == pathname.split("/")[2]:
             from dash_website.datasets.videos import get_layout
 
-    if "age_prediction_performances" == pathname.split("/")[1]:
+    elif "age_prediction_performances" == pathname.split("/")[1]:
         from dash_website.age_prediction_performances.age_prediction_performances import get_layout
 
     elif "feature_importances" == pathname.split("/")[1]:
