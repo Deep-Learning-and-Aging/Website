@@ -9,7 +9,8 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website.utils.graphs import heatmap_by_clustering, heatmap_by_sorted_dimensions, add_custom_legend_axis
+from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, ORDER_TYPES, CUSTOM_ORDER
 from dash_website.xwas import SUBSET_METHODS
 
 
@@ -71,6 +72,7 @@ def get_controls_tab_category():
                 from_dict=False,
             ),
             get_drop_down("category_category", ["All"], "Select X subcategory: ", from_dict=False),
+            get_item_radio_items("order_type_category", ORDER_TYPES, "Order by:"),
             get_item_radio_items("subset_method_category", SUBSET_METHODS, "Select subset method :"),
             get_item_radio_items("correlation_type_category", CORRELATION_TYPES, "Select correlation type :"),
         ]
@@ -88,44 +90,82 @@ def _change_category_category(main_category):
 @APP.callback(
     [Output("graph_category", "figure"), Output("title_category", "children")],
     [
+        Input("order_type_category", "value"),
         Input("subset_method_category", "value"),
         Input("correlation_type_category", "value"),
         Input("memory_category", "data"),
     ],
 )
-def _fill_graph_tab_category(subset_method, correlation_type, data_category):
-    from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
-
-    correlations_raw = pd.DataFrame(data_category).set_index(["dimension_1", "dimension_2"])
+def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_category):
+    correlations_raw = pd.DataFrame(data_category).set_index(
+        ["dimension_1", "subdimension_1", "r2_1", "r2_std_1", "dimension_2", "subdimension_2", "r2_2", "r2_std_2"]
+    )
     correlations_raw.columns = pd.MultiIndex.from_tuples(
         list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
     )
-    correlations = correlations_raw[[(subset_method, correlation_type)]]
-    correlations.columns = ["correlation"]
-    numbers_variables = correlations_raw[[(subset_method, "number_variables")]]
-    numbers_variables.columns = ["number_variables"]
+    correlations = correlations_raw[[(subset_method, correlation_type), (subset_method, "number_variables")]]
+    correlations.columns = ["correlation", "number_variables"]
+    correlations.reset_index(inplace=True)
 
-    correlations_2d = pd.pivot_table(
-        correlations, values="correlation", index="dimension_1", columns="dimension_2", dropna=False
-    ).fillna(0)
-    correlations_2d.rename(index=RENAME_DIMENSIONS, columns=RENAME_DIMENSIONS, inplace=True)
-    numbers_variables_2d = pd.pivot_table(
-        numbers_variables, values="number_variables", index="dimension_1", columns="dimension_2", dropna=False
-    ).fillna(0)
-    numbers_variables_2d.rename(index=RENAME_DIMENSIONS, columns=RENAME_DIMENSIONS, inplace=True)
-
-    hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
-
-    fig = create_dendrogram_heatmap(correlations_2d, hovertemplate, numbers_variables_2d)
-
-    fig.update_layout(
-        {
-            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "Aging dimension", "showgrid": False},
-        }
+    table_correlations = correlations.pivot(
+        index=["dimension_1", "subdimension_1"],
+        columns=["dimension_2", "subdimension_2"],
+        values="correlation",
     )
 
-    title_mean = correlations_2d.values[np.triu_indices(correlations_2d.shape[0], 1)].mean().round(3)
-    title_std = correlations_2d.values[np.triu_indices(correlations_2d.shape[0], 1)].std().round(3)
+    customdata_list = []
+    for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", "number_variables"]:
+        customdata_list.append(
+            correlations.pivot(
+                index=["dimension_1", "subdimension_1"],
+                columns=["dimension_2", "subdimension_2"],
+                values=customdata_item,
+            ).values
+        )
+    stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    return fig, f"Average correlation = {title_mean} ± {title_std}"
+    customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
+    customdata[customdata.columns] = stacked_customdata
+
+    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>r²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
+
+    if order_by == "clustering":
+        fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
+    elif order_by == "r2":
+        sorted_dimensions = (
+            correlations.set_index(["dimension_1", "subdimension_1"])
+            .sort_values(by="r2_1", ascending=False)
+            .index.drop_duplicates()
+        )
+
+        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
+        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
+
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
+
+    else:  # order_by == "custom"
+        sorted_dimensions = (
+            correlations.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
+        )
+
+        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
+        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
+
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
+
+        fig = add_custom_legend_axis(fig, sorted_table_correlations)
+
+    if order_by != "custom":
+        fig.update_layout(font={"size": 8})
+
+    fig.update_layout(
+        yaxis={"showgrid": False, "zeroline": False},
+        xaxis={"showgrid": False, "zeroline": False},
+        width=1100,
+        height=1100,
+    )
+
+    return (
+        fig,
+        f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
+    )

@@ -9,7 +9,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down
-from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
+from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
 from dash_website.utils import BLUE_WHITE_RED
 from dash_website.correlation_between import SAMPLE_DEFINITION
@@ -87,7 +87,7 @@ def get_controls_tab_all_dimensions():
     ],
 )
 def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimensions):
-    from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
+    from dash_website.utils.graphs import heatmap_by_clustering
     import plotly.graph_objs as go
 
     correlations = pd.DataFrame(data_all_dimensions)
@@ -119,7 +119,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>r²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
-        fig = create_dendrogram_heatmap(table_correlations, hovertemplate, customdata)
+        fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
 
     elif order_by == "r2":
         sorted_dimensions = (
