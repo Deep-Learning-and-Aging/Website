@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -108,7 +108,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    )
+    ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
 
     customdata_list = []
     for customdata_item in ["correlation_std", "r2_1", "r2_std_1", "r2_2", "r2_std_2"]:
@@ -117,11 +117,13 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
                 index=["dimension_1", "subdimension_1"],
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
-            ).values
+            )
+            .loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+            .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
+    customdata = pd.DataFrame(None, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
     customdata[customdata.columns] = stacked_customdata
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>r2: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"

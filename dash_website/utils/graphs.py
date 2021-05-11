@@ -5,7 +5,7 @@ from plotly.figure_factory import create_dendrogram
 from dash_website.utils import BLUE_WHITE_RED
 
 
-def heatmap_by_clustering(table_correlations, hovertemplate, customdata):
+def heatmap_by_clustering(table_correlations, hovertemplate, customdata, zmin=-1, zmax=1):
     fig = create_dendrogram(table_correlations.replace(np.nan, 0), orientation="bottom", distfun=lambda df: 1 - df)
     for scatter in fig["data"]:
         scatter["yaxis"] = "y2"
@@ -29,8 +29,8 @@ def heatmap_by_clustering(table_correlations, hovertemplate, customdata):
         colorscale=BLUE_WHITE_RED,
         customdata=heat_customdata,
         hovertemplate=hovertemplate,
-        zmin=-1,
-        zmax=1,
+        zmin=zmin,
+        zmax=zmax,
     )
 
     fig.update_layout(
@@ -54,7 +54,7 @@ def heatmap_by_clustering(table_correlations, hovertemplate, customdata):
     return fig
 
 
-def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata):
+def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata, zmin=-1, zmax=1):
     heatmap = go.Heatmap(
         x=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
         y=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
@@ -62,8 +62,8 @@ def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorte
         colorscale=BLUE_WHITE_RED,
         customdata=sorted_customdata,
         hovertemplate=hovertemplate,
-        zmin=-1,
-        zmax=1,
+        zmin=zmin,
+        zmax=zmax,
     )
 
     fig = go.Figure(heatmap)

@@ -118,20 +118,24 @@ def get_item_radio_items(id, items, legend, from_dict=True, value_idx=0):
     return control
 
 
-def get_drop_down(id, items, legend, from_dict=True):
+def get_drop_down(id, items, legend, from_dict=True, value=None):
     if from_dict:
+        if value is None:
+            value = list(items.keys())[0]
         control = dbc.FormGroup(
             [
                 html.P(legend),
-                dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0], clearable=False),
+                dcc.Dropdown(id=id, options=get_options_from_dict(items), value=value, clearable=False),
                 html.Br(),
             ]
         )
     else:
+        if value is None:
+            value = items[0]
         control = dbc.FormGroup(
             [
                 html.P(legend),
-                dcc.Dropdown(id=id, options=get_options(items), value=items[0], clearable=False),
+                dcc.Dropdown(id=id, options=get_options(items), value=value, clearable=False),
                 html.Br(),
             ]
         )

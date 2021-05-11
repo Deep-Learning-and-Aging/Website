@@ -120,6 +120,8 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         columns=["dimension_2", "subdimension_2", "sub_subdimension_2", "algorithm_2"],
         values="correlation",
     )
+    order_dimensions = table_correlations.index
+    table_correlations = table_correlations.loc[order_dimensions, order_dimensions]
 
     customdata_list = []
     for customdata_item in ["correlation_std", "r2_1", "r2_std_1", "r2_2", "r2_std_2"]:
@@ -128,11 +130,13 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                 index=["dimension_1", "subdimension_1", "sub_subdimension_1", "algorithm_1"],
                 columns=["dimension_2", "subdimension_2", "sub_subdimension_2", "algorithm_2"],
                 values=customdata_item,
-            ).values
+            )
+            .loc[order_dimensions, order_dimensions]
+            .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
+    customdata = pd.DataFrame(None, index=order_dimensions, columns=order_dimensions)
     customdata[customdata.columns] = stacked_customdata
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>r2: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"

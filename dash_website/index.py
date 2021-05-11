@@ -125,6 +125,13 @@ def get_top_bar():
                         label="XWAS",
                         nav=True,
                     ),
+                    dbc.NavItem(
+                        dbc.NavLink(
+                            "Correlations comparison",
+                            href="/correlations_comparison",
+                            id="correlations_comparison",
+                        )
+                    ),
                 ],
                 fill=True,
                 pills=True,
@@ -187,6 +194,9 @@ def display_page(pathname):
             from dash_website.xwas.multivariate_correlations import get_layout
         elif "multivariate_feature_importances" == pathname.split("/")[2]:
             from dash_website.xwas.multivariate_feature_importances import get_layout
+
+    elif "correlations_comparison" == pathname.split("/")[1]:
+        from dash_website.correlations_comparison.correlations_comparison import get_layout
 
     elif "/" == pathname:
         from dash_website.introduction.introduction import get_layout

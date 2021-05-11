@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
 
 
 def get_layout():
@@ -94,7 +94,7 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    )
+    ).loc[ORDER_DIMENSIONS.drop(("Eyes", "All")), ORDER_DIMENSIONS.drop(("Eyes", "All"))]
 
     customdata_list = []
     for customdata_item in [
@@ -113,11 +113,15 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
                 index=["dimension_1", "subdimension_1"],
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
-            ).values
+            )
+            .loc[ORDER_DIMENSIONS.drop(("Eyes", "All")), ORDER_DIMENSIONS.drop(("Eyes", "All"))]
+            .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
+    customdata = pd.DataFrame(
+        None, index=ORDER_DIMENSIONS.drop(("Eyes", "All")), columns=ORDER_DIMENSIONS.drop(("Eyes", "All"))
+    )
     customdata[customdata.columns] = stacked_customdata
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>r2: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
