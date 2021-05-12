@@ -199,10 +199,7 @@ def add_line_and_annotation(
 
 def histogram_correlation(table_correlations):
     correlations = table_correlations.values[np.triu_indices(table_correlations.shape[0])]
-    histogram = go.Histogram(
-        x=correlations,
-        histnorm="percent",
-    )
+    histogram = go.Histogram(x=correlations, histnorm="percent", xbins={"size": 0.01})
 
     fig = go.Figure(histogram)
 

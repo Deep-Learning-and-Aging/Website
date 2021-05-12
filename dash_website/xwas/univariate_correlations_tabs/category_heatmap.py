@@ -15,7 +15,14 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, MAIN_CATEGORIES_TO_CATEGORIES, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
+from dash_website import (
+    DOWNLOAD_CONFIG,
+    CORRELATION_TYPES,
+    MAIN_CATEGORIES_TO_CATEGORIES,
+    ORDER_TYPES,
+    CUSTOM_ORDER,
+    ORDER_DIMENSIONS,
+)
 from dash_website.xwas import SUBSET_METHODS
 
 
@@ -60,7 +67,7 @@ def get_category_heatmap():
                                 ]
                             )
                         ],
-                        width={"size": 9, "offset": 3},
+                        width={"size": 6, "offset": 3},
                     ),
                 ]
             ),
@@ -139,14 +146,16 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
                 index=["dimension_1", "subdimension_1"],
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
-            ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS].values
+            )
+            .loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+            .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
     customdata = pd.DataFrame(None, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>r2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)

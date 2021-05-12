@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import dash_table
 
 import pandas as pd
 import numpy as np
@@ -10,7 +11,7 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down
 from dash_website import DOWNLOAD_CONFIG
-from dash_website.genetics import DIMENSIONS_GWAS_VOLCANO
+from dash_website.genetics import DIMENSIONS_GWAS_VOLCANO, VOLCANO_TABLE_COLUMNS
 
 
 def get_volcano():
@@ -41,6 +42,22 @@ def get_volcano():
                         ],
                         width={"size": 6},
                     ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dash_table.DataTable(
+                                id="table_volcano_gwas",
+                                columns=[{"name": i, "id": i} for i in list(VOLCANO_TABLE_COLUMNS.values())],
+                                style_cell={"textAlign": "left"},
+                                sort_action="custom",
+                                sort_mode="single",
+                            )
+                        ],
+                        width={"size": 8, "offset": 3},
+                    )
                 ]
             ),
         ],

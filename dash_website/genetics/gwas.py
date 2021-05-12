@@ -16,7 +16,7 @@ def get_layout():
                     dbc.Tab(label="Select Volcano plot", tab_id="tab_volcano_gwas"),
                 ],
                 id="tab_manager_gwas",
-                active_tab="tab_manhatton_qq_gwas",
+                active_tab="tab_volcano_gwas",  #"tab_manhatton_qq_gwas",
             ),
             html.Div(id="tab_content_gwas"),
         ]
