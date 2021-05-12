@@ -65,9 +65,11 @@ DIMENSIONS_GWAS_VOLCANO = [
 
 
 VOLCANO_TABLE_COLUMNS = {
-    "category": "Category",
-    "variable": "Variable",
+    "dimension": "Dimension",
+    "size_effect": "Size effect",
     "p_value": "p-value (if 0 then < 5 x 10^-6)",
-    "correlation": "Partial correlation",
-    "sample_size": "Sample size",
+    "chromosome": "Chromosome",
+    "SNP": "SNP",
+    "Gene": "Gene",
+    "Gene_type": "Gene type",
 }

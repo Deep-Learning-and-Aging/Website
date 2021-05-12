@@ -37,15 +37,17 @@ def get_volcano():
             dbc.Row(
                 [
                     dbc.Col(
-                        [
-                            dash_table.DataTable(
-                                id="table_volcano",
-                                columns=[{"name": i, "id": i} for i in list(VOLCANO_TABLE_COLUMNS.values())],
-                                style_cell={"textAlign": "left"},
-                                sort_action="custom",
-                                sort_mode="single",
-                            )
-                        ],
+                        dcc.Loading(
+                            [
+                                dash_table.DataTable(
+                                    id="table_volcano",
+                                    columns=[{"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()],
+                                    style_cell={"textAlign": "left"},
+                                    sort_action="custom",
+                                    sort_mode="single",
+                                )
+                            ]
+                        ),
                         width={"size": 8, "offset": 3},
                     )
                 ]
@@ -174,15 +176,10 @@ def _sort_table(dict_correlations, main_category, category, sort_by_col):
 
     correlations_category.reset_index(inplace=True)
 
-    correlations_category.rename(
-        columns=VOLCANO_TABLE_COLUMNS,
-        inplace=True,
-    )
-
     if sort_by_col is not None and len(sort_by_col) > 0:
         is_ascending = sort_by_col[0]["direction"] == "asc"
         correlations_category.sort_values(sort_by_col[0]["column_id"], ascending=is_ascending, inplace=True)
     else:
-        correlations_category.sort_values(VOLCANO_TABLE_COLUMNS["p_value"], inplace=True)
+        correlations_category.sort_values("p_value", inplace=True)
 
     return correlations_category.round(5).to_dict("records")
