@@ -188,7 +188,7 @@ def _fill_graph_tab_comparison(
         height=1100,
     )
 
-    hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>r2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
+    hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     # Invert upper and lower since the origin of the graph is at the bottom
     triangular_heatmap_values = np.tril(table_correlations_upper)
@@ -213,7 +213,7 @@ def _fill_graph_tab_comparison(
         height=1100,
     )
 
-    hovertemplate_difference = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>r2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>r2: %{customdata[2]:.3f} +- %{customdata[3]:.3f}<br><extra></extra>"
+    hovertemplate_difference = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f}<br><extra></extra>"
 
     difference_heatmap = table_correlations_upper - table_correlations_lower
 

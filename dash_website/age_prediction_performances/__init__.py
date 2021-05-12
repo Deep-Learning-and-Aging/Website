@@ -8,4 +8,4 @@ DIMENSIONS_SELECTION = {
     "without_ensemble_models": "Without ensemble models",
 }
 
-SCORES = {"r2": "r2", "rmse": "RMSE"}
+SCORES = {"r2": "R2", "rmse": "RMSE"}

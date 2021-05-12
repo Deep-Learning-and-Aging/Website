@@ -121,7 +121,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
     customdata = np.dstack((std_2d, sample_size_2d, algorithm_2d))
 
-    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>r2: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
+    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>R2: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
 
     heatmap = go.Heatmap(
         x=r2_2d.columns,
@@ -175,14 +175,14 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
         return (
             fig,
-            f"Average r2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
+            f"Average R2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "block"},
             fig_pie_chart,
         )
     else:
         return (
             fig,
-            f"Average r2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
+            f"Average R2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "none"},
             dash.no_update,
         )
