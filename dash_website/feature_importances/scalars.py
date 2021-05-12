@@ -12,13 +12,13 @@ from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_options
 from dash_website import DOWNLOAD_CONFIG
 from dash_website import CORRELATION_TYPES, ALGORITHMS_RENDERING
-from dash_website.feature_importances import TREE_SCALARS, BAR_PLOT_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
+from dash_website.feature_importances import TREE_SCALARS, FEATURES_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
 
 def get_layout():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_scores_features", data=get_data_scores())]),
+            dcc.Loading([dcc.Store(id="memory_features"), dcc.Store(id="memory_scores", data=get_data_scores())]),
             html.H1("Feature importances - Scalars"),
             html.Br(),
             html.Br(),
@@ -48,15 +48,17 @@ def get_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        [
-                            dash_table.DataTable(
-                                id="table_scalars_features",
-                                columns=[{"name": i, "id": i} for i in list(BAR_PLOT_TABLE_COLUMNS.values())],
-                                style_cell={"textAlign": "left"},
-                                sort_action="custom",
-                                sort_mode="single",
-                            )
-                        ],
+                        dcc.Loading(
+                            [
+                                dash_table.DataTable(
+                                    id="table_scalars_features",
+                                    columns=[{"id": key, "name": name} for key, name in FEATURES_TABLE_COLUMNS.items()],
+                                    style_cell={"textAlign": "left"},
+                                    sort_action="custom",
+                                    sort_mode="single",
+                                )
+                            ]
+                        ),
                         width={"size": 8, "offset": 3},
                     )
                 ]
@@ -68,6 +70,18 @@ def get_layout():
 
 def get_data_scores():
     return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
+
+
+@APP.callback(
+    Output("memory_features", "data"),
+    [
+        Input("dimension_scalars_features", "value"),
+        Input("subdimension_scalars_features", "value"),
+        Input("sub_subdimension_scalars_features", "value"),
+    ],
+)
+def _modify_store_features(dimension, subdimension, sub_subdimension):
+    return load_feather(f"feature_importances/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather").to_dict()
 
 
 def get_controls_scalars_features():
@@ -134,7 +148,7 @@ def get_controls_table_scalars_features():
                 html.P("Correlation between feature importances/correlation : "),
                 dash_table.DataTable(
                     id="table_correlation_scalars_features",
-                    columns=[{"name": i, "id": i} for i in list(FEATURES_CORRELATIONS_TABLE_COLUMNS.values())],
+                    columns=[{"id": key, "name": name} for key, name in FEATURES_CORRELATIONS_TABLE_COLUMNS.items()],
                     style_cell={"textAlign": "left"},
                     sort_action="custom",
                     sort_mode="single",
@@ -148,8 +162,6 @@ def get_controls_table_scalars_features():
 @APP.callback(
     [
         Output("bar_plot_scalars_features", "figure"),
-        Output("table_scalars_features", "data"),
-        Output("table_correlation_scalars_features", "data"),
         Output("title_scalars_features", "children"),
         Output("sub_title_scalars_features", "children"),
     ],
@@ -157,11 +169,11 @@ def get_controls_table_scalars_features():
         Input("dimension_scalars_features", "value"),
         Input("subdimension_scalars_features", "value"),
         Input("sub_subdimension_scalars_features", "value"),
-        Input("correlation_type_scalars_features", "value"),
-        Input("memory_scores_features", "data"),
+        Input("memory_scores", "data"),
+        Input("memory_features", "data"),
     ],
 )
-def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlation_type, data_scores):
+def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_scores, data_features):
     import plotly.graph_objects as go
 
     scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
@@ -181,16 +193,14 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlatio
     for other_algorithm in other_scores.index:
         subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a R2 of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
 
-    features = load_feather(
-        f"feature_importances/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather"
-    ).set_index("feature")
+    features = pd.DataFrame(data_features).set_index("feature")
     features.columns = pd.MultiIndex.from_tuples(
         list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
     )
 
     sorted_features = features.abs().sort_values(by=[(best_algorithm, "mean")], ascending=False).index
 
-    table_features = pd.DataFrame(None, columns=BAR_PLOT_TABLE_COLUMNS.keys())
+    table_features = pd.DataFrame(None, columns=FEATURES_TABLE_COLUMNS.keys())
     table_features["feature"] = sorted_features
 
     for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
@@ -227,6 +237,59 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlatio
             "yaxis": {"title": "Features", "showgrid": False},
         }
     )
+
+    return (fig, title, subtitle)
+
+
+@APP.callback(
+    [Output("table_scalars_features", "data"), Output("table_correlation_scalars_features", "data")],
+    [
+        Input("dimension_scalars_features", "value"),
+        Input("subdimension_scalars_features", "value"),
+        Input("sub_subdimension_scalars_features", "value"),
+        Input("correlation_type_scalars_features", "value"),
+        Input("memory_scores", "data"),
+        Input("memory_features", "data"),
+        Input("table_scalars_features", "sort_by"),
+        Input("table_correlation_scalars_features", "sort_by"),
+    ],
+)
+def _sort_tables(
+    dimension,
+    subdimension,
+    sub_subdimension,
+    correlation_type,
+    data_scores,
+    data_features,
+    sort_by_col_features,
+    sort_by_col_correlations,
+):
+    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
+    scores = (
+        scores_raw.loc[(dimension, subdimension, sub_subdimension)]
+        .set_index("algorithm")
+        .sort_values("r2", ascending=False)
+    )
+
+    best_algorithm = scores.index[0]
+
+    features = pd.DataFrame(data_features).set_index("feature")
+    features.columns = pd.MultiIndex.from_tuples(
+        list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
+    )
+
+    sorted_features = features.abs().sort_values(by=[(best_algorithm, "mean")], ascending=False).index
+
+    table_features = pd.DataFrame(None, columns=FEATURES_TABLE_COLUMNS.keys())
+    table_features["feature"] = sorted_features
+
+    for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
+        table_features[f"percentage_{algorithm}"] = (
+            features.loc[sorted_features, (algorithm, "mean")].round(3).astype(str).values
+            + " +- "
+            + features.loc[sorted_features, (algorithm, "std")].round(3).astype(str).values
+        )
+
     table_correlations_raw = pd.DataFrame(
         None, index=features.index, columns=pd.Index(FEATURES_CORRELATIONS_TABLE_COLUMNS.keys()).drop("index")
     )
@@ -241,10 +304,16 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, correlatio
         .reset_index()
     )
 
-    return (
-        fig,
-        table_features.rename(columns=BAR_PLOT_TABLE_COLUMNS).to_dict("records"),
-        table_correlations.rename(columns=FEATURES_CORRELATIONS_TABLE_COLUMNS).to_dict("records"),
-        title,
-        subtitle,
-    )
+    if sort_by_col_features is not None and len(sort_by_col_features) > 0:
+        is_ascending = sort_by_col_features[0]["direction"] == "asc"
+        table_features.sort_values(sort_by_col_features[0]["column_id"], ascending=is_ascending, inplace=True)
+    else:
+        table_features.sort_values("percentage_light_gbm", inplace=True)
+
+    if sort_by_col_correlations is not None and len(sort_by_col_correlations) > 0:
+        is_ascending = sort_by_col_correlations[0]["direction"] == "asc"
+        table_correlations.sort_values(sort_by_col_correlations[0]["column_id"], ascending=is_ascending, inplace=True)
+
+    return table_features[FEATURES_TABLE_COLUMNS].round(3).to_dict("records"), table_correlations[
+        FEATURES_CORRELATIONS_TABLE_COLUMNS
+    ].round(3).to_dict("records")

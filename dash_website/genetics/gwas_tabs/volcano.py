@@ -47,15 +47,19 @@ def get_volcano():
             dbc.Row(
                 [
                     dbc.Col(
-                        [
-                            dash_table.DataTable(
-                                id="table_volcano_gwas",
-                                columns=[{"name": i, "id": i} for i in list(VOLCANO_TABLE_COLUMNS.values())],
-                                style_cell={"textAlign": "left"},
-                                sort_action="custom",
-                                sort_mode="single",
-                            )
-                        ],
+                        dcc.Loading(
+                            [
+                                dash_table.DataTable(
+                                    id="table_volcano_gwas",
+                                    columns=[
+                                        {"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()
+                                    ],
+                                    style_cell={"textAlign": "left"},
+                                    sort_action="custom",
+                                    sort_mode="single",
+                                )
+                            ]
+                        ),
                         width={"size": 8, "offset": 3},
                     )
                 ]
@@ -130,3 +134,26 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
     fig.update_layout(xaxis={"title": "Size Effect (SE)"}, yaxis={"title": "-log(p-value)"}, height=800)
 
     return fig
+
+
+@APP.callback(
+    Output("table_volcano_gwas", "data"),
+    [
+        Input("dimension_volcano_gwas", "value"),
+        Input("memory_volcano_gwas", "data"),
+        Input("table_volcano_gwas", "sort_by"),
+    ],
+)
+def _sort_table(dimension, data_volcano_gwas, sort_by_col):
+    size_effects = pd.DataFrame(data_volcano_gwas)
+
+    if dimension != "All":
+        size_effects = size_effects.set_index("dimension").loc[[dimension]].reset_index()
+
+    if sort_by_col is not None and len(sort_by_col) > 0:
+        is_ascending = sort_by_col[0]["direction"] == "asc"
+        size_effects.sort_values(sort_by_col[0]["column_id"], ascending=is_ascending, inplace=True)
+    else:
+        size_effects.sort_values("p_value", inplace=True)
+
+    return size_effects[VOLCANO_TABLE_COLUMNS].round(5).to_dict("records")

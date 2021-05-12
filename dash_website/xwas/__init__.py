@@ -1,6 +1,6 @@
 SUBSET_METHODS = {"union": "Union", "all": "All", "intersection": "Intersection"}
 
-BAR_PLOT_TABLE_COLUMNS = {
+FEATURES_TABLE_COLUMNS = {
     "variable": "Variable",
     "feature_correlation": "Feature Correlation",
     "percentage_correlation": "Percentage Correlation",
