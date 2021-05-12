@@ -148,7 +148,7 @@ def get_top_bar():
 
 
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
-def display_page(pathname):
+def _display_page(pathname):
     if "datasets" == pathname.split("/")[1]:
         if "scalars" == pathname.split("/")[2]:
             from dash_website.datasets.scalars import get_layout
@@ -205,3 +205,86 @@ def display_page(pathname):
         return "404"
 
     return get_layout()
+
+
+@APP.callback(
+    [
+        Output("introduction", "active"),
+        Output("datasets_scalars", "active"),
+        Output("datasets_time_series", "active"),
+        Output("datasets_images", "active"),
+        Output("datasets_videos", "active"),
+        Output("age_prediction_performances", "active"),
+        Output("feature_importances_scalars", "active"),
+        Output("feature_importances_time_series", "active"),
+        Output("feature_importances_images", "active"),
+        Output("feature_importances_videos", "active"),
+        Output("correlation_between", "active"),
+        Output("genetics_gwas", "active"),
+        Output("genetics_heritability", "active"),
+        Output("genetics_correlations", "active"),
+        Output("xwas_univariate_results", "active"),
+        Output("xwas_univariate_correlations", "active"),
+        Output("xwas_multivariate_results", "active"),
+        Output("xwas_multivariate_correlations", "active"),
+        Output("xwas_multivariate_feature_importances", "active"),
+        Output("correlations_comparison", "active"),
+    ],
+    Input("url", "pathname"),
+)
+def _change_active_page(pathname):
+    active_pages = [False] * 20
+
+    if "datasets" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
+            active_pages[1] = True
+        elif "time_series" == pathname.split("/")[2]:
+            active_pages[2] = True
+        elif "images" == pathname.split("/")[2]:
+            active_pages[3] = True
+        elif "videos" == pathname.split("/")[2]:
+            active_pages[4] = True
+
+    elif "age_prediction_performances" == pathname.split("/")[1]:
+        active_pages[5] = True
+
+    elif "feature_importances" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
+            active_pages[6] = True
+        elif "time_series" == pathname.split("/")[2]:
+            active_pages[7] = True
+        elif "images" == pathname.split("/")[2]:
+            active_pages[8] = True
+        elif "videos" == pathname.split("/")[2]:
+            active_pages[9] = True
+
+    elif "correlation_between" == pathname.split("/")[1]:
+        active_pages[10] = True
+
+    elif "genetics" == pathname.split("/")[1]:
+        if "gwas" == pathname.split("/")[2]:
+            active_pages[11] = True
+        elif "correlations" == pathname.split("/")[2]:
+            active_pages[12] = True
+        elif "heritability" == pathname.split("/")[2]:
+            active_pages[13] = True
+
+    elif "xwas" == pathname.split("/")[1]:
+        if "univariate_results" == pathname.split("/")[2]:
+            active_pages[14] = True
+        elif "univariate_correlations" == pathname.split("/")[2]:
+            active_pages[15] = True
+        elif "multivariate_results" == pathname.split("/")[2]:
+            active_pages[16] = True
+        elif "multivariate_correlations" == pathname.split("/")[2]:
+            active_pages[17] = True
+        elif "multivariate_feature_importances" == pathname.split("/")[2]:
+            active_pages[18] = True
+
+    elif "correlations_comparison" == pathname.split("/")[1]:
+        active_pages[19] = True
+
+    elif "/" == pathname:
+        active_pages[0] = True
+
+    return active_pages
