@@ -41,7 +41,6 @@ def get_layout():
                             )
                         ],
                         width={"size": 9},
-                        style={"overflowX": "scroll"},
                     ),
                 ]
             ),
@@ -190,18 +189,22 @@ def _fill_graph_age_prediction_performances(
     annotations = []
 
     if dimensions_selection == "custom_dimensions":
+        size_dimension = 18
+        size_subdimension = 15
         if metric == "r2":
             dimension_outer_margin = min_score - 0.9
             dimension_inner_margin = min_score - 0.5
             subdimension_margin = min_score - 0.1
             sub_subdimension_margin = min_score - 0.1
-
         else:
             dimension_outer_margin = min_score - 9
             dimension_inner_margin = min_score - 5
             subdimension_margin = min_score - 1
             sub_subdimension_margin = min_score - 1
     else:
+        size_dimension = 13
+        size_subdimension = 11
+        size_sub_subdimension = 9
         if metric == "r2":
             dimension_outer_margin = min_score - 1.4
             dimension_inner_margin = min_score - 1
@@ -227,7 +230,7 @@ def _fill_graph_age_prediction_performances(
             dimension_inner_margin,
             dimension_outer_margin,
             90,
-            13,
+            size_dimension,
         )
 
         lines.append(line)
@@ -246,7 +249,7 @@ def _fill_graph_age_prediction_performances(
                 subdimension_margin,
                 dimension_inner_margin,
                 90,
-                11,
+                size_subdimension,
             )
 
             lines.append(line)
@@ -270,7 +273,7 @@ def _fill_graph_age_prediction_performances(
                     sub_subdimension_margin,
                     subdimension_margin,
                     90,
-                    9,
+                    size_sub_subdimension,
                 )
 
                 lines.append(line)
@@ -300,7 +303,7 @@ def _fill_graph_age_prediction_performances(
         yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
-        width=400 + 20 * scores.shape[0],
+        # width=400 + 20 * scores.shape[0],
     )
 
     return (

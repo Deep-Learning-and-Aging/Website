@@ -153,17 +153,12 @@ def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
     import plotly.graph_objects as go
 
     scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "category"])
-    if (dimension, category) in scores_raw.index:
-        scores = scores_raw.loc[dimension, category]
-        best_algorithm = scores.iloc[scores["r2"].argmax()]["algorithm"]
+    scores = scores_raw.loc[dimension, category]
+    best_algorithm = scores.iloc[scores["r2"].argmax()]["algorithm"]
 
-        scores_algorithm = scores.reset_index().set_index("algorithm").round(3)
-        title = f"R² : Elastic Net {scores_algorithm.loc['elastic_net', 'r2']} +- {scores_algorithm.loc['elastic_net', 'std']}, "
-        title += f"Light GBM {scores_algorithm.loc['light_gbm', 'r2']} +- {scores_algorithm.loc['light_gbm', 'std']}, Neural Network {scores_algorithm.loc['neural_network', 'r2']} +- {scores_algorithm.loc['neural_network', 'std']}"
-    else:
-        scores = None
-        best_algorithm = "light_gbm"
-        title = "We don't have the scores for the moment, they are going to be uploaded soon."
+    scores_algorithm = scores.reset_index().set_index("algorithm").round(3)
+    title = f"R² : Elastic Net {scores_algorithm.loc['elastic_net', 'r2']} +- {scores_algorithm.loc['elastic_net', 'std']}, "
+    title += f"Light GBM {scores_algorithm.loc['light_gbm', 'r2']} +- {scores_algorithm.loc['light_gbm', 'std']}, Neural Network {scores_algorithm.loc['neural_network', 'r2']} +- {scores_algorithm.loc['neural_network', 'std']}"
 
     features = pd.DataFrame(data_features).set_index(["algorithm", "variable"])
     sorted_variables = (
