@@ -13,38 +13,6 @@ from dash_website.utils.controls import get_options_from_dict, get_item_radio_it
 from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND, SAMPLE_LEGEND, AGE_RANGES
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_videos", data=get_data())]),
-            html.H1("Datasets - Videos"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(get_controls_videos(), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                [
-                    dbc.Col(dbc.Card(get_controls_side_video("left")), width={"size": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_video("right")), width={"size": 6}),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [html.H3(id="title_left_video"), dcc.Loading(id="gif_display_left_video")],
-                        width={"size": 6},
-                    ),
-                    dbc.Col(
-                        [html.H3(id="title_right_video"), dcc.Loading(id="gif_display_right_video")],
-                        width={"size": 6},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data():
     return load_feather("datasets/videos/information.feather").to_dict()
 
@@ -123,3 +91,34 @@ def display_gif(chamber_type, sex, age_group, sample, data_videos):
         style={"padding-left": 400},
     )
     return gif_display, title
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_videos", data=get_data())]),
+        html.H1("Datasets - Videos"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(get_controls_videos(), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(get_controls_side_video("left")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_video("right")), width={"size": 6}),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [html.H3(id="title_left_video"), dcc.Loading(id="gif_display_left_video")],
+                    width={"size": 6},
+                ),
+                dbc.Col(
+                    [html.H3(id="title_right_video"), dcc.Loading(id="gif_display_right_video")],
+                    width={"size": 6},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

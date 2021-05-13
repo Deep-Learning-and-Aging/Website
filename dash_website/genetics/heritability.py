@@ -14,41 +14,6 @@ from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
 from dash_website.genetics import ORDER_TYPES_HERITABILITY
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
-            html.H1("Genetics - Heritabiliy"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            get_controls_heritability(),
-                            html.Br(),
-                            html.Br(),
-                        ],
-                        width={"size": 3},
-                    ),
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="title_heritability"),
-                                    dcc.Graph(id="graph_heritability", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 9},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data():
     return load_feather(f"genetics/heritability/heritability.feather").to_dict()
 
@@ -187,3 +152,37 @@ def _fill_graph_heritability(order_by, data_heritability):
         fig,
         f"Average heritability = {heritability['h2'].mean().round(3)} +- {heritability['h2'].std().round(3)}",
     )
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
+        html.H1("Genetics - Heritabiliy"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        get_controls_heritability(),
+                        html.Br(),
+                        html.Br(),
+                    ],
+                    width={"size": 3},
+                ),
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_heritability"),
+                                dcc.Graph(id="graph_heritability", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

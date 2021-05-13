@@ -19,53 +19,6 @@ from dash_website import (
 from dash_website.xwas import FEATURES_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_features_xwas"), dcc.Store(id="memory_scores_xwas", data=get_data())]),
-            html.H1("Multivariate XWAS - Feature importances"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [get_controls_features(), html.Br(), html.Br(), get_controls_table_features()],
-                        width={"size": 5},
-                    ),
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                html.H2(id="title_feature_importances"),
-                                dcc.Graph(id="bar_plot_features", config=DOWNLOAD_CONFIG),
-                            ]
-                        ),
-                        width={"size": 7},
-                    ),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                dash_table.DataTable(
-                                    id="table_features_xwas",
-                                    columns=[{"id": key, "name": name} for key, name in FEATURES_TABLE_COLUMNS.items()],
-                                    style_cell={"textAlign": "left"},
-                                    sort_action="custom",
-                                    sort_mode="single",
-                                )
-                            ]
-                        ),
-                        width={"size": 8, "offset": 3},
-                    )
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data():
     return load_feather(
         f"xwas/multivariate_results/scores.feather", columns=["category", "dimension", "r2", "std", "algorithm"]
@@ -280,3 +233,49 @@ def _sort_tables(
     return table_features[FEATURES_TABLE_COLUMNS].round(5).to_dict("records"), table_correlations[
         FEATURES_CORRELATIONS_TABLE_COLUMNS
     ].round(5).to_dict("records")
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_features_xwas"), dcc.Store(id="memory_scores_xwas", data=get_data())]),
+        html.H1("Multivariate XWAS - Feature importances"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [get_controls_features(), html.Br(), html.Br(), get_controls_table_features()],
+                    width={"size": 5},
+                ),
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            html.H2(id="title_feature_importances"),
+                            dcc.Graph(id="bar_plot_features", config=DOWNLOAD_CONFIG),
+                        ]
+                    ),
+                    width={"size": 7},
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            dash_table.DataTable(
+                                id="table_features_xwas",
+                                columns=[{"id": key, "name": name} for key, name in FEATURES_TABLE_COLUMNS.items()],
+                                style_cell={"textAlign": "left"},
+                                sort_action="custom",
+                                sort_mode="single",
+                            )
+                        ]
+                    ),
+                    width={"size": 8, "offset": 3},
+                )
+            ]
+        ),
+    ],
+    fluid=True,
+)
