@@ -21,72 +21,6 @@ from dash_website import (
 from dash_website.xwas import SUBSET_METHODS
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(dcc.Store(id="memory_comparison_upper")),
-            dcc.Loading(dcc.Store(id="memory_comparison_lower")),
-            html.H1("Correlations comparison"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            get_controls_comparison(),
-                            html.Br(),
-                            html.Br(),
-                        ],
-                        width={"size": 3},
-                    ),
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="title_comparison"),
-                                    dcc.Graph(id="scatter_comparison", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 9},
-                    ),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H4(id="title_triangular_heatmap_comparison"),
-                                    dcc.Graph(id="triangular_heatmap_comparison", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 9, "offset": 3},
-                    ),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H4(id="title_difference_heatmap_comparison"),
-                                    dcc.Graph(id="difference_heatmap_comparison", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 9, "offset": 3},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 @APP.callback(
     Output("memory_comparison_upper", "data"),
     Input("first_category_comparison", "value"),
@@ -317,3 +251,68 @@ def filter_none_to_nan(customdata_element):
         return np.array(list(customdata_element[:-1]) + [np.nan])
     else:
         return customdata_element
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(dcc.Store(id="memory_comparison_upper")),
+        dcc.Loading(dcc.Store(id="memory_comparison_lower")),
+        html.H1("Correlations comparison"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        get_controls_comparison(),
+                        html.Br(),
+                        html.Br(),
+                    ],
+                    width={"size": 3},
+                ),
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_comparison"),
+                                dcc.Graph(id="scatter_comparison", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9},
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H4(id="title_triangular_heatmap_comparison"),
+                                dcc.Graph(id="triangular_heatmap_comparison", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9, "offset": 3},
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H4(id="title_difference_heatmap_comparison"),
+                                dcc.Graph(id="difference_heatmap_comparison", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9, "offset": 3},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

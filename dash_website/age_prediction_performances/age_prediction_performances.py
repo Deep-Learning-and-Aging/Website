@@ -14,41 +14,6 @@ from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
 from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(dcc.Store(id="memory_age_prediction_performances")),
-            html.H1("Age prediction performances"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            get_controls_age_prediction_performances(),
-                            html.Br(),
-                            html.Br(),
-                        ],
-                        width={"size": 3},
-                    ),
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="title_age_prediction_performances"),
-                                    dcc.Graph(id="graph_age_prediction_performances", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 9},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 @APP.callback(
     Output("memory_age_prediction_performances", "data"),
     [
@@ -310,3 +275,37 @@ def _fill_graph_age_prediction_performances(
         fig,
         f"Average {SCORES[metric]} = {scores[metric].mean().round(3)} +- {scores[metric].std().round(3)}",
     )
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(dcc.Store(id="memory_age_prediction_performances")),
+        html.H1("Age prediction performances"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        get_controls_age_prediction_performances(),
+                        html.Br(),
+                        html.Br(),
+                    ],
+                    width={"size": 3},
+                ),
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_age_prediction_performances"),
+                                dcc.Graph(id="graph_age_prediction_performances", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

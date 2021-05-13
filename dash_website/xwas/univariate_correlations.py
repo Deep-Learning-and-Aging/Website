@@ -8,23 +8,6 @@ from dash_website.xwas.univariate_correlations_tabs.dimension_heatmap import get
 from dash_website.xwas.univariate_correlations_tabs.average_bars import get_average_bars
 
 
-def get_layout():
-    return html.Div(
-        [
-            dbc.Tabs(
-                [
-                    dbc.Tab(label="Select Category", tab_id="tab_category"),
-                    dbc.Tab(label="Select Dimension", tab_id="tab_dimension"),
-                    dbc.Tab(label="Select Average", tab_id="tab_average"),
-                ],
-                id="tab_manager_correlations",
-                active_tab="tab_category",
-            ),
-            html.Div(id="tab_content_correlations"),
-        ]
-    )
-
-
 @APP.callback(Output("tab_content_correlations", "children"), Input("tab_manager_correlations", "active_tab"))
 def _fill_tab(
     active_tab,
@@ -35,3 +18,19 @@ def _fill_tab(
         return get_dimension_heatmap()
     else:  # active_tab == "tab_average"
         return get_average_bars()
+
+
+LAYOUT = html.Div(
+    [
+        dbc.Tabs(
+            [
+                dbc.Tab(label="Select Category", tab_id="tab_category"),
+                dbc.Tab(label="Select Dimension", tab_id="tab_dimension"),
+                dbc.Tab(label="Select Average", tab_id="tab_average"),
+            ],
+            id="tab_manager_correlations",
+            active_tab="tab_category",
+        ),
+        html.Div(id="tab_content_correlations"),
+    ]
+)

@@ -18,56 +18,6 @@ from dash_website.utils.graphs import (
 from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(dcc.Store(id="memory_genetics_correlations", data=get_data())),
-            html.H1("Genetics - Correlations"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            get_controls_genetics_correlations(),
-                            html.Br(),
-                            html.Br(),
-                        ],
-                        width={"size": 3},
-                    ),
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="title_genetics_correlations"),
-                                    dcc.Graph(id="graph_genetics_correlations", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 9},
-                    ),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H4("Histogram of the above correlations"),
-                                    dcc.Graph(id="histogram_correlations", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        width={"size": 6, "offset": 3},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data():
     return load_feather("genetics/correlations/correlations.feather").to_dict()
 
@@ -168,3 +118,52 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
         f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
         histogram_correlation(table_correlations),
     )
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(dcc.Store(id="memory_genetics_correlations", data=get_data())),
+        html.H1("Genetics - Correlations"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        get_controls_genetics_correlations(),
+                        html.Br(),
+                        html.Br(),
+                    ],
+                    width={"size": 3},
+                ),
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_genetics_correlations"),
+                                dcc.Graph(id="graph_genetics_correlations", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9},
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H4("Histogram of the above correlations"),
+                                dcc.Graph(id="histogram_correlations", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 6, "offset": 3},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

@@ -21,41 +21,6 @@ from dash_website.datasets import (
 )
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_images", data=get_data())]),
-            html.H1("Datasets - Images"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(dbc.Col(dbc.Card(get_controls_images())), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dbc.Card(get_controls_side_image("left")),
-                        width={"size": 6},
-                    ),
-                    dbc.Col(dbc.Card(get_controls_side_image("right")), width={"size": 6}),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [html.H3(id="title_left_image"), dcc.Loading(id="image_left_image")],
-                        width={"size": 6},
-                    ),
-                    dbc.Col(
-                        [html.H3(id="title_right_image"), dcc.Loading(id="image_right_image")],
-                        width={"size": 6},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data():
     return load_feather("datasets/images/information.feather").to_dict()
 
@@ -214,3 +179,37 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sam
             title = "The image was not provided by the UK Biobank dataset, please choose another sample."
 
     return image, title
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_images", data=get_data())]),
+        html.H1("Datasets - Images"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(dbc.Col(dbc.Card(get_controls_images())), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(get_controls_side_image("left")),
+                    width={"size": 6},
+                ),
+                dbc.Col(dbc.Card(get_controls_side_image("right")), width={"size": 6}),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [html.H3(id="title_left_image"), dcc.Loading(id="image_left_image")],
+                    width={"size": 6},
+                ),
+                dbc.Col(
+                    [html.H3(id="title_right_image"), dcc.Loading(id="image_right_image")],
+                    width={"size": 6},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

@@ -22,55 +22,6 @@ from dash_website.datasets import (
 from dash_website.feature_importances import AGING_RATE_LEGEND
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(
-                [
-                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
-                    dcc.Store(id="memory_time_series_features", data=get_data_features()),
-                ]
-            ),
-            html.H1("Feature importances - Time series"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(dbc.Col(dbc.Card(get_controls_time_series_features())), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(html.H3(id="title_time_series_features"), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                [
-                    dbc.Col(dbc.Card(get_controls_side_time_series_features("left")), width={"size": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_time_series_features("right")), width={"size": 6}),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                html.H3(id="title_left_time_series_features"),
-                                dcc.Graph(id="time_series_left_time_series_features", config=DOWNLOAD_CONFIG),
-                            ]
-                        ),
-                        width={"size": 6},
-                    ),
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                html.H3(id="title_right_time_series_features"),
-                                dcc.Graph(id="time_series_right_time_series_features", config=DOWNLOAD_CONFIG),
-                            ]
-                        ),
-                        width={"size": 6},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data_scores():
     return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
 
@@ -281,3 +232,51 @@ def display_time_series_features(
     )
 
     return fig, title
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(
+            [
+                dcc.Store(id="memory_scores_features", data=get_data_scores()),
+                dcc.Store(id="memory_time_series_features", data=get_data_features()),
+            ]
+        ),
+        html.H1("Feature importances - Time series"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(dbc.Col(dbc.Card(get_controls_time_series_features())), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(html.H3(id="title_time_series_features"), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(get_controls_side_time_series_features("left")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_time_series_features("right")), width={"size": 6}),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            html.H3(id="title_left_time_series_features"),
+                            dcc.Graph(id="time_series_left_time_series_features", config=DOWNLOAD_CONFIG),
+                        ]
+                    ),
+                    width={"size": 6},
+                ),
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            html.H3(id="title_right_time_series_features"),
+                            dcc.Graph(id="time_series_right_time_series_features", config=DOWNLOAD_CONFIG),
+                        ]
+                    ),
+                    width={"size": 6},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

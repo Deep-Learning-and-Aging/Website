@@ -15,59 +15,6 @@ from dash_website import CORRELATION_TYPES, ALGORITHMS_RENDERING
 from dash_website.feature_importances import TREE_SCALARS, FEATURES_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_features"), dcc.Store(id="memory_scores", data=get_data_scores())]),
-            html.H1("Feature importances - Scalars"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            dbc.Card(get_controls_scalars_features()),
-                            html.Br(),
-                            html.Br(),
-                            dbc.Card(get_controls_table_scalars_features()),
-                        ],
-                        width={"size": 5},
-                    ),
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                html.H3(id="title_scalars_features"),
-                                html.H5(id="sub_title_scalars_features"),
-                                dcc.Graph(id="bar_plot_scalars_features", config=DOWNLOAD_CONFIG),
-                            ]
-                        ),
-                        width={"size": 7},
-                    ),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                dash_table.DataTable(
-                                    id="table_scalars_features",
-                                    columns=[{"id": key, "name": name} for key, name in FEATURES_TABLE_COLUMNS.items()],
-                                    style_cell={"textAlign": "left"},
-                                    sort_action="custom",
-                                    sort_mode="single",
-                                )
-                            ]
-                        ),
-                        width={"size": 8, "offset": 3},
-                    )
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data_scores():
     return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
 
@@ -317,3 +264,55 @@ def _sort_tables(
     return table_features[FEATURES_TABLE_COLUMNS].round(3).to_dict("records"), table_correlations[
         FEATURES_CORRELATIONS_TABLE_COLUMNS
     ].round(3).to_dict("records")
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_features"), dcc.Store(id="memory_scores", data=get_data_scores())]),
+        html.H1("Feature importances - Scalars"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dbc.Card(get_controls_scalars_features()),
+                        html.Br(),
+                        html.Br(),
+                        dbc.Card(get_controls_table_scalars_features()),
+                    ],
+                    width={"size": 5},
+                ),
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            html.H3(id="title_scalars_features"),
+                            html.H5(id="sub_title_scalars_features"),
+                            dcc.Graph(id="bar_plot_scalars_features", config=DOWNLOAD_CONFIG),
+                        ]
+                    ),
+                    width={"size": 7},
+                ),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            dash_table.DataTable(
+                                id="table_scalars_features",
+                                columns=[{"id": key, "name": name} for key, name in FEATURES_TABLE_COLUMNS.items()],
+                                style_cell={"textAlign": "left"},
+                                sort_action="custom",
+                                sort_mode="single",
+                            )
+                        ]
+                    ),
+                    width={"size": 8, "offset": 3},
+                )
+            ]
+        ),
+    ],
+    fluid=True,
+)

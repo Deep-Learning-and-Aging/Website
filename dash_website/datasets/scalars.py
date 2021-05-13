@@ -16,49 +16,6 @@ from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import TREE_SCALARS, ETHNICITIES, SEX_VALUE, SEX_COLOR
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_scalars"), dcc.Store(id="linear_regression_scalars")]),
-            html.H1("Datasets - Scalars"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(dbc.Col(dbc.Card(get_controls_scalars())), justify="center"),
-            dbc.Row(dbc.Col(dbc.Card(get_subcontrols_scalars())), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                dcc.Loading(
-                    [
-                        html.H4(id="title_distribution_scalars"),
-                        dcc.Graph(id="figure_distribution_scalars", config=DOWNLOAD_CONFIG),
-                    ]
-                ),
-                justify="center",
-            ),
-            dbc.Row(
-                dcc.Loading(
-                    [
-                        html.H4(id="title_values_scalars"),
-                        html.H6(id="subtitle_values_scalars"),
-                        dcc.Graph(id="figure_values_scalars", config=DOWNLOAD_CONFIG),
-                    ]
-                ),
-                justify="center",
-            ),
-            dbc.Row(
-                dcc.Loading(
-                    [
-                        html.H4(id="title_volcano_scalars"),
-                        dcc.Graph(id="figure_volcano_scalars", config=DOWNLOAD_CONFIG),
-                    ]
-                ),
-                justify="center",
-            ),
-        ],
-        fluid=True,
-    )
-
-
 @APP.callback(
     Output("memory_scalars", "data"),
     [
@@ -407,3 +364,45 @@ def _change_volcano(data_linear_regresion, feature):
     fig.update_layout(width=2000, height=500, yaxis_title_text="-log(p_value)", xaxis_title_text="Pearson correlation")
 
     return fig, "Volcano plot for all features"
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_scalars"), dcc.Store(id="linear_regression_scalars")]),
+        html.H1("Datasets - Scalars"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(dbc.Col(dbc.Card(get_controls_scalars())), justify="center"),
+        dbc.Row(dbc.Col(dbc.Card(get_subcontrols_scalars())), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            dcc.Loading(
+                [
+                    html.H4(id="title_distribution_scalars"),
+                    dcc.Graph(id="figure_distribution_scalars", config=DOWNLOAD_CONFIG),
+                ]
+            ),
+            justify="center",
+        ),
+        dbc.Row(
+            dcc.Loading(
+                [
+                    html.H4(id="title_values_scalars"),
+                    html.H6(id="subtitle_values_scalars"),
+                    dcc.Graph(id="figure_values_scalars", config=DOWNLOAD_CONFIG),
+                ]
+            ),
+            justify="center",
+        ),
+        dbc.Row(
+            dcc.Loading(
+                [
+                    html.H4(id="title_volcano_scalars"),
+                    dcc.Graph(id="figure_volcano_scalars", config=DOWNLOAD_CONFIG),
+                ]
+            ),
+            justify="center",
+        ),
+    ],
+    fluid=True,
+)
