@@ -51,9 +51,7 @@ def get_volcano():
                             [
                                 dash_table.DataTable(
                                     id="table_volcano_gwas",
-                                    columns=[
-                                        {"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()
-                                    ],
+                                    columns=[{"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()],
                                     style_cell={"textAlign": "left"},
                                     sort_action="custom",
                                     sort_mode="single",
@@ -119,14 +117,15 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
     for chromosome in size_effects["chromosome"].drop_duplicates():
         customdata = size_effects.loc[
             [chromosome], ["SNP", "dimension", "p_value", "Gene", "Gene_type", "chromosome"]
-        ].values
+        ]
+        customdata["p_value"] = customdata["p_value"].apply(lambda x: "%.3e" % x)
 
         fig.add_scatter(
             x=size_effects.loc[[chromosome], "size_effect"],
             y=-np.log(size_effects.loc[[chromosome], "p_value"] + +1e-323),
             mode="markers",
             name=f"Chromosome {chromosome}",
-            customdata=customdata,
+            customdata=customdata.values,
             hovertemplate=hovertemplate,
             marker={"size": size},
         )
@@ -156,4 +155,9 @@ def _sort_table(dimension, data_volcano_gwas, sort_by_col):
     else:
         size_effects.sort_values("p_value", inplace=True)
 
-    return size_effects[VOLCANO_TABLE_COLUMNS].round(5).to_dict("records")
+    size_effects["p_value"] = size_effects["p_value"].apply(lambda x: "%.3e" % x)
+    size_effects[pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")] = size_effects[
+        pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")
+    ].round(3)
+
+    return size_effects[VOLCANO_TABLE_COLUMNS].to_dict("records")

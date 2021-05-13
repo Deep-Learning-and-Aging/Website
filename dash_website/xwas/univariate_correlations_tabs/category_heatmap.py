@@ -138,6 +138,7 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
     ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+    np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
     for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", "number_variables"]:

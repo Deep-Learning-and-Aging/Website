@@ -82,7 +82,7 @@ def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorte
     return fig
 
 
-def add_custom_legend_axis(fig, sorted_table_correlations):
+def add_custom_legend_axis(fig, sorted_table_correlations, size_dimension=10, size_subdimension=8):
     dimensions = (
         sorted_table_correlations.index.to_frame()[["dimension_1", "subdimension_1"]]
         .reset_index(drop=True)
@@ -114,7 +114,7 @@ def add_custom_legend_axis(fig, sorted_table_correlations):
                 dimension_inner_margin,
                 dimension_outer_margin,
                 textangles[first_axis],
-                10,
+                size_dimension,
             )
 
             lines.append(line)
@@ -134,7 +134,7 @@ def add_custom_legend_axis(fig, sorted_table_correlations):
                         subdimension_margin,
                         dimension_inner_margin,
                         textangles[first_axis],
-                        8,
+                        size_subdimension,
                     )
 
                     lines.append(line)

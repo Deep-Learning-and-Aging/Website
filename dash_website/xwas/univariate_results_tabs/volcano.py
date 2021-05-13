@@ -112,6 +112,8 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
     correlations_category["category"] = correlations_category.index.get_level_values("category")
     correlations_category["variable"] = correlations_category.index.get_level_values("variable")
 
+    correlations_category["p_value"] = correlations_category["p_value"].apply(lambda x: "%.3e" % x)
+
     fig = px.scatter(
         correlations_category,
         x="correlation",
@@ -182,4 +184,9 @@ def _sort_table(dict_correlations, main_category, category, sort_by_col):
     else:
         correlations_category.sort_values("p_value", inplace=True)
 
-    return correlations_category.round(5).to_dict("records")
+    correlations_category["p_value"] = correlations_category["p_value"].apply(lambda x: "%.3e" % x)
+    correlations_category[pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")] = correlations_category[
+        pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")
+    ].round(3)
+
+    return correlations_category.to_dict("records")

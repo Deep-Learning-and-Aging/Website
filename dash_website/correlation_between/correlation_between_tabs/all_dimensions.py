@@ -122,6 +122,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     )
     order_dimensions = table_correlations.index
     table_correlations = table_correlations.loc[order_dimensions, order_dimensions]
+    np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
     for customdata_item in ["correlation_std", "r2_1", "r2_std_1", "r2_2", "r2_std_2"]:

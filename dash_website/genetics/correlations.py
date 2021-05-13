@@ -95,6 +95,7 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
     ).loc[ORDER_DIMENSIONS.drop(("Eyes", "All")), ORDER_DIMENSIONS.drop(("Eyes", "All"))]
+    np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
     for customdata_item in [

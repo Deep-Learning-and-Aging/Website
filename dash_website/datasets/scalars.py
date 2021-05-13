@@ -314,7 +314,7 @@ def _change_scatter(feature, age_range, data_linear_regresion, data_scalars):
     return (
         fig,
         f"Scatter plot of {feature}",
-        f"p-value : {linear_regression.loc[('all', 'p_value'), feature].round(3)}, correlation : {linear_regression.loc[('all', 'correlation'), feature].round(3)} and regression coefficient : {linear_regression.loc[('all', 'slope'), feature].round(3)}",
+        f"p-value : {format(linear_regression.loc[('all', 'p_value'), feature], '.3e')}, correlation : {linear_regression.loc[('all', 'correlation'), feature].round(3)} and regression coefficient : {format(linear_regression.loc[('all', 'slope'), feature], '.3e')}",
     )
 
 
