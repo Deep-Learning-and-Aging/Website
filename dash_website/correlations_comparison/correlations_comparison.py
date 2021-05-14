@@ -50,7 +50,7 @@ def get_controls_comparison():
                 + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()],
                 "Select first category to compare: ",
                 from_dict=False,
-                value="Phenotypic",
+                value="Genetics",
             ),
             get_drop_down(
                 "second_category_comparison",
@@ -58,7 +58,7 @@ def get_controls_comparison():
                 + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()],
                 "Select second category to compare: ",
                 from_dict=False,
-                value="Genetics",
+                value="Phenotypic",
             ),
             get_item_radio_items("subset_method_comparison", SUBSET_METHODS, "Select subset method :"),
             get_item_radio_items("correlation_type_comparison", CORRELATION_TYPES, "Select correlation type :"),
@@ -140,18 +140,18 @@ def _fill_graph_tab_comparison(
     fig_points.update_layout(
         yaxis={
             "title": f"{second_category} correlation",
-            "range": [-1.1, 1.1],
+            "range": [-0.1, 1.1],
             "showgrid": False,
             "title_font": {"size": 25},
         },
         xaxis={
             "title": f"{first_category} correlation",
-            "range": [0, 1.1],  # [-1.1, 1.1],
+            "range": [-1.1, 1.1],
             "showgrid": False,
             "title_font": {"size": 25},
         },
         width=1500,
-        height=1500,
+        height=750,
     )
 
     sorted_dimensions = (
