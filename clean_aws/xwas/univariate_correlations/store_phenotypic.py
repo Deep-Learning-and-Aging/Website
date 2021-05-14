@@ -1,32 +1,21 @@
-import pandas as pd
-
-from dash_website.utils.aws_loader import load_csv
-from dash_website import DIMENSIONS
+from dash_website.utils.aws_loader import load_feather, upload_file
 
 
 if __name__ == "__main__":
-    list_indexes = []
-    for dimension_1 in DIMENSIONS:
-        for dimension_2 in DIMENSIONS:
-            list_indexes.append([dimension_1, dimension_2])
-    indexes = pd.MultiIndex.from_tuples(list_indexes, names=["dimension_1", "dimension_2"])
-    phenotypic = pd.DataFrame(None, index=indexes, columns=["correlation"])
+    squeezed_dimensions = load_feather(
+        "xwas/squeezed_dimensions_participant_and_time_of_examination.feather"
+    ).set_index(["dimension", "subdimension"])
 
-    phenotypic_table = load_csv(
-        "page4_correlations/ResidualsCorrelations/ResidualsCorrelations_bestmodels_*_Age_test.csv", index_col=0
+    phenotypic = load_feather(
+        "correlation_between_accelerated_aging_dimensions/custom_dimensions_all_samples_when_possible_otherwise_average.feather"
+    )[["dimension_1", "subdimension_1", "dimension_2", "subdimension_2", "correlation"]]
+
+    for index_dimension in [1, 2]:
+        phenotypic.set_index([f"dimension_{index_dimension}", f"subdimension_{index_dimension}"], inplace=True)
+        phenotypic[f"squeezed_dimension_{index_dimension}"] = squeezed_dimensions["squeezed_dimensions"]
+        phenotypic.reset_index(drop=True, inplace=True)
+
+    phenotypic.to_feather("all_data/xwas/univariate_correlations/phenotypic.feather")
+    upload_file(
+        "all_data/xwas/univariate_correlations/phenotypic.feather", "xwas/univariate_correlations/phenotypic.feather"
     )
-
-    phenotypic_raw = phenotypic_table.stack(dropna=False).rename(
-        index={
-            "*": "set",
-            "*instances01": "set_instances01",
-            "*instances1.5x": "set_instances1.5x",
-            "*instances23": "set_instances23",
-        }
-    )
-    phenotypic_raw.index.names = ["dimension_1", "dimension_2"]
-    phenotypic_raw.name = "correlation"
-
-    phenotypic["correlation"] = phenotypic_raw
-
-    phenotypic.reset_index().to_feather("data/xwas/univariate_correlations/phenotypic.feather")
