@@ -52,7 +52,7 @@ def get_dimension_heatmap():
 @APP.callback(Output("memory_dimension", "data"), Input("dimension_dimension", "value"))
 def _modify_store_dimension(dimension):
     return load_feather(
-        f"xwas/univariate_correlations/correlations/dimensions/correlations_{dimension}.feather"
+        f"xwas/univariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
     ).to_dict()
 
 
@@ -69,35 +69,38 @@ def get_controls_tab_dimension():
 @APP.callback(
     [Output("graph_dimension", "figure"), Output("title_dimension", "children")],
     [
-        Input("dimension_dimension", "value"),
         Input("subset_method_dimension", "value"),
         Input("correlation_type_dimension", "value"),
         Input("memory_dimension", "data"),
     ],
 )
-def _fill_graph_tab_dimension(dimension, subset_method, correlation_type, data_dimension):
+def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
     import plotly.graph_objs as go
 
-    correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "category"])
+    correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "subdimension", "category"])
     correlations_raw.columns = pd.MultiIndex.from_tuples(
         list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
     )
     correlations = correlations_raw[[(subset_method, correlation_type)]]
     correlations.columns = ["correlation"]
+    correlations["dimension_subdimension"] = (
+        correlations.index.get_level_values("dimension") + " - " + correlations.index.get_level_values("subdimension")
+    )
     numbers_variables = correlations_raw[[(subset_method, "number_variables")]]
     numbers_variables.columns = ["number_variables"]
+    numbers_variables["dimension_subdimension"] = (
+        numbers_variables.index.get_level_values("dimension")
+        + " - "
+        + numbers_variables.index.get_level_values("subdimension")
+    )
 
     correlations_2d = pd.pivot_table(
-        correlations, values="correlation", index="dimension", columns="category", dropna=False
+        correlations, values="correlation", index="dimension_subdimension", columns="category", dropna=False
     ).fillna(0)
-    correlations_2d.drop(index=dimension, inplace=True)
-    correlations_2d.rename(index=RENAME_DIMENSIONS, inplace=True)
 
     numbers_variables_2d = pd.pivot_table(
-        numbers_variables, values="number_variables", index="dimension", columns="category", dropna=False
+        numbers_variables, values="number_variables", index="dimension_subdimension", columns="category", dropna=False
     ).fillna(0)
-    numbers_variables_2d.drop(index=dimension, inplace=True)
-    numbers_variables_2d.rename(index=RENAME_DIMENSIONS, inplace=True)
 
     hovertemplate = "Correlation: %{z:.3f} <br>X subcategory: %{x} <br>Aging dimension: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
 

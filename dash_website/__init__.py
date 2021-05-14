@@ -3,10 +3,10 @@ import pandas as pd
 
 DIMENSIONS = sorted(
     [
-        "set",
-        "set_instances01",
-        "set_instances1.5x",
-        "set_instances23",
+        "*",
+        "*instances01",
+        "*instances1.5x",
+        "*instances23",
         "Abdomen",
         "AbdomenLiver",
         "AbdomenPancreas",
@@ -40,10 +40,10 @@ DIMENSIONS = sorted(
 )
 
 RENAME_DIMENSIONS = {
-    "set": "*",
-    "set_instances01": "*instances01",
-    "set_instances1.5x": "*instances1.5x",
-    "set_instances23": "*instances23",
+    "*": "set",
+    "*instances01": "set_instances01",
+    "*instances1.5x": "set_instances1.5x",
+    "*instances23": "set_instances23",
 }
 
 

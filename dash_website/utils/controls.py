@@ -2,13 +2,11 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-from dash_website import RENAME_DIMENSIONS
-
 
 def get_options(list_):
     list_label_value = []
     for value in list_:
-        list_label_value.append({"value": value, "label": RENAME_DIMENSIONS.get(value, value)})
+        list_label_value.append({"value": value, "label": value})
     return list_label_value
 
 

@@ -9,8 +9,13 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
-from dash_website import DOWNLOAD_CONFIG
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, CORRELATION_TYPES
+from dash_website import (
+    DOWNLOAD_CONFIG,
+    DIMENSIONS,
+    MAIN_CATEGORIES_TO_CATEGORIES,
+    CORRELATION_TYPES,
+    RENAME_DIMENSIONS,
+)
 from dash_website.xwas import SUBSET_METHODS, DISPLAY_MODE
 
 
@@ -63,7 +68,7 @@ def _modify_store_correlations(dimension_1, dimension_2):
         raise PreventUpdate
     else:
         return load_feather(
-            f"xwas/univariate_correlations/correlations/dimensions/correlations_{dimension_1}.feather"
+            f"xwas/univariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_1, dimension_1)}.feather"
         ).to_dict()
 
 
@@ -201,9 +206,16 @@ def _fill_graph_tab_average(
         title = f"Average average correlation across aging dimensions and X categories = {sorted_averages['mean'].mean().round(3)} +- {sorted_averages['mean'].std().round(3)}"
         y_label = "Average correlation"
     else:
-        correlations_raw = pd.DataFrame(data_correlations).set_index(["dimension", "category"])
+        correlations_raw = pd.DataFrame(data_correlations).set_index(["dimension", "subdimension", "category"])
         correlations_raw.columns = pd.MultiIndex.from_tuples(
             list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
+        )
+        correlations_raw.reset_index(inplace=True)
+        correlations_raw["squeezed_dimension"] = correlations_raw["dimension"] + correlations_raw[
+            "subdimension"
+        ].replace("*", "")
+        correlations_raw = correlations_raw.drop(columns=["dimension", "subdimension"]).set_index(
+            ["squeezed_dimension", "category"]
         )
 
         sorted_correlations = correlations_raw.loc[
@@ -218,7 +230,7 @@ def _fill_graph_tab_average(
                 name="Correlations",
                 marker_color="indianred",
             )
-        else:  # display_mode == view_per_main_category then main_category = All
+        else:  # display_mode == view_per_main_category
             list_main_category = []
             list_categories = []
             # Get the ranking of subcategories per main category

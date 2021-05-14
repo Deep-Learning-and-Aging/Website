@@ -103,7 +103,7 @@ def _fill_graph_tab_comparison(
 
     hovertemplate_points = "Dimension 1: %{customdata[0]}, Subdimension 1: %{customdata[1]}<br>Dimenions 2: %{customdata[2]}, Subdimension 2: %{customdata[3]}<Br>Correlation first category %{x:.3f}, Correlation second category %{y:.3f}<extra></extra>"
 
-    y_points = correlations_upper.set_index(["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"])[
+    y_points = correlations_lower.set_index(["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"])[
         "correlation"
     ]
     y_points[
@@ -111,7 +111,7 @@ def _fill_graph_tab_comparison(
         & (y_points.index.get_level_values("subdimension_1") == y_points.index.get_level_values("subdimension_2"))
     ] = np.nan
 
-    x_points = correlations_lower.set_index(["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"]).loc[
+    x_points = correlations_upper.set_index(["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"]).loc[
         y_points.index, "correlation"
     ]
     x_points[
@@ -122,7 +122,7 @@ def _fill_graph_tab_comparison(
     customdata_points = list(map(list, y_points.index.values))
 
     fig_points = go.Figure()
-    fig_points.add_scatter(x=[-1.1, 1.1], y=[-1.1, 1.1], mode="lines", name="perfect similarity")
+    fig_points.add_scatter(x=[-1.1, 1.1], y=[-1.1, 1.1], mode="lines", name="perfect correlation line")
 
     fig_points.add_scatter(
         x=x_points.values,
@@ -131,15 +131,15 @@ def _fill_graph_tab_comparison(
         customdata=customdata_points,
         hovertemplate=hovertemplate_points,
         marker={"size": 5},
-        name="correlation point",
+        name=f"{first_category} vs. {second_category} correlation for one aging dimension",
     )
     correlation_of_correlations, p_value_of_correlations = stats.pearsonr(
         x_points[x_points.notna() & y_points.notna()], y_points[x_points.notna() & y_points.notna()]
     )
 
     fig_points.update_layout(
-        yaxis={"title": f"{second_category}'s correlation", "range": [-1.1, 1.1], "showgrid": False},
-        xaxis={"title": f"{first_category}'s correlation", "range": [-1.1, 1.1], "showgrid": False},
+        yaxis={"title": f"{second_category} correlation", "range": [-1.1, 1.1], "showgrid": False},
+        xaxis={"title": f"{first_category} correlation", "range": [-1.1, 1.1], "showgrid": False},
         width=1500,
         height=1500,
     )
@@ -147,50 +147,44 @@ def _fill_graph_tab_comparison(
     sorted_dimensions = (
         correlations_upper.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
     )
+    sorted_table_correlations_upper = table_correlations_upper.loc[sorted_dimensions, sorted_dimensions]
+    sorted_table_correlations_lower = table_correlations_lower.loc[sorted_dimensions, sorted_dimensions]
+    sorted_customdata_upper = customdata_upper.loc[sorted_dimensions, sorted_dimensions]
+    sorted_customdata_lower = customdata_lower.loc[sorted_dimensions, sorted_dimensions]
 
-    triangular_heatmap_values = np.triu(table_correlations_upper)
-    triangular_heatmap_values += np.tril(table_correlations_lower, k=1)
+    triangular_heatmap_values = np.triu(sorted_table_correlations_upper)
+    triangular_heatmap_values += np.tril(sorted_table_correlations_lower, k=1)
     triangular_heatmap = pd.DataFrame(
-        triangular_heatmap_values, index=table_correlations_upper.index, columns=table_correlations_upper.columns
+        triangular_heatmap_values,
+        index=sorted_table_correlations_upper.index,
+        columns=sorted_table_correlations_upper.columns,
     )
 
-    customdata_triangular_values = np.triu(customdata_upper)
-    customdata_triangular_values += np.tril(customdata_lower, k=1)
+    customdata_triangular_values = np.triu(sorted_customdata_upper)
+    customdata_triangular_values += np.tril(sorted_customdata_lower, k=1)
     customdata_triangular = pd.DataFrame(
-        customdata_triangular_values, index=table_correlations_upper.index, columns=table_correlations_upper.columns
+        customdata_triangular_values, index=sorted_customdata_upper.index, columns=sorted_customdata_upper.columns
     )
-
-    sorted_triangular_heatmap = triangular_heatmap.loc[sorted_dimensions, sorted_dimensions]
-    sorted_customdata_triangular = customdata_triangular.loc[sorted_dimensions, sorted_dimensions]
 
     hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
-    fig_triangular = heatmap_by_sorted_dimensions(
-        sorted_triangular_heatmap, hovertemplate_triangular, sorted_customdata_triangular
-    )
-    fig_triangular = add_custom_legend_axis(
-        fig_triangular, sorted_triangular_heatmap, size_dimension=14, size_subdimension=12
-    )
+    fig_triangular = heatmap_by_sorted_dimensions(triangular_heatmap, hovertemplate_triangular, customdata_triangular)
+    fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap, size_dimension=14, size_subdimension=12)
     fig_triangular.update_layout(
-        yaxis={"showgrid": False, "zeroline": False},
-        xaxis={"showgrid": False, "zeroline": False},
+        yaxis={"title": f"{second_category} correlation", "showgrid": False, "zeroline": False},
+        xaxis={"title": f"{first_category} correlation", "showgrid": False, "zeroline": False},
         width=1500,
         height=1500,
     )
 
-    difference_heatmap = table_correlations_upper - table_correlations_lower
-
-    sorted_difference_heatmap = difference_heatmap.loc[sorted_dimensions, sorted_dimensions]
-    sorted_customdata_upper = customdata_upper.loc[sorted_dimensions, sorted_dimensions]
+    difference_heatmap = sorted_table_correlations_upper - sorted_table_correlations_lower
 
     hovertemplate_difference = "Difference in correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f}<br><extra></extra>"
 
     fig_difference = heatmap_by_sorted_dimensions(
-        sorted_difference_heatmap, hovertemplate_difference, sorted_customdata_upper, zmin=-2, zmax=2
+        difference_heatmap, hovertemplate_difference, sorted_customdata_upper, zmin=-2, zmax=2
     )
-    fig_difference = add_custom_legend_axis(
-        fig_difference, sorted_difference_heatmap, size_dimension=14, size_subdimension=12
-    )
+    fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap, size_dimension=14, size_subdimension=12)
     fig_difference.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
