@@ -138,8 +138,18 @@ def _fill_graph_tab_comparison(
     )
 
     fig_points.update_layout(
-        yaxis={"title": f"{second_category} correlation", "range": [-1.1, 1.1], "showgrid": False},
-        xaxis={"title": f"{first_category} correlation", "range": [-1.1, 1.1], "showgrid": False},
+        yaxis={
+            "title": f"{second_category} correlation",
+            "range": [-1.1, 1.1],
+            "showgrid": False,
+            "title_font": {"size": 25},
+        },
+        xaxis={
+            "title": f"{first_category} correlation",
+            "range": [0, 1.1],  # [-1.1, 1.1],
+            "showgrid": False,
+            "title_font": {"size": 25},
+        },
         width=1500,
         height=1500,
     )
@@ -171,8 +181,18 @@ def _fill_graph_tab_comparison(
     fig_triangular = heatmap_by_sorted_dimensions(triangular_heatmap, hovertemplate_triangular, customdata_triangular)
     fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap, size_dimension=14, size_subdimension=12)
     fig_triangular.update_layout(
-        yaxis={"title": f"{second_category} correlation", "showgrid": False, "zeroline": False},
-        xaxis={"title": f"{first_category} correlation", "showgrid": False, "zeroline": False},
+        yaxis={
+            "title": f"{second_category} correlation",
+            "showgrid": False,
+            "zeroline": False,
+            "title_font": {"size": 25},
+        },
+        xaxis={
+            "title": f"{first_category} correlation",
+            "showgrid": False,
+            "zeroline": False,
+            "title_font": {"size": 25},
+        },
         width=1500,
         height=1500,
     )
