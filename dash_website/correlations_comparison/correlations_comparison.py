@@ -157,6 +157,9 @@ def _fill_graph_tab_comparison(
     sorted_dimensions = (
         correlations_upper.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
     )
+    if first_category in ["Genetics", "Phenotypic"] and second_category in ["Genetics", "Phenotypic"]:
+        sorted_dimensions = sorted_dimensions.drop(("Eyes", "All"))
+
     sorted_table_correlations_upper = table_correlations_upper.loc[sorted_dimensions, sorted_dimensions]
     sorted_table_correlations_lower = table_correlations_lower.loc[sorted_dimensions, sorted_dimensions]
     sorted_customdata_upper = customdata_upper.loc[sorted_dimensions, sorted_dimensions]
