@@ -1,16 +1,10 @@
 import pandas as pd
 from tqdm import tqdm
 
-from dash_website.utils.aws_loader import load_csv
+from dash_website.utils.aws_loader import load_csv, upload_file
 from dash_website import DIMENSIONS, ALL_CATEGORIES
 
-DICT_TO_CHANGE_DIMENSIONS = {
-    "ImmuneSystem": "BloodCells",
-    "\*": "set",
-    "*instances01": "set_instances01",
-    "*instances1.5x": "set_instances1.5x",
-    "*instances23": "set_instances23",
-}
+DICT_TO_CHANGE_DIMENSIONS = {"ImmuneSystem": "BloodCells", "\*": "*"}
 DICT_TO_FORMER_DIMENSIONS = {value: key for key, value in DICT_TO_CHANGE_DIMENSIONS.items()}
 DICT_TO_CHANGE_CATEGORIES = {
     "HeartSize": "HeartFunction",
@@ -50,5 +44,9 @@ if __name__ == "__main__":
                 list_features.append(features)
 
     pd.concat(list_features).reset_index(drop=True).to_feather(
-        "data/xwas/multivariate_feature_importances/feature_importances.feather"
+        "all_data/xwas/multivariate_feature_importances/feature_importances.feather"
+    )
+    upload_file(
+        "all_data/xwas/multivariate_feature_importances/feature_importances.feather",
+        "xwas/multivariate_feature_importances/feature_importances.feather",
     )

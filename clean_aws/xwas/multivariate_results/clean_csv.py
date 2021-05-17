@@ -4,10 +4,7 @@ from dash_website.utils.aws_loader import load_csv, upload_file
 
 DICT_TO_CHANGE_DIMENSIONS = {
     "ImmuneSystem": "BloodCells",
-    "\*": "set",
-    "*instances01": "set_instances01",
-    "*instances1.5x": "set_instances1.5x",
-    "*instances23": "set_instances23",
+    "\*": "*",
 }
 DICT_TO_CHANGE_CATEGORIES = {
     "HeartSize": "HeartFunction",

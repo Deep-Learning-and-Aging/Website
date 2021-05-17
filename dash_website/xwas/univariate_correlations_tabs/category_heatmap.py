@@ -67,7 +67,7 @@ def get_category_heatmap():
                                 ]
                             )
                         ],
-                        width={"size": 6, "offset": 3},
+                        width={"size": 9, "offset": 3},
                     ),
                 ]
             ),
@@ -183,9 +183,6 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
         fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
         fig = add_custom_legend_axis(fig, sorted_table_correlations)
-
-    if order_by != "custom":
-        fig.update_layout(font={"size": 8})
 
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},

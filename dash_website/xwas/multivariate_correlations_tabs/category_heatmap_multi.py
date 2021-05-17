@@ -11,14 +11,21 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, does_key_exists
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.graphs import (
+    heatmap_by_clustering,
+    heatmap_by_sorted_dimensions,
+    add_custom_legend_axis,
+    histogram_correlation,
+)
 from dash_website import (
     DOWNLOAD_CONFIG,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    RENAME_DIMENSIONS,
     ALGORITHMS_RENDERING,
     CORRELATION_TYPES,
+    ORDER_DIMENSIONS,
+    CUSTOM_ORDER,
+    ORDER_TYPES
 )
-
 
 def get_category_heatmap():
     return dbc.Container(
@@ -48,6 +55,21 @@ def get_category_heatmap():
                             )
                         ],
                         width={"size": 9},
+                    ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dcc.Loading(
+                                [
+                                    html.H4("Histogram of the above correlations"),
+                                    dcc.Graph(id="histogram_category_multi", config=DOWNLOAD_CONFIG),
+                                ]
+                            )
+                        ],
+                        width={"size": 6, "offset": 3},
                     ),
                 ]
             ),
@@ -84,7 +106,8 @@ def get_controls_tab_category_multi():
                 "Select X main category: ",
                 from_dict=False,
             ),
-            get_drop_down("category_category_multi", ["All"], "Select X subcategory: ", from_dict=False),
+            get_drop_down("category_category_multi", ["..."], "Select X subcategory: ", from_dict=False),
+            get_item_radio_items("order_type_category_multi", ORDER_TYPES, "Order by:"),
             get_item_radio_items(
                 "algorithm_category",
                 {
@@ -108,53 +131,91 @@ def _change_category_category_multi(main_category):
 
 
 @APP.callback(
-    [Output("graph_category_multi", "figure"), Output("title_category_multi", "children")],
+    [Output("graph_category_multi", "figure"), Output("title_category_multi", "children"), Output("histogram_category_multi", "figure")],
     [
+        Input("order_type_category_multi", "value"),
         Input("algorithm_category", "value"),
         Input("correlation_type_category_multi", "value"),
         Input("memory_category_multi", "data"),
         Input("memory_exists_category_multi", "data"),
     ],
 )
-def _fill_graph_tab_category_multi(algorithm, correlation_type, data_category, data_exists):
-    from dash_website.utils.graphs import heatmap_by_clustering
+def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_category, data_exists):
     import plotly.graph_objs as go
 
     if not data_exists:
         return go.Figure(), "The data for this X subcategory is not provided :("
 
-    correlations_raw = pd.DataFrame(data_category).set_index(["dimension_1", "dimension_2"])
-    correlations_raw.columns = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
+    correlations_raw = pd.DataFrame(data_category).set_index(
+        ["dimension_1", "subdimension_1", "r2_1", "r2_std_1", "dimension_2", "subdimension_2", "r2_2", "r2_std_2"]
     )
-    correlations = correlations_raw[[(algorithm, correlation_type)]]
-    correlations.columns = ["correlation"]
-    numbers_features = correlations_raw[[(algorithm, "number_features")]]
-    numbers_features.columns = ["number_features"]
+    correlations_raw.columns = pd.MultiIndex.from_tuples(
+        list(map(eval, correlations_raw.columns.tolist())), names=["algorithm", "correlation_type"]
+    )
+    correlations = correlations_raw[[(algorithm, correlation_type), (algorithm, "number_features")]]
+    correlations.columns = ["correlation", "number_features"]
+    correlations.reset_index(inplace=True)
 
-    correlations_2d = pd.pivot_table(
-        correlations, values="correlation", index="dimension_1", columns="dimension_2", dropna=False
-    ).fillna(0)
-    correlations_2d.rename(index=RENAME_DIMENSIONS, columns=RENAME_DIMENSIONS, inplace=True)
-    numbers_features_2d = pd.pivot_table(
-        numbers_features, values="number_features", index="dimension_1", columns="dimension_2", dropna=False
-    ).fillna(0)
-    numbers_features_2d.rename(index=RENAME_DIMENSIONS, columns=RENAME_DIMENSIONS, inplace=True)
+    table_correlations = correlations.pivot(
+        index=["dimension_1", "subdimension_1"],
+        columns=["dimension_2", "subdimension_2"],
+        values="correlation",
+    ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+    np.fill_diagonal(table_correlations.values, np.nan)
 
-    hovertemplate = "Correlation: %{z:.3f} <br>Dimension 1: %{x} <br>Dimension 2: %{y} <br>Number features: %{customdata} <br><extra></extra>"
+    customdata_list = []
+    for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", "number_features"]:
+        customdata_list.append(
+            correlations.pivot(
+                index=["dimension_1", "subdimension_1"],
+                columns=["dimension_2", "subdimension_2"],
+                values=customdata_item,
+            )
+            .loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+            .values
+        )
+    stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    fig = heatmap_by_clustering(correlations_2d, hovertemplate, numbers_features_2d)
+    customdata = pd.DataFrame(None, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
+    customdata[customdata.columns] = stacked_customdata
+
+    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number features: %{customdata[4]}<br><extra></extra>"
+
+    if order_by == "clustering":
+        fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
+    elif order_by == "r2":
+        sorted_dimensions = (
+            correlations.set_index(["dimension_1", "subdimension_1"])
+            .sort_values(by="r2_1", ascending=False)
+            .index.drop_duplicates()
+        )
+
+        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
+        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
+
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
+
+    else:  # order_by == "custom"
+        sorted_dimensions = (
+            correlations.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
+        )
+
+        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
+        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
+
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
+
+        fig = add_custom_legend_axis(fig, sorted_table_correlations)
 
     fig.update_layout(
-        {
-            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
-            "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
-            "width": 1500,
-            "height": 1500,
-        }
+        yaxis={"showgrid": False, "zeroline": False},
+        xaxis={"showgrid": False, "zeroline": False},
+        width=1500,
+        height=1500,
     )
 
-    title_mean = correlations_2d.values[np.triu_indices(correlations_2d.shape[0], 1)].mean().round(3)
-    title_std = correlations_2d.values[np.triu_indices(correlations_2d.shape[0], 1)].std().round(3)
-
-    return fig, f"Average correlation on feature importances = {title_mean} ± {title_std}"
+    return (
+        fig,
+        f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
+        histogram_correlation(table_correlations),
+    )

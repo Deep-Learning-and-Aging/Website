@@ -22,3 +22,5 @@ FEATURES_CORRELATIONS_TABLE_COLUMNS = {
 }
 
 DISPLAY_MODE = {"view_all": "Decreasing correlation", "view_per_main_category": "X main category"}
+
+UNIVARIATE_OR_MULTIVARIATE = {"univariate": "Univariate", "multivariate": "Multivariate"}

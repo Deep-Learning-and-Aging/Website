@@ -72,21 +72,12 @@ LAYOUT = html.Div(
                 ),
                 dbc.Row(
                     dbc.Col(
-                        html.H5(
-                            "WEBSITE UNDER CONSTRUCTION - YOU MIGHT NEED TO REFRESH SOME PAGES SEVERAL TIMES ?",
-                            style={"padding-top": "100px"},
-                        ),
-                        style={"text-align": "center"},
-                    ),
-                ),
-                dbc.Row(
-                    dbc.Col(
                         html.H6(
                             [
-                                "You can report some errors or give us some feedback on this ",
+                                "You can ask us some questions, report some errors or give us some feedback ",
                                 html.A(
-                                    "document",
-                                    href="https://docs.google.com/document/d/1uJdVu6KVOoi1plpxAz1oAs8cDX-fNDPsqYmFyBxud1w/edit?usp=sharing",
+                                    "here",
+                                    href="https://github.com/Deep-Learning-and-Aging/Website/discussions",
                                 ),
                                 ".",
                             ],
