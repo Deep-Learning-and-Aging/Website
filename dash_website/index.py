@@ -293,9 +293,9 @@ def _change_active_page(pathname):
     elif "genetics" == pathname.split("/")[1]:
         if "gwas" == pathname.split("/")[2]:
             active_pages[11] = True
-        elif "correlations" == pathname.split("/")[2]:
-            active_pages[12] = True
         elif "heritability" == pathname.split("/")[2]:
+            active_pages[12] = True
+        elif "correlations" == pathname.split("/")[2]:
             active_pages[13] = True
 
     elif "xwas" == pathname.split("/")[1]:

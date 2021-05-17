@@ -178,10 +178,10 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
 
     fig.update_layout(
         {
-            "width": 800,
+            "width": 1000,
             "height": int(25 * len(sorted_features)),
-            "xaxis": {"title": "Percentage of overall feature importance", "showgrid": False},
-            "yaxis": {"title": "Features", "showgrid": False},
+            "xaxis": {"title": "Percentage of overall feature importance", "showgrid": False, "title_font":{"size": 25}},
+            "yaxis": {"title": "Features", "showgrid": False, "title_font":{"size": 25}},
         }
     )
 

@@ -51,7 +51,7 @@ def get_dimension_heatmap():
 @APP.callback(Output("memory_dimension_multi", "data"), Input("dimension_dimension_multi", "value"))
 def _modify_store_dimension_multi(dimension):
     return load_feather(
-        f"xwas/multivariate_correlations/correlations/dimensions/correlations_{dimension}.feather"
+        f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
     ).to_dict()
 
 
@@ -99,13 +99,11 @@ def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data
         correlations, values="correlation", index="dimension", columns="category", dropna=False
     ).fillna(0)
     correlations_2d.drop(index=dimension, inplace=True)
-    correlations_2d.rename(index=RENAME_DIMENSIONS, inplace=True)
 
     numbers_features_2d = pd.pivot_table(
         numbers_features, values="number_features", index="dimension", columns="category", dropna=False
     ).fillna(0)
     numbers_features_2d.drop(index=dimension, inplace=True)
-    numbers_features_2d.rename(index=RENAME_DIMENSIONS, inplace=True)
 
     hovertemplate = "Correlation: %{z:.3f} <br>X subcategory: %{x} <br>Aging dimension: %{y} <br>Number features: %{customdata} <br><extra></extra>"
 
@@ -126,8 +124,8 @@ def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data
         {
             "width": 2000,
             "height": 1000,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "Aging dimension", "showgrid": False},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 

@@ -140,7 +140,7 @@ def _fill_graph_tab_comparison(
     fig_points.update_layout(
         yaxis={
             "title": f"{second_category} correlation",
-            "range": [-0.1, 1.1],
+            "range": [-1.1, 1.1],
             "showgrid": False,
             "title_font": {"size": 25},
         },
@@ -151,7 +151,7 @@ def _fill_graph_tab_comparison(
             "title_font": {"size": 25},
         },
         width=1500,
-        height=750,
+        height=1500,
     )
 
     sorted_dimensions = (

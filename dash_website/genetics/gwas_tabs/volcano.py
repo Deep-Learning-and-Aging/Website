@@ -115,9 +115,7 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
         size = 3
 
     for chromosome in size_effects["chromosome"].drop_duplicates():
-        customdata = size_effects.loc[
-            [chromosome], ["SNP", "dimension", "p_value", "Gene", "Gene_type", "chromosome"]
-        ]
+        customdata = size_effects.loc[[chromosome], ["SNP", "dimension", "p_value", "Gene", "Gene_type", "chromosome"]]
         customdata["p_value"] = customdata["p_value"].apply(lambda x: "%.3e" % x)
 
         fig.add_scatter(
@@ -130,7 +128,13 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
             marker={"size": size},
         )
 
-    fig.update_layout(xaxis={"title": "Size Effect (SE)"}, yaxis={"title": "-log(p-value)"}, height=800)
+    fig.update_layout(
+        xaxis={"title": "Size Effect (SE)"},
+        xaxis_title_font={"size": 25},
+        yaxis={"title": "-log(p-value)"},
+        yaxis_title_font={"size": 25},
+        height=800,
+    )
 
     return fig
 

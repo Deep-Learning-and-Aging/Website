@@ -147,8 +147,10 @@ def _fill_graph_tab_category_multi(algorithm, correlation_type, data_category, d
 
     fig.update_layout(
         {
-            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "Aging dimension", "showgrid": False},
+            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
+            "width": 1500,
+            "height": 1500,
         }
     )
 

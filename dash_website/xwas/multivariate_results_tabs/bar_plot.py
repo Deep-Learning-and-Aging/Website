@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING, RENAME_DIMENSIONS
 
 
 def get_bar_plot():
@@ -81,6 +81,8 @@ def get_controls_tab_bar_plot():
 )
 def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
     import plotly.graph_objs as go
+    
+    dimension = RENAME_DIMENSIONS.get(dimension, dimension)
 
     if algorithm == "best_algorithm":
         every_score_every_dimension = (
@@ -122,8 +124,8 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
         {
             "width": 1500,
             "height": 800,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "r2"},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font":{"size": 25}},
+            "yaxis": {"title": "r2", "title_font":{"size": 25}},
         }
     )
 

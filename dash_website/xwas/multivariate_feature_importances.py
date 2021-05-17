@@ -13,6 +13,7 @@ from dash_website import (
     DOWNLOAD_CONFIG,
     MAIN_CATEGORIES_TO_CATEGORIES,
     DIMENSIONS,
+    RENAME_DIMENSIONS,
     ALGORITHMS_RENDERING,
     CORRELATION_TYPES,
 )
@@ -30,7 +31,7 @@ def get_data():
 )
 def _modify_store_features(dimension, category):
     return load_feather(
-        f"xwas/multivariate_feature_importances/dimension_category/features_{dimension}_{category}.feather"
+        f"xwas/multivariate_feature_importances/dimension_category/features_{RENAME_DIMENSIONS.get(dimension, dimension)}_{category}.feather"
     ).to_dict()
 
 
@@ -154,8 +155,12 @@ def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
         {
             "width": 800,
             "height": int(25 * len(sorted_variables)),
-            "xaxis": {"title": "Percentage of overall feature importance", "showgrid": False},
-            "yaxis": {"title": "Variables", "showgrid": False},
+            "xaxis": {
+                "title": "Percentage of overall feature importance",
+                "showgrid": False,
+                "title_font": {"size": 25},
+            },
+            "yaxis": {"title": "Variables", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 

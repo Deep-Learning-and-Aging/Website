@@ -121,8 +121,8 @@ def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
         {
             "width": 2000,
             "height": 1000,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "Aging dimension", "showgrid": False},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 
