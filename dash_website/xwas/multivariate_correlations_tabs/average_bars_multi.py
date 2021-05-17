@@ -114,7 +114,7 @@ def get_controls_tab_average_multi():
                     "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
                     "neural_network": ALGORITHMS_RENDERING["neural_network"],
                 },
-                "Select an Algorithm :",
+                "Select an algorithm :",
             ),
             get_item_radio_items("correlation_type_average_multi", CORRELATION_TYPES, "Select correlation type :"),
         ]
@@ -222,9 +222,16 @@ def _fill_graph_tab_average(
         title = f"Average average correlation across aging dimensions and X categories = {sorted_averages['mean'].mean().round(3)} +- {sorted_averages['mean'].std().round(3)}"
         y_label = "Average correlation"
     else:
-        correlations_raw = pd.DataFrame(data_correlations).set_index(["dimension", "category"])
+        correlations_raw = pd.DataFrame(data_correlations).set_index(["dimension", "subdimension", "category"])
         correlations_raw.columns = pd.MultiIndex.from_tuples(
             list(map(eval, correlations_raw.columns.tolist())), names=["algorithm", "correlation_type"]
+        )
+        correlations_raw.reset_index(inplace=True)
+        correlations_raw["squeezed_dimension"] = correlations_raw["dimension"] + correlations_raw[
+            "subdimension"
+        ].replace("*", "")
+        correlations_raw = correlations_raw.drop(columns=["dimension", "subdimension"]).set_index(
+            ["squeezed_dimension", "category"]
         )
 
         sorted_correlations = correlations_raw.loc[

@@ -9,7 +9,7 @@ import numpy as np
 from scipy import stats
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_item_radio_items, get_drop_down
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options_from_dict
 from dash_website.utils.graphs import heatmap_by_sorted_dimensions, add_custom_legend_axis
 from dash_website import (
     DOWNLOAD_CONFIG,
@@ -17,53 +17,128 @@ from dash_website import (
     MAIN_CATEGORIES_TO_CATEGORIES,
     ORDER_DIMENSIONS,
     CUSTOM_ORDER,
+    ALGORITHMS_RENDERING,
 )
-from dash_website.xwas import SUBSET_METHODS
+from dash_website.xwas import SUBSET_METHODS, UNIVARIATE_OR_MULTIVARIATE
 
 
 @APP.callback(
     Output("memory_comparison_upper", "data"),
-    Input("first_category_comparison", "value"),
+    [Input("first_uni_or_multi_comparison", "value"), Input("first_category_comparison", "value")],
 )
-def _modify_store_upper_comparison(category):
+def _modify_store_upper_comparison(uni_or_multi, category):
     return load_feather(
-        f"xwas/univariate_correlations/correlations/categories/correlations_{category}.feather"
+        f"xwas/{uni_or_multi}_correlations/correlations/categories/correlations_{category}.feather"
     ).to_dict()
 
 
 @APP.callback(
     Output("memory_comparison_lower", "data"),
-    Input("second_category_comparison", "value"),
+    [Input("second_uni_or_multi_comparison", "value"), Input("second_category_comparison", "value")],
 )
-def _modify_store_lower_comparison(category):
+def _modify_store_lower_comparison(uni_or_multi, category):
     return load_feather(
-        f"xwas/univariate_correlations/correlations/categories/correlations_{category}.feather"
+        f"xwas/{uni_or_multi}_correlations/correlations/categories/correlations_{category}.feather"
     ).to_dict()
 
 
-def get_controls_comparison():
+def get_controls_comparison(order, default_category):
     return dbc.Card(
         [
             get_drop_down(
-                "first_category_comparison",
+                f"{order}_category_comparison",
                 MAIN_CATEGORIES_TO_CATEGORIES["All"]
                 + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()],
-                "Select first category to compare: ",
+                f"Select {order} category to compare: ",
                 from_dict=False,
-                value="Genetics",
+                value=default_category,
             ),
-            get_drop_down(
-                "second_category_comparison",
-                MAIN_CATEGORIES_TO_CATEGORIES["All"]
-                + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()],
-                "Select second category to compare: ",
-                from_dict=False,
-                value="Phenotypic",
+            html.Div(
+                [
+                    get_item_radio_items(
+                        f"{order}_uni_or_multi_comparison", UNIVARIATE_OR_MULTIVARIATE, "Select the type of XWAS :"
+                    ),
+                    get_item_radio_items(f"{order}_method_comparison", SUBSET_METHODS, "Select method :"),
+                    get_item_radio_items(
+                        f"{order}_correlation_type_comparison", CORRELATION_TYPES, "Select correlation type :"
+                    ),
+                ],
+                id=f"{order}_hiden_settings",
+                style={"display": "none"},
             ),
-            get_item_radio_items("subset_method_comparison", SUBSET_METHODS, "Select subset method :"),
-            get_item_radio_items("correlation_type_comparison", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
+
+
+@APP.callback(
+    [
+        Output("first_hiden_settings", component_property="style"),
+        Output("first_uni_or_multi_comparison", "options"),
+        Output("first_uni_or_multi_comparison", "value"),
+    ],
+    Input("first_category_comparison", "value"),
+)
+def _change_controls_first_hidden_settings(first_category):
+    return display_settings(first_category)
+
+
+@APP.callback(
+    [
+        Output("second_hiden_settings", component_property="style"),
+        Output("second_uni_or_multi_comparison", "options"),
+        Output("second_uni_or_multi_comparison", "value"),
+    ],
+    Input("second_category_comparison", "value"),
+)
+def _change_controls_second_hidden_settings(second_category):
+    return display_settings(second_category)
+
+
+def display_settings(category):
+    if category in ["Genetics", "Phenotypic"]:
+        return {"display": "none"}, get_options_from_dict(UNIVARIATE_OR_MULTIVARIATE), "univariate"
+    elif "All" in category:
+        return {"display": "block"}, get_options_from_dict({"univariate": "Univariate"}), "univariate"
+    else:
+        return {"display": "block"}, get_options_from_dict(UNIVARIATE_OR_MULTIVARIATE), "univariate"
+
+
+@APP.callback(
+    [
+        Output("first_method_comparison", "options"),
+        Output("first_method_comparison", "value"),
+    ],
+    [Input("first_uni_or_multi_comparison", "value"), Input("first_category_comparison", "value")],
+)
+def _change_controls_first_method(first_uni_or_multi, first_category):
+    return change_method(first_uni_or_multi, first_category)
+
+
+@APP.callback(
+    [
+        Output("second_method_comparison", "options"),
+        Output("second_method_comparison", "value"),
+    ],
+    [Input("second_uni_or_multi_comparison", "value"), Input("second_category_comparison", "value")],
+)
+def _change_controls_second_method(second_uni_or_multi, second_category):
+    return change_method(second_uni_or_multi, second_category)
+
+
+def change_method(uni_or_mutli, category):
+    if uni_or_mutli == "univariate" or category in ["Genetics", "Phenotypic"]:
+        return get_options_from_dict(SUBSET_METHODS), "union"
+    else:  # uni_or_multi == "multivariate"
+        return (
+            get_options_from_dict(
+                {
+                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
+                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
+                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                }
+            ),
+            "elastic_net",
+        )
 
 
 @APP.callback(
@@ -76,26 +151,39 @@ def get_controls_comparison():
         Output("title_difference_heatmap_comparison", "children"),
     ],
     [
-        Input("subset_method_comparison", "value"),
-        Input("correlation_type_comparison", "value"),
+        Input("first_uni_or_multi_comparison", "value"),
+        Input("first_method_comparison", "value"),
+        Input("first_correlation_type_comparison", "value"),
         Input("first_category_comparison", "value"),
+        Input("second_uni_or_multi_comparison", "value"),
+        Input("second_method_comparison", "value"),
+        Input("second_correlation_type_comparison", "value"),
         Input("second_category_comparison", "value"),
         Input("memory_comparison_upper", "data"),
         Input("memory_comparison_lower", "data"),
     ],
 )
 def _fill_graph_tab_comparison(
-    subset_method, correlation_type, first_category, second_category, data_comparison_upper, data_comparison_lower
+    first_uni_or_multi,
+    first_method,
+    first_correlation_type,
+    first_category,
+    second_uni_or_multi,
+    second_method,
+    second_correlation_type,
+    second_category,
+    data_comparison_upper,
+    data_comparison_lower,
 ):
     import plotly.graph_objs as go
 
     table_correlations_upper, customdata_upper, correlations_upper = get_table_and_customdata(
-        data_comparison_upper, subset_method, correlation_type
+        first_uni_or_multi, data_comparison_upper, first_method, first_correlation_type
     )
     np.fill_diagonal(table_correlations_upper.values, np.nan)
 
     table_correlations_lower, customdata_lower, correlations_lower = get_table_and_customdata(
-        data_comparison_lower, subset_method, correlation_type
+        second_uni_or_multi, data_comparison_lower, second_method, second_correlation_type
     )
     np.fill_diagonal(table_correlations_lower.values, np.nan)
 
@@ -225,15 +313,19 @@ def _fill_graph_tab_comparison(
     )
 
 
-def get_table_and_customdata(data_comparison, subset_method, correlation_type):
+def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_type):
+    if uni_or_multi == "univariate":
+        sample_nature = "number_variables"
+    else:  # uni_or_multi == "multivariate"
+        sample_nature = "number_features"
     correlations_raw = pd.DataFrame(data_comparison).set_index(
         ["dimension_1", "subdimension_1", "r2_1", "r2_std_1", "dimension_2", "subdimension_2", "r2_2", "r2_std_2"]
     )
     correlations_raw.columns = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
+        list(map(eval, correlations_raw.columns.tolist())), names=["method", "correlation_type"]
     )
-    correlations = correlations_raw[[(subset_method, correlation_type), (subset_method, "number_variables")]]
-    correlations.columns = ["correlation", "number_variables"]
+    correlations = correlations_raw[[(method, correlation_type), (method, sample_nature)]]
+    correlations.columns = ["correlation", sample_nature]
     correlations.reset_index(inplace=True)
 
     table_correlations = correlations.pivot(
@@ -243,7 +335,7 @@ def get_table_and_customdata(data_comparison, subset_method, correlation_type):
     ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
 
     customdata_list = []
-    for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", "number_variables"]:
+    for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", sample_nature]:
         customdata_list.append(
             correlations.pivot(
                 index=["dimension_1", "subdimension_1"],
@@ -281,7 +373,9 @@ LAYOUT = dbc.Container(
             [
                 dbc.Col(
                     [
-                        get_controls_comparison(),
+                        get_controls_comparison("first", "Genetics"),
+                        html.Br(),
+                        get_controls_comparison("second", "Phenotypic"),
                         html.Br(),
                         html.Br(),
                     ],

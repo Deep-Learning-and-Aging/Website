@@ -77,33 +77,38 @@ def get_controls_tab_dimension_multi():
 @APP.callback(
     [Output("graph_dimension_multi", "figure"), Output("title_dimension_multi", "children")],
     [
-        Input("dimension_dimension_multi", "value"),
         Input("algorithm_dimension", "value"),
         Input("correlation_type_category_multi", "value"),
         Input("memory_dimension_multi", "data"),
     ],
 )
-def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data_dimension):
+def _fill_graph_tab_dimension_multi(algorithm, correlation_type, data_dimension):
     import plotly.graph_objs as go
 
-    correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "category"])
+    correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "subdimension", "category"])
     correlations_raw.columns = pd.MultiIndex.from_tuples(
         list(map(eval, correlations_raw.columns.tolist())), names=["algorithm", "correlation_type"]
     )
     correlations = correlations_raw[[(algorithm, correlation_type)]]
     correlations.columns = ["correlation"]
+    correlations["dimension_subdimension"] = (
+        correlations.index.get_level_values("dimension") + " - " + correlations.index.get_level_values("subdimension")
+    )
     numbers_features = correlations_raw[[(algorithm, "number_features")]]
     numbers_features.columns = ["number_features"]
+    numbers_features["dimension_subdimension"] = (
+        numbers_features.index.get_level_values("dimension")
+        + " - "
+        + numbers_features.index.get_level_values("subdimension")
+    )
 
     correlations_2d = pd.pivot_table(
-        correlations, values="correlation", index="dimension", columns="category", dropna=False
+        correlations, values="correlation", index="dimension_subdimension", columns="category", dropna=False
     ).fillna(0)
-    correlations_2d.drop(index=dimension, inplace=True)
 
     numbers_features_2d = pd.pivot_table(
-        numbers_features, values="number_features", index="dimension", columns="category", dropna=False
+        numbers_features, values="number_features", index="dimension_subdimension", columns="category", dropna=False
     ).fillna(0)
-    numbers_features_2d.drop(index=dimension, inplace=True)
 
     hovertemplate = "Correlation: %{z:.3f} <br>X subcategory: %{x} <br>Aging dimension: %{y} <br>Number features: %{customdata} <br><extra></extra>"
 
