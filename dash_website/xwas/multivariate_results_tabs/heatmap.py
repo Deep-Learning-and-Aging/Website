@@ -139,8 +139,8 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         {
             "width": 1000,
             "height": int(1000 * max(1, r2_2d.shape[0] / r2_2d.shape[1])),
-            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "X subcategory", "showgrid": False},
+            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False, "title_font":{"size": 25}},
+            "yaxis": {"title": "X subcategory", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 

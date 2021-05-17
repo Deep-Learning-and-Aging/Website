@@ -265,10 +265,9 @@ def _fill_graph_age_prediction_performances(
     fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
-        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False},
+        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
-        # width=400 + 20 * scores.shape[0],
     )
 
     return (

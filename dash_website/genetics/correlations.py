@@ -109,8 +109,8 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1100,
-        height=1100,
+        width=1500,
+        height=1500,
     )
 
     return (

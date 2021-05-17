@@ -227,7 +227,9 @@ def display_time_series_features(
     fig.update_layout(
         {
             "xaxis": {"title": x_label},
+            "xaxis_title_font":{"size": 25},
             "yaxis": {"title": y_label},
+            "yaxis_title_font":{"size": 25},
         }
     )
 

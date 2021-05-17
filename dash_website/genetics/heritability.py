@@ -143,7 +143,7 @@ def _fill_graph_heritability(order_by, data_heritability):
         fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
-        yaxis={"title": "GWAS-based heritability", "showgrid": False, "zeroline": False},
+        yaxis={"title": "GWAS-based heritability", "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
     )

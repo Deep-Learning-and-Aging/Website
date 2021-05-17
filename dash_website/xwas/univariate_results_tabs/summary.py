@@ -114,6 +114,8 @@ def _fill_summary_heatmap(item, main_category, data):
             "yaxis": {"title": "Aging dimension"},
             "width": max(30 * summary_item_percentage_category.shape[1], 500),
             "height": 30 * summary_item_percentage_category.shape[0],
+            "xaxis_title_font": {"size": 25},
+            "yaxis_title_font": {"size": 25},
         }
     )
 

@@ -186,8 +186,8 @@ def display_time_series(dimension, subdimension, sub_subdimension, sex, age_grou
 
     fig.update_layout(
         {
-            "xaxis": {"title": x_label},
-            "yaxis": {"title": y_label},
+            "xaxis": {"title": x_label, "title_font": {"size": 25}},
+            "yaxis": {"title": y_label, "title_font": {"size": 25}},
         }
     )
 

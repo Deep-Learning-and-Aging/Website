@@ -43,7 +43,9 @@ def heatmap_by_clustering(table_correlations, hovertemplate, customdata, zmin=-1
             "tickvals": fig["layout"]["xaxis"]["tickvals"],
             "showticklabels": True,
             "ticks": "outside",
-        }
+            "tickfont": {"size": 15},
+        },
+        xaxis={"tickfont": {"size": 15}},
     )
 
     fig.add_trace(heatmap)
@@ -72,17 +74,19 @@ def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorte
         xaxis={
             "tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
             "ticktext": [" - ".join(elem) for elem in sorted_table_correlations.columns.values],
+            "tickfont": {"size": 15},
         },
         yaxis={
             "tickvals": np.arange(5, 10 * sorted_table_correlations.shape[0] + 5, 10),
             "ticktext": [" - ".join(elem) for elem in sorted_table_correlations.index.values],
+            "tickfont": {"size": 15},
         },
     )
 
     return fig
 
 
-def add_custom_legend_axis(fig, sorted_table_correlations, size_dimension=10, size_subdimension=8):
+def add_custom_legend_axis(fig, sorted_table_correlations, size_dimension=12, size_subdimension=10):
     dimensions = (
         sorted_table_correlations.index.to_frame()[["dimension_1", "subdimension_1"]]
         .reset_index(drop=True)
@@ -203,5 +207,14 @@ def histogram_correlation(table_correlations):
 
     fig = go.Figure(histogram)
 
-    fig.update_layout(xaxis_title_text="Correlation", yaxis_title_text="Count (in %)", bargap=0.2, bargroupgap=0.1)
+    fig.update_layout(
+        height=500,
+        width=1500,
+        xaxis_title_text="Correlation",
+        xaxis_title_font={"size": 25},
+        yaxis_title_text="Count (in %)",
+        yaxis_title_font={"size": 25},
+        bargap=0.2,
+        bargroupgap=0.1,
+    )
     return fig

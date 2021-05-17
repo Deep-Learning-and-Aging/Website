@@ -190,8 +190,8 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1100,
-        height=1100,
+        width=1500,
+        height=1500,
     )
 
     return (

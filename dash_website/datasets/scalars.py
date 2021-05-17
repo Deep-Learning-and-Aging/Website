@@ -203,7 +203,14 @@ def _change_distribution(feature, age_range, data_scalars):
         )
 
     fig.update_layout(
-        width=2000, height=500, xaxis_title_text="Value", yaxis_title_text="Count (in %)", bargap=0.2, bargroupgap=0.1
+        width=2000,
+        height=500,
+        xaxis_title_text="Value",
+        xaxis_title_font={"size": 25},
+        yaxis_title_text="Count (in %)",
+        yaxis_title_font={"size": 25},
+        bargap=0.2,
+        bargroupgap=0.1,
     )
 
     return fig, "Histogram of " + feature
@@ -266,7 +273,7 @@ def _change_scatter(feature, age_range, data_linear_regresion, data_scalars):
             marker={"size": 0.1},
         )
 
-    fig.update_layout(width=2000, height=500, xaxis_title_text="Chronological Age")
+    fig.update_layout(width=2000, height=500, xaxis_title_text="Chronological Age", xaxis_title_font={"size": 25})
 
     return (
         fig,
@@ -361,7 +368,14 @@ def _change_volcano(data_linear_regresion, feature):
         marker={"size": 0.1},
     )
 
-    fig.update_layout(width=2000, height=500, yaxis_title_text="-log(p_value)", xaxis_title_text="Pearson correlation")
+    fig.update_layout(
+        width=2000,
+        height=500,
+        yaxis_title_text="-log(p_value)",
+        yaxis_title_font={"size": 25},
+        xaxis_title_text="Pearson correlation",
+        xaxis_title_font={"size": 25},
+    )
 
     return fig, "Volcano plot for all features"
 

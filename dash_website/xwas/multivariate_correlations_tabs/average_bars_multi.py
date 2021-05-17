@@ -12,6 +12,7 @@ from dash_website.utils.controls import get_drop_down, get_item_radio_items, get
 from dash_website import (
     DOWNLOAD_CONFIG,
     DIMENSIONS,
+    RENAME_DIMENSIONS,
     MAIN_CATEGORIES_TO_CATEGORIES,
     ALGORITHMS_RENDERING,
     CORRELATION_TYPES,
@@ -70,7 +71,7 @@ def _modify_store_correlations(dimension_1, dimension_2):
         raise PreventUpdate
     else:
         return load_feather(
-            f"xwas/multivariate_correlations/correlations/dimensions/correlations_{dimension_1}.feather"
+            f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_1, dimension_1)}.feather"
         ).to_dict()
 
 
@@ -278,8 +279,8 @@ def _fill_graph_tab_average(
         {
             "width": 2000,
             "height": 800,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": y_label},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": y_label, "title_font": {"size": 25}},
         }
     )
 
