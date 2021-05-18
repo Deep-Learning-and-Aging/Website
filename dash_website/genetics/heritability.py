@@ -157,7 +157,7 @@ def _fill_graph_heritability(order_by, data_heritability):
 LAYOUT = dbc.Container(
     [
         dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
-        html.H1("Heritabiliy - GWAS"),
+        html.H1("Heritability - GWAS"),
         html.Br(),
         html.Br(),
         dbc.Row(
