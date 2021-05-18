@@ -1,24 +1,14 @@
-Procfile
-app.yaml
-
 __pycache__/
 env*/
 *.egg-info/
-**/*.csv
-**/*.zip
-**/*.feather
-**/*.html
-**/*.ipynb
-**/*.sh
-**/*.xlsx
-**/*.txt
+.devcontainer
+.vscode
+.gitignore
+.dockerignore
+README.md
+Dockerfile
 
 # Local specific
 /clean_aws
 /external_code
-.vscode
 /all_data
-.devcontainer
-/pages
-.gitignore
-README.md

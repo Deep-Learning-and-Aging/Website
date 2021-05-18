@@ -1,0 +1,14 @@
+__pycache__/
+env*/
+*.egg-info/
+.devcontainer
+.vscode
+.gitignore
+.gcloudignore
+README.md
+Dockerfile
+
+# Local specific
+/clean_aws
+/external_code
+/all_data
