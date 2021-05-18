@@ -16,7 +16,7 @@ from dash_website.utils import BLUE_WHITE_RED
 def get_heatmap():
     return dbc.Container(
         [
-            html.H1("Multivariate XWAS - Results"),
+            html.H1("Accelerated aging prediction performance - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(

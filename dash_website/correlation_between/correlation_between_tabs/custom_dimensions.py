@@ -23,7 +23,7 @@ def get_custom_dimensions():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_custom_dimensions")),
-            html.H1("Correlation between accelerated aging dimensions"),
+            html.H1("Phenotype - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -159,8 +159,8 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
         fig.update_layout(font={"size": 8})
 
     fig.update_layout(
-        yaxis={"showgrid": False, "zeroline": False, "title_font":{"size": 25}},
-        xaxis={"showgrid": False, "zeroline": False, "title_font":{"size": 25}},
+        yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         width=1500,
         height=1500,
     )

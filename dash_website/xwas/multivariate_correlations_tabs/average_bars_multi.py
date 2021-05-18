@@ -26,7 +26,7 @@ def get_average_bars():
             dcc.Loading(
                 [dcc.Store(id="memory_average_multi", data=get_data_multi()), dcc.Store(id="memory_correlations_multi")]
             ),
-            html.H1("Multivariate XWAS - Correlations between accelerated aging"),
+            html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(

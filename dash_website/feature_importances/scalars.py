@@ -180,8 +180,12 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
         {
             "width": 1000,
             "height": int(25 * len(sorted_features)),
-            "xaxis": {"title": "Percentage of overall feature importance", "showgrid": False, "title_font":{"size": 25}},
-            "yaxis": {"title": "Features", "showgrid": False, "title_font":{"size": 25}},
+            "xaxis": {
+                "title": "Percentage of overall feature importance",
+                "showgrid": False,
+                "title_font": {"size": 25},
+            },
+            "yaxis": {"title": "Features", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 
@@ -269,7 +273,7 @@ def _sort_tables(
 LAYOUT = dbc.Container(
     [
         dcc.Loading([dcc.Store(id="memory_features"), dcc.Store(id="memory_scores", data=get_data_scores())]),
-        html.H1("Feature importances - Scalars"),
+        html.H1("Model interpretability - Scalars"),
         html.Br(),
         html.Br(),
         dbc.Row(

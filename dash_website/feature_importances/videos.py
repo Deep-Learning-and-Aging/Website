@@ -128,7 +128,7 @@ LAYOUT = dbc.Container(
                 dcc.Store(id="memory_videos_features", data=get_data_features()),
             ]
         ),
-        html.H1("Feature importances - Videos"),
+        html.H1("Model interpretability - Videos"),
         html.Br(),
         html.Br(),
         dbc.Row(get_controls_videos(), justify="center"),

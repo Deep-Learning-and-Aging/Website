@@ -16,7 +16,7 @@ def get_summary():
     return dbc.Container(
         [
             dcc.Loading([dcc.Store(id="memory_summary", data=get_data())]),
-            html.H1("Univariate XWAS - Results"),
+            html.H1("Univariate associations - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(

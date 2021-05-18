@@ -32,7 +32,7 @@ def get_category_heatmap():
         [
             dcc.Loading(dcc.Store(id="memory_category_multi")),
             dcc.Store(id="memory_exists_category_multi"),
-            html.H1("Multivariate XWAS - Correlations between accelerated aging"),
+            html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(

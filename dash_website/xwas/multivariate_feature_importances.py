@@ -243,7 +243,7 @@ def _sort_tables(
 LAYOUT = dbc.Container(
     [
         dcc.Loading([dcc.Store(id="memory_features_xwas"), dcc.Store(id="memory_scores_xwas", data=get_data())]),
-        html.H1("Multivariate XWAS - Feature importances"),
+        html.H1("Accelerated aging prediction interpretability - XWAS"),
         html.Br(),
         html.Br(),
         dbc.Row(

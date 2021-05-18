@@ -18,7 +18,7 @@ def get_volcano():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_volcano_gwas", data=get_data())),
-            html.H1("Genetics - GWAS"),
+            html.H1("Associations - GWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
