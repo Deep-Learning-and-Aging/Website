@@ -65,7 +65,7 @@ LAYOUT = html.Div(
                 ),
                 dbc.Row(
                     dbc.Col(
-                        html.H1("Multi-Dimensionality of Aging", style={"padding-top": "100px"}),
+                        html.H1("Multidimensionality of Aging", style={"padding-top": "100px"}),
                         style={"width": 4, "text-align": "center"},
                     ),
                     className="mb-4",
