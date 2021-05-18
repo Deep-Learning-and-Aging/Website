@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+import dash_table
 
 import pandas as pd
 import numpy as np
@@ -10,7 +11,7 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down
 from dash_website import DOWNLOAD_CONFIG
-from dash_website.genetics import DIMENSIONS_GWAS_VOLCANO
+from dash_website.genetics import DIMENSIONS_GWAS_VOLCANO, VOLCANO_TABLE_COLUMNS
 
 
 def get_volcano():
@@ -28,7 +29,7 @@ def get_volcano():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -39,9 +40,26 @@ def get_volcano():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 6},
                     ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dcc.Loading(
+                            [
+                                dash_table.DataTable(
+                                    id="table_volcano_gwas",
+                                    columns=[{"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()],
+                                    style_cell={"textAlign": "left"},
+                                    sort_action="custom",
+                                    sort_mode="single",
+                                )
+                            ]
+                        ),
+                        width={"size": 8, "offset": 3},
+                    )
                 ]
             ),
         ],
@@ -95,22 +113,55 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
         size = 5
     else:
         size = 3
-        
+
     for chromosome in size_effects["chromosome"].drop_duplicates():
-        customdata = size_effects.loc[
-            [chromosome], ["SNP", "dimension", "p_value", "Gene", "Gene_type", "chromosome"]
-        ].values
+        customdata = size_effects.loc[[chromosome], ["SNP", "dimension", "p_value", "Gene", "Gene_type", "chromosome"]]
+        customdata["p_value"] = customdata["p_value"].apply(lambda x: "%.3e" % x)
 
         fig.add_scatter(
             x=size_effects.loc[[chromosome], "size_effect"],
             y=-np.log(size_effects.loc[[chromosome], "p_value"] + +1e-323),
             mode="markers",
             name=f"Chromosome {chromosome}",
-            customdata=customdata,
+            customdata=customdata.values,
             hovertemplate=hovertemplate,
             marker={"size": size},
         )
 
-    fig.update_layout(xaxis={"title": "Size Effect (SE)"}, yaxis={"title": "-log(p-value)"}, height=800)
+    fig.update_layout(
+        xaxis={"title": "Size Effect (SE)"},
+        xaxis_title_font={"size": 25},
+        yaxis={"title": "-log(p-value)"},
+        yaxis_title_font={"size": 25},
+        height=800,
+    )
 
     return fig
+
+
+@APP.callback(
+    Output("table_volcano_gwas", "data"),
+    [
+        Input("dimension_volcano_gwas", "value"),
+        Input("memory_volcano_gwas", "data"),
+        Input("table_volcano_gwas", "sort_by"),
+    ],
+)
+def _sort_table(dimension, data_volcano_gwas, sort_by_col):
+    size_effects = pd.DataFrame(data_volcano_gwas)
+
+    if dimension != "All":
+        size_effects = size_effects.set_index("dimension").loc[[dimension]].reset_index()
+
+    if sort_by_col is not None and len(sort_by_col) > 0:
+        is_ascending = sort_by_col[0]["direction"] == "asc"
+        size_effects.sort_values(sort_by_col[0]["column_id"], ascending=is_ascending, inplace=True)
+    else:
+        size_effects.sort_values("p_value", inplace=True)
+
+    size_effects["p_value"] = size_effects["p_value"].apply(lambda x: "%.3e" % x)
+    size_effects[pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")] = size_effects[
+        pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")
+    ].round(3)
+
+    return size_effects[VOLCANO_TABLE_COLUMNS].to_dict("records")

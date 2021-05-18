@@ -9,45 +9,9 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
-from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
+from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
 from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
-
-
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(dcc.Store(id="memory_age_prediction_performances")),
-            html.H1("Age prediction performances"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            get_controls_age_prediction_performances(),
-                            html.Br(),
-                            html.Br(),
-                        ],
-                        md=3,
-                    ),
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="title_age_prediction_performances"),
-                                    dcc.Graph(id="graph_age_prediction_performances", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
 
 
 @APP.callback(
@@ -126,6 +90,9 @@ def _fill_graph_age_prediction_performances(
 
     scores = pd.DataFrame(data_age_prediction_performances)
 
+    if dimensions_selection == "custom_dimensions":
+        scores.replace("1DCNN", "*", inplace=True)  # since it is the only one that is different
+
     scores.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
 
     if selected_dimension != "all":
@@ -186,14 +153,36 @@ def _fill_graph_age_prediction_performances(
     lines = []
     annotations = []
 
-    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
+    if dimensions_selection == "custom_dimensions":
+        size_dimension = 18
+        size_subdimension = 15
         if metric == "r2":
-            dimension_inner_margin = min_score - 1
-            dimension_outer_margin = min_score - 1.4
+            dimension_outer_margin = min_score - 0.9
+            dimension_inner_margin = min_score - 0.5
+            subdimension_margin = min_score - 0.1
+            sub_subdimension_margin = min_score - 0.1
         else:
-            dimension_inner_margin = min_score - 10
-            dimension_outer_margin = min_score - 14
+            dimension_outer_margin = min_score - 9
+            dimension_inner_margin = min_score - 5
+            subdimension_margin = min_score - 1
+            sub_subdimension_margin = min_score - 1
+    else:
+        size_dimension = 13
+        size_subdimension = 11
+        size_sub_subdimension = 9
+        if metric == "r2":
+            dimension_outer_margin = min_score - 1.4
+            dimension_inner_margin = min_score - 1
+            subdimension_margin = min_score - 0.6
+            sub_subdimension_margin = min_score - 0.1
 
+        else:
+            dimension_outer_margin = min_score - 14
+            dimension_inner_margin = min_score - 10
+            subdimension_margin = min_score - 6
+            sub_subdimension_margin = min_score - 1
+
+    for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
         min_position = dimensions.loc[dimension].min()
         max_position = dimensions.loc[dimension].max()
 
@@ -206,18 +195,13 @@ def _fill_graph_age_prediction_performances(
             dimension_inner_margin,
             dimension_outer_margin,
             90,
-            13,
+            size_dimension,
         )
 
         lines.append(line)
         annotations.append(annotation)
 
         for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-            if metric == "r2":
-                subdimension_margin = min_score - 0.6
-            else:
-                subdimension_margin = min_score - 6
-
             submin_position = dimensions.loc[(dimension, subdimension)].min()
             submax_position = dimensions.loc[(dimension, subdimension)].max()
 
@@ -230,19 +214,18 @@ def _fill_graph_age_prediction_performances(
                 subdimension_margin,
                 dimension_inner_margin,
                 90,
-                11,
+                size_subdimension,
             )
 
             lines.append(line)
             annotations.append(annotation)
+
+            if dimensions_selection == "custom_dimensions":
+                continue
+
             for sub_subdimension in (
                 dimensions.loc[(dimension, subdimension)].index.get_level_values("sub_subdimension").drop_duplicates()
             ):
-                if metric == "r2":
-                    sub_subdimension_margin = min_score - 0.1
-                else:
-                    sub_subdimension_margin = min_score - 1
-
                 sub_submin_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].min()
                 sub_submax_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].max()
 
@@ -255,7 +238,7 @@ def _fill_graph_age_prediction_performances(
                     sub_subdimension_margin,
                     subdimension_margin,
                     90,
-                    9,
+                    size_sub_subdimension,
                 )
 
                 lines.append(line)
@@ -282,13 +265,46 @@ def _fill_graph_age_prediction_performances(
     fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
-        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False},
+        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
-        width=400 + 20 * scores.shape[0],
     )
 
     return (
         fig,
         f"Average {SCORES[metric]} = {scores[metric].mean().round(3)} +- {scores[metric].std().round(3)}",
     )
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(dcc.Store(id="memory_age_prediction_performances")),
+        html.H1("Age prediction performances"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        get_controls_age_prediction_performances(),
+                        html.Br(),
+                        html.Br(),
+                    ],
+                    width={"size": 3},
+                ),
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_age_prediction_performances"),
+                                dcc.Graph(id="graph_age_prediction_performances", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

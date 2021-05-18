@@ -1,13 +1,10 @@
 import pandas as pd
 import numpy as np
-from dash_website.utils.aws_loader import load_csv
+from dash_website.utils.aws_loader import load_csv, upload_file
 
 DICT_TO_CHANGE_DIMENSIONS = {
     "ImmuneSystem": "BloodCells",
-    "\*": "set",
-    "*instances01": "set_instances01",
-    "*instances1.5x": "set_instances1.5x",
-    "*instances23": "set_instances23",
+    "\*": "*",
 }
 DICT_TO_CHANGE_CATEGORIES = {
     "HeartSize": "HeartFunction",
@@ -20,6 +17,21 @@ CAMEL_TO_SNAKE = {"ElasticNet": "elastic_net", "LightGbm": "light_gbm", "NeuralN
 
 
 if __name__ == "__main__":
+    # Merge with new scores
+    for algorithm in CAMEL_TO_SNAKE.keys():
+        missing_scores = pd.read_csv(
+            f"all_data/page7_MultivariateXWASResults/Scores/ScoresMissing_{algorithm}_test.csv"
+        )
+        old_scores = pd.read_csv(f"all_data/page7_MultivariateXWASResults/Scores/Old_Scores_{algorithm}_test.csv")
+
+        pd.concat((missing_scores, old_scores), ignore_index=True).drop(columns="Unnamed: 0").to_csv(
+            f"all_data/page7_MultivariateXWASResults/Scores/Scores_{algorithm}_test.csv"
+        )
+        upload_file(
+            f"all_data/page7_MultivariateXWASResults/Scores/Scores_{algorithm}_test.csv",
+            f"page7_MultivariateXWASResults/Scores/Scores_{algorithm}_test.csv",
+        )
+
     list_scores = []
 
     for algorithm in CAMEL_TO_SNAKE.keys():
@@ -46,4 +58,5 @@ if __name__ == "__main__":
 
         list_scores.append(scores_cleaned)
 
-    pd.concat(list_scores, ignore_index=True).to_feather("data/xwas/multivariate_results/scores.feather")
+    pd.concat(list_scores, ignore_index=True).to_feather("all_data/xwas/multivariate_results/scores.feather")
+    upload_file("all_data/xwas/multivariate_results/scores.feather", "xwas/multivariate_results/scores.feather")

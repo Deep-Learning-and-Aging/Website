@@ -21,7 +21,7 @@ def get_bar_plot():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_bar_plot(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab_bar_plot(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         [
                             dcc.Loading(
@@ -31,8 +31,8 @@ def get_bar_plot():
                                 ]
                             )
                         ],
-                        style={"overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
+                        style={"overflowX": "scroll"},
                     ),
                 ]
             ),
@@ -101,7 +101,7 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
         by=["r2"], ascending=False
     )
 
-    hovertemplate = "X subcategory: %{x} <br>r²: %{y:.3f} +- %{customdata[0]:.3f} <br><extra>%{customdata[1]}</extra>"
+    hovertemplate = "X subcategory: %{x} <br>R2: %{y:.3f} +- %{customdata[0]:.3f} <br><extra>%{customdata[1]}</extra>"
 
     bars = go.Bar(
         x=scores["category"],
@@ -122,9 +122,9 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
         {
             "width": 1500,
             "height": 800,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "r²"},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": "r2", "title_font": {"size": 25}},
         }
     )
 
-    return fig, f"Average r² = {scores['r2'].mean().round(3)} +- {scores['r2'].std().round(3)}"
+    return fig, f"Average R2 = {scores['r2'].mean().round(3)} +- {scores['r2'].std().round(3)}"

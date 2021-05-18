@@ -1,8 +1,8 @@
 import pandas as pd
 from tqdm import tqdm
 
-from dash_website.utils.aws_loader import load_feather
-from dash_website import DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website.utils.aws_loader import load_feather, upload_file
+from dash_website import DIMENSIONS
 
 
 MAIN_DIMENSIONS = [
@@ -15,7 +15,7 @@ MAIN_DIMENSIONS = [
     "Brain",
     "Biochemistry",
     "Hearing",
-    "ImmuneSystem",
+    "BloodCells",
     "PhysicalActivity",
 ]
 
@@ -43,10 +43,10 @@ PAIRS_SUBDIMENSIONS = [
     ["MusculoskeletalHips", "MusculoskeletalKnees"],
 ]
 DIMENSIONS_TO_EXCLUDE = {
-    "set": [],
-    "set_instances01": [],
-    "set_instances1.5x": [],
-    "set_instances23": [],
+    "*": [],
+    "*instances01": [],
+    "*instances1.5x": [],
+    "*instances23": [],
     "Abdomen": ["AbdomenLiver", "AbdomenPancreas"],
     "AbdomenLiver": ["Abdomen"],
     "AbdomenPancreas": ["Abdomen"],
@@ -67,7 +67,7 @@ DIMENSIONS_TO_EXCLUDE = {
     "Heart": ["HeartECG", "HeartMRI"],
     "HeartECG": ["Heart"],
     "HeartMRI": ["Heart"],
-    "ImmuneSystem": [],
+    "BloodCells": [],
     "Lungs": [],
     "Musculoskeletal": [
         "MusculoskeletalFullBody",
@@ -84,55 +84,57 @@ DIMENSIONS_TO_EXCLUDE = {
     "PhysicalActivity": [],
 }
 
-FULL_CATEGORY = (
-    MAIN_CATEGORIES_TO_CATEGORIES["All"]
-    + ["Phenotypic", "Genetics"]
-    + [f"All_{main_category}" for main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()]
-)
-
 
 if __name__ == "__main__":
-    correlations_raw = load_feather(f"xwas/univariate_correlations/correlations.feather").set_index(
-        ["dimension_1", "dimension_2", "category"]
+    correlations_raw = load_feather("xwas/multivariate_correlations/correlations/correlations.feather").set_index(
+        ["dimension_1", "subdimension_1", "dimension_2", "subdimension_2", "category"]
     )
     correlations_raw.columns = pd.MultiIndex.from_tuples(
-        list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
+        list(map(eval, correlations_raw.columns.tolist())), names=["algorithm", "correlation_type"]
     )
+    correlations_raw.reset_index(inplace=True)
+    for index_dimension in [1, 2]:
+        correlations_raw[f"squeezed_dimension_{index_dimension}"] = correlations_raw[
+            f"dimension_{index_dimension}"
+        ] + correlations_raw[f"subdimension_{index_dimension}"].replace("*", "")
+    correlations_raw = correlations_raw.drop(
+        columns=["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"]
+    ).set_index(["category", "squeezed_dimension_1", "squeezed_dimension_2"])
+
+    every_category = correlations_raw.index.get_level_values("category").drop_duplicates()
 
     list_indexes = []
     for dimension in DIMENSIONS + ["MainDimensions", "SubDimensions"]:
-        for category in FULL_CATEGORY:
+        for category in every_category:
             list_indexes.append([dimension, category])
     indexes = pd.MultiIndex.from_tuples(list_indexes, names=["dimension", "category"])
 
     list_columns = []
-    for subset_method in ["all", "union", "intersection"]:
+    for algorithm in ["elastic_net", "light_gbm", "neural_network"]:
         for correlation_type in ["pearson", "spearman"]:
             for observation in ["mean", "std"]:
-                list_columns.append([subset_method, correlation_type, observation])
-    columns = pd.MultiIndex.from_tuples(list_columns, names=["subset_method", "correlation_type", "observation"])
+                list_columns.append([algorithm, correlation_type, observation])
+    columns = pd.MultiIndex.from_tuples(list_columns, names=["algorithm", "correlation_type", "observation"])
 
     averages_correlations = pd.DataFrame(None, index=indexes, columns=columns)
 
-    for subset_method in tqdm(["union", "intersection", "all"]):
+    for algorithm in tqdm(["elastic_net", "light_gbm", "neural_network"]):
         for correlation_type in ["pearson", "spearman"]:
-            correlations = correlations_raw[subset_method, correlation_type].swaplevel().swaplevel(i=0, j=1)
-
-            for category in FULL_CATEGORY:
-                correlations_category = correlations.loc[category]
+            for category in every_category:
+                correlations_category = correlations_raw.loc[category, (algorithm, correlation_type)]
 
                 averages_correlations.loc[
-                    ("MainDimensions", category), (subset_method, correlation_type, "mean")
+                    ("MainDimensions", category), (algorithm, correlation_type, "mean")
                 ] = correlations_category.loc[PAIRS_MAIN_DIMENSIONS].mean()
                 averages_correlations.loc[
-                    ("MainDimensions", category), (subset_method, correlation_type, "std")
+                    ("MainDimensions", category), (algorithm, correlation_type, "std")
                 ] = correlations_category.loc[PAIRS_MAIN_DIMENSIONS].std()
 
                 averages_correlations.loc[
-                    ("SubDimensions", category), (subset_method, correlation_type, "mean")
+                    ("SubDimensions", category), (algorithm, correlation_type, "mean")
                 ] = correlations_category.loc[PAIRS_SUBDIMENSIONS].mean()
                 averages_correlations.loc[
-                    ("SubDimensions", category), (subset_method, correlation_type, "std")
+                    ("SubDimensions", category), (algorithm, correlation_type, "std")
                 ] = correlations_category.loc[PAIRS_SUBDIMENSIONS].std()
 
                 for dimension in DIMENSIONS:
@@ -141,11 +143,17 @@ if __name__ == "__main__":
                     )
 
                     averages_correlations.loc[
-                        (dimension, category), (subset_method, correlation_type, "mean")
+                        (dimension, category), (algorithm, correlation_type, "mean")
                     ] = correlations_independant.mean()
                     averages_correlations.loc[
-                        (dimension, category), (subset_method, correlation_type, "std")
+                        (dimension, category), (algorithm, correlation_type, "std")
                     ] = correlations_independant.std()
 
     averages_correlations.columns = map(str, averages_correlations.columns.tolist())
-    averages_correlations.reset_index().to_feather("data/xwas/univariate_correlations/averages_correlations.feather")
+    averages_correlations.reset_index().to_feather(
+        "all_data/xwas/multivariate_correlations/averages_correlations.feather"
+    )
+    upload_file(
+        "all_data/xwas/multivariate_correlations/averages_correlations.feather",
+        "xwas/multivariate_correlations/averages_correlations.feather",
+    )

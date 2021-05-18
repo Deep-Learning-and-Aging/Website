@@ -14,7 +14,7 @@ from dash_website.utils.controls import (
     get_options,
 )
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
 
@@ -27,25 +27,27 @@ def get_volcano():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         dcc.Loading([html.H2("Volcano plot"), dcc.Graph(id="graph_volcano", config=DOWNLOAD_CONFIG)]),
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),
             dbc.Row(
                 [
                     dbc.Col(
-                        [
-                            dash_table.DataTable(
-                                id="table_volcano",
-                                columns=[{"name": i, "id": i} for i in list(VOLCANO_TABLE_COLUMNS.values())],
-                                style_cell={"textAlign": "left"},
-                                sort_action="custom",
-                                sort_mode="single",
-                            )
-                        ],
+                        dcc.Loading(
+                            [
+                                dash_table.DataTable(
+                                    id="table_volcano",
+                                    columns=[{"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()],
+                                    style_cell={"textAlign": "left"},
+                                    sort_action="custom",
+                                    sort_mode="single",
+                                )
+                            ]
+                        ),
                         width={"size": 8, "offset": 3},
                     )
                 ]
@@ -84,7 +86,7 @@ def _change_controls_category(main_category):
 
 @APP.callback(Output("memory_volcano", "data"), Input("dimension_volcano", "value"))
 def _modify_store_volcano(dimension):
-    correlations = load_feather(f"xwas/univariate_results/linear_correlations_{dimension}.feather")
+    correlations = load_feather(f"xwas/univariate_results/linear_correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather")
 
     return correlations.drop(index=correlations.index[correlations["sample_size"] < 10]).to_dict()
 
@@ -109,6 +111,8 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
     correlations_category["neg_log_p_value"] = -np.log10(correlations_category["p_value"])
     correlations_category["category"] = correlations_category.index.get_level_values("category")
     correlations_category["variable"] = correlations_category.index.get_level_values("variable")
+
+    correlations_category["p_value"] = correlations_category["p_value"].apply(lambda x: "%.3e" % x)
 
     fig = px.scatter(
         correlations_category,
@@ -148,7 +152,7 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
             name="With Bonferoni Correction",
         )
     )
-    fig.update_layout(xaxis_range=[x_range_min, x_range_max])
+    fig.update_layout(width=1500, height=1000, xaxis_range=[x_range_min, x_range_max], xaxis_title_font={"size": 25}, yaxis_title_font={"size": 25})
 
     return fig
 
@@ -174,15 +178,15 @@ def _sort_table(dict_correlations, main_category, category, sort_by_col):
 
     correlations_category.reset_index(inplace=True)
 
-    correlations_category.rename(
-        columns=VOLCANO_TABLE_COLUMNS,
-        inplace=True,
-    )
-
     if sort_by_col is not None and len(sort_by_col) > 0:
         is_ascending = sort_by_col[0]["direction"] == "asc"
         correlations_category.sort_values(sort_by_col[0]["column_id"], ascending=is_ascending, inplace=True)
     else:
-        correlations_category.sort_values(VOLCANO_TABLE_COLUMNS["p_value"], inplace=True)
+        correlations_category.sort_values("p_value", inplace=True)
 
-    return correlations_category.round(5).to_dict("records")
+    correlations_category["p_value"] = correlations_category["p_value"].apply(lambda x: "%.3e" % x)
+    correlations_category[pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")] = correlations_category[
+        pd.Index(VOLCANO_TABLE_COLUMNS.keys()).drop("p_value")
+    ].round(3)
+
+    return correlations_category.to_dict("records")

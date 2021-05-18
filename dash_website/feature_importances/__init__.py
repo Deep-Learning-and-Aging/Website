@@ -43,7 +43,7 @@ TREE_SCALARS = {
     "PhysicalActivity": {"FullWeek": ["Scalars"]},
 }
 
-BAR_PLOT_TABLE_COLUMNS = {
+FEATURES_TABLE_COLUMNS = {
     "feature": "Feature",
     "percentage_correlation": "Percentage Correlation",
     "percentage_elastic_net": "Percentage Elastic Net",

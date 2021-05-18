@@ -12,6 +12,7 @@ from dash_website.utils.controls import get_drop_down, get_item_radio_items, get
 from dash_website import (
     DOWNLOAD_CONFIG,
     DIMENSIONS,
+    RENAME_DIMENSIONS,
     MAIN_CATEGORIES_TO_CATEGORIES,
     ALGORITHMS_RENDERING,
     CORRELATION_TYPES,
@@ -36,7 +37,7 @@ def get_average_bars():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -47,8 +48,8 @@ def get_average_bars():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 0},
-                        md=9,
+                        width={"size": 9},
+                        style={"overflowX": "scroll"},
                     ),
                 ]
             ),
@@ -70,7 +71,7 @@ def _modify_store_correlations(dimension_1, dimension_2):
         raise PreventUpdate
     else:
         return load_feather(
-            f"xwas/multivariate_correlations/correlations/dimensions/correlations_{dimension_1}.feather"
+            f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_1, dimension_1)}.feather"
         ).to_dict()
 
 
@@ -113,7 +114,7 @@ def get_controls_tab_average_multi():
                     "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
                     "neural_network": ALGORITHMS_RENDERING["neural_network"],
                 },
-                "Select an Algorithm :",
+                "Select an algorithm :",
             ),
             get_item_radio_items("correlation_type_average_multi", CORRELATION_TYPES, "Select correlation type :"),
         ]
@@ -221,9 +222,16 @@ def _fill_graph_tab_average(
         title = f"Average average correlation across aging dimensions and X categories = {sorted_averages['mean'].mean().round(3)} +- {sorted_averages['mean'].std().round(3)}"
         y_label = "Average correlation"
     else:
-        correlations_raw = pd.DataFrame(data_correlations).set_index(["dimension", "category"])
+        correlations_raw = pd.DataFrame(data_correlations).set_index(["dimension", "subdimension", "category"])
         correlations_raw.columns = pd.MultiIndex.from_tuples(
             list(map(eval, correlations_raw.columns.tolist())), names=["algorithm", "correlation_type"]
+        )
+        correlations_raw.reset_index(inplace=True)
+        correlations_raw["squeezed_dimension"] = correlations_raw["dimension"] + correlations_raw[
+            "subdimension"
+        ].replace("*", "")
+        correlations_raw = correlations_raw.drop(columns=["dimension", "subdimension"]).set_index(
+            ["squeezed_dimension", "category"]
         )
 
         sorted_correlations = correlations_raw.loc[
@@ -278,8 +286,8 @@ def _fill_graph_tab_average(
         {
             "width": 2000,
             "height": 800,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": y_label},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": y_label, "title_font": {"size": 25}},
         }
     )
 

@@ -21,8 +21,11 @@ def get_summary():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], md=3),
-                    dbc.Col([html.H2(id="title_summary"), dcc.Graph(id="graph_summary", config=DOWNLOAD_CONFIG)], md=9),
+                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], width={"size": 3}),
+                    dbc.Col(
+                        [html.H2(id="title_summary"), dcc.Graph(id="graph_summary", config=DOWNLOAD_CONFIG)],
+                        width={"size": 9},
+                    ),
                 ]
             ),
         ],
@@ -111,6 +114,8 @@ def _fill_summary_heatmap(item, main_category, data):
             "yaxis": {"title": "Aging dimension"},
             "width": max(30 * summary_item_percentage_category.shape[1], 500),
             "height": 30 * summary_item_percentage_category.shape[0],
+            "xaxis_title_font": {"size": 25},
+            "yaxis_title_font": {"size": 25},
         }
     )
 
