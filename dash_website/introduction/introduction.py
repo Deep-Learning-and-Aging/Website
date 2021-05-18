@@ -105,24 +105,20 @@ LAYOUT = html.Div(
                 dbc.Row(
                     html.Div([html.Br(), html.Br()]),
                 ),
+                dbc.Row(dbc.Col(id="core_div", children=TEXT, width=8), justify="center"),
                 dbc.Row(
-                    [
-                        # dbc.Col(
-                        #     html.Img(
-                        #         src=load_src_image("introduction/logo_harvard.png"),
-                        #         style={"height": 200, "margin": "90px"},
-                        #     ),
-                        #     style={"width": 2},
-                        # ),
-                        dbc.Col(id="core_div", children=TEXT, width=8),
-                        # dbc.Col(
-                        #     html.Img(
-                        #         src=load_src_image("introduction/logo_hms.png"),
-                        #         style={"height": 200, "float": "right", "margin": "90px"},
-                        #     ),
-                        #     style={"width": 2},
-                        # ),
-                    ],
+                    dbc.Col(
+                        [
+                            html.Img(
+                                src=load_src_image("introduction/logo_harvard.png"),
+                                style={"height": 200, "margin-left": "600px"},
+                            ),
+                            html.Img(
+                                src=load_src_image("introduction/logo_hms.png"),
+                                style={"height": 200, "float": "right", "margin-right": "600px"},
+                            ),
+                        ],
+                    ),
                     justify="center",
                 ),
             ],

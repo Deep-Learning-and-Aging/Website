@@ -2,12 +2,12 @@ from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 import pandas as pd
 import numpy as np
 
-from dash_website.utils.aws_loader import load_feather
+from dash_website.utils.aws_loader import load_feather, load_src_image
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER

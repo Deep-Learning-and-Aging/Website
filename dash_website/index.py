@@ -1,9 +1,10 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 from dash_website.app import APP
+from dash_website.utils.aws_loader import load_src_image
 
 import dash_website.datasets.scalars as datasets_scalars
 import dash_website.datasets.time_series as datasets_time_series
@@ -51,6 +52,28 @@ def add_layout(app):
             get_top_bar(),
             html.Hr(),
             html.Div(id="page_content"),
+            html.Div(
+                [
+                    dbc.Button(
+                        html.Img(src=load_src_image("info_icon.png"), style={"height": 50}),
+                        id="open_info",
+                        color="transparent",
+                    ),
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader("Age prediction performances", id="info_header"),
+                            dbc.ModalBody("This modal is vertically centered", id="info_text"),
+                            dbc.ModalFooter(dbc.Button("Close", id="close_info", className="ml-auto")),
+                        ],
+                        id="info",
+                        backdrop=False,
+                        centered=True,
+                        scrollable=True,
+                    ),
+                ],
+                id="div_info",
+                style={"display": "None"},
+            ),
         ],
         style={"height": "100vh", "fontSize": 10},
     )
@@ -320,3 +343,35 @@ def _change_active_page(pathname):
         active_pages[0] = True
 
     return active_pages
+
+
+@APP.callback(Output("div_info", component_property="style"), Input("url", "pathname"))
+def _display_div_info(pathname):
+    if "/" == pathname:
+        return {"display": "None"}
+    else:
+        return {
+            "position": "fixed",
+            "bottom": 0,
+            "left": 40,
+            "width": "5%",
+            "background": "#0070FF",
+            "text-align": "center",
+            "box-shadow": "0 0 15px #00214B",
+        }
+
+
+@APP.callback(
+    Output("info", "is_open"),
+    [Input("open_info", "n_clicks"), Input("close_info", "n_clicks")],
+    State("info", "is_open"),
+)
+def _toggle_modal(open_button_clicks, close_button_clicks, is_open):
+    if open_button_clicks or close_button_clicks:
+        return not is_open
+    return is_open
+
+
+@APP.callback([Output("info_header", "children"), Output("info_text", "children")], Input("url", "pathname"))
+def _fill_info(pathname):
+    return pathname, "Hej there"
