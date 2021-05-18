@@ -299,8 +299,8 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         fig.update_layout(font={"size": 8})
 
     fig.update_layout(
-        yaxis={"showgrid": False, "zeroline": False, "title_font":{"size": 25}},
-        xaxis={"showgrid": False, "zeroline": False, "title_font":{"size": 25}},
+        yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         width=1500,
         height=1500,
     )
