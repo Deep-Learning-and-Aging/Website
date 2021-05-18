@@ -310,7 +310,7 @@ LAYOUT = dbc.Container(
                 dcc.Store(id="memory_images_features", data=get_data_features()),
             ]
         ),
-        html.H1("Feature importances - Images"),
+        html.H1("Model interpretability - Images"),
         html.Br(),
         html.Br(),
         dbc.Row(dbc.Col(dbc.Card(get_controls_images_features())), justify="center"),

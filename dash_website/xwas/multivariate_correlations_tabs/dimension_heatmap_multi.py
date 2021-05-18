@@ -16,7 +16,7 @@ def get_dimension_heatmap():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_dimension_multi")),
-            html.H1("Multivariate XWAS - Correlations between accelerated aging"),
+            html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(

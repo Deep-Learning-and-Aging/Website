@@ -23,7 +23,7 @@ def get_all_dimensions():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_all_dimensions")),
-            html.H1("Correlation between accelerated aging dimensions"),
+            html.H1("Phenotype - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(

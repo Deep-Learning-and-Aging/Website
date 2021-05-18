@@ -16,7 +16,7 @@ from dash_website.genetics import DIMENSIONS_GWAS
 def get_manhattan_qq():
     return dbc.Container(
         [
-            html.H1("Genetics - GWAS"),
+            html.H1("Associations - GWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(dbc.Col([get_controls_manhattan_qq_gwas(), html.Br(), html.Br()], width={"size": 3})),

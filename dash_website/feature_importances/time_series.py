@@ -244,7 +244,7 @@ LAYOUT = dbc.Container(
                 dcc.Store(id="memory_time_series_features", data=get_data_features()),
             ]
         ),
-        html.H1("Feature importances - Time series"),
+        html.H1("Model interpretability - Time series"),
         html.Br(),
         html.Br(),
         dbc.Row(dbc.Col(dbc.Card(get_controls_time_series_features())), justify="center"),

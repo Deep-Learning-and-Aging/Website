@@ -16,7 +16,7 @@ from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSI
 def get_bar_plot():
     return dbc.Container(
         [
-            html.H1("Multivariate XWAS - Results"),
+            html.H1("Accelerated aging prediction performance - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
