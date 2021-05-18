@@ -9,45 +9,9 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
-from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
+from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
 from dash_website.genetics import ORDER_TYPES_HERITABILITY
-
-
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
-            html.H1("Genetics - Heritabiliy"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            get_controls_heritability(),
-                            html.Br(),
-                            html.Br(),
-                        ],
-                        md=3,
-                    ),
-                    dbc.Col(
-                        [
-                            dcc.Loading(
-                                [
-                                    html.H2(id="title_heritability"),
-                                    dcc.Graph(id="graph_heritability", config=DOWNLOAD_CONFIG),
-                                ]
-                            )
-                        ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
 
 
 def get_data():
@@ -179,7 +143,7 @@ def _fill_graph_heritability(order_by, data_heritability):
         fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
-        yaxis={"showgrid": False, "zeroline": False},
+        yaxis={"title": "GWAS-based heritability", "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
     )
@@ -188,3 +152,37 @@ def _fill_graph_heritability(order_by, data_heritability):
         fig,
         f"Average heritability = {heritability['h2'].mean().round(3)} +- {heritability['h2'].std().round(3)}",
     )
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
+        html.H1("Genetics - Heritabiliy"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        get_controls_heritability(),
+                        html.Br(),
+                        html.Br(),
+                    ],
+                    width={"size": 3},
+                ),
+                dbc.Col(
+                    [
+                        dcc.Loading(
+                            [
+                                html.H2(id="title_heritability"),
+                                dcc.Graph(id="graph_heritability", config=DOWNLOAD_CONFIG),
+                            ]
+                        )
+                    ],
+                    width={"size": 9},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

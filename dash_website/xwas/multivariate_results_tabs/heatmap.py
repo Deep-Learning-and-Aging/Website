@@ -21,15 +21,14 @@ def get_heatmap():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_heatmap(), html.Br(), html.Br()], md=3),
+                    dbc.Col([get_controls_tab_heatmap(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         [
                             dcc.Loading(
                                 [html.H2(id="title_heatmap"), dcc.Graph(id="heatmap_heatmap", config=DOWNLOAD_CONFIG)]
                             )
                         ],
-                        style={"overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
                     ),
                 ]
             ),
@@ -122,7 +121,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
     customdata = np.dstack((std_2d, sample_size_2d, algorithm_2d))
 
-    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>r²: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
+    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>R2: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
 
     heatmap = go.Heatmap(
         x=r2_2d.columns,
@@ -140,8 +139,8 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         {
             "width": 1000,
             "height": int(1000 * max(1, r2_2d.shape[0] / r2_2d.shape[1])),
-            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "X subcategory", "showgrid": False},
+            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False, "title_font":{"size": 25}},
+            "yaxis": {"title": "X subcategory", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 
@@ -176,14 +175,14 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
         return (
             fig,
-            f"Average r² = {overall_mean.round(3)} +- {overall_std.round(3)}",
+            f"Average R2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "block"},
             fig_pie_chart,
         )
     else:
         return (
             fig,
-            f"Average r² = {overall_mean.round(3)} +- {overall_std.round(3)}",
+            f"Average R2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "none"},
             dash.no_update,
         )

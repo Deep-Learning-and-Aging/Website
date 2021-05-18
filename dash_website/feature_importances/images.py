@@ -24,45 +24,6 @@ from dash_website.datasets import (
 from dash_website.feature_importances import AGING_RATE_LEGEND, DISPLAY_MODE
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(
-                [
-                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
-                    dcc.Store(id="memory_images_features", data=get_data_features()),
-                ]
-            ),
-            html.H1("Feature importances - Images"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(dbc.Col(dbc.Card(get_controls_images_features())), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(html.H2(id="title_images_features"), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                [
-                    dbc.Col(dbc.Card(get_controls_side_image_features("left")), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_image_features("right")), style={"width": 6}),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [html.H3(id="title_left_image_features"), dcc.Loading(id="image_left_image_features")],
-                        style={"width": 6},
-                    ),
-                    dbc.Col(
-                        [html.H3(id="title_right_image_features"), dcc.Loading(id="image_right_image_features")],
-                        style={"width": 6},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data_scores():
     return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
 
@@ -134,7 +95,7 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {algorithm} has a R2 of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
@@ -339,3 +300,41 @@ def get_image(dimension, subdimension, sub_subdimension, display_mode, sex, age_
     encoded_image = base64.b64encode(buffer.getvalue())
 
     return f"data:image/png;base64,{encoded_image.decode()}"
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(
+            [
+                dcc.Store(id="memory_scores_features", data=get_data_scores()),
+                dcc.Store(id="memory_images_features", data=get_data_features()),
+            ]
+        ),
+        html.H1("Feature importances - Images"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(dbc.Col(dbc.Card(get_controls_images_features())), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(html.H2(id="title_images_features"), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(get_controls_side_image_features("left")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_image_features("right")), width={"size": 6}),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [html.H3(id="title_left_image_features"), dcc.Loading(id="image_left_image_features")],
+                    width={"size": 6},
+                ),
+                dbc.Col(
+                    [html.H3(id="title_right_image_features"), dcc.Loading(id="image_right_image_features")],
+                    width={"size": 6},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

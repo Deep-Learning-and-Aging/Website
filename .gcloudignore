@@ -11,9 +11,14 @@ env*/
 **/*.ipynb
 **/*.sh
 **/*.xlsx
+**/*.txt
 
 # Local specific
-clean_aws/
-external_code/
+/clean_aws
+/external_code
 .vscode
 /all_data
+.devcontainer
+/pages
+.gitignore
+README.md

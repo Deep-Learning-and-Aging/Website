@@ -2,13 +2,11 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 
-from dash_website import RENAME_DIMENSIONS
-
 
 def get_options(list_):
     list_label_value = []
     for value in list_:
-        list_label_value.append({"value": value, "label": RENAME_DIMENSIONS.get(value, value)})
+        list_label_value.append({"value": value, "label": value})
     return list_label_value
 
 
@@ -118,20 +116,24 @@ def get_item_radio_items(id, items, legend, from_dict=True, value_idx=0):
     return control
 
 
-def get_drop_down(id, items, legend, from_dict=True):
+def get_drop_down(id, items, legend, from_dict=True, value=None):
     if from_dict:
+        if value is None:
+            value = list(items.keys())[0]
         control = dbc.FormGroup(
             [
                 html.P(legend),
-                dcc.Dropdown(id=id, options=get_options_from_dict(items), value=list(items.keys())[0], clearable=False),
+                dcc.Dropdown(id=id, options=get_options_from_dict(items), value=value, clearable=False),
                 html.Br(),
             ]
         )
     else:
+        if value is None:
+            value = items[0]
         control = dbc.FormGroup(
             [
                 html.P(legend),
-                dcc.Dropdown(id=id, options=get_options(items), value=items[0], clearable=False),
+                dcc.Dropdown(id=id, options=get_options(items), value=value, clearable=False),
                 html.Br(),
             ]
         )

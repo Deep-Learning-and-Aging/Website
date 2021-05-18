@@ -9,9 +9,13 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down
-from dash_website.utils.graphs.add_line_and_annotation import add_line_and_annotation
+from dash_website.utils.graphs import (
+    heatmap_by_clustering,
+    heatmap_by_sorted_dimensions,
+    add_line_and_annotation,
+    histogram_correlation,
+)
 from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
-from dash_website.utils import BLUE_WHITE_RED
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -30,7 +34,7 @@ def get_all_dimensions():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -41,8 +45,22 @@ def get_all_dimensions():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
+                    ),
+                ]
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dcc.Loading(
+                                [
+                                    html.H4("Histogram of the above correlations"),
+                                    dcc.Graph(id="histogram_all_dimensions", config=DOWNLOAD_CONFIG),
+                                ]
+                            )
+                        ],
+                        width={"size": 6, "offset": 3},
                     ),
                 ]
             ),
@@ -79,7 +97,11 @@ def get_controls_tab_all_dimensions():
 
 
 @APP.callback(
-    [Output("graph_all_dimensions", "figure"), Output("title_all_dimensions", "children")],
+    [
+        Output("graph_all_dimensions", "figure"),
+        Output("title_all_dimensions", "children"),
+        Output("histogram_all_dimensions", "figure"),
+    ],
     [
         Input("order_type_all_dimensions", "value"),
         Input("dimension_all_dimensions", "value"),
@@ -87,9 +109,6 @@ def get_controls_tab_all_dimensions():
     ],
 )
 def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimensions):
-    from dash_website.utils.graphs.dendrogram_heatmap import create_dendrogram_heatmap
-    import plotly.graph_objs as go
-
     correlations = pd.DataFrame(data_all_dimensions)
     if selected_dimension != "all":
         correlations = correlations[
@@ -101,6 +120,9 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         columns=["dimension_2", "subdimension_2", "sub_subdimension_2", "algorithm_2"],
         values="correlation",
     )
+    order_dimensions = table_correlations.index
+    table_correlations = table_correlations.loc[order_dimensions, order_dimensions]
+    np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
     for customdata_item in ["correlation_std", "r2_1", "r2_std_1", "r2_2", "r2_std_2"]:
@@ -109,17 +131,19 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                 index=["dimension_1", "subdimension_1", "sub_subdimension_1", "algorithm_1"],
                 columns=["dimension_2", "subdimension_2", "sub_subdimension_2", "algorithm_2"],
                 values=customdata_item,
-            ).values
+            )
+            .loc[order_dimensions, order_dimensions]
+            .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(None, index=table_correlations.index, columns=table_correlations.columns)
+    customdata = pd.DataFrame(None, index=order_dimensions, columns=order_dimensions)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>r²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>r²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R2: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
-        fig = create_dendrogram_heatmap(table_correlations, hovertemplate, customdata)
+        fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
 
     elif order_by == "r2":
         sorted_dimensions = (
@@ -131,18 +155,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
         sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
 
-        heatmap = go.Heatmap(
-            x=[" - ".join(elem) for elem in sorted_table_correlations],
-            y=[" - ".join(elem) for elem in sorted_table_correlations],
-            z=sorted_table_correlations,
-            colorscale=BLUE_WHITE_RED,
-            customdata=sorted_customdata,
-            hovertemplate=hovertemplate,
-            zmin=-1,
-            zmax=1,
-        )
-
-        fig = go.Figure(heatmap)
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
     else:  # order_by == "custom"
         if selected_dimension == "all":
@@ -157,18 +170,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
         sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
 
-        heatmap = go.Heatmap(
-            x=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
-            y=np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10),
-            z=sorted_table_correlations,
-            colorscale=BLUE_WHITE_RED,
-            customdata=sorted_customdata,
-            hovertemplate=hovertemplate,
-            zmin=-1,
-            zmax=1,
-        )
-
-        fig = go.Figure(heatmap)
+        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
         fig.update_layout(
             xaxis={"tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10)},
@@ -192,23 +194,23 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         lines = []
         annotations = []
 
-        for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
-            if selected_dimension == "all":
-                dimension_inner_margin = -400
-                dimension_outer_margin = -800
-            else:
-                dimension_inner_margin = -400
-                dimension_outer_margin = -500
+        if selected_dimension == "all":
+            dimension_outer_margin = -800
+            dimension_inner_margin = -400
+            subdimension_margin = 0
+        else:
+            dimension_outer_margin = -500
+            dimension_inner_margin = -400
+            subdimension_margin = -200
+            sub_subdimension_margin = 0
 
+        textangles = {"x": 90, "y": 0}
+
+        for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
             min_position = dimensions.loc[dimension].min()
             max_position = dimensions.loc[dimension].max()
 
             for first_axis, second_axis in [("x", "y"), ("y", "x")]:
-                if first_axis == "x":
-                    textangle = 90
-                else:  # first_axis == "y"
-                    textangle = 0
-
                 line, annotation = add_line_and_annotation(
                     dimension,
                     first_axis,
@@ -217,7 +219,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                     max_position,
                     dimension_inner_margin,
                     dimension_outer_margin,
-                    textangle,
+                    textangles[first_axis],
                     10,
                 )
 
@@ -225,20 +227,10 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                 annotations.append(annotation)
 
                 for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-                    if selected_dimension == "all":
-                        subdimension_margin = 0
-                    else:
-                        subdimension_margin = -200
-
                     submin_position = dimensions.loc[(dimension, subdimension)].min()
                     submax_position = dimensions.loc[(dimension, subdimension)].max()
 
                     for first_axis, second_axis in [("x", "y"), ("y", "x")]:
-                        if first_axis == "x":
-                            textangle = 90
-                        else:  # first_axis == "y"
-                            textangle = 0
-
                         line, annotation = add_line_and_annotation(
                             subdimension,
                             first_axis,
@@ -247,7 +239,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             submax_position,
                             subdimension_margin,
                             dimension_inner_margin,
-                            textangle,
+                            textangles[first_axis],
                             8,
                         )
 
@@ -262,17 +254,10 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             .index.get_level_values("sub_subdimension")
                             .drop_duplicates()
                         ):
-                            sub_subdimension_margin = 0
-
                             sub_submin_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].min()
                             sub_submax_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].max()
 
                             for first_axis, second_axis in [("x", "y"), ("y", "x")]:
-                                if first_axis == "x":
-                                    textangle = 90
-                                else:  # first_axis == "y"
-                                    textangle = 0
-
                                 line, annotation = add_line_and_annotation(
                                     sub_subdimension,
                                     first_axis,
@@ -281,7 +266,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                                     sub_submax_position,
                                     sub_subdimension_margin,
                                     subdimension_margin,
-                                    textangle,
+                                    textangles[first_axis],
                                     8,
                                 )
 
@@ -314,13 +299,14 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         fig.update_layout(font={"size": 8})
 
     fig.update_layout(
-        yaxis={"showgrid": False, "zeroline": False},
-        xaxis={"showgrid": False, "zeroline": False},
-        width=1100,
-        height=1100,
+        yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        width=1500,
+        height=1500,
     )
 
     return (
         fig,
         f"Average correlation = {correlations['correlation'].mean().round(3)} +- {correlations['correlation'].std().round(3)}",
+        histogram_correlation(table_correlations),
     )

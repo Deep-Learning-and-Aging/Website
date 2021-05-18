@@ -14,45 +14,6 @@ from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND
 from dash_website.feature_importances import AGING_RATE_LEGEND
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading(
-                [
-                    dcc.Store(id="memory_scores_features", data=get_data_scores()),
-                    dcc.Store(id="memory_videos_features", data=get_data_features()),
-                ]
-            ),
-            html.H1("Feature importances - Videos"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(get_controls_videos(), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(html.H2(id="title_time_series_features"), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                [
-                    dbc.Col(dbc.Card(get_controls_side_video("left")), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_video("right")), style={"width": 6}),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [html.H3(id="title_left_video_features"), dcc.Loading(id="gif_display_left_video_features")],
-                        style={"width": 6},
-                    ),
-                    dbc.Col(
-                        [html.H3(id="title_right_video_features"), dcc.Loading(id="gif_display_right_video_features")],
-                        style={"width": 6},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data_scores():
     return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
 
@@ -76,7 +37,7 @@ def get_controls_videos():
 
 
 @APP.callback(
-    Output("title_time_series_features", "children"),
+    Output("title_videos_features", "children"),
     [
         Input("chamber_type_features", "value"),
         Input("memory_scores_features", "data"),
@@ -92,7 +53,7 @@ def _display_score(chamber_type, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a r² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {algorithm} has a R2 of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return title
 
@@ -157,3 +118,41 @@ def display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
         style={"padding-left": 400},
     )
     return gif_display, title
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading(
+            [
+                dcc.Store(id="memory_scores_features", data=get_data_scores()),
+                dcc.Store(id="memory_videos_features", data=get_data_features()),
+            ]
+        ),
+        html.H1("Feature importances - Videos"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(get_controls_videos(), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(html.H2(id="title_videos_features"), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(get_controls_side_video("left")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_video("right")), width={"size": 6}),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [html.H3(id="title_left_video_features"), dcc.Loading(id="gif_display_left_video_features")],
+                    width={"size": 6},
+                ),
+                dbc.Col(
+                    [html.H3(id="title_right_video_features"), dcc.Loading(id="gif_display_right_video_features")],
+                    width={"size": 6},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)

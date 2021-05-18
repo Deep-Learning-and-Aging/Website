@@ -19,13 +19,9 @@ def get_manhattan_qq():
             html.H1("Genetics - GWAS"),
             html.Br(),
             html.Br(),
-            dbc.Row(dbc.Col([get_controls_manhattan_qq_gwas(), html.Br(), html.Br()], md=3)),
-            dbc.Row(
-                [
-                    dbc.Col([html.H2("Manhatton plot"), dcc.Loading(id="image_manhattan_gwas")]),
-                    dbc.Col([html.H2("QQ plot"), dcc.Loading(id="image_qq_gwas")]),
-                ]
-            ),
+            dbc.Row(dbc.Col([get_controls_manhattan_qq_gwas(), html.Br(), html.Br()], width={"size": 3})),
+            dbc.Row([html.H2("Manhattan plot"), dcc.Loading(id="image_manhattan_gwas")], justify="center"),
+            dbc.Row([html.H2("QQ plot"), dcc.Loading(id="image_qq_gwas")], justify="center"),
         ],
         fluid=True,
     )
@@ -47,7 +43,7 @@ def _display_image_(dimension):
     for plot in ["manhattan", "qq"]:
         path_to_plot = f"genetics/gwas/{plot}/{dimension}.png"
         if plot == "manhattan":
-            style = {"height": 700, "padding-top": "100px"}
+            style = {"height": 900, "padding-top": "100px"}
         else:  # plot == "qq"
             style = {"width": 1000}
 

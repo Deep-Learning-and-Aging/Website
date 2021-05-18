@@ -27,7 +27,7 @@ def get_dimension_heatmap():
                             html.Br(),
                             html.Br(),
                         ],
-                        md=3,
+                        width={"size": 3},
                     ),
                     dbc.Col(
                         [
@@ -38,8 +38,8 @@ def get_dimension_heatmap():
                                 ]
                             )
                         ],
-                        style={"overflowY": "scroll", "height": 1000, "overflowX": "scroll", "width": 1000},
-                        md=9,
+                        width={"size": 9},
+                        style={"overflowX": "scroll"},
                     ),
                 ]
             ),
@@ -51,7 +51,7 @@ def get_dimension_heatmap():
 @APP.callback(Output("memory_dimension_multi", "data"), Input("dimension_dimension_multi", "value"))
 def _modify_store_dimension_multi(dimension):
     return load_feather(
-        f"xwas/multivariate_correlations/correlations/dimensions/correlations_{dimension}.feather"
+        f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
     ).to_dict()
 
 
@@ -77,35 +77,38 @@ def get_controls_tab_dimension_multi():
 @APP.callback(
     [Output("graph_dimension_multi", "figure"), Output("title_dimension_multi", "children")],
     [
-        Input("dimension_dimension_multi", "value"),
         Input("algorithm_dimension", "value"),
         Input("correlation_type_category_multi", "value"),
         Input("memory_dimension_multi", "data"),
     ],
 )
-def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data_dimension):
+def _fill_graph_tab_dimension_multi(algorithm, correlation_type, data_dimension):
     import plotly.graph_objs as go
 
-    correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "category"])
+    correlations_raw = pd.DataFrame(data_dimension).set_index(["dimension", "subdimension", "category"])
     correlations_raw.columns = pd.MultiIndex.from_tuples(
         list(map(eval, correlations_raw.columns.tolist())), names=["algorithm", "correlation_type"]
     )
     correlations = correlations_raw[[(algorithm, correlation_type)]]
     correlations.columns = ["correlation"]
+    correlations["dimension_subdimension"] = (
+        correlations.index.get_level_values("dimension") + " - " + correlations.index.get_level_values("subdimension")
+    )
     numbers_features = correlations_raw[[(algorithm, "number_features")]]
     numbers_features.columns = ["number_features"]
+    numbers_features["dimension_subdimension"] = (
+        numbers_features.index.get_level_values("dimension")
+        + " - "
+        + numbers_features.index.get_level_values("subdimension")
+    )
 
     correlations_2d = pd.pivot_table(
-        correlations, values="correlation", index="dimension", columns="category", dropna=False
+        correlations, values="correlation", index="dimension_subdimension", columns="category", dropna=False
     ).fillna(0)
-    correlations_2d.drop(index=dimension, inplace=True)
-    correlations_2d.rename(index=RENAME_DIMENSIONS, inplace=True)
 
     numbers_features_2d = pd.pivot_table(
-        numbers_features, values="number_features", index="dimension", columns="category", dropna=False
+        numbers_features, values="number_features", index="dimension_subdimension", columns="category", dropna=False
     ).fillna(0)
-    numbers_features_2d.drop(index=dimension, inplace=True)
-    numbers_features_2d.rename(index=RENAME_DIMENSIONS, inplace=True)
 
     hovertemplate = "Correlation: %{z:.3f} <br>X subcategory: %{x} <br>Aging dimension: %{y} <br>Number features: %{customdata} <br><extra></extra>"
 
@@ -126,8 +129,8 @@ def _fill_graph_tab_dimension_multi(dimension, algorithm, correlation_type, data
         {
             "width": 2000,
             "height": 1000,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False},
-            "yaxis": {"title": "Aging dimension", "showgrid": False},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
         }
     )
 

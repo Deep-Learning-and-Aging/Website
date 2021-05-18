@@ -16,49 +16,6 @@ from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import TREE_SCALARS, ETHNICITIES, SEX_VALUE, SEX_COLOR
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_scalars"), dcc.Store(id="linear_regression_scalars")]),
-            html.H1("Datasets - Scalars"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(dbc.Col(dbc.Card(get_controls_scalars())), justify="center"),
-            dbc.Row(dbc.Col(dbc.Card(get_subcontrols_scalars())), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                dcc.Loading(
-                    [
-                        html.H4(id="title_distribution_scalars"),
-                        dcc.Graph(id="figure_distribution_scalars", config=DOWNLOAD_CONFIG),
-                    ]
-                ),
-                justify="center",
-            ),
-            dbc.Row(
-                dcc.Loading(
-                    [
-                        html.H4(id="title_values_scalars"),
-                        html.H6(id="subtitle_values_scalars"),
-                        dcc.Graph(id="figure_values_scalars", config=DOWNLOAD_CONFIG),
-                    ]
-                ),
-                justify="center",
-            ),
-            dbc.Row(
-                dcc.Loading(
-                    [
-                        html.H4(id="title_volcano_scalars"),
-                        dcc.Graph(id="figure_volcano_scalars", config=DOWNLOAD_CONFIG),
-                    ]
-                ),
-                justify="center",
-            ),
-        ],
-        fluid=True,
-    )
-
-
 @APP.callback(
     Output("memory_scalars", "data"),
     [
@@ -246,7 +203,14 @@ def _change_distribution(feature, age_range, data_scalars):
         )
 
     fig.update_layout(
-        width=2000, height=500, xaxis_title_text="Value", yaxis_title_text="Count (in %)", bargap=0.2, bargroupgap=0.1
+        width=2000,
+        height=500,
+        xaxis_title_text="Value",
+        xaxis_title_font={"size": 25},
+        yaxis_title_text="Count (in %)",
+        yaxis_title_font={"size": 25},
+        bargap=0.2,
+        bargroupgap=0.1,
     )
 
     return fig, "Histogram of " + feature
@@ -309,12 +273,12 @@ def _change_scatter(feature, age_range, data_linear_regresion, data_scalars):
             marker={"size": 0.1},
         )
 
-    fig.update_layout(width=2000, height=500, xaxis_title_text="Chronological Age")
+    fig.update_layout(width=2000, height=500, xaxis_title_text="Chronological Age", xaxis_title_font={"size": 25})
 
     return (
         fig,
         f"Scatter plot of {feature}",
-        f"p-value : {linear_regression.loc[('all', 'p_value'), feature].round(3)}, correlation : {linear_regression.loc[('all', 'correlation'), feature].round(3)} and regression coefficient : {linear_regression.loc[('all', 'slope'), feature].round(3)}",
+        f"p-value : {format(linear_regression.loc[('all', 'p_value'), feature], '.3e')}, correlation : {linear_regression.loc[('all', 'correlation'), feature].round(3)} and regression coefficient : {format(linear_regression.loc[('all', 'slope'), feature], '.3e')}",
     )
 
 
@@ -404,6 +368,55 @@ def _change_volcano(data_linear_regresion, feature):
         marker={"size": 0.1},
     )
 
-    fig.update_layout(width=2000, height=500, yaxis_title_text="-log(p_value)", xaxis_title_text="Pearson correlation")
+    fig.update_layout(
+        width=2000,
+        height=500,
+        yaxis_title_text="-log(p_value)",
+        yaxis_title_font={"size": 25},
+        xaxis_title_text="Pearson correlation",
+        xaxis_title_font={"size": 25},
+    )
 
     return fig, "Volcano plot for all features"
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_scalars"), dcc.Store(id="linear_regression_scalars")]),
+        html.H1("Datasets - Scalars"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(dbc.Col(dbc.Card(get_controls_scalars())), justify="center"),
+        dbc.Row(dbc.Col(dbc.Card(get_subcontrols_scalars())), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            dcc.Loading(
+                [
+                    html.H4(id="title_distribution_scalars"),
+                    dcc.Graph(id="figure_distribution_scalars", config=DOWNLOAD_CONFIG),
+                ]
+            ),
+            justify="center",
+        ),
+        dbc.Row(
+            dcc.Loading(
+                [
+                    html.H4(id="title_values_scalars"),
+                    html.H6(id="subtitle_values_scalars"),
+                    dcc.Graph(id="figure_values_scalars", config=DOWNLOAD_CONFIG),
+                ]
+            ),
+            justify="center",
+        ),
+        dbc.Row(
+            dcc.Loading(
+                [
+                    html.H4(id="title_volcano_scalars"),
+                    dcc.Graph(id="figure_volcano_scalars", config=DOWNLOAD_CONFIG),
+                ]
+            ),
+            justify="center",
+        ),
+    ],
+    fluid=True,
+)

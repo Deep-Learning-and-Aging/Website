@@ -1,9 +1,12 @@
+import pandas as pd
+
+
 DIMENSIONS = sorted(
     [
-        "set",
-        "set_instances01",
-        "set_instances1.5x",
-        "set_instances23",
+        "*",
+        "*instances01",
+        "*instances1.5x",
+        "*instances23",
         "Abdomen",
         "AbdomenLiver",
         "AbdomenPancreas",
@@ -37,10 +40,10 @@ DIMENSIONS = sorted(
 )
 
 RENAME_DIMENSIONS = {
-    "set": "*",
-    "set_instances01": "*instances01",
-    "set_instances1.5x": "*instances1.5x",
-    "set_instances23": "*instances23",
+    "*": "set",
+    "*instances01": "set_instances01",
+    "*instances1.5x": "set_instances1.5x",
+    "*instances23": "set_instances23",
 }
 
 
@@ -173,7 +176,7 @@ CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
 
 DOWNLOAD_CONFIG = {"toImageButtonOptions": {"format": "svg"}}
 
-ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "r²"}
+ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "R2"}
 
 CUSTOM_ORDER = [
     "*",
@@ -192,3 +195,41 @@ CUSTOM_ORDER = [
     "Biochemistry",
     "BloodCells",
 ]
+
+ORDER_DIMENSIONS = pd.MultiIndex.from_tuples(
+    [
+        ("*", "*"),
+        ("*instances01", "*"),
+        ("*instances1.5x", "*"),
+        ("*instances23", "*"),
+        ("Abdomen", "*"),
+        ("Abdomen", "Liver"),
+        ("Abdomen", "Pancreas"),
+        ("Arterial", "*"),
+        ("Arterial", "Carotids"),
+        ("Arterial", "PulseWaveAnalysis"),
+        ("Biochemistry", "*"),
+        ("Biochemistry", "Blood"),
+        ("Biochemistry", "Urine"),
+        ("BloodCells", "*"),
+        ("Brain", "*"),
+        ("Brain", "Cognitive"),
+        ("Brain", "MRI"),
+        ("Eyes", "*"),
+        ("Eyes", "All"),
+        ("Eyes", "Fundus"),
+        ("Eyes", "OCT"),
+        ("Hearing", "*"),
+        ("Heart", "*"),
+        ("Heart", "ECG"),
+        ("Heart", "MRI"),
+        ("Lungs", "*"),
+        ("Musculoskeletal", "*"),
+        ("Musculoskeletal", "FullBody"),
+        ("Musculoskeletal", "Hips"),
+        ("Musculoskeletal", "Knees"),
+        ("Musculoskeletal", "Scalars"),
+        ("Musculoskeletal", "Spine"),
+        ("PhysicalActivity", "*"),
+    ]
+)

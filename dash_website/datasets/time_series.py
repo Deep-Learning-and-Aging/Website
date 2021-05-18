@@ -21,48 +21,6 @@ from dash_website.datasets import (
 )
 
 
-def get_layout():
-    return dbc.Container(
-        [
-            dcc.Loading([dcc.Store(id="memory_time_series", data=get_data())]),
-            html.H1("Datasets - Time series"),
-            html.Br(),
-            html.Br(),
-            dbc.Row(dbc.Col(dbc.Card(get_controls_time_series())), justify="center"),
-            dbc.Row(html.Br()),
-            dbc.Row(
-                [
-                    dbc.Col(dbc.Card(get_controls_side_time_series("left")), style={"width": 6}),
-                    dbc.Col(dbc.Card(get_controls_side_time_series("right")), style={"width": 6}),
-                ]
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                html.H3(id="title_left_time_series"),
-                                dcc.Graph(id="time_series_left_time_series", config=DOWNLOAD_CONFIG),
-                            ]
-                        ),
-                        style={"width": 6},
-                    ),
-                    dbc.Col(
-                        dcc.Loading(
-                            [
-                                html.H3(id="title_right_time_series"),
-                                dcc.Graph(id="time_series_right_time_series", config=DOWNLOAD_CONFIG),
-                            ]
-                        ),
-                        style={"width": 6},
-                    ),
-                ]
-            ),
-        ],
-        fluid=True,
-    )
-
-
 def get_data():
     return load_feather("datasets/time_series/information.feather").to_dict()
 
@@ -228,9 +186,50 @@ def display_time_series(dimension, subdimension, sub_subdimension, sex, age_grou
 
     fig.update_layout(
         {
-            "xaxis": {"title": x_label},
-            "yaxis": {"title": y_label},
+            "xaxis": {"title": x_label, "title_font": {"size": 25}},
+            "yaxis": {"title": y_label, "title_font": {"size": 25}},
         }
     )
 
     return fig, title
+
+
+LAYOUT = dbc.Container(
+    [
+        dcc.Loading([dcc.Store(id="memory_time_series", data=get_data())]),
+        html.H1("Datasets - Time series"),
+        html.Br(),
+        html.Br(),
+        dbc.Row(dbc.Col(dbc.Card(get_controls_time_series())), justify="center"),
+        dbc.Row(html.Br()),
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card(get_controls_side_time_series("left")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_time_series("right")), width={"size": 6}),
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            html.H3(id="title_left_time_series"),
+                            dcc.Graph(id="time_series_left_time_series", config=DOWNLOAD_CONFIG),
+                        ]
+                    ),
+                    width={"size": 6},
+                ),
+                dbc.Col(
+                    dcc.Loading(
+                        [
+                            html.H3(id="title_right_time_series"),
+                            dcc.Graph(id="time_series_right_time_series", config=DOWNLOAD_CONFIG),
+                        ]
+                    ),
+                    width={"size": 6},
+                ),
+            ]
+        ),
+    ],
+    fluid=True,
+)
