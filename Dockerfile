@@ -3,10 +3,7 @@ FROM python:latest
 RUN mkdir /website
 WORKDIR /website
 
-COPY setup.py .
-COPY /dash_website .
-COPY /data .
-COPY app.yaml .
+COPY . .
 
 RUN pip install -e .
 

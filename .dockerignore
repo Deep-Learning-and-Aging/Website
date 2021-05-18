@@ -4,7 +4,7 @@ env*/
 .devcontainer
 .vscode
 .gitignore
-.dockerignore
+.gcloudignore
 README.md
 Dockerfile
 
