@@ -96,7 +96,7 @@ def get_controls_table_scalars_features():
                 dash_table.DataTable(
                     id="table_correlation_scalars_features",
                     columns=[{"id": key, "name": name} for key, name in FEATURES_CORRELATIONS_TABLE_COLUMNS.items()],
-                    style_cell={"textAlign": "left"},
+                    style_cell={"textAlign": "left", "fontSize": 10},
                     sort_action="custom",
                     sort_mode="single",
                 ),
@@ -313,7 +313,7 @@ LAYOUT = dbc.Container(
                             )
                         ]
                     ),
-                    width={"size": 8, "offset": 3},
+                    width={"size": 8, "offset": 2},
                 )
             ]
         ),

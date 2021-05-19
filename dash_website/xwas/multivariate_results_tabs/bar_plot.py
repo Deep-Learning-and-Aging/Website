@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING, GRAPH_SIZE
 
 
 def get_bar_plot():
@@ -120,7 +120,7 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
 
     fig.update_layout(
         {
-            "width": 1500,
+            "width": GRAPH_SIZE,
             "height": 800,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
             "yaxis": {"title": "r2", "title_font": {"size": 25}},

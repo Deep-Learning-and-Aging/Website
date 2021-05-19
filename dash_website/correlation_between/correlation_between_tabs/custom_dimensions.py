@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -161,8 +161,8 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     return (

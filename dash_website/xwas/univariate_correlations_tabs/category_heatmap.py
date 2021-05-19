@@ -22,6 +22,7 @@ from dash_website import (
     ORDER_TYPES,
     CUSTOM_ORDER,
     ORDER_DIMENSIONS,
+    GRAPH_SIZE,
 )
 from dash_website.xwas import SUBSET_METHODS
 
@@ -187,8 +188,8 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     return (
