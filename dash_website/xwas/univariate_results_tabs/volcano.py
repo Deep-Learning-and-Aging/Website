@@ -14,7 +14,7 @@ from dash_website.utils.controls import (
     get_options,
 )
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, GRAPH_SIZE
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
 
@@ -155,7 +155,7 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
         )
     )
     fig.update_layout(
-        width=1500,
+        width=GRAPH_SIZE,
         height=1000,
         xaxis_range=[x_range_min, x_range_max],
         xaxis_title_font={"size": 25},

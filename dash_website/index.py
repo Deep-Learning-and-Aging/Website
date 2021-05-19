@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output, State
 from dash_website.app import APP
 from dash_website.utils.aws_loader import load_src_image
 
+# IMPORT LAYOUTS
 import dash_website.datasets.scalars as datasets_scalars
 import dash_website.datasets.time_series as datasets_time_series
 import dash_website.datasets.images as datasets_images
@@ -33,6 +34,34 @@ import dash_website.xwas.multivariate_feature_importances as xwas_multivariate_f
 import dash_website.correlations_comparison.correlations_comparison as correlations_comparison
 
 import dash_website.introduction.introduction as introduction
+
+
+# IMPORT INFORMATION
+import dash_website.introduction.texts.datasets.scalars as info_datasets_scalars
+import dash_website.introduction.texts.datasets.time_series as info_datasets_time_series
+import dash_website.introduction.texts.datasets.images as info_datasets_images
+import dash_website.introduction.texts.datasets.videos as info_datasets_videos
+
+import dash_website.introduction.texts.age_prediction_performances.age_prediction_performances as info_age_prediction_performances
+
+import dash_website.introduction.texts.feature_importances.scalars as info_feature_importances_scalars
+import dash_website.introduction.texts.feature_importances.time_series as info_feature_importances_time_series
+import dash_website.introduction.texts.feature_importances.images as info_feature_importances_images
+import dash_website.introduction.texts.feature_importances.videos as info_feature_importances_videos
+
+import dash_website.introduction.texts.correlation_between.correlation_between as info_correlation_between
+
+import dash_website.introduction.texts.genetics.gwas as info_genetics_gwas
+import dash_website.introduction.texts.genetics.correlations as info_genetics_correlations
+import dash_website.introduction.texts.genetics.heritability as info_genetics_heritability
+
+import dash_website.introduction.texts.xwas.univariate_results as info_xwas_univariate_results
+import dash_website.introduction.texts.xwas.univariate_correlations as info_xwas_univariate_correlations
+import dash_website.introduction.texts.xwas.multivariate_results as info_xwas_multivariate_results
+import dash_website.introduction.texts.xwas.multivariate_correlations as info_xwas_multivariate_correlations
+import dash_website.introduction.texts.xwas.multivariate_feature_importances as info_xwas_multivariate_feature_importances
+
+import dash_website.introduction.texts.correlations_comparison.correlations_comparison as info_correlations_comparison
 
 
 def get_server():
@@ -69,13 +98,14 @@ def add_layout(app):
                         backdrop=False,
                         centered=True,
                         scrollable=True,
+                        size="xl"
                     ),
                 ],
                 id="div_info",
                 style={"display": "None"},
             ),
         ],
-        style={"height": "100vh", "fontSize": 10},
+        style={"height": "100vh", "fontSize": 15},
     )
 
 
@@ -374,4 +404,75 @@ def _toggle_modal(open_button_clicks, close_button_clicks, is_open):
 
 @APP.callback([Output("info_header", "children"), Output("info_text", "children")], Input("url", "pathname"))
 def _fill_info(pathname):
-    return pathname, "Hej there"
+    if "correlation_between_aging_dimensions" == pathname.split("/")[1]:
+        if "phenotypic" == pathname.split("/")[2]:
+            header = "Correlation between aging dimensions - Phenotypic"
+            text = info_correlation_between.TEXT
+        elif "genetics" == pathname.split("/")[2]:
+            header = "Correlation between aging dimensions - Genetics"
+            text = info_genetics_correlations.TEXT
+        elif "xwas_univariate" == pathname.split("/")[2]:
+            header = "Correlation between aging dimensions - XWAS Univariate"
+            text = info_xwas_univariate_correlations.TEXT
+        elif "xwas_multivariate" == pathname.split("/")[2]:
+            header = "Correlation between aging dimensions - XWAS Multivariate"
+            text = info_xwas_multivariate_correlations.TEXT
+        elif "comparison" == pathname.split("/")[2]:
+            header = "Correlation between aging dimensions - Comparison"
+            text = info_correlations_comparison.TEXT
+
+    elif "age_prediction_performances" == pathname.split("/")[1]:
+        header = "Age prediction performances"
+        text = info_age_prediction_performances.TEXT
+
+    elif "model_interpretability" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
+            header = "Model interpretability - Scalars"
+            text = info_feature_importances_scalars.TEXT
+        elif "time_series" == pathname.split("/")[2]:
+            header = "Model interpretability - Time series"
+            text = info_feature_importances_time_series.TEXT
+        elif "images" == pathname.split("/")[2]:
+            header = "Model interpretability - Images"
+            text = info_feature_importances_images.TEXT
+        elif "videos" == pathname.split("/")[2]:
+            header = "Model interpretability - Videos"
+            text = info_feature_importances_videos.TEXT
+
+    elif "gwas" == pathname.split("/")[1]:
+        if "associations" == pathname.split("/")[2]:
+            header = "GWAS - Associations"
+            text = info_genetics_gwas.TEXT
+        elif "heritability" == pathname.split("/")[2]:
+            header = "GWAS - Heritability"
+            text = info_genetics_heritability.TEXT
+
+    elif "xwas" == pathname.split("/")[1]:
+        if "univariate_associations" == pathname.split("/")[2]:
+            header = "XWAS - Univariate associations"
+            text = info_xwas_univariate_results.TEXT
+        elif "accelerated_aging_prediction_performance" == pathname.split("/")[2]:
+            header = "XWAS - Accelerated aging prediction - Performance"
+            text = info_xwas_multivariate_results.TEXT
+        elif "accelerated_aging_prediction_interpretability" == pathname.split("/")[2]:
+            header = "XWAS - Accelerated aging prediction - Interpretability"
+            text = info_xwas_multivariate_feature_importances.TEXT
+
+    elif "datasets" == pathname.split("/")[1]:
+        if "scalars" == pathname.split("/")[2]:
+            header = "Datasets - Scalars"
+            text = info_datasets_scalars.TEXT
+        elif "time_series" == pathname.split("/")[2]:
+            header = "Datasets - Time series"
+            text = info_datasets_time_series.TEXT
+        elif "images" == pathname.split("/")[2]:
+            header = "Datasets - Images"
+            text = info_datasets_images.TEXT
+        elif "videos" == pathname.split("/")[2]:
+            header = "Datasets - Videos"
+            text = info_datasets_videos.TEXT
+
+    else:
+        header, text = None, None
+
+    return header, text

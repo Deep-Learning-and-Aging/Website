@@ -18,6 +18,7 @@ from dash_website import (
     ORDER_DIMENSIONS,
     CUSTOM_ORDER,
     ALGORITHMS_RENDERING,
+    GRAPH_SIZE,
 )
 from dash_website.xwas import SUBSET_METHODS, UNIVARIATE_OR_MULTIVARIATE
 
@@ -238,8 +239,8 @@ def _fill_graph_tab_comparison(
             "showgrid": False,
             "title_font": {"size": 25},
         },
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     sorted_dimensions = (
@@ -270,7 +271,7 @@ def _fill_graph_tab_comparison(
     hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     fig_triangular = heatmap_by_sorted_dimensions(triangular_heatmap, hovertemplate_triangular, customdata_triangular)
-    fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap, size_dimension=14, size_subdimension=12)
+    fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap)
     fig_triangular.update_layout(
         yaxis={
             "title": f"{second_category} correlation",
@@ -284,8 +285,8 @@ def _fill_graph_tab_comparison(
             "zeroline": False,
             "title_font": {"size": 25},
         },
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     difference_heatmap = sorted_table_correlations_upper - sorted_table_correlations_lower
@@ -295,12 +296,12 @@ def _fill_graph_tab_comparison(
     fig_difference = heatmap_by_sorted_dimensions(
         difference_heatmap, hovertemplate_difference, sorted_customdata_upper, zmin=-2, zmax=2
     )
-    fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap, size_dimension=14, size_subdimension=12)
+    fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap)
     fig_difference.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     return (

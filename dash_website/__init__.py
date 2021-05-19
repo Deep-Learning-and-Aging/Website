@@ -175,6 +175,7 @@ ALGORITHMS_RENDERING = {
 CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}
 
 DOWNLOAD_CONFIG = {"toImageButtonOptions": {"format": "svg"}}
+GRAPH_SIZE = 1200
 
 ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "R2"}
 

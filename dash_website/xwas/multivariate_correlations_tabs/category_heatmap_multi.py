@@ -24,8 +24,10 @@ from dash_website import (
     CORRELATION_TYPES,
     ORDER_DIMENSIONS,
     CUSTOM_ORDER,
-    ORDER_TYPES
+    ORDER_TYPES,
+    GRAPH_SIZE,
 )
+
 
 def get_category_heatmap():
     return dbc.Container(
@@ -131,7 +133,11 @@ def _change_category_category_multi(main_category):
 
 
 @APP.callback(
-    [Output("graph_category_multi", "figure"), Output("title_category_multi", "children"), Output("histogram_category_multi", "figure")],
+    [
+        Output("graph_category_multi", "figure"),
+        Output("title_category_multi", "children"),
+        Output("histogram_category_multi", "figure"),
+    ],
     [
         Input("order_type_category_multi", "value"),
         Input("algorithm_category", "value"),
@@ -210,8 +216,8 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     return (

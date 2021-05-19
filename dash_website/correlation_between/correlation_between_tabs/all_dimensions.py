@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_line_and_annotation,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -220,7 +220,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                     dimension_inner_margin,
                     dimension_outer_margin,
                     textangles[first_axis],
-                    10,
+                    12,
                 )
 
                 lines.append(line)
@@ -240,7 +240,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             subdimension_margin,
                             dimension_inner_margin,
                             textangles[first_axis],
-                            8,
+                            10,
                         )
 
                         lines.append(line)
@@ -267,7 +267,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                                     sub_subdimension_margin,
                                     subdimension_margin,
                                     textangles[first_axis],
-                                    8,
+                                    9,
                                 )
 
                                 lines.append(line)
@@ -301,8 +301,8 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     return (

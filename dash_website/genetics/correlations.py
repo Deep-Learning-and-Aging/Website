@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS, GRAPH_SIZE
 
 
 def get_data():
@@ -109,8 +109,8 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
     )
 
     return (

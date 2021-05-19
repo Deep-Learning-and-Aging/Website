@@ -2,6 +2,7 @@ import numpy as np
 import plotly.graph_objs as go
 from plotly.figure_factory import create_dendrogram
 
+from dash_website import GRAPH_SIZE
 from dash_website.utils import BLUE_WHITE_RED
 
 
@@ -86,7 +87,7 @@ def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorte
     return fig
 
 
-def add_custom_legend_axis(fig, sorted_table_correlations, size_dimension=12, size_subdimension=10):
+def add_custom_legend_axis(fig, sorted_table_correlations, size_dimension=11, size_subdimension=9):
     dimensions = (
         sorted_table_correlations.index.to_frame()[["dimension_1", "subdimension_1"]]
         .reset_index(drop=True)
@@ -209,7 +210,7 @@ def histogram_correlation(table_correlations):
 
     fig.update_layout(
         height=500,
-        width=1500,
+        width=GRAPH_SIZE,
         xaxis_title_text="Correlation",
         xaxis_title_font={"size": 25},
         yaxis_title_text="Count (in %)",
