@@ -8,14 +8,6 @@ import pandas as pd
 import numpy as np
 from matplotlib.image import imread
 
-import yaml
-
-
-if os.environ.get("AWS_ACCESS_KEY_ID") is None:
-    with open("credentials.yaml", "r") as app_yaml:
-        app_file = yaml.safe_load(app_yaml)
-    os.environ["AWS_ACCESS_KEY_ID"] = app_file["env_variables"]["AWS_ACCESS_KEY_ID"]
-    os.environ["AWS_SECRET_ACCESS_KEY"] = app_file["env_variables"]["AWS_SECRET_ACCESS_KEY"]
 
 AWS_BUCKET_NAME = "age-prediction-site"
 CLIENT = client(

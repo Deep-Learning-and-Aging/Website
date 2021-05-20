@@ -5,6 +5,7 @@ env*/
 .vscode
 .gitignore
 .dockerignore
+.github
 README.md
 Dockerfile
 
