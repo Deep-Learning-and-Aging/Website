@@ -133,12 +133,12 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
     best_algorithm = scores.index[0]
     best_score = scores.loc[best_algorithm]
 
-    title = f"The best algorithm is the {ALGORITHMS_RENDERING[best_algorithm]}. The R2 is {best_score['r2']} +- {best_score['r2_std']} with a RMSE of {best_score['rmse']} +- {best_score['rmse_std']} for a sample size of {int(best_score['sample_size'])} participants"
+    title = f"The best algorithm is the {ALGORITHMS_RENDERING[best_algorithm]}. The R² is {best_score['r2']} +- {best_score['r2_std']} with a RMSE of {best_score['rmse']} +- {best_score['rmse_std']} for a sample size of {int(best_score['sample_size'])} participants"
 
     other_scores = scores.drop(index=best_algorithm)
     subtitle = ""
     for other_algorithm in other_scores.index:
-        subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a R2 of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
+        subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a R² of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
 
     features = pd.DataFrame(data_features).set_index("feature")
     features.columns = pd.MultiIndex.from_tuples(
@@ -186,6 +186,7 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
                 "title_font": {"size": 25},
             },
             "yaxis": {"title": "Features", "showgrid": False, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

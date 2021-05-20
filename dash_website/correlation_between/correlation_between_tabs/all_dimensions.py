@@ -140,7 +140,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     customdata = pd.DataFrame(None, index=order_dimensions, columns=order_dimensions)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R2: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
@@ -303,6 +303,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         width=GRAPH_SIZE,
         height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

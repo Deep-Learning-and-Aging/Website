@@ -95,7 +95,7 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R2 of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
@@ -227,9 +227,10 @@ def display_time_series_features(
     fig.update_layout(
         {
             "xaxis": {"title": x_label},
-            "xaxis_title_font":{"size": 25},
+            "xaxis_title_font": {"size": 25},
             "yaxis": {"title": y_label},
-            "yaxis_title_font":{"size": 25},
+            "yaxis_title_font": {"size": 25},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

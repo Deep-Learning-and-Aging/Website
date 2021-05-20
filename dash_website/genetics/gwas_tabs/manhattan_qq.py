@@ -5,11 +5,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-import pandas as pd
-import numpy as np
-
 from dash_website.utils.aws_loader import load_src_image
 from dash_website.utils.controls import get_drop_down
+from dash_website import RENAME_DIMENSIONS
 from dash_website.genetics import DIMENSIONS_GWAS
 
 
@@ -41,11 +39,11 @@ def _display_image_(dimension):
     plots = []
 
     for plot in ["manhattan", "qq"]:
-        path_to_plot = f"genetics/gwas/{plot}/{dimension}.png"
+        path_to_plot = f"genetics/gwas/{plot}/{RENAME_DIMENSIONS.get(dimension, dimension)}.png"
         if plot == "manhattan":
-            style = {"height": 900, "padding-top": "100px"}
+            style = {"height": "100%", "width": "100%"}
         else:  # plot == "qq"
-            style = {"width": 1000}
+            style = {"height": "80%", "width": "80%", "margin-left": "10%"}
 
         plots.append(
             html.Img(

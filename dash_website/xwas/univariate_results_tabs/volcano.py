@@ -160,6 +160,7 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
         xaxis_range=[x_range_min, x_range_max],
         xaxis_title_font={"size": 25},
         yaxis_title_font={"size": 25},
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return fig

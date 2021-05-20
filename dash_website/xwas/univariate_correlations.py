@@ -24,9 +24,9 @@ LAYOUT = html.Div(
     [
         dbc.Tabs(
             [
-                dbc.Tab(label="Select Category", tab_id="tab_category"),
-                dbc.Tab(label="Select Dimension", tab_id="tab_dimension"),
-                dbc.Tab(label="Select Average", tab_id="tab_average"),
+                dbc.Tab(label="By category", tab_id="tab_category"),
+                dbc.Tab(label="By aging dimension", tab_id="tab_dimension"),
+                dbc.Tab(label="Summary", tab_id="tab_average"),
             ],
             id="tab_manager_correlations",
             active_tab="tab_category",

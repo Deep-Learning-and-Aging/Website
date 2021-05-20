@@ -145,7 +145,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sam
         if does_key_exists(left_path_to_image):
             left_image = html.Img(
                 src=load_src_image(left_path_to_image),
-                style={"height": 400, "margin": "2px"},
+                style={"height": "35%", "width": "35%", "margin-left": "5%"},
             )
         else:
             left_image = html.Div()
@@ -154,7 +154,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sam
         if does_key_exists(right_path_to_image):
             right_image = html.Img(
                 src=load_src_image(right_path_to_image),
-                style={"height": 400, "margin": "2px", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
+                style={"height": "35%", "width": "35%", "margin-right": "5%", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
             )
         else:
             right_image = html.Div()
@@ -172,7 +172,7 @@ def display_image(dimension, subdimension, sub_subdimension, sex, age_group, sam
         if does_key_exists(path_to_image):
             image = html.Img(
                 src=load_src_image(path_to_image),
-                style={"height": 800, "margin": "15px", "padding-left": 100},
+                style={"height": "70%", "width": "70%", "margin-left": "10%"},
             )
         else:
             image = html.Div()

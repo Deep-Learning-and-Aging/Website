@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 from dash_website.utils.aws_loader import load_src_image
-import dash_website.introduction.texts.introduction.introduction as info_introduction
+import dash_website.texts.introduction.introduction as info_introduction
 
 
 LAYOUT = html.Div(
@@ -20,7 +20,7 @@ LAYOUT = html.Div(
                     dbc.Col(
                         html.H6(
                             [
-                                "You can ask us some questions, report some errors or give us some feedback ",
+                                "Feel free to report errors, provide feedback or ask questions about our work ",
                                 html.A(
                                     "here",
                                     href="https://github.com/Deep-Learning-and-Aging/Website/discussions",
@@ -37,21 +37,19 @@ LAYOUT = html.Div(
                     justify="center",
                     style={"padding-top": "20px"},
                 ),
-                dbc.Row(
-                    dbc.Col(
-                        [
-                            html.Img(
-                                src=load_src_image("introduction/logo_harvard.png"),
-                                style={"height": 200, "margin-left": 600},
-                            ),
-                            html.Img(
-                                src=load_src_image("introduction/logo_hms.png"),
-                                style={"height": 200, "float": "right", "margin-right": 600},
-                            ),
-                        ],
-                    ),
-                    justify="center",
+                html.Div(
+                    [
+                        html.Img(
+                            src=load_src_image("introduction/logo_harvard.png"),
+                            style={"height": "10%", "width": "10%", "margin-left": "25%"},
+                        ),
+                        html.Img(
+                            src=load_src_image("introduction/logo_hms.png"),
+                            style={"height": "8%", "width": "8%", "float": "right", "margin-right": "25%"},
+                        ),
+                    ]
                 ),
+                html.Div([html.Br(), html.Br()]),
             ],
             style={"padding-bottom": 100},
         ),

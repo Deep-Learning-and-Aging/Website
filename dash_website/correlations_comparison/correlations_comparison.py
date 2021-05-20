@@ -241,6 +241,7 @@ def _fill_graph_tab_comparison(
         },
         width=GRAPH_SIZE,
         height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     sorted_dimensions = (
@@ -268,7 +269,7 @@ def _fill_graph_tab_comparison(
         customdata_triangular_values, index=sorted_customdata_upper.index, columns=sorted_customdata_upper.columns
     )
 
-    hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
+    hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     fig_triangular = heatmap_by_sorted_dimensions(triangular_heatmap, hovertemplate_triangular, customdata_triangular)
     fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap)
@@ -287,11 +288,12 @@ def _fill_graph_tab_comparison(
         },
         width=GRAPH_SIZE,
         height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     difference_heatmap = sorted_table_correlations_upper - sorted_table_correlations_lower
 
-    hovertemplate_difference = "Difference in correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f}<br><extra></extra>"
+    hovertemplate_difference = "Difference in correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f}<br><extra></extra>"
 
     fig_difference = heatmap_by_sorted_dimensions(
         difference_heatmap, hovertemplate_difference, sorted_customdata_upper, zmin=-2, zmax=2
@@ -302,6 +304,7 @@ def _fill_graph_tab_comparison(
         xaxis={"showgrid": False, "zeroline": False},
         width=GRAPH_SIZE,
         height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

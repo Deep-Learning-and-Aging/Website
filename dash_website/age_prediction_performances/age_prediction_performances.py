@@ -38,7 +38,7 @@ def get_controls_age_prediction_performances():
             get_item_radio_items(
                 "dimensions_selection_age_prediction_performances",
                 DIMENSIONS_SELECTION,
-                "Select a group of dimensions: ",
+                "Filter models: ",
             ),
             get_drop_down(
                 "selected_dimension_age_prediction_performances",
@@ -265,9 +265,15 @@ def _fill_graph_age_prediction_performances(
     fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
-        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        yaxis={
+            "title": SCORES[metric],
+            "showgrid": False,
+            "zeroline": False,
+            "title_font": {"size": 25},
+        },
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

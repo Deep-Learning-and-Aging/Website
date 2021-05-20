@@ -131,6 +131,7 @@ def _fill_graph_tab_dimension_multi(algorithm, correlation_type, data_dimension)
             "height": 1000,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
             "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

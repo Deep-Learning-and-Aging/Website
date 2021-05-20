@@ -134,6 +134,7 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
         yaxis={"title": "-log(p-value)"},
         yaxis_title_font={"size": 25},
         height=800,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return fig
