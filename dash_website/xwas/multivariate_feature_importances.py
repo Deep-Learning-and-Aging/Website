@@ -161,6 +161,7 @@ def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
                 "title_font": {"size": 25},
             },
             "yaxis": {"title": "Variables", "showgrid": False, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

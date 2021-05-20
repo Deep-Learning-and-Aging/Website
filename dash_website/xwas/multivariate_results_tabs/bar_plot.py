@@ -101,7 +101,7 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
         by=["r2"], ascending=False
     )
 
-    hovertemplate = "X subcategory: %{x} <br>R2: %{y:.3f} +- %{customdata[0]:.3f} <br><extra>%{customdata[1]}</extra>"
+    hovertemplate = "X subcategory: %{x} <br>R²: %{y:.3f} +- %{customdata[0]:.3f} <br><extra>%{customdata[1]}</extra>"
 
     bars = go.Bar(
         x=scores["category"],
@@ -124,7 +124,8 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, data_scores):
             "height": 800,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
             "yaxis": {"title": "r2", "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 
-    return fig, f"Average R2 = {scores['r2'].mean().round(3)} +- {scores['r2'].std().round(3)}"
+    return fig, f"Average R² = {scores['r2'].mean().round(3)} +- {scores['r2'].std().round(3)}"

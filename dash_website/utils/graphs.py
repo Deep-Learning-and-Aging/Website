@@ -217,5 +217,6 @@ def histogram_correlation(table_correlations):
         yaxis_title_font={"size": 25},
         bargap=0.2,
         bargroupgap=0.1,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
     return fig

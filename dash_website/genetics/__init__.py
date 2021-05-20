@@ -2,8 +2,8 @@ ORDER_TYPES_HERITABILITY = {"custom": "Custom", "h2": "h²"}
 
 DIMENSIONS_GWAS = [
     "All",
-    "set_instances1.5x",
-    "set_instances23",
+    "*instances1.5x",
+    "*instances23",
     "Abdomen",
     "AbdomenLiver",
     "AbdomenPancreas",

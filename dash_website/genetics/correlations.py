@@ -75,7 +75,7 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
     )
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>h²: %{customdata[3]:.3f} +- %{customdata[4]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[5]:.3f} +- %{customdata[6]:.3f}<br>h²: %{customdata[7]:.3f} +- %{customdata[8]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
@@ -111,6 +111,7 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
         xaxis={"showgrid": False, "zeroline": False},
         width=GRAPH_SIZE,
         height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

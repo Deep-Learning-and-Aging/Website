@@ -37,31 +37,31 @@ import dash_website.introduction.introduction as introduction
 
 
 # IMPORT INFORMATION
-import dash_website.introduction.texts.datasets.scalars as info_datasets_scalars
-import dash_website.introduction.texts.datasets.time_series as info_datasets_time_series
-import dash_website.introduction.texts.datasets.images as info_datasets_images
-import dash_website.introduction.texts.datasets.videos as info_datasets_videos
+import dash_website.texts.datasets.scalars as info_datasets_scalars
+import dash_website.texts.datasets.time_series as info_datasets_time_series
+import dash_website.texts.datasets.images as info_datasets_images
+import dash_website.texts.datasets.videos as info_datasets_videos
 
-import dash_website.introduction.texts.age_prediction_performances.age_prediction_performances as info_age_prediction_performances
+import dash_website.texts.age_prediction_performances.age_prediction_performances as info_age_prediction_performances
 
-import dash_website.introduction.texts.feature_importances.scalars as info_feature_importances_scalars
-import dash_website.introduction.texts.feature_importances.time_series as info_feature_importances_time_series
-import dash_website.introduction.texts.feature_importances.images as info_feature_importances_images
-import dash_website.introduction.texts.feature_importances.videos as info_feature_importances_videos
+import dash_website.texts.feature_importances.scalars as info_feature_importances_scalars
+import dash_website.texts.feature_importances.time_series as info_feature_importances_time_series
+import dash_website.texts.feature_importances.images as info_feature_importances_images
+import dash_website.texts.feature_importances.videos as info_feature_importances_videos
 
-import dash_website.introduction.texts.correlation_between.correlation_between as info_correlation_between
+import dash_website.texts.correlation_between.correlation_between as info_correlation_between
 
-import dash_website.introduction.texts.genetics.gwas as info_genetics_gwas
-import dash_website.introduction.texts.genetics.correlations as info_genetics_correlations
-import dash_website.introduction.texts.genetics.heritability as info_genetics_heritability
+import dash_website.texts.genetics.gwas as info_genetics_gwas
+import dash_website.texts.genetics.correlations as info_genetics_correlations
+import dash_website.texts.genetics.heritability as info_genetics_heritability
 
-import dash_website.introduction.texts.xwas.univariate_results as info_xwas_univariate_results
-import dash_website.introduction.texts.xwas.univariate_correlations as info_xwas_univariate_correlations
-import dash_website.introduction.texts.xwas.multivariate_results as info_xwas_multivariate_results
-import dash_website.introduction.texts.xwas.multivariate_correlations as info_xwas_multivariate_correlations
-import dash_website.introduction.texts.xwas.multivariate_feature_importances as info_xwas_multivariate_feature_importances
+import dash_website.texts.xwas.univariate_results as info_xwas_univariate_results
+import dash_website.texts.xwas.univariate_correlations as info_xwas_univariate_correlations
+import dash_website.texts.xwas.multivariate_results as info_xwas_multivariate_results
+import dash_website.texts.xwas.multivariate_correlations as info_xwas_multivariate_correlations
+import dash_website.texts.xwas.multivariate_feature_importances as info_xwas_multivariate_feature_importances
 
-import dash_website.introduction.texts.correlations_comparison.correlations_comparison as info_correlations_comparison
+import dash_website.texts.correlations_comparison.correlations_comparison as info_correlations_comparison
 
 
 def get_server():
@@ -84,7 +84,7 @@ def add_layout(app):
             html.Div(
                 [
                     dbc.Button(
-                        html.Img(src=load_src_image("info_icon.png"), style={"height": 50}),
+                        html.Img(src=load_src_image("info_icon.png"), style={"height": "100%", "width": "100%"}),
                         id="open_info",
                         color="transparent",
                     ),
@@ -98,14 +98,14 @@ def add_layout(app):
                         backdrop=False,
                         centered=True,
                         scrollable=True,
-                        size="xl"
+                        size="xl",
                     ),
                 ],
                 id="div_info",
                 style={"display": "None"},
             ),
         ],
-        style={"height": "100vh", "fontSize": 15},
+        style={"height": "100vh", "fontSize": 14},
     )
 
 
