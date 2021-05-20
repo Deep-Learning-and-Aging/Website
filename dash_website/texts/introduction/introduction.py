@@ -5,9 +5,9 @@ TEXT = html.Div(
     [
         html.P(
             [
-                "This website presents the results of our publication “Analyzing the multidimensionality of biological aging with the tools of deep learning across diverse image-based and physiological indicators yields robust age predictors” which can be found ",
+                "This website presents the results of our publication “Analyzing the multidimensionality of biological aging with the tools of deep learning across diverse image-based and physiological indicators yields robust age predictors”, which can be found ",
                 html.A("here", href="https://www.medrxiv.org/content/10.1101/2021.04.25.21255767v1"),
-                ". For a one hour seminar presentation of our main results, see ",
+                ". For a one-hour seminar presentation of our main results, see ",
                 html.A("here", href="https://www.youtube.com/watch?v=VqQtQxkwzNo"),
                 ".",
             ]
