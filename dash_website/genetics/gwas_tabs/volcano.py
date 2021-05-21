@@ -18,7 +18,7 @@ def get_volcano():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_volcano_gwas", data=get_data())),
-            html.H1("Genetics - GWAS"),
+            html.H1("Associations - GWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -134,6 +134,7 @@ def _fill_graph_volcano_gwas(dimension, data_volcano_gwas):
         yaxis={"title": "-log(p-value)"},
         yaxis_title_font={"size": 25},
         height=800,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return fig

@@ -16,7 +16,7 @@ def get_dimension_heatmap():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_dimension_multi")),
-            html.H1("Multivariate XWAS - Correlations between accelerated aging"),
+            html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -131,6 +131,7 @@ def _fill_graph_tab_dimension_multi(algorithm, correlation_type, data_dimension)
             "height": 1000,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
             "yaxis": {"title": "Aging dimension", "showgrid": False, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

@@ -23,8 +23,8 @@ LAYOUT = html.Div(
     [
         dbc.Tabs(
             [
-                dbc.Tab(label="Select custom dimensions", tab_id="tab_custom_dimensions_correlation_between"),
-                dbc.Tab(label="Select all dimensions", tab_id="tab_all_dimensions_correlation_between"),
+                dbc.Tab(label="33 principal aging dimensions", tab_id="tab_custom_dimensions_correlation_between"),
+                dbc.Tab(label="All 331 aging dimensions", tab_id="tab_all_dimensions_correlation_between"),
             ],
             id="tab_manager_correlation_between",
             active_tab="tab_custom_dimensions_correlation_between",

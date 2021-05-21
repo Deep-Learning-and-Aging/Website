@@ -24,15 +24,17 @@ from dash_website import (
     CORRELATION_TYPES,
     ORDER_DIMENSIONS,
     CUSTOM_ORDER,
-    ORDER_TYPES
+    ORDER_TYPES,
+    GRAPH_SIZE,
 )
+
 
 def get_category_heatmap():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_category_multi")),
             dcc.Store(id="memory_exists_category_multi"),
-            html.H1("Multivariate XWAS - Correlations between accelerated aging"),
+            html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -131,7 +133,11 @@ def _change_category_category_multi(main_category):
 
 
 @APP.callback(
-    [Output("graph_category_multi", "figure"), Output("title_category_multi", "children"), Output("histogram_category_multi", "figure")],
+    [
+        Output("graph_category_multi", "figure"),
+        Output("title_category_multi", "children"),
+        Output("histogram_category_multi", "figure"),
+    ],
     [
         Input("order_type_category_multi", "value"),
         Input("algorithm_category", "value"),
@@ -179,7 +185,7 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
     customdata = pd.DataFrame(None, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R2: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number features: %{customdata[4]}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number features: %{customdata[4]}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
@@ -210,8 +216,9 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

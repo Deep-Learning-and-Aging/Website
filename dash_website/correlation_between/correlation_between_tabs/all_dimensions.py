@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_line_and_annotation,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -23,7 +23,7 @@ def get_all_dimensions():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_all_dimensions")),
-            html.H1("Correlation between accelerated aging dimensions"),
+            html.H1("Phenotype - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -140,7 +140,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     customdata = pd.DataFrame(None, index=order_dimensions, columns=order_dimensions)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R2: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
@@ -220,7 +220,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                     dimension_inner_margin,
                     dimension_outer_margin,
                     textangles[first_axis],
-                    10,
+                    12,
                 )
 
                 lines.append(line)
@@ -240,7 +240,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             subdimension_margin,
                             dimension_inner_margin,
                             textangles[first_axis],
-                            8,
+                            10,
                         )
 
                         lines.append(line)
@@ -267,7 +267,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                                     sub_subdimension_margin,
                                     subdimension_margin,
                                     textangles[first_axis],
-                                    8,
+                                    9,
                                 )
 
                                 lines.append(line)
@@ -301,8 +301,9 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
-        width=1500,
-        height=1500,
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

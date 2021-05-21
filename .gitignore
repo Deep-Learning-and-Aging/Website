@@ -128,13 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-app.yaml
+credentials.yaml
 /data 
-
-
-# Avoid pushing data
-**/*.csv
-**/*.zip
-**/*.feather
-**/*.html
-**/*.xlsx

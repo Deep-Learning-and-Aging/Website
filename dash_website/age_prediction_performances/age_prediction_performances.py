@@ -2,12 +2,12 @@ from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 import pandas as pd
 import numpy as np
 
-from dash_website.utils.aws_loader import load_feather
+from dash_website.utils.aws_loader import load_feather, load_src_image
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
@@ -38,7 +38,7 @@ def get_controls_age_prediction_performances():
             get_item_radio_items(
                 "dimensions_selection_age_prediction_performances",
                 DIMENSIONS_SELECTION,
-                "Select a group of dimensions: ",
+                "Filter models: ",
             ),
             get_drop_down(
                 "selected_dimension_age_prediction_performances",
@@ -265,9 +265,15 @@ def _fill_graph_age_prediction_performances(
     fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
-        yaxis={"title": SCORES[metric], "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        yaxis={
+            "title": SCORES[metric],
+            "showgrid": False,
+            "zeroline": False,
+            "title_font": {"size": 25},
+        },
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (

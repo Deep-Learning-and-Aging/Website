@@ -53,7 +53,7 @@ def _display_score(chamber_type, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R2 of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return title
 
@@ -128,7 +128,7 @@ LAYOUT = dbc.Container(
                 dcc.Store(id="memory_videos_features", data=get_data_features()),
             ]
         ),
-        html.H1("Feature importances - Videos"),
+        html.H1("Model interpretability - Videos"),
         html.Br(),
         html.Br(),
         dbc.Row(get_controls_videos(), justify="center"),

@@ -26,7 +26,7 @@ def get_average_bars():
             dcc.Loading(
                 [dcc.Store(id="memory_average_multi", data=get_data_multi()), dcc.Store(id="memory_correlations_multi")]
             ),
-            html.H1("Multivariate XWAS - Correlations between accelerated aging"),
+            html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -288,6 +288,7 @@ def _fill_graph_tab_average(
             "height": 800,
             "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
             "yaxis": {"title": y_label, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 
