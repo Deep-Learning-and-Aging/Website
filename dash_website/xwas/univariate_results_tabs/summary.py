@@ -16,7 +16,7 @@ def get_summary():
     return dbc.Container(
         [
             dcc.Loading([dcc.Store(id="memory_summary", data=get_data())]),
-            html.H1("Univariate XWAS - Results"),
+            html.H1("Univariate associations - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -116,6 +116,7 @@ def _fill_summary_heatmap(item, main_category, data):
             "height": 30 * summary_item_percentage_category.shape[0],
             "xaxis_title_font": {"size": 25},
             "yaxis_title_font": {"size": 25},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

@@ -14,7 +14,7 @@ from dash_website.utils.controls import (
     get_options,
 )
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, GRAPH_SIZE
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
 
@@ -22,7 +22,7 @@ def get_volcano():
     return dbc.Container(
         [
             dcc.Loading([dcc.Store(id="memory_volcano")]),
-            html.H1("Univariate XWAS - Results"),
+            html.H1("Univariate associations - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -86,7 +86,9 @@ def _change_controls_category(main_category):
 
 @APP.callback(Output("memory_volcano", "data"), Input("dimension_volcano", "value"))
 def _modify_store_volcano(dimension):
-    correlations = load_feather(f"xwas/univariate_results/linear_correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather")
+    correlations = load_feather(
+        f"xwas/univariate_results/linear_correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
+    )
 
     return correlations.drop(index=correlations.index[correlations["sample_size"] < 10]).to_dict()
 
@@ -152,7 +154,14 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
             name="With Bonferoni Correction",
         )
     )
-    fig.update_layout(width=1500, height=1000, xaxis_range=[x_range_min, x_range_max], xaxis_title_font={"size": 25}, yaxis_title_font={"size": 25})
+    fig.update_layout(
+        width=GRAPH_SIZE,
+        height=1000,
+        xaxis_range=[x_range_min, x_range_max],
+        xaxis_title_font={"size": 25},
+        yaxis_title_font={"size": 25},
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
+    )
 
     return fig
 

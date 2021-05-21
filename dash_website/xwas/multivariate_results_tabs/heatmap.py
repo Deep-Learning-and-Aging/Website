@@ -16,7 +16,7 @@ from dash_website.utils import BLUE_WHITE_RED
 def get_heatmap():
     return dbc.Container(
         [
-            html.H1("Multivariate XWAS - Results"),
+            html.H1("Accelerated aging prediction performance - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -121,7 +121,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
     customdata = np.dstack((std_2d, sample_size_2d, algorithm_2d))
 
-    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>R2: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
+    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>R²: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
 
     heatmap = go.Heatmap(
         x=r2_2d.columns,
@@ -139,8 +139,9 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         {
             "width": 1000,
             "height": int(1000 * max(1, r2_2d.shape[0] / r2_2d.shape[1])),
-            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False, "title_font":{"size": 25}},
+            "xaxis": {"title": "Aging dimension", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
             "yaxis": {"title": "X subcategory", "showgrid": False, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 
@@ -169,20 +170,21 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
 
         fig_pie_chart = go.Figure(pie_chart)
 
-        fig_pie_chart.update_layout(title="Composition of the best algorithm")
-
-        fig_pie_chart.update_layout(title="Composition of the best algorithms")
+        fig_pie_chart.update_layout(
+            title="Composition of the best algorithms",
+            margin={"l": 0, "r": 0, "b": 0, "t": 0},
+        )
 
         return (
             fig,
-            f"Average R2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
+            f"Average R² = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "block"},
             fig_pie_chart,
         )
     else:
         return (
             fig,
-            f"Average R2 = {overall_mean.round(3)} +- {overall_std.round(3)}",
+            f"Average R² = {overall_mean.round(3)} +- {overall_std.round(3)}",
             {"display": "none"},
             dash.no_update,
         )

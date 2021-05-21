@@ -263,8 +263,9 @@ def _fill_graph_tab_average(
         {
             "width": 2000,
             "height": 800,
-            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font":{"size": 25}},
-            "yaxis": {"title": y_label, "title_font":{"size": 25}},
+            "xaxis": {"title": "X subcategory", "tickangle": 90, "showgrid": False, "title_font": {"size": 25}},
+            "yaxis": {"title": y_label, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

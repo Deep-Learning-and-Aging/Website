@@ -211,6 +211,7 @@ def _change_distribution(feature, age_range, data_scalars):
         yaxis_title_font={"size": 25},
         bargap=0.2,
         bargroupgap=0.1,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return fig, "Histogram of " + feature
@@ -273,7 +274,13 @@ def _change_scatter(feature, age_range, data_linear_regresion, data_scalars):
             marker={"size": 0.1},
         )
 
-    fig.update_layout(width=2000, height=500, xaxis_title_text="Chronological Age", xaxis_title_font={"size": 25})
+    fig.update_layout(
+        width=2000,
+        height=500,
+        xaxis_title_text="Chronological Age",
+        xaxis_title_font={"size": 25},
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
+    )
 
     return (
         fig,

@@ -146,6 +146,7 @@ def _fill_graph_heritability(order_by, data_heritability):
         yaxis={"title": "GWAS-based heritability", "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (
@@ -157,7 +158,7 @@ def _fill_graph_heritability(order_by, data_heritability):
 LAYOUT = dbc.Container(
     [
         dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
-        html.H1("Genetics - Heritabiliy"),
+        html.H1("Heritability - GWAS"),
         html.Br(),
         html.Br(),
         dbc.Row(

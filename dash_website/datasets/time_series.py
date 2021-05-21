@@ -188,6 +188,7 @@ def display_time_series(dimension, subdimension, sub_subdimension, sex, age_grou
         {
             "xaxis": {"title": x_label, "title_font": {"size": 25}},
             "yaxis": {"title": y_label, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 

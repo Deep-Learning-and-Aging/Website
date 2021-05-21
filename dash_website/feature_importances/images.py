@@ -95,7 +95,7 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R2 of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
@@ -201,7 +201,7 @@ def display_image_features(
 
                 left_image = html.Img(
                     src=left_source_image,
-                    style={"height": 400, "margin": "2px"},
+                    style={"height": "35%", "width": "35%", "margin-left": "5%"},
                 )
             else:
                 left_image = html.Div()
@@ -222,12 +222,7 @@ def display_image_features(
 
                 right_image = html.Img(
                     src=right_source_image,
-                    style={
-                        "height": 400,
-                        "margin": "2px",
-                        "-webkit-transform": "scaleX(-1)",
-                        "transform": "scaleX(-1)",
-                    },
+                    style={"height": "35%", "width": "35%", "margin-right": "5%", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
                 )
             else:
                 right_image = html.Div()
@@ -252,7 +247,7 @@ def display_image_features(
 
             image = html.Img(
                 src=right_source_image,
-                style={"height": 800, "margin": "15px", "padding-left": 100},
+                style={"height": "70%", "width": "70%", "margin-left": "10%"},
             )
         else:
             image = html.Div()
@@ -310,7 +305,7 @@ LAYOUT = dbc.Container(
                 dcc.Store(id="memory_images_features", data=get_data_features()),
             ]
         ),
-        html.H1("Feature importances - Images"),
+        html.H1("Model interpretability - Images"),
         html.Br(),
         html.Br(),
         dbc.Row(dbc.Col(dbc.Card(get_controls_images_features())), justify="center"),

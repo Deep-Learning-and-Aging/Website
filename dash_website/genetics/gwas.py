@@ -21,8 +21,8 @@ LAYOUT = html.Div(
     [
         dbc.Tabs(
             [
-                dbc.Tab(label="Select Manhattan & QQ plots", tab_id="tab_manhatton_qq_gwas"),
-                dbc.Tab(label="Select Volcano plot", tab_id="tab_volcano_gwas"),
+                dbc.Tab(label="Manhattan & QQ plots", tab_id="tab_manhatton_qq_gwas"),
+                dbc.Tab(label="Volcano plot", tab_id="tab_volcano_gwas"),
             ],
             id="tab_manager_gwas",
             active_tab="tab_manhatton_qq_gwas",

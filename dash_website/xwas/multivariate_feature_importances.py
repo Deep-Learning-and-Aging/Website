@@ -83,7 +83,7 @@ def get_controls_table_features():
                         columns=[
                             {"id": key, "name": name} for key, name in FEATURES_CORRELATIONS_TABLE_COLUMNS.items()
                         ],
-                        style_cell={"textAlign": "left"},
+                        style_cell={"textAlign": "left", "fontSize": 10},
                         sort_action="custom",
                         sort_mode="single",
                     ),
@@ -161,6 +161,7 @@ def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
                 "title_font": {"size": 25},
             },
             "yaxis": {"title": "Variables", "showgrid": False, "title_font": {"size": 25}},
+            "margin": {"l": 0, "r": 0, "b": 0, "t": 0},
         }
     )
 
@@ -243,7 +244,7 @@ def _sort_tables(
 LAYOUT = dbc.Container(
     [
         dcc.Loading([dcc.Store(id="memory_features_xwas"), dcc.Store(id="memory_scores_xwas", data=get_data())]),
-        html.H1("Multivariate XWAS - Feature importances"),
+        html.H1("Accelerated aging prediction interpretability - XWAS"),
         html.Br(),
         html.Br(),
         dbc.Row(
@@ -277,7 +278,7 @@ LAYOUT = dbc.Container(
                             )
                         ]
                     ),
-                    width={"size": 8, "offset": 3},
+                    width={"size": 8, "offset": 2},
                 )
             ]
         ),

@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, ORDER_DIMENSIONS, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -23,7 +23,7 @@ def get_custom_dimensions():
     return dbc.Container(
         [
             dcc.Loading(dcc.Store(id="memory_custom_dimensions")),
-            html.H1("Correlation between accelerated aging dimensions"),
+            html.H1("Phenotype - Correlations"),
             html.Br(),
             html.Br(),
             dbc.Row(
@@ -127,7 +127,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
     customdata = pd.DataFrame(None, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
     customdata[customdata.columns] = stacked_customdata
 
-    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R2: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R2: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
+    hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
     if order_by == "clustering":
         fig = heatmap_by_clustering(table_correlations, hovertemplate, customdata)
@@ -159,10 +159,11 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
         fig.update_layout(font={"size": 8})
 
     fig.update_layout(
-        yaxis={"showgrid": False, "zeroline": False, "title_font":{"size": 25}},
-        xaxis={"showgrid": False, "zeroline": False, "title_font":{"size": 25}},
-        width=1500,
-        height=1500,
+        yaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        xaxis={"showgrid": False, "zeroline": False, "title_font": {"size": 25}},
+        width=GRAPH_SIZE,
+        height=GRAPH_SIZE,
+        margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
     return (
