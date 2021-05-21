@@ -1,5 +1,8 @@
 # Welcome to the repository of the [Website](https://www.multidimensionality-of-aging.net/) that shows the paper's results
 
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fmultidimensionality-of-aging.net%2F)
+![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCEUEAd-MoVx30rbQfluDxmg?label=seminar%20presentation)
+
 The website is coded in Python, using the framework Dash. The data is stored on AWS s3. We use Cloud Run from Google Cloud Platform to host our website.
 
 ## Contribute to the project 
