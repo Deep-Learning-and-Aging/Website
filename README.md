@@ -1,4 +1,4 @@
-# Welcome to repository of the [Website](https://www.multidimensionality-of-aging.net/) that shows the paper's results
+# Welcome to the repository of the [Website](https://www.multidimensionality-of-aging.net/) that shows the paper's results
 
 The website is coded in Python, using the framework Dash. The data is stored on AWS s3. We use Cloud Run from Google Cloud Platform to host our website.
 
