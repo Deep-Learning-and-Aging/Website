@@ -12,7 +12,7 @@ LAYOUT = html.Div(
                 dbc.Row(
                     dbc.Col(
                         html.P("Multidimensionality of Aging", style={"padding-top": "50px"}),
-                        style={"width": 8, "text-align": "center", "fontSize": 80},
+                        style={"width": 8, "text-align": "center", "fontSize": 70},
                     )
                 ),
                 dbc.Row(
@@ -32,7 +32,7 @@ LAYOUT = html.Div(
                     ),
                 ),
                 dbc.Row(
-                    dbc.Col(info_introduction.TEXT, width=9),
+                    dbc.Col(info_introduction.TEXT, width=11),
                     justify="center",
                     style={"padding-top": "10px"},
                 ),
