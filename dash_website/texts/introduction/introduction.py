@@ -17,8 +17,8 @@ TEXT = html.Div(
         ),
     ],
     style={
-        "fontSize": 22,
-        "padding": 30,
+        "fontSize": 20,
+        "padding": 15,
         "text-align": "justify",
         "text-indent": 30,
     },

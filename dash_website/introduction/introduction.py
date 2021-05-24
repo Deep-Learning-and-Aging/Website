@@ -11,14 +11,13 @@ LAYOUT = html.Div(
             [
                 dbc.Row(
                     dbc.Col(
-                        html.H1("Multidimensionality of Aging", style={"padding-top": "50px"}),
-                        style={"width": 4, "text-align": "center"},
-                    ),
-                    className="mb-4",
+                        html.P("Multidimensionality of Aging", style={"padding-top": "50px"}),
+                        style={"width": 8, "text-align": "center", "fontSize": 80},
+                    )
                 ),
                 dbc.Row(
                     dbc.Col(
-                        html.H6(
+                        html.P(
                             [
                                 "Feel free to report errors, provide feedback or ask questions about our work ",
                                 html.A(
@@ -27,15 +26,15 @@ LAYOUT = html.Div(
                                 ),
                                 ".",
                             ],
-                            style={"padding-top": "50px"},
+                            style={"padding-top": "25px"},
                         ),
-                        style={"text-align": "center"},
+                        style={"width": 8, "text-align": "center", "fontSize": 24},
                     ),
                 ),
                 dbc.Row(
-                    dbc.Col(info_introduction.TEXT, width=8),
+                    dbc.Col(info_introduction.TEXT, width=9),
                     justify="center",
-                    style={"padding-top": "20px"},
+                    style={"padding-top": "10px"},
                 ),
                 html.Div(
                     [
