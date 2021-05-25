@@ -1,0 +1,18 @@
+name: Docker
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  deploy_app_in_dev:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Build docker image
+      run: docker build -t gcr.io/age-prediction-306519/website:dev .
+
+    - name: Docker images
+      run: docker images
