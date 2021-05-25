@@ -167,8 +167,8 @@ def _fill_graph_age_prediction_performances(
             subdimension_margin = min_score - 1
             sub_subdimension_margin = min_score - 1
     else:
-        size_dimension = 13
-        size_subdimension = 11
+        size_dimension = 15
+        size_subdimension = 12
         size_sub_subdimension = 9
         if metric == "r2":
             dimension_outer_margin = min_score - 1.4
