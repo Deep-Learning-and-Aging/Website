@@ -29,7 +29,7 @@ jobs:
         credentials: ${{ secrets.GCP_SA_KEY }}
         service: website
         image: gcr.io/age-prediction-306519/website:dev
-        env_vars: AWS_ACCESS_KEY_ID=${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}, AWS_SECRET_ACCESS_KEY=${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+        # env_vars: AWS_ACCESS_KEY_ID=${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}, AWS_SECRET_ACCESS_KEY=${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
         tag: dev
         no_traffic: true
         flags: --concurrency=60 --cpu=1 --min-instances=0 --max-instances=100 --memory=2Gi --platform=managed --allow-unauthenticated
