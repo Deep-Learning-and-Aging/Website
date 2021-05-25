@@ -270,6 +270,7 @@ def _fill_graph_age_prediction_performances(
             "showgrid": False,
             "zeroline": False,
             "title_font": {"size": 25},
+            "dtick": 0.1 if metric == "r2" else 1,
         },
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
