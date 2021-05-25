@@ -6,6 +6,7 @@ env*/
 .gitignore
 .dockerignore
 .github
+.gcloudignore
 README.md
 Dockerfile
 

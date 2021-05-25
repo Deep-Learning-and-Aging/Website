@@ -1,13 +1,11 @@
 name: Deployment for development branch
 
 on:
-  push:
-    branches:
-      - development
+  workflow_dispatch:
 
 jobs:
-  build:
 
+  deploy_app_in_dev:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,13 +15,13 @@ jobs:
       run: docker build -t gcr.io/age-prediction-306519/website:dev .
 
     - name: Get the AWS credentials from Google Secret Manager
-      id: secrets
+      id: gcp_secrets
       uses: google-github-actions/get-secretmanager-secrets@main
       with:
         credentials: ${{ secrets.GCP_SA_KEY }}
         secrets: |-
-          AWS_ACCESS_KEY_ID:135905066122/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY:135905066122/AWS_SECRET_ACCESS_KEY
+          AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
+          AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
 
     - name: Deploy on cloud Run
       uses: google-github-actions/deploy-cloudrun@main
@@ -31,7 +29,7 @@ jobs:
         credentials: ${{ secrets.GCP_SA_KEY }}
         service: website
         image: gcr.io/age-prediction-306519/website:dev
-        env_vars: AWS_ACCESS_KEY_ID=${{ steps.secrets.outputs.AWS_ACCESS_KEY_ID }}, AWS_SECRET_ACCESS_KEY=${{ steps.secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+        env_vars: AWS_ACCESS_KEY_ID=${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}, AWS_SECRET_ACCESS_KEY=${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
         tag: dev
         no_traffic: true
         flags: --concurrency=60 --cpu=1 --min-instances=0 --max-instances=100 --memory=2Gi --platform=managed --allow-unauthenticated
