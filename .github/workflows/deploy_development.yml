@@ -12,23 +12,14 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: Build docker image
-      run: docker build -t gcr.io/age-prediction-306519/website:dev .
+      run: docker build -t local_gcr.io/age-prediction-306519/website:dev .
 
     - name: Push the docker image to Google Container Registry
       uses: mattes/gce-docker-push-action@v1
       with:
         creds: ${{ secrets.GCP_SA_KEY }}
-        src: gcr.io/age-prediction-306519/website:dev
+        src: local_gcr.io/age-prediction-306519/website:dev
         dst: gcr.io/age-prediction-306519/website:dev
-
-    - name: Get the AWS credentials from Google Secret Manager
-      id: gcp_secrets
-      uses: google-github-actions/get-secretmanager-secrets@main
-      with:
-        credentials: ${{ secrets.GCP_SA_KEY }}
-        secrets: |-
-          AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
-          AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
 
     - name: Deploy on cloud Run
       uses: google-github-actions/deploy-cloudrun@main
