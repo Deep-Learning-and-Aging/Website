@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.9.5-buster
 
 RUN echo 'root:root' | chpasswd
 ENV SSH_AUTH_SOCK=/ssh-agent
