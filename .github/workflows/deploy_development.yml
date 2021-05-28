@@ -20,13 +20,29 @@ jobs:
             AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
             AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
       
-      - name: Copy the files that are not pushed on GitHub
+      - name: Copy the favicon that is not pushed on GitHub
         uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
-          SOURCE: 's3://age-prediction-site/flavicon.ico'
+          SOURCE: 's3://age-prediction-site/favicon.ico'
           DEST: './data/'
+
+      - name: Copy the raw MRI gif that are not pushed on GitHub
+        uses: prewk/s3-cp-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          SOURCE: 's3://age-prediction-site/datasets/videos/'
+          DEST: './data/datasets/videos/'
+      
+      - name: Copy the features MRI gif that are not pushed on GitHub
+        uses: prewk/s3-cp-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          SOURCE: 's3://age-prediction-site/feature_importances/videos/'
+          DEST: './data/feature_importances/videos/'
     
       - name: Build docker image
         run: docker build -t local_gcr.io/age-prediction-306519/website:dev .
