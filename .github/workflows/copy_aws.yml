@@ -24,7 +24,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
-          SOURCE: 's3://age-prediction-site/flavicon.ico'
+          SOURCE: 's3://age-prediction-site/favicon.ico'
           DEST: './data/'
 
       - name: View
