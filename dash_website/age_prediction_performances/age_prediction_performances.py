@@ -7,7 +7,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import numpy as np
 
-from dash_website.utils.aws_loader import load_feather, load_src_image
+from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
@@ -23,7 +23,7 @@ from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIO
 )
 def _get_data_age_prediction_performances(sample_definition, dimensions_selection):
     return load_feather(
-        f"age_prediction_performances/scores_{sample_definition}_{dimensions_selection}.feather"
+        f"age_prediction_performances/scores_withCI_{sample_definition}_{dimensions_selection}.feather"
     ).to_dict()
 
 
@@ -156,31 +156,31 @@ def _fill_graph_age_prediction_performances(
     if dimensions_selection == "custom_dimensions":
         size_dimension = 18
         size_subdimension = 15
-        if metric == "r2":
-            dimension_outer_margin = min_score - 0.9
-            dimension_inner_margin = min_score - 0.5
-            subdimension_margin = min_score - 0.1
-            sub_subdimension_margin = min_score - 0.1
-        else:
+        if metric == "rsme":
             dimension_outer_margin = min_score - 9
             dimension_inner_margin = min_score - 5
             subdimension_margin = min_score - 1
             sub_subdimension_margin = min_score - 1
+        else:
+            dimension_outer_margin = min_score - 0.9
+            dimension_inner_margin = min_score - 0.5
+            subdimension_margin = min_score - 0.1
+            sub_subdimension_margin = min_score - 0.1
+
     else:
         size_dimension = 15
         size_subdimension = 12
         size_sub_subdimension = 9
-        if metric == "r2":
-            dimension_outer_margin = min_score - 1.4
-            dimension_inner_margin = min_score - 1
-            subdimension_margin = min_score - 0.6
-            sub_subdimension_margin = min_score - 0.1
-
-        else:
+        if metric == "rmse":
             dimension_outer_margin = min_score - 14
             dimension_inner_margin = min_score - 10
             subdimension_margin = min_score - 6
             sub_subdimension_margin = min_score - 1
+        else:
+            dimension_outer_margin = min_score - 1.4
+            dimension_inner_margin = min_score - 1
+            subdimension_margin = min_score - 0.6
+            sub_subdimension_margin = min_score - 0.1
 
     for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
         min_position = dimensions.loc[dimension].min()
@@ -270,7 +270,7 @@ def _fill_graph_age_prediction_performances(
             "showgrid": False,
             "zeroline": False,
             "title_font": {"size": 25},
-            "dtick": 0.1 if metric == "r2" else 1,
+            "dtick": 1 if metric == "rmse" else 0.1,
         },
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
