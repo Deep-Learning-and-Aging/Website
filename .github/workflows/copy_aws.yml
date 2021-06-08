@@ -19,13 +19,24 @@ jobs:
             AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
             AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
       
-      - name: Copy the files that are not pushed on GitHub
-        uses: prewk/s3-cp-action@master
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
-          SOURCE: 's3://age-prediction-site/favicon.ico'
-          DEST: './data/'
+      - uses: keithweaver/aws-s3-github-action@master
+        with:
+          command: cp
+          source: s3://age-prediction-site/favicon.ico
+          destination: ./data/
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - uses: keithweaver/aws-s3-github-action@master
+        with:
+          command: cp
+          source: s3://age-prediction-site/datasets/videos/
+          destination: ./data/datasets/videos/
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: View
         run: ls -a
+
+      - name: View
+        run: ls -a ./data/
