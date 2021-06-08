@@ -5,7 +5,7 @@ TEXT = html.Div(
     [
         html.P("This page presents the prediction performances for the different models we used to predict age."),
         html.Div(
-            html.P("Samples can be defined in three ways:"),
+            html.P("Samples can be defined in two ways:"),
             style={
                 "text-indent": 0,
             },
@@ -25,6 +25,18 @@ TEXT = html.Div(
         html.P("- Custom dimensions: selected dimensions that are all ensemble models."),
         html.P("- All dimensions: all dimensions are displayed."),
         html.P("- Without ensemble models: all the models that are not ensemble models."),
+        html.Div(
+            html.P("Among the metrics that can be chosen, there is:"),
+            style={
+                "text-indent": 0,
+            },
+        ),
+        html.P(
+            "- C-index: the C-index when the prediction of the chronological age (i.e. the biological age) was taken as the risk of dying."
+        ),
+        html.P(
+            "- C-index difference: the C-index with the biological age as the risk of dying minus the C-index with the chronological age as the risk of dying."
+        ),
     ],
     style={
         "fontSize": 18,
