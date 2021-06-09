@@ -20,7 +20,7 @@ jobs:
             AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
             AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
       
-      - name: Copy the favicon that is not pushed on GitHub
+      - name: Download favicon.ico from AWS
         uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
@@ -28,21 +28,23 @@ jobs:
           SOURCE: 's3://age-prediction-site/favicon.ico'
           DEST: './data/'
 
-      - name: Copy the raw MRI gifs that are not pushed on GitHub
+      - name: Download datasets/videos/ from AWS
         uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
           SOURCE: 's3://age-prediction-site/datasets/videos/'
           DEST: './data/datasets/videos/'
-      
-      - name: Copy the features MRI gifs that are not pushed on GitHub
+          ENDPOINT_APPEND: --recursive
+
+      - name: Download feature_importances/videos/ from AWS
         uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
           SOURCE: 's3://age-prediction-site/feature_importances/videos/'
           DEST: './data/feature_importances/videos/'
+          ENDPOINT_APPEND: --recursive
     
       - name: Build docker image
         run: docker build -t local_gcr.io/age-prediction-306519/website:dev .
@@ -60,7 +62,6 @@ jobs:
           credentials: ${{ secrets.GCP_SA_KEY }}
           service: website
           image: gcr.io/age-prediction-306519/website:dev
-          # env_vars: AWS_ACCESS_KEY_ID=${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}, AWS_SECRET_ACCESS_KEY=${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
           tag: dev
           no_traffic: true
           flags: --concurrency=60 --cpu=1 --min-instances=0 --max-instances=100 --memory=2Gi --platform=managed --allow-unauthenticated
