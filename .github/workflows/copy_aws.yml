@@ -18,28 +18,26 @@ jobs:
           secrets: |-
             AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
             AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
-
-      - name: Download favicon.ico from AWS
-        uses: keithweaver/aws-s3-github-action@master
-        with:
-          command: cp
-          source: s3://age-prediction-site/favicon.ico
-          destination: ./data/
-          aws_access_key_id: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
       
-      - name: Download datasets/videos/ from AWS
-        uses: keithweaver/aws-s3-github-action@master
-        with:
-          command: cp
-          source: s3://age-prediction-site/datasets/videos/
-          destination: ./data/datasets/videos/
+      - name: Download favicon.ico from AWS
+        uses: prewk/s3-cp-action@master
+        env:
           aws_access_key_id: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
-          input_flags: -r
+          source: 's3://age-prediction-site/favicon.ico'
+          dest: './data/'
 
+      - name: Download datasets/videos/ from AWS
+        uses: prewk/s3-cp-action@master
+        env:
+          aws_access_key_id: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          source: 's3://age-prediction-site/datasets/videos/'
+          dest: './data/datasets/videos/'
+          endpoint_append: --recursive
+    
       - name: View
         run: ls -a
 
       - name: View
-        run: ls -a ./data/
+        run: ls -R ./data/
