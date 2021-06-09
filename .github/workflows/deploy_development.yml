@@ -28,7 +28,7 @@ jobs:
           SOURCE: 's3://age-prediction-site/favicon.ico'
           DEST: './data/'
 
-      - name: Copy the raw MRI gif that are not pushed on GitHub
+      - name: Copy the raw MRI gifs that are not pushed on GitHub
         uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
@@ -36,7 +36,7 @@ jobs:
           SOURCE: 's3://age-prediction-site/datasets/videos/'
           DEST: './data/datasets/videos/'
       
-      - name: Copy the features MRI gif that are not pushed on GitHub
+      - name: Copy the features MRI gifs that are not pushed on GitHub
         uses: prewk/s3-cp-action@master
         env:
           AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
