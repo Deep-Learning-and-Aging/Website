@@ -1,0 +1,65 @@
+name: Production for development branch
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  deploy_app_in_dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Get the AWS credentials from Google Secret Manager
+        id: gcp_secrets
+        uses: google-github-actions/get-secretmanager-secrets@main
+        with:
+          credentials: ${{ secrets.GCP_SA_KEY }}
+          secrets: |-
+            AWS_ACCESS_KEY_ID:${{ secrets.GCP_PROJECT_ID }}/AWS_ACCESS_KEY_ID
+            AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
+      
+      - name: Download favicon.ico from AWS
+        uses: prewk/s3-cp-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          SOURCE: 's3://age-prediction-site/favicon.ico'
+          DEST: './data/'
+
+      - name: Download datasets/videos/ from AWS
+        uses: prewk/s3-cp-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          SOURCE: 's3://age-prediction-site/datasets/videos/'
+          DEST: './data/datasets/videos/'
+          ENDPOINT_APPEND: --recursive
+
+      - name: Download feature_importances/videos/ from AWS
+        uses: prewk/s3-cp-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          SOURCE: 's3://age-prediction-site/feature_importances/videos/'
+          DEST: './data/feature_importances/videos/'
+          ENDPOINT_APPEND: --recursive
+    
+      - name: Build docker image
+        run: docker build -t local_gcr.io/age-prediction-306519/website .
+
+      - name: Push the docker image to Google Container Registry
+        uses: mattes/gce-docker-push-action@v1
+        with:
+          creds: ${{ secrets.GCP_SA_KEY }}
+          src: local_gcr.io/age-prediction-306519/website
+          dst: gcr.io/age-prediction-306519/website
+
+      - name: Deploy on cloud Run
+        uses: google-github-actions/deploy-cloudrun@main
+        with:
+          credentials: ${{ secrets.GCP_SA_KEY }}
+          service: website
+          image: gcr.io/age-prediction-306519/website
+          flags: --concurrency=60 --cpu=1 --min-instances=0 --max-instances=100 --memory=2Gi --platform=managed --allow-unauthenticated
