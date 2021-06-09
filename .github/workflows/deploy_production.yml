@@ -47,19 +47,21 @@ jobs:
           ENDPOINT_APPEND: --recursive
     
       - name: Build docker image
-        run: docker build -t local_gcr.io/age-prediction-306519/website .
+        run: docker build -t local_gcr.io/age-prediction-306519/website:prod .
 
       - name: Push the docker image to Google Container Registry
         uses: mattes/gce-docker-push-action@v1
         with:
           creds: ${{ secrets.GCP_SA_KEY }}
-          src: local_gcr.io/age-prediction-306519/website
-          dst: gcr.io/age-prediction-306519/website
+          src: local_gcr.io/age-prediction-306519/website:prod
+          dst: gcr.io/age-prediction-306519/website:prod
 
       - name: Deploy on cloud Run
         uses: google-github-actions/deploy-cloudrun@main
         with:
           credentials: ${{ secrets.GCP_SA_KEY }}
           service: website
-          image: gcr.io/age-prediction-306519/website
+          image: gcr.io/age-prediction-306519/website:prod
+          tag: prod
+          tag_traffic: prod=100, dev=0
           flags: --concurrency=60 --cpu=1 --min-instances=0 --max-instances=100 --memory=2Gi --platform=managed --allow-unauthenticated
