@@ -168,18 +168,24 @@ def _fill_graph_age_prediction_performances(
             sub_subdimension_margin = min_score - 0.1
 
     else:
-        size_dimension = 15
-        size_subdimension = 12
-        size_sub_subdimension = 9
+        if selected_dimension == "all":
+            size_dimension = 15
+            size_subdimension = 12
+            size_sub_subdimension = 11
+        else:
+            size_dimension = 20
+            size_subdimension = 19
+            size_sub_subdimension = 19
+
         if metric == "rmse":
-            dimension_outer_margin = min_score - 14
-            dimension_inner_margin = min_score - 10
-            subdimension_margin = min_score - 6
+            dimension_outer_margin = min_score - 17
+            dimension_inner_margin = min_score - 13
+            subdimension_margin = min_score - 9
             sub_subdimension_margin = min_score - 1
         else:
-            dimension_outer_margin = min_score - 1.4
-            dimension_inner_margin = min_score - 1
-            subdimension_margin = min_score - 0.6
+            dimension_outer_margin = min_score - 1.7
+            dimension_inner_margin = min_score - 1.3
+            subdimension_margin = min_score - 0.9
             sub_subdimension_margin = min_score - 0.1
 
     for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
@@ -269,12 +275,14 @@ def _fill_graph_age_prediction_performances(
             "title": SCORES[metric],
             "showgrid": False,
             "zeroline": False,
-            "title_font": {"size": 25},
+            "title_font": {"size": 45},
             "dtick": 1 if metric == "rmse" else 0.1,
+            "tickfont_size": 20,
         },
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
         margin={"l": 0, "r": 0, "b": 0, "t": 0},
+        legend={"orientation": "h", "yanchor": "bottom", "font": {"size": 35}},
     )
 
     return (
