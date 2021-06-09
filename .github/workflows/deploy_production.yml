@@ -71,4 +71,4 @@ jobs:
           credentials: ${{ secrets.GCP_SA_KEY }}
           service: website
           image: gcr.io/age-prediction-306519/website:prod
-          tag_traffic: [prod=100, dev=0]  
+          tag_traffic: prod=100, dev=0
