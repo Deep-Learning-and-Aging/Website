@@ -173,9 +173,9 @@ def _fill_graph_age_prediction_performances(
             size_subdimension = 12
             size_sub_subdimension = 11
         else:
-            size_dimension = 20
-            size_subdimension = 19
-            size_sub_subdimension = 19
+            size_dimension = 21
+            size_subdimension = 20
+            size_sub_subdimension = 20
 
         if metric == "rmse":
             dimension_outer_margin = min_score - 17
@@ -282,7 +282,7 @@ def _fill_graph_age_prediction_performances(
         xaxis={"showgrid": False, "zeroline": False},
         height=800,
         margin={"l": 0, "r": 0, "b": 0, "t": 0},
-        legend={"orientation": "h", "yanchor": "bottom", "font": {"size": 35}},
+        legend={"orientation": "h", "yanchor": "bottom", "font": {"size": 30}},
     )
 
     return (
