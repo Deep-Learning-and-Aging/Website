@@ -1,4 +1,4 @@
-name: Production for development branch
+name: Production
 
 on:
   workflow_dispatch:
