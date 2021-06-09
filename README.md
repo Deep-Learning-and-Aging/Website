@@ -47,4 +47,4 @@ Each page has the same structure : a layout python object, and some attributes o
 
 ## How to deploy 
 
-A CI / CD workflow has been created with Git Actions in order to deploy the website automatically whenever a push is made. 
+A CI / CD workflow has been created with Git Actions in order to deploy the website automatically on demand. 
