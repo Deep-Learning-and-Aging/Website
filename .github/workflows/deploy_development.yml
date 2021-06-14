@@ -35,7 +35,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
           SOURCE: 's3://age-prediction-site/datasets/videos/'
           DEST: './data/datasets/videos/'
-          FLAGS: --recursive
+          ENDPOINT_APPEND: --recursive
 
       - name: Download feature_importances/videos/ from AWS
         uses: prewk/s3-cp-action@master
@@ -44,7 +44,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
           SOURCE: 's3://age-prediction-site/feature_importances/videos/'
           DEST: './data/feature_importances/videos/'
-          FLAGS: --recursive
+          ENDPOINT_APPEND: --recursive
     
       - name: Build docker image
         run: docker build -t local_gcr.io/age-prediction-306519/website:dev .
