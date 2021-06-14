@@ -48,3 +48,4 @@ Each page has the same structure : a layout python object, and some attributes o
 ## How to deploy 
 
 A CI / CD workflow has been created with Git Actions in order to deploy the website automatically on demand. 
+You can find the development version of the website [here](https://dev---website-4mfjnp4fjq-uc.a.run.app).
