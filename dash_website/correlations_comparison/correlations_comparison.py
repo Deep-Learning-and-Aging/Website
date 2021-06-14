@@ -256,7 +256,7 @@ def _fill_graph_tab_comparison(
     sorted_customdata_lower = customdata_lower.loc[sorted_dimensions, sorted_dimensions]
 
     triangular_heatmap_values = np.triu(sorted_table_correlations_upper)
-    triangular_heatmap_values += np.tril(sorted_table_correlations_lower, k=1)
+    triangular_heatmap_values += np.tril(sorted_table_correlations_lower, k=-1)
     triangular_heatmap = pd.DataFrame(
         triangular_heatmap_values,
         index=sorted_table_correlations_upper.index,
@@ -264,7 +264,7 @@ def _fill_graph_tab_comparison(
     )
 
     customdata_triangular_values = np.triu(sorted_customdata_upper)
-    customdata_triangular_values += np.tril(sorted_customdata_lower, k=1)
+    customdata_triangular_values += np.tril(sorted_customdata_lower, k=-1)
     customdata_triangular = pd.DataFrame(
         customdata_triangular_values, index=sorted_customdata_upper.index, columns=sorted_customdata_upper.columns
     )
