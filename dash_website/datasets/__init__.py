@@ -118,7 +118,7 @@ INFORMATION_TIME_SERIES = {
         "Walking": {
             "3D": {
                 "nb_channel": 3,
-                "y_label": "5 uV / Lsb",
+                "y_label": "Acceleration",
                 "x_label": "Time (2 min / unit)",
             }
         },
