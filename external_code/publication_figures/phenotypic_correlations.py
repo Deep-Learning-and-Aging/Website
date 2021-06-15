@@ -13,7 +13,7 @@ def get_data_all_dimensions(sample_definition):
     ).to_dict()
 
 
-def get_graph_all_dimensions(selected_dimension, data_all_dimensions):
+def get_graph_all_dimensions(selected_dimension, data_all_dimensions, order_subdimensions, order_sub_subdimensions):
     correlations = pd.DataFrame(data_all_dimensions)
     correlations = correlations[
         (correlations["dimension_1"] == selected_dimension) & (correlations["dimension_2"] == selected_dimension)
@@ -46,12 +46,13 @@ def get_graph_all_dimensions(selected_dimension, data_all_dimensions):
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
 
-    subdimension_order = ["*", "FullBody", "Spine", "Hips", "Knees", "Scalars"]
-    sorted_dimensions = table_correlations.sort_index(
-        axis=0,
-        level=1,
-        key=lambda subdimensions: list(map(lambda subdimension: subdimension_order.index(subdimension), subdimensions)),
-    ).index
+    def sort_dimensions(index_level):
+        if index_level.name == "subdimension_1":
+            return list(map(lambda subdimension: order_subdimensions.index(subdimension), index_level))
+        if index_level.name == "sub_subdimension_1":
+            return list(map(lambda sub_subdimension: order_sub_subdimensions.index(sub_subdimension), index_level))
+
+    sorted_dimensions = table_correlations.sort_index(axis=0, level=[1, 2], key=sort_dimensions).index
 
     sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
     sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
@@ -80,8 +81,8 @@ def get_graph_all_dimensions(selected_dimension, data_all_dimensions):
     lines = []
     annotations = []
 
-    dimension_inner_margin = -150
-    subdimension_margin = -100
+    dimension_inner_margin = -290
+    subdimension_margin = -200
     sub_subdimension_margin = 0
 
     textangles = {"x": 90, "y": 0}
@@ -169,10 +170,59 @@ def get_graph_all_dimensions(selected_dimension, data_all_dimensions):
 
 
 if __name__ == "__main__":
+    import os
+
     sample_definiion = list(SAMPLE_DEFINITION.keys())[2]
     print("Sample definition: ", sample_definiion)
     data_all_dimensions = get_data_all_dimensions(sample_definiion)
 
-    fig_musculoskeletal = get_graph_all_dimensions("Musculoskeletal", data_all_dimensions)
+    selected_dimension = "Brain"
 
-    fig_musculoskeletal.show(config=DOWNLOAD_CONFIG)
+    columns_to_take = {
+        "Main dimension": "dimension",
+        "Subdimension": "subdimension",
+        "Sub-subdimension": "sub_subdimension",
+    }
+    dimensions_order = pd.read_csv(
+        f"https://docs.google.com/spreadsheets/d/{os.environ.get('GOOGLE_SHEET_ID')}/gviz/tq?tqx=out:csv&sheet=Sheet1",
+        usecols=columns_to_take,
+    ).rename(columns=columns_to_take)
+
+    former_index_row = 0
+    for index_row in dimensions_order.index:
+        for column in dimensions_order.columns:
+            if dimensions_order.loc[index_row, column] != dimensions_order.loc[index_row, column]:
+                dimensions_order.loc[index_row, column] = dimensions_order.loc[former_index_row, column]
+            if "*" == dimensions_order.loc[index_row, column][0]:
+                dimensions_order.loc[index_row, column] = dimensions_order.loc[index_row, column][1:]
+            if dimensions_order.loc[index_row, column] == "GramianAngularFieldDifference":
+                dimensions_order.loc[index_row, column] = "GramianAngularField1minDifference"
+            if dimensions_order.loc[index_row, column] == "GramianAngularFieldSummation":
+                dimensions_order.loc[index_row, column] = "GramianAngularField1minSummation"
+            if dimensions_order.loc[index_row, column] == "MarkovTransitionField":
+                dimensions_order.loc[index_row, column] = "MarkovTransitionField1min"
+            if dimensions_order.loc[index_row, column] == "RecurrencePlot":
+                dimensions_order.loc[index_row, column] = "RecurrencePlots1min"
+
+        former_index_row = index_row
+
+    order_selected_dimensions = dimensions_order.set_index("dimension").loc[selected_dimension]
+
+    raw_order_sub_subdimensions = order_selected_dimensions["sub_subdimension"].tolist()
+    order_sub_subdimensions = []
+    raw_order_subdimensions = order_selected_dimensions["subdimension"].tolist()
+    order_subdimensions = []
+    former_subdimension = None
+    for idx_list, subdimension in enumerate(raw_order_subdimensions):
+        if subdimension != former_subdimension:
+            order_subdimensions.append("*")
+            order_sub_subdimensions.append("*")
+        order_subdimensions.append(subdimension)
+        order_sub_subdimensions.append(raw_order_sub_subdimensions[idx_list])
+        former_subdimension = subdimension
+
+    fig_selected_dimension = get_graph_all_dimensions(
+        selected_dimension, data_all_dimensions, order_subdimensions, order_sub_subdimensions
+    )
+
+    fig_selected_dimension.show(config=DOWNLOAD_CONFIG)
