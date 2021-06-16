@@ -91,6 +91,7 @@ def _fill_graph_age_prediction_performances(
         scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
         scores.replace("1DCNN", "*", inplace=True)  # since it is the only one that is different
         scores.drop(index=scores.index[scores["algorithm"] != "*"], inplace=True)
+        scores.drop_duplicates(inplace=True)  # due to the conversion of 1DCNN to *
     elif dimensions_selection == "without_ensemble_models":
         scores.drop(
             index=scores.index[
