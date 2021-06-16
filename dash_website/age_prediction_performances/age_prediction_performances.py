@@ -11,20 +11,15 @@ from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs import add_line_and_annotation
 from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
-from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
+from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES, CUSTOM_DIMENSIONS
 
 
 @APP.callback(
     Output("memory_age_prediction_performances", "data"),
-    [
-        Input("sample_definition_age_prediction_performances", "value"),
-        Input("dimensions_selection_age_prediction_performances", "value"),
-    ],
+    Input("sample_definition_age_prediction_performances", "value"),
 )
-def _get_data_age_prediction_performances(sample_definition, dimensions_selection):
-    return load_feather(
-        f"age_prediction_performances/scores_withCI_{sample_definition}_{dimensions_selection}.feather"
-    ).to_dict()
+def _get_data_age_prediction_performances(sample_definition):
+    return load_feather(f"age_prediction_performances/scores_{sample_definition}.feather").to_dict()
 
 
 def get_controls_age_prediction_performances():
@@ -88,16 +83,24 @@ def _fill_graph_age_prediction_performances(
 ):
     import plotly.graph_objs as go
 
-    scores = pd.DataFrame(data_age_prediction_performances)
+    scores = pd.DataFrame(data_age_prediction_performances).set_index(
+        ["dimension", "subdimension", "sub_subdimension"], drop=False
+    )
 
     if dimensions_selection == "custom_dimensions":
+        scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
         scores.replace("1DCNN", "*", inplace=True)  # since it is the only one that is different
-
-    scores.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
+        scores.drop(index=scores.index[scores["algorithm"] != "*"], inplace=True)
+    elif dimensions_selection == "without_ensemble_models":
+        scores.drop(
+            index=scores.index[
+                (scores["dimension"] == "*") | (scores["subdimension"] == "*") | (scores["sub_subdimension"] == "*")
+            ]
+        )
 
     if selected_dimension != "all":
         scores = scores.loc[[selected_dimension]]
-        sorted_dimensions = scores.loc[[selected_dimension]].index.drop_duplicates()
+        sorted_dimensions = scores.index.drop_duplicates()
     else:
         if dimensions_selection != "without_ensemble_models":
             sorted_dimensions = scores.loc[CUSTOM_ORDER].index.drop_duplicates()
@@ -115,7 +118,7 @@ def _fill_graph_age_prediction_performances(
         xaxis={
             "tickvals": np.arange(5, 10 * len(sorted_dimensions) + 5, 10),
             "ticktext": [" - ".join(elem) for elem in sorted_dimensions.values],
-        },
+        }
     )
 
     algorithms = scores["algorithm"].drop_duplicates()

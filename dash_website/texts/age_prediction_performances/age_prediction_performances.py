@@ -26,7 +26,7 @@ TEXT = html.Div(
         html.P("- All dimensions: all dimensions are displayed."),
         html.P("- Without ensemble models: all the models that are not ensemble models."),
         html.Div(
-            html.P("Among the metrics that can be chosen, there is:"),
+            html.P("Among the metrics that can be chosen, there are:"),
             style={
                 "text-indent": 0,
             },
