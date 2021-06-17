@@ -7,7 +7,7 @@ TREE_SCALARS = {
         "All": ["Scalars"],
         "BloodPressure": ["Scalars"],
         "Carotids": ["Scalars"],
-        "PWA": ["Scalars"],
+        "PulseWaveAnalysis": ["Scalars"],
     },
     "Biochemistry": {"All": ["Scalars"], "Blood": ["Scalars"], "Urine": ["Scalars"]},
     "BloodCells": {"BloodCount": ["Scalars"]},
