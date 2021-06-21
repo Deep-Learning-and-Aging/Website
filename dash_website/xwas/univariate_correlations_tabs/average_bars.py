@@ -154,6 +154,11 @@ def _fill_graph_tab_average(
 ):
     import plotly.graph_objs as go
 
+    if main_category == "All":
+        all_main_categories = [f"All_{main_cat}" for main_cat in MAIN_CATEGORIES_TO_CATEGORIES.keys()]
+    else:
+        all_main_categories = [f"All_{main_category}"]
+
     if dimension_2 == "average":
         averages = pd.DataFrame(data_averages).set_index(["dimension", "category"])
         averages.columns = pd.MultiIndex.from_tuples(
@@ -161,7 +166,7 @@ def _fill_graph_tab_average(
         )
 
         sorted_averages = averages.loc[
-            (dimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + [f"All_{main_category}"]),
+            (dimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + all_main_categories),
             (subset_method, correlation_type),
         ].sort_values(by=["mean"], ascending=False)
 
@@ -219,7 +224,7 @@ def _fill_graph_tab_average(
         )
 
         sorted_correlations = correlations_raw.loc[
-            (dimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + [f"All_{main_category}"]),
+            (dimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + all_main_categories),
             (subset_method, correlation_type),
         ].sort_values(ascending=False)
 
