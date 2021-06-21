@@ -13,6 +13,7 @@ import base64
 
 from dash_website.utils.aws_loader import load_feather, load_npy, load_jpg, does_key_exists
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_check_list, get_options
+from dash_website import ALGORITHMS_RENDERING
 from dash_website.datasets import (
     TREE_IMAGES,
     SIDES_DIMENSION,
@@ -25,7 +26,7 @@ from dash_website.feature_importances import AGING_RATE_LEGEND, DISPLAY_MODE
 
 
 def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
+    return load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").to_dict()
 
 
 def get_data_features():
@@ -86,16 +87,19 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
         option_sub_subdimension = get_options(TREE_IMAGES[dimension][subdimension])
         value_sub_subdimension = TREE_IMAGES[dimension][subdimension][0]
 
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, value_subdimension, value_sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, value_subdimension, value_sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {ALGORITHMS_RENDERING[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
@@ -222,7 +226,13 @@ def display_image_features(
 
                 right_image = html.Img(
                     src=right_source_image,
-                    style={"height": "35%", "width": "35%", "margin-right": "5%", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
+                    style={
+                        "height": "35%",
+                        "width": "35%",
+                        "margin-right": "5%",
+                        "-webkit-transform": "scaleX(-1)",
+                        "transform": "scaleX(-1)",
+                    },
                 )
             else:
                 right_image = html.Div()

@@ -10,12 +10,13 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_options_from_dict, get_item_radio_items
+from dash_website import ALGORITHMS_RENDERING
 from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND
 from dash_website.feature_importances import AGING_RATE_LEGEND
 
 
 def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
+    return load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").to_dict()
 
 
 def get_data_features():
@@ -44,16 +45,19 @@ def get_controls_videos():
     ],
 )
 def _display_score(chamber_type, data_scores):
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[("Heart", "MRI", f"{chamber_type}chambersRaw")]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[("Heart", "MRI", f"{chamber_type}chambersContrast")]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {ALGORITHMS_RENDERING[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return title
 
@@ -108,7 +112,7 @@ def display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
         .loc[(int(chamber_type), sex, age_group, aging_rate), ["chronological_age", "biological_age"]]
         .tolist()
     )
-    title = f"The participant is an {aging_rate} ager: {np.round_(biological_age - chronological_age, 1)} years"
+    title = f"The participant is a {aging_rate} ager: {np.round_(biological_age - chronological_age, 1)} years"
 
     gif_display = html.Div(
         gif.GifPlayer(
