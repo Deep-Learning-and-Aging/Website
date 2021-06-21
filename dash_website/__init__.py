@@ -170,6 +170,11 @@ ALGORITHMS_RENDERING = {
     "elastic_net": "Elastic Net",
     "light_gbm": "Light GBM",
     "neural_network": "Neural Network",
+    "inception_res_net_v2": "Inception ResNet V2",
+    "inception_v3": "Inception V3",
+    "1dcnn": "1 DCNN",
+    "3dcnn": "3 DCNN",
+    "*": "*",
 }
 
 CORRELATION_TYPES = {"pearson": "Pearson", "spearman": "Spearman"}

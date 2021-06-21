@@ -17,7 +17,16 @@ COLUMNS_TO_TAKE = {
     "RMSE_str_all": "rmse_and_std",
     "C-Index-difference_str_all": "c_index_difference_and_std",
 }
-DICT_TO_CHANGE_DIMENSIONS = {"ImmuneSystem": "BloodCells"}
+DICT_TO_CHANGE_DIMENSIONS = {
+    "ImmuneSystem": "BloodCells",
+    "InceptionResNetV2": "inception_res_net_v2",
+    "InceptionV3": "inception_v3",
+    "ElasticNet": "elastic_net",
+    "LightGBM": "light_gbm",
+    "NeuralNetwork": "neural_network",
+    "1DCNN": "1dcnn",
+    "3DCNN": "3dcnn",
+}
 
 
 if __name__ == "__main__":

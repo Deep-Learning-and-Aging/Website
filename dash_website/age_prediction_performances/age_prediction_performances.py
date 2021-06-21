@@ -10,7 +10,7 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
+from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER, ALGORITHMS_RENDERING
 from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES, CUSTOM_DIMENSIONS
 
 
@@ -145,7 +145,7 @@ def _fill_graph_age_prediction_performances(
             x=x_positions.loc[scores_algorithm.index].values.flatten(),
             y=scores_algorithm[metric],
             error_y={"array": scores_algorithm[f"{metric}_std"], "type": "data"},
-            name=algorithm,
+            name=ALGORITHMS_RENDERING[algorithm],
             hovertemplate=hovertemplate,
             customdata=customdata,
         )

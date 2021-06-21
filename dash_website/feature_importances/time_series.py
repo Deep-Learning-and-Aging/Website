@@ -11,7 +11,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website import DOWNLOAD_CONFIG
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS_RENDERING
 from dash_website.datasets import (
     TREE_TIME_SERIES,
     INFORMATION_TIME_SERIES,
@@ -23,7 +23,7 @@ from dash_website.feature_importances import AGING_RATE_LEGEND
 
 
 def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
+    return load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").to_dict()
 
 
 def get_data_features():
@@ -86,16 +86,19 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
         option_sub_subdimension = get_options(TREE_TIME_SERIES[dimension][subdimension])
         value_sub_subdimension = TREE_TIME_SERIES[dimension][subdimension][0]
 
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, value_subdimension, value_sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, value_subdimension, value_sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {ALGORITHMS_RENDERING[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 

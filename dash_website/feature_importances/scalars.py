@@ -16,7 +16,7 @@ from dash_website.feature_importances import TREE_SCALARS, FEATURES_TABLE_COLUMN
 
 
 def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
+    return load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").to_dict()
 
 
 @APP.callback(
@@ -27,7 +27,7 @@ def get_data_scores():
         Input("sub_subdimension_scalars_features", "value"),
     ],
 )
-def _modify_store_features(dimension, subdimension, sub_subdimension):
+def _modify_memory_features(dimension, subdimension, sub_subdimension):
     return load_feather(f"feature_importances/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather").to_dict()
 
 
@@ -123,11 +123,14 @@ def get_controls_table_scalars_features():
 def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_scores, data_features):
     import plotly.graph_objects as go
 
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, subdimension, sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, subdimension, sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     best_algorithm = scores.index[0]
@@ -217,11 +220,14 @@ def _sort_tables(
     sort_by_col_features,
     sort_by_col_correlations,
 ):
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, subdimension, sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, subdimension, sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     best_algorithm = scores.index[0]
