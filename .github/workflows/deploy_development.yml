@@ -21,12 +21,12 @@ jobs:
             AWS_SECRET_ACCESS_KEY:${{ secrets.GCP_PROJECT_ID }}/AWS_SECRET_ACCESS_KEY
       
       - name: Download favicon.ico from AWS
-        uses: prewk/s3-cp-action@master
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
-          SOURCE: 's3://age-prediction-site/favicon.ico'
-          DEST: './data/'
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_access_key_id: ${{ steps.gcp_secrets.outputs.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ steps.gcp_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+          source: 's3://age-prediction-site/favicon.ico'
+          dest: './data/'
 
       - name: Download datasets/videos/ from AWS
         uses: prewk/s3-cp-action@v2
