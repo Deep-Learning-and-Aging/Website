@@ -1,3 +1,4 @@
+from botocore.exceptions import IncompleteReadError
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -83,21 +84,21 @@ def _fill_graph_age_prediction_performances(
 ):
     import plotly.graph_objs as go
 
-    scores = pd.DataFrame(data_age_prediction_performances).set_index(
-        ["dimension", "subdimension", "sub_subdimension"], drop=False
-    )
+    scores = pd.DataFrame(data_age_prediction_performances)
 
     if dimensions_selection == "custom_dimensions":
+        scores.set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"], inplace=True)
         scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-        scores.replace("1DCNN", "*", inplace=True)  # since it is the only one that is different
-        scores.drop(index=scores.index[scores["algorithm"] != "*"], inplace=True)
-        scores.drop_duplicates(inplace=True)  # due to the conversion of 1DCNN to *
+        scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
+        scores.reset_index(inplace=True)
     elif dimensions_selection == "without_ensemble_models":
         scores.drop(
             index=scores.index[
                 (scores["dimension"] == "*") | (scores["subdimension"] == "*") | (scores["sub_subdimension"] == "*")
-            ]
+            ],
+            inplace=True,
         )
+    scores.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
 
     if selected_dimension != "all":
         scores = scores.loc[[selected_dimension]]
