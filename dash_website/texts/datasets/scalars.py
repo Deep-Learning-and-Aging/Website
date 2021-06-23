@@ -6,12 +6,7 @@ TEXT = html.Div(
         html.P(
             "Here, you can explore the distribution of the different scalar variables which we leveraged to predict chronological age. "
         ),
-        html.Div(
-            html.P("It includes three plots:"),
-            style={
-                "text-indent": 0,
-            },
-        ),
+        html.Div(html.P("It includes three plots:"), style={"text-indent": 0}),
         html.P("- a histogram of the variables for male and female participants."),
         html.P(
             "- a scatter plot with a regression line showing the association of the variable with age in a univariate, linear context."
