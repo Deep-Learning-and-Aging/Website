@@ -161,7 +161,9 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
             + " +- "
             + features.loc[sorted_features, (algorithm, "std")].round(3).astype(str).values
         )
-    # table_features.to_csv(f"{dimension}_{subdimension}_{sub_subdimension}_feature_importances.csv")
+    # table_features.to_csv(
+    #     f"external_code/publication_figures/feature_importances/{dimension}_{subdimension}_{sub_subdimension}.csv"
+    # )
 
     fig = go.Figure()
     hovertemplate = (
