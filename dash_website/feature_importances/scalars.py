@@ -258,7 +258,7 @@ def _sort_tables(
     )
 
     for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
-        table_correlations_raw[f"percentage_{algorithm}"] = features[(algorithm, "mean")]
+        table_correlations_raw[f"percentage_{algorithm}"] = features[(algorithm, "mean")].abs()
 
     table_correlations = (
         table_correlations_raw.corr(method=correlation_type)
