@@ -102,14 +102,8 @@ def _fill_graph_age_prediction_performances(
 
     if selected_dimension != "all":
         scores = scores.loc[[selected_dimension]]
-        sorted_dimensions = scores.index.drop_duplicates()
-    else:
-        if dimensions_selection != "without_ensemble_models":
-            sorted_dimensions = scores.loc[CUSTOM_ORDER].index.drop_duplicates()
-        else:
-            sorted_dimensions = scores.loc[
-                pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"])
-            ].index.drop_duplicates()
+
+    sorted_dimensions = scores.index.drop_duplicates()
 
     x_positions = pd.DataFrame(
         np.arange(5, 10 * len(sorted_dimensions) + 5, 10), index=sorted_dimensions, columns=["x_position"]
