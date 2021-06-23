@@ -35,7 +35,7 @@ TREE_SCALARS = {
         "IntraocularPressure": ["Scalars"],
     },
     "Hearing": {"HearingTest": ["Scalars"]},
-    "Heart": {"All": ["Scalars"], "ECG": ["Scalars"], "MRI": ["Size", "PWA", "AllScalars"]},
+    "Heart": {"All": ["Scalars"], "ECG": ["Scalars"], "MRI": ["Size", "PulseWaveAnalysis", "AllScalars"]},
     "Lungs": {"Spirometry": ["Scalars"]},
     "Musculoskeletal": {
         "Scalars": ["AllScalars", "Anthropometry", "Impedance", "HeelBoneDensitometry", "HandGripStrength"]
