@@ -1,3 +1,4 @@
+from types import DynamicClassAttribute
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -7,6 +8,7 @@ import dash_table
 import dash
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_options
@@ -143,7 +145,7 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
     for other_algorithm in other_scores.index:
         subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a R² of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
 
-    features = pd.DataFrame(data_features).set_index("feature")
+    features = pd.DataFrame(data_features, dtype=np.float32).set_index("feature")
     features.columns = pd.MultiIndex.from_tuples(
         list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
     )
@@ -232,7 +234,7 @@ def _sort_tables(
 
     best_algorithm = scores.index[0]
 
-    features = pd.DataFrame(data_features).set_index("feature")
+    features = pd.DataFrame(data_features, dtype=np.float32).set_index("feature")
     features.columns = pd.MultiIndex.from_tuples(
         list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
     )
