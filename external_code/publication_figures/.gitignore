@@ -1,0 +1,4 @@
+# Avoid pushing data
+*.csv
+*.feather
+*.zip
