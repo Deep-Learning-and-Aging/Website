@@ -88,11 +88,7 @@ def heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorte
 
 
 def add_custom_legend_axis(fig, sorted_table_correlations, size_dimension=11, size_subdimension=9):
-    dimensions = (
-        sorted_table_correlations.index.to_frame()[["dimension_1", "subdimension_1"]]
-        .reset_index(drop=True)
-        .rename(columns={"dimension_1": "dimension", "subdimension_1": "subdimension"})
-    )
+    dimensions = sorted_table_correlations.index.to_frame()[["dimension", "subdimension"]].reset_index(drop=True)
     dimensions["position"] = fig["layout"]["xaxis"]["tickvals"]
     dimensions.set_index(["dimension", "subdimension"], inplace=True)
 
@@ -203,7 +199,7 @@ def add_line_and_annotation(
 
 
 def histogram_correlation(table_correlations):
-    correlations = table_correlations.values[np.triu_indices(table_correlations.shape[0])]
+    correlations = table_correlations.values[np.triu_indices(table_correlations.shape[0], k=1)]
     histogram = go.Histogram(x=correlations, histnorm="percent", xbins={"size": 0.01})
 
     fig = go.Figure(histogram)

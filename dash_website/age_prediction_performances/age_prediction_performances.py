@@ -11,7 +11,7 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS_RENDERING
 from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES, CUSTOM_DIMENSIONS
 
 
@@ -38,7 +38,7 @@ def get_controls_age_prediction_performances():
             ),
             get_drop_down(
                 "selected_dimension_age_prediction_performances",
-                ["all"] + CUSTOM_ORDER,
+                ["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist(),
                 "Select an aging dimension: ",
                 from_dict=False,
             ),
@@ -60,11 +60,15 @@ def get_controls_age_prediction_performances():
 )
 def _change_dimensions_age_prediction_performances(dimensions_selection):
     if dimensions_selection != "without_ensemble_models":
-        return get_options(["all"] + CUSTOM_ORDER), "all"
+        return get_options(["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist()), "all"
     else:
         return (
             get_options(
-                ["all"] + list(pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"]))
+                ["all"]
+                + CUSTOM_DIMENSIONS.get_level_values("dimension")
+                .drop_duplicates()
+                .drop(["*", "*instances01", "*instances1.5x", "*instances23"])
+                .tolist()
             ),
             "all",
         )

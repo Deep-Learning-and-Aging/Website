@@ -38,7 +38,7 @@ CUSTOM_DIMENSIONS = pd.MultiIndex.from_tuples(
         ["Heart", "*", "*", "*"],
         ["Heart", "ECG", "TimeSeries", "*"],
         ["Heart", "MRI", "*", "*"],
-        ["BloodCells", "*", "*", "*"],
+        ["BloodCells", "BloodCount", "*", "*"],
         ["Lungs", "Spirometry", "*", "*"],
         ["Musculoskeletal", "*", "*", "*"],
         ["Musculoskeletal", "FullBody", "*", "*"],
