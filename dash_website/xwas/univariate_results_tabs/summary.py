@@ -8,7 +8,7 @@ import pandas as pd
 from dash_website.app import APP
 from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES
 from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE, ITEMS_TITLES
 
 
@@ -34,7 +34,7 @@ def get_summary():
 
 
 def get_data():
-    return load_feather(f"xwas/univariate_results/summary.feather").to_dict()
+    return load_feather("xwas/univariate_results/summary.feather").to_dict()
 
 
 def get_controls_tab():
@@ -59,9 +59,9 @@ def _fill_summary_heatmap(item, main_category, data):
     import plotly.graph_objects as go
 
     if main_category == "All":
-        list_categories = [f"All_{main_category}"] + list(
-            pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic"])
-        )
+        list_categories = [
+            f"All_{one_main_category}" for one_main_category in MAIN_CATEGORIES_TO_CATEGORIES.keys()
+        ] + list(pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic"]))
     else:
         list_categories = [f"All_{main_category}"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]
 
@@ -76,14 +76,14 @@ def _fill_summary_heatmap(item, main_category, data):
             index=[("dimension", "")], columns=[("category", "")], values=(item, "percentage")
         )
     ).astype(int)
-    summary_item_percentage_category = summary_item_percentage[list_categories].rename(index=RENAME_DIMENSIONS)
+    summary_item_percentage_category = summary_item_percentage[list_categories]
     summary_item_percentage_category.index.name = "dimension"
     summary_item_percentage_category.columns.name = "category"
 
     summary_item_number = summary.reset_index().pivot(
         index=[("dimension", "")], columns=[("category", "")], values=(item, "number")
     )
-    summary_item_number_category = summary_item_number[list_categories].rename(index=RENAME_DIMENSIONS)
+    summary_item_number_category = summary_item_number[list_categories]
     summary_item_percentage_category.index.name = "dimension"
     summary_item_percentage_category.columns.name = "category"
 

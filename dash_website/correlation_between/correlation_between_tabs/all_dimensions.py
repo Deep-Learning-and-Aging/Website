@@ -15,7 +15,8 @@ from dash_website.utils.graphs import (
     add_line_and_annotation,
     histogram_correlation,
 )
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, CUSTOM_ORDER, GRAPH_SIZE
+from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -74,9 +75,34 @@ def get_all_dimensions():
     Input("sample_definition_all_dimensions", "value"),
 )
 def _modify_store_all_dimensions(sample_definition):
-    return load_feather(
+    correlations = load_feather(
         f"correlation_between_accelerated_aging_dimensions/all_dimensions_{sample_definition}.feather"
-    ).to_dict()
+    ).drop(
+        columns=[
+            "r2_1",
+            "r2_std_1",
+            "r2_2",
+            "r2_std_2",
+        ]
+    )
+
+    score_sample_definition = sample_definition
+    if sample_definition == "all_samples_when_possible_otherwise_average":
+        score_sample_definition = "all_samples_per_participant"
+    scores = load_feather(f"age_prediction_performances/scores_{score_sample_definition}.feather").set_index(
+        ["dimension", "subdimension", "sub_subdimension", "algorithm"]
+    )
+
+    for number in [1, 2]:
+        correlations.set_index(
+            [f"dimension_{number}", f"subdimension_{number}", f"sub_subdimension_{number}", f"algorithm_{number}"],
+            inplace=True,
+        )
+        correlations[f"r2_{number}"] = scores["r2"]
+        correlations[f"r2_std_{number}"] = scores["r2_std"]
+        correlations.reset_index(inplace=True)
+
+    return correlations.to_dict()
 
 
 def get_controls_tab_all_dimensions():
@@ -88,7 +114,7 @@ def get_controls_tab_all_dimensions():
             get_item_radio_items("order_type_all_dimensions", ORDER_TYPES, "Order by:"),
             get_drop_down(
                 "dimension_all_dimensions",
-                ["all"] + list(pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"])),
+                ["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist(),
                 "Select an aging dimension: ",
                 from_dict=False,
             ),
@@ -159,11 +185,7 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
 
     else:  # order_by == "custom"
         if selected_dimension == "all":
-            sorted_dimensions = (
-                correlations.set_index(["dimension_1", "subdimension_1", "sub_subdimension_1", "algorithm_1"])
-                .loc[CUSTOM_ORDER]
-                .index.drop_duplicates()
-            )
+            sorted_dimensions = order_dimensions
         else:
             sorted_dimensions = [selected_dimension]
 
