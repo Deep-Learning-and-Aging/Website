@@ -109,7 +109,10 @@ def get_controls_tab_all_dimensions():
     return dbc.Card(
         [
             get_item_radio_items(
-                "sample_definition_all_dimensions", SAMPLE_DEFINITION, "Select the way we define a sample: "
+                "sample_definition_all_dimensions",
+                SAMPLE_DEFINITION,
+                "Select the way we define a sample: ",
+                value_idx=2,
             ),
             get_item_radio_items("order_type_all_dimensions", ORDER_TYPES, "Order by:"),
             get_drop_down(
