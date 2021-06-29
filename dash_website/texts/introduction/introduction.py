@@ -5,7 +5,7 @@ TEXT = html.Div(
     [
         html.Div(
             html.P(
-                "On this website, we present the results of our different publications in the field of biological age predictors. Eight of these publications take a deep dive to analyze organ-specific age predictors:"
+                "On this website, we present the results of our different projects in the field of biological age predictors. Nine of these projects take a deep dive to analyze organ-specific age predictors:"
             ),
             style={"text-indent": 0},
         ),
@@ -22,8 +22,21 @@ TEXT = html.Div(
                         ),
                     ]
                 ),
-                html.P("- Brain age"),
-                html.P("- Physical activity-based age"),
+                html.P(
+                    [
+                        "- ",
+                        html.A("Brain age", href="https://www.medrxiv.org/content/10.1101/2021.06.22.21259280v1"),
+                    ]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Physical activity-based age",
+                            href="https://www.medrxiv.org/content/10.1101/2021.06.21.21259265v1",
+                        ),
+                    ]
+                ),
                 html.P(
                     ["- ", html.A("Arterial age", href="https://www.medrxiv.org/content/10.1101/2021.06.17.21259120v1")]
                 ),
@@ -35,12 +48,12 @@ TEXT = html.Div(
         ),
         html.P(
             [
-                "Finally, our last publication analyzes the ",
+                "Finally, our last project analyzes the ",
                 html.A(
                     "multidimensionality of aging",
                     href="https://www.medrxiv.org/content/10.1101/2021.04.25.21255767v1",
                 ),
-                " by comparing and correlating the different aforementioned biological age predictors, and others (hearing, lung, urine). For a one-hour seminar presentation of our main results, see ",
+                " by comparing and correlating the different aforementioned biological age predictors, and others. For a one-hour seminar presentation of our main results, see ",
                 html.A("here", href="https://www.youtube.com/watch?v=VqQtQxkwzNo"),
                 ".",
             ]
