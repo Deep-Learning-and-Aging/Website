@@ -18,6 +18,15 @@ TEXT = html.Div(
                     [
                         "- ",
                         html.A(
+                            "Abdomen age",
+                            href="https://www.medrxiv.org/content/10.1101/2021.06.24.21259492v1",
+                        ),
+                    ]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
                             "Musculoskeletal age", href="https://www.medrxiv.org/content/10.1101/2021.06.14.21258896v1"
                         ),
                     ]
@@ -40,9 +49,16 @@ TEXT = html.Div(
                 html.P(
                     ["- ", html.A("Arterial age", href="https://www.medrxiv.org/content/10.1101/2021.06.17.21259120v1")]
                 ),
-                html.P("- Eye age"),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Eye age",
+                            href="https://www.medrxiv.org/content/10.1101/2021.06.24.21259471v1",
+                        ),
+                    ]
+                ),
                 html.P("- Blood age"),
-                html.P("- Abdomen age"),
             ],
             style={"line-height": 0.7},
         ),
