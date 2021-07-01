@@ -1,7 +1,7 @@
 import pandas as pd
 
 RENAMING_COLUMNS = {
-    "dimension": "Heart Dimension",
+    "dimension": "Abdomen Dimension",
     "category": "X - main category",
     "subcategory": "X - subcategory",
     "variable": "Variable",
@@ -10,9 +10,9 @@ RENAMING_COLUMNS = {
     "sample_size": "Sample size",
 }
 RENAMING = {
-    "Heart": "General",
-    "HeartECG": "Electrical (ECG-based)",
-    "HeartMRI": "Anatomical (MRI-based)",
+    "Abdomen": "General",
+    "AbdomenLiver": "Liver",
+    "AbdomenPancreas": "Pancreas",
     "ClinicalPhenotypes": "Clinical Phenotypes",
     "FamilyHistory": "Family History",
     "Environmental": "Environmental variables",
@@ -28,19 +28,25 @@ ORDER_MAIN_CATEGORIES = [
 ]
 ORDER_DIMENSIONS_MAIN_CATEGORIES = [
     [dimension, main_category]
-    for dimension in ["Heart", "HeartECG", "HeartMRI"]
+    for dimension in ["Abdomen", "AbdomenLiver", "AbdomenPancreas"]
     for main_category in ORDER_MAIN_CATEGORIES
 ]
 
 
 if __name__ == "__main__":
-    correlations = (
-        pd.read_csv("Heart_univariate_correlations.csv")
-        .drop(columns="Unnamed: 0")
-        .rename(columns={"category": "subcategory"})
-    )
-
     from dash_website import MAIN_CATEGORIES_TO_CATEGORIES
+
+    correlations_list = []
+    for abdomen_dimension in ["Abdomen", "AbdomenLiver", "AbdomenPancreas"]:
+        clean_dimension = (
+            pd.read_csv(f"external_code/publication_figures/univariate_correlations/{abdomen_dimension}.csv")
+            .drop(columns="Unnamed: 0")
+            .rename(columns={"category": "subcategory"})
+        )
+        clean_dimension["dimension"] = abdomen_dimension
+        correlations_list.append(clean_dimension)
+
+    correlations = pd.concat(correlations_list, ignore_index=True)
 
     correlations.set_index("subcategory", inplace=True)
     correlations["category"] = None
@@ -64,4 +70,4 @@ if __name__ == "__main__":
 
     correlations_sorted.replace(RENAMING)[RENAMING_COLUMNS].rename(columns=RENAMING_COLUMNS).reset_index(
         drop=True
-    ).to_csv("Heart.csv")
+    ).to_csv("external_code/publication_figures/univariate_correlations/Abdomen_XWAS_univariate_correlations.csv")
