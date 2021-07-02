@@ -1,8 +1,11 @@
 import pandas as pd
 
-STUDIED_DIMENSION = "PhysicalActivity"
+STUDIED_DIMENSION = "Eye"
 RENAMING = {
-    "PhysicalActivity": "Physical Activity",
+    "Eyes": "General",
+    "EyesFundus": "Fundus",
+    "EyesOCT": "OCT",
+    "EyesAll": "All",
     "ClinicalPhenotypes": "Clinical Phenotypes",
     "FamilyHistory": "Family History",
     "Environmental": "Environmental variables",

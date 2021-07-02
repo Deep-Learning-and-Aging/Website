@@ -271,7 +271,7 @@ def _sort_tables(
         is_ascending = sort_by_col_features[0]["direction"] == "asc"
         table_features.sort_values(sort_by_col_features[0]["column_id"], ascending=is_ascending, inplace=True)
     else:
-        table_features.sort_values("percentage_light_gbm", inplace=True)
+        table_features.sort_values("percentage_light_gbm", ascending=False, inplace=True)
 
     if sort_by_col_correlations is not None and len(sort_by_col_correlations) > 0:
         is_ascending = sort_by_col_correlations[0]["direction"] == "asc"
