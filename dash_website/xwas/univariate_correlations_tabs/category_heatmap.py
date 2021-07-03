@@ -180,7 +180,7 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
 
         sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
         sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
-
+        sorted_table_correlations.index.names = ["dimension", "subdimension"]
         fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
         fig = add_custom_legend_axis(fig, sorted_table_correlations)

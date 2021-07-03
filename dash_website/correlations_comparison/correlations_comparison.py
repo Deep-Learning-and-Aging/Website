@@ -272,6 +272,7 @@ def _fill_graph_tab_comparison(
     hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     fig_triangular = heatmap_by_sorted_dimensions(triangular_heatmap, hovertemplate_triangular, customdata_triangular)
+    triangular_heatmap.index.names = ["dimension", "subdimension"]
     fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap)
     fig_triangular.update_layout(
         yaxis={
@@ -298,6 +299,7 @@ def _fill_graph_tab_comparison(
     fig_difference = heatmap_by_sorted_dimensions(
         difference_heatmap, hovertemplate_difference, sorted_customdata_upper, zmin=-2, zmax=2
     )
+    difference_heatmap.index.names = ["dimension", "subdimension"]
     fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap)
     fig_difference.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
