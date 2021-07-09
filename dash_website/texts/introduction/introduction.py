@@ -58,7 +58,17 @@ TEXT = html.Div(
                         ),
                     ]
                 ),
-                html.P("- Blood age"),
+                html.P(
+                    ["- ", html.A("Hearing age", href="https://www.medrxiv.org/content/10.1101/2021.07.05.21260048v1")]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Blood and Urine ages", href="https://www.medrxiv.org/content/10.1101/2021.07.05.21260032v1"
+                        ),
+                    ]
+                ),
             ],
             style={"line-height": 0.7},
         ),
