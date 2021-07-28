@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, does_key_exists
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website.utils.graphs import (
     heatmap_by_clustering,
     heatmap_by_sorted_dimensions,
@@ -20,10 +20,9 @@ from dash_website.utils.graphs import (
 from dash_website import (
     DOWNLOAD_CONFIG,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    ALGORITHMS_RENDERING,
+    ALGORITHMS,
     CORRELATION_TYPES,
-    ORDER_DIMENSIONS,
-    CUSTOM_ORDER,
+    CUSTOM_DIMENSIONS,
     ORDER_TYPES,
     GRAPH_SIZE,
 )
@@ -88,10 +87,19 @@ def _modify_store_category_multi(category):
     key = f"xwas/multivariate_correlations/correlations/categories/correlations_{category}.feather"
 
     if does_key_exists(key):
+        correlations = load_feather(
+            f"xwas/multivariate_correlations/correlations/categories/correlations_{category}.feather"
+        )
+        for dimension, subdimension in [
+            ("Lungs", "Spirometry"),
+            ("Hearing", "HearingTest"),
+            ("BloodCells", "BloodCount"),
+        ]:
+            for i in [1, 2]:
+                correlations.loc[correlations[f"dimension_{i}"] == dimension, f"subdimension_{i}"] = subdimension
+
         return (
-            load_feather(
-                f"xwas/multivariate_correlations/correlations/categories/correlations_{category}.feather"
-            ).to_dict(),
+            correlations.to_dict(),
             True,
         )
     else:
@@ -113,9 +121,9 @@ def get_controls_tab_category_multi():
             get_item_radio_items(
                 "algorithm_category",
                 {
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an Algorithm :",
             ),
@@ -129,7 +137,10 @@ def get_controls_tab_category_multi():
     Input("main_category_category_multi", "value"),
 )
 def _change_category_category_multi(main_category):
-    return get_options(MAIN_CATEGORIES_TO_CATEGORIES[main_category]), MAIN_CATEGORIES_TO_CATEGORIES[main_category][0]
+    return (
+        get_options_from_list(MAIN_CATEGORIES_TO_CATEGORIES[main_category]),
+        MAIN_CATEGORIES_TO_CATEGORIES[main_category][0],
+    )
 
 
 @APP.callback(
@@ -166,7 +177,10 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+    ).loc[
+        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+    ]
     np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
@@ -177,12 +191,19 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
             )
-            .loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+            .loc[
+                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+            ]
             .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(None, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
+    customdata = pd.DataFrame(
+        None,
+        index=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        columns=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+    )
     customdata[customdata.columns] = stacked_customdata
 
     hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number features: %{customdata[4]}<br><extra></extra>"
@@ -203,7 +224,9 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
 
     else:  # order_by == "custom"
         sorted_dimensions = (
-            correlations.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
+            correlations.set_index(["dimension_1", "subdimension_1"])
+            .loc[CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates()]
+            .index.drop_duplicates()
         )
 
         sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]

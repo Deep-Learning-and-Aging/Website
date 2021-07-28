@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, DIMENSIONS, ALGORITHMS_RENDERING, GRAPH_SIZE
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, CUSTOM_DIMENSIONS, ALGORITHMS, GRAPH_SIZE
 
 
 def get_bar_plot():
@@ -52,17 +52,17 @@ def get_controls_tab_bar_plot():
             ),
             get_drop_down(
                 "dimension_bar_plot",
-                DIMENSIONS,
+                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
                 "Select an aging dimension : ",
                 from_dict=False,
             ),
             get_item_radio_items(
                 "algorithm_bar_plot",
                 {
-                    "best_algorithm": ALGORITHMS_RENDERING["best_algorithm"],
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "best_algorithm": ALGORITHMS["best_algorithm"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an Algorithm :",
             ),

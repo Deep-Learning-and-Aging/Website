@@ -8,7 +8,7 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, RENAME_DIMENSIONS, CORRELATION_TYPES
+from dash_website import DOWNLOAD_CONFIG, RENAME_DIMENSIONS, CORRELATION_TYPES, CUSTOM_DIMENSIONS
 from dash_website.utils import BLUE_WHITE_RED
 from dash_website.xwas import SUBSET_METHODS
 
@@ -59,7 +59,12 @@ def _modify_store_dimension(dimension):
 def get_controls_tab_dimension():
     return dbc.Card(
         [
-            get_drop_down("dimension_dimension", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
+            get_drop_down(
+                "dimension_dimension",
+                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
+                "Select an aging dimension: ",
+                from_dict=False,
+            ),
             get_item_radio_items("subset_method_dimension", SUBSET_METHODS, "Select subset method :"),
             get_item_radio_items("correlation_type_dimension", CORRELATION_TYPES, "Select correlation type :"),
         ]

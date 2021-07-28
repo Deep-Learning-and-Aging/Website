@@ -11,10 +11,16 @@ from dash_website.app import APP
 from dash_website.utils.controls import (
     get_item_radio_items,
     get_drop_down,
-    get_options,
+    get_options_from_list,
 )
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, GRAPH_SIZE
+from dash_website import (
+    DOWNLOAD_CONFIG,
+    MAIN_CATEGORIES_TO_CATEGORIES,
+    RENAME_DIMENSIONS,
+    GRAPH_SIZE,
+    CUSTOM_DIMENSIONS,
+)
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
 
@@ -67,7 +73,17 @@ def get_controls_tab():
                 from_dict=False,
             ),
             get_drop_down("category_volcano", ["All"], "Select X subcategory: ", from_dict=False),
-            get_drop_down("dimension_volcano", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
+            get_drop_down(
+                "dimension_volcano",
+                list(
+                    map(
+                        lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
+                        ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+                    )
+                ),
+                "Select an aging dimension: ",
+                from_dict=False,
+            ),
         ]
     )
 
@@ -81,7 +97,7 @@ def _change_controls_category(main_category):
         list_categories = list(pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic"]))
     else:
         list_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    return get_options(["All"] + list_categories), "All"
+    return get_options_from_list(["All"] + list_categories), "All"
 
 
 @APP.callback(Output("memory_volcano", "data"), Input("dimension_volcano", "value"))

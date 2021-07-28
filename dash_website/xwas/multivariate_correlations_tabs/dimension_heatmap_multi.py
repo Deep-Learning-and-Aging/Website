@@ -8,7 +8,7 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS_RENDERING, CORRELATION_TYPES
+from dash_website import DOWNLOAD_CONFIG, CUSTOM_DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS, CORRELATION_TYPES
 from dash_website.utils import BLUE_WHITE_RED
 
 
@@ -59,13 +59,18 @@ def get_controls_tab_dimension_multi():
 
     return dbc.Card(
         [
-            get_drop_down("dimension_dimension_multi", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
+            get_drop_down(
+                "dimension_dimension_multi",
+                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
+                "Select an aging dimension: ",
+                from_dict=False,
+            ),
             get_item_radio_items(
                 "algorithm_dimension",
                 {
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an Algorithm :",
             ),

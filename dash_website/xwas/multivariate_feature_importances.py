@@ -8,13 +8,13 @@ import dash_table
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options_from_list
 from dash_website import (
     DOWNLOAD_CONFIG,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    DIMENSIONS,
+    CUSTOM_DIMENSIONS,
     RENAME_DIMENSIONS,
-    ALGORITHMS_RENDERING,
+    ALGORITHMS,
     CORRELATION_TYPES,
 )
 from dash_website.xwas import FEATURES_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
@@ -47,7 +47,7 @@ def get_controls_features():
             get_drop_down("category_features", ["..."], "Select X subcategory: ", from_dict=False),
             get_drop_down(
                 "dimension_features",
-                DIMENSIONS,
+                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
                 "Select an aging dimension: ",
                 from_dict=False,
             ),
@@ -68,7 +68,7 @@ def _change_controls_category(main_category):
         list_categories = list(pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["PhysicalActivity"]))
     else:
         list_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    return get_options(list_categories), list_categories[0]
+    return get_options_from_list(list_categories), list_categories[0]
 
 
 def get_controls_table_features():
@@ -140,7 +140,7 @@ def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
     for algorithm in algorithms:
         bars.append(
             go.Bar(
-                name=ALGORITHMS_RENDERING[algorithm],
+                name=ALGORITHMS[algorithm],
                 x=table_features[f"percentage_{algorithm}"].values[::-1],
                 y=sorted_variables[::-1],
                 orientation="h",

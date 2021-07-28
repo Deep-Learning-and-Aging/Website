@@ -8,14 +8,14 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website import (
     DOWNLOAD_CONFIG,
-    DIMENSIONS,
     RENAME_DIMENSIONS,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    ALGORITHMS_RENDERING,
+    ALGORITHMS,
     CORRELATION_TYPES,
+    CUSTOM_DIMENSIONS
 )
 from dash_website.xwas import DISPLAY_MODE
 
@@ -86,7 +86,7 @@ def get_controls_tab_average_multi():
             ),
             get_drop_down(
                 "dimension_1_average_multi",
-                ["MainDimensions", "SubDimensions"] + DIMENSIONS,
+                ["MainDimensions", "SubDimensions"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().to_list(),
                 "Select an aging dimension 1: ",
                 from_dict=False,
             ),
@@ -94,7 +94,7 @@ def get_controls_tab_average_multi():
                 [
                     get_drop_down(
                         "dimension_2_average_multi",
-                        ["average"] + DIMENSIONS,
+                        ["average"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().to_list(),
                         "Select an aging dimension 2: ",
                         from_dict=False,
                     )
@@ -110,9 +110,9 @@ def get_controls_tab_average_multi():
             get_item_radio_items(
                 "algorithm_average",
                 {
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an algorithm :",
             ),
@@ -131,11 +131,11 @@ def get_controls_tab_average_multi():
 )
 def _change_controls_average(dimension_1):
     if dimension_1 in ["MainDimensions", "SubDimensions"]:
-        return {"display": "none"}, get_options(["average"]), "average"
+        return {"display": "none"}, get_options_from_list(["average"]), "average"
     else:
         return (
             {"display": "block"},
-            get_options(["average"] + pd.Index(DIMENSIONS).drop(dimension_1).tolist()),
+            get_options_from_list(["average"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().drop(dimension_1).tolist()),
             "average",
         )
 
