@@ -4,7 +4,7 @@ setup(
     name="dash_website",
     version="0.1",
     description="Website that shows the results on multi-dimensionality of aging.",
-    packages=find_packages(),
+    packages=["clean_aws", "dash_website", "external_code"],
     requires=["setuptools", "wheel"],
     install_requires=[
         "gunicorn",
