@@ -8,10 +8,10 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website import (
     DOWNLOAD_CONFIG,
-    DIMENSIONS,
+    CUSTOM_DIMENSIONS,
     MAIN_CATEGORIES_TO_CATEGORIES,
     CORRELATION_TYPES,
     RENAME_DIMENSIONS,
@@ -83,7 +83,8 @@ def get_controls_tab_average():
             ),
             get_drop_down(
                 "dimension_1_average",
-                ["MainDimensions", "SubDimensions"] + DIMENSIONS,
+                ["MainDimensions", "SubDimensions"]
+                + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().to_list(),
                 "Select an aging dimension 1: ",
                 from_dict=False,
             ),
@@ -91,7 +92,7 @@ def get_controls_tab_average():
                 [
                     get_drop_down(
                         "dimension_2_average",
-                        ["average"] + DIMENSIONS,
+                        ["average"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().to_list(),
                         "Select an aging dimension 2: ",
                         from_dict=False,
                     )
@@ -120,11 +121,14 @@ def get_controls_tab_average():
 )
 def _change_controls_average(dimension_1):
     if dimension_1 in ["MainDimensions", "SubDimensions"]:
-        return {"display": "none"}, get_options(["average"]), "average"
+        return {"display": "none"}, get_options_from_list(["average"]), "average"
     else:
         return (
             {"display": "block"},
-            get_options(["average"] + pd.Index(DIMENSIONS).drop(dimension_1).tolist()),
+            get_options_from_list(
+                ["average"]
+                + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().drop(dimension_1).tolist()
+            ),
             "average",
         )
 

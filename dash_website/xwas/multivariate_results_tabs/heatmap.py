@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.controls import get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS
 from dash_website.utils import BLUE_WHITE_RED
 
 
@@ -50,10 +50,10 @@ def get_controls_tab_heatmap():
             get_item_radio_items(
                 "algorithm_heatmap",
                 {
-                    "best_algorithm": ALGORITHMS_RENDERING["best_algorithm"],
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "best_algorithm": ALGORITHMS["best_algorithm"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an Algorithm :",
             ),
@@ -112,9 +112,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         index=np.roll(sample_size_2d.index, 1), columns=np.roll(sample_size_2d.columns, 1)
     )
 
-    algorithm_2d = pd.pivot(scores, index="category", columns="dimension", values="algorithm").replace(
-        ALGORITHMS_RENDERING
-    )
+    algorithm_2d = pd.pivot(scores, index="category", columns="dimension", values="algorithm").replace(ALGORITHMS)
     algorithm_2d["average"] = "No algorithm"
     algorithm_2d.loc["average"] = "No algorithm"
     algorithm_2d = algorithm_2d.reindex(index=np.roll(algorithm_2d.index, 1), columns=np.roll(algorithm_2d.columns, 1))
@@ -151,13 +149,11 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         )
         percentages.index.name = "algorithm"
         for algorithm in ["elastic_net", "light_gbm", "neural_network"]:
-            percentages.loc[algorithm, "percentage"] = (algorithm_2d == ALGORITHMS_RENDERING[algorithm]).sum().sum()
-            percentages.loc[algorithm, "max_percentage"] = r2_2d.values[
-                algorithm_2d == ALGORITHMS_RENDERING[algorithm]
-            ].max()
+            percentages.loc[algorithm, "percentage"] = (algorithm_2d == ALGORITHMS[algorithm]).sum().sum()
+            percentages.loc[algorithm, "max_percentage"] = r2_2d.values[algorithm_2d == ALGORITHMS[algorithm]].max()
 
         percentages.reset_index(inplace=True)
-        percentages.replace(ALGORITHMS_RENDERING, inplace=True)
+        percentages.replace(ALGORITHMS, inplace=True)
 
         hovertemplate = "Algorithm: %{label} <br>Number of best algorithm: %{value} <br>Max percentage: %{customdata:.3f} <br><extra></extra>"
 
