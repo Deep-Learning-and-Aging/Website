@@ -1,44 +1,6 @@
 import pandas as pd
 
 
-DIMENSIONS = sorted(
-    [
-        "*",
-        "*instances01",
-        "*instances1.5x",
-        "*instances23",
-        "Abdomen",
-        "AbdomenLiver",
-        "AbdomenPancreas",
-        "Arterial",
-        "ArterialPulseWaveAnalysis",
-        "ArterialCarotids",
-        "Biochemistry",
-        "BiochemistryUrine",
-        "BiochemistryBlood",
-        "Brain",
-        "BrainCognitive",
-        "BrainMRI",
-        "Eyes",
-        "EyesAll",
-        "EyesFundus",
-        "EyesOCT",
-        "Hearing",
-        "HeartMRI",
-        "Heart",
-        "HeartECG",
-        "BloodCells",
-        "Lungs",
-        "Musculoskeletal",
-        "MusculoskeletalSpine",
-        "MusculoskeletalHips",
-        "MusculoskeletalKnees",
-        "MusculoskeletalFullBody",
-        "MusculoskeletalScalars",
-        "PhysicalActivity",
-    ]
-)
-
 RENAME_DIMENSIONS = {
     "*": "set",
     "*instances01": "set_instances01",
@@ -164,7 +126,7 @@ MAIN_CATEGORIES_TO_CATEGORIES = {
     "Socioeconomics": ALL_SOCIOECONOMICS,
 }
 
-ALGORITHMS_RENDERING = {
+ALGORITHMS = {
     "correlation": "Correlation",
     "best_algorithm": "Best Algorithm",
     "elastic_net": "Elastic Net",
