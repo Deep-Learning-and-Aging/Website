@@ -10,22 +10,8 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
-from dash_website import DOWNLOAD_CONFIG
+from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG
 from dash_website.genetics import ORDER_TYPES_HERITABILITY
-
-
-def get_data():
-    heritabilities = load_feather(f"genetics/heritability/heritability.feather")
-
-    for dimension, subdimension in [
-        ("Hearing", "HearingTest"),
-        ("BloodCells", "BloodCount"),
-        ("Lungs", "Spirometry"),
-    ]:
-        heritabilities.loc[heritabilities["dimension"] == dimension, "subdimension"] = subdimension
-
-    return heritabilities.to_dict()
 
 
 def get_controls_heritability():
@@ -167,7 +153,11 @@ def _fill_graph_heritability(order_by, data_heritability):
 
 LAYOUT = dbc.Container(
     [
-        dcc.Loading(dcc.Store(id="memory_heritability", data=get_data())),
+        dcc.Loading(
+            dcc.Store(
+                id="memory_heritability", data=load_feather("genetics/heritability/heritability.feather").to_dict()
+            )
+        ),
         html.H1("Heritability - GWAS"),
         html.Br(),
         html.Br(),
