@@ -12,6 +12,7 @@ from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down
 from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG
 from dash_website.genetics import VOLCANO_TABLE_COLUMNS
+from dash_website.genetics.gwas_tabs import DIMENSIONS_TO_DROP_VOLCANO
 
 
 def get_volcano():
@@ -81,16 +82,7 @@ def get_controls_volcano_gwas():
                     )
                 )
             ).drop(
-                [
-                    "*",
-                    "*instances01",
-                    "*instances23",
-                    "AbdomenPancreas",
-                    "Arterial",
-                    "ArterialCarotids",
-                    "EyesAll",
-                    "HeartECG",
-                ]
+                DIMENSIONS_TO_DROP_VOLCANO
             ),
             "Select a dimension:",
             from_dict=False,

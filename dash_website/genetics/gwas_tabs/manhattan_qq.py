@@ -9,6 +9,7 @@ import pandas as pd
 from dash_website.utils.aws_loader import load_src_image
 from dash_website.utils.controls import get_drop_down
 from dash_website import RENAME_DIMENSIONS, CUSTOM_DIMENSIONS
+from dash_website.genetics.gwas_tabs import DIMENSIONS_TO_DROP_MANHATTAN_QQ
 
 
 def get_manhattan_qq():
@@ -36,7 +37,7 @@ def get_controls_manhattan_qq_gwas():
                         ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
                     )
                 )
-            ).drop(["*instances01"]),
+            ).drop(DIMENSIONS_TO_DROP_MANHATTAN_QQ),
             "Select a dimension:",
             from_dict=False,
         )
