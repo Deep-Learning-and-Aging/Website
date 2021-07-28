@@ -10,8 +10,8 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
-from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
-from dash_website import DOWNLOAD_CONFIG, ALGORITHMS_RENDERING
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options_from_list
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS
 from dash_website.datasets import (
     TREE_TIME_SERIES,
     INFORMATION_TIME_SERIES,
@@ -20,14 +20,6 @@ from dash_website.datasets import (
     SAMPLE_LEGEND,
 )
 from dash_website.feature_importances import AGING_RATE_LEGEND
-
-
-def get_data_scores():
-    return load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").to_dict()
-
-
-def get_data_features():
-    return load_feather("datasets/time_series/information.feather").to_dict()
 
 
 def get_controls_time_series_features():
@@ -70,20 +62,20 @@ def get_controls_time_series_features():
         Input("memory_scores_features", "data"),
     ],
 )
-def _change_subdimensions_features(dimension, subdimension, data_scores):
+def _change_subdimensions_time_series_features(dimension, subdimension, data_scores):
     context = dash.callback_context.triggered
 
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_time_series_features":
         first_subdimension = list(TREE_TIME_SERIES[dimension].keys())[0]
 
-        option_subdimension = get_options(list(TREE_TIME_SERIES[dimension].keys()))
+        option_subdimension = get_options_from_list(list(TREE_TIME_SERIES[dimension].keys()))
         value_subdimension = list(TREE_TIME_SERIES[dimension].keys())[0]
-        option_sub_subdimension = get_options(TREE_TIME_SERIES[dimension][first_subdimension])
+        option_sub_subdimension = get_options_from_list(TREE_TIME_SERIES[dimension][first_subdimension])
         value_sub_subdimension = TREE_TIME_SERIES[dimension][first_subdimension][0]
     else:
-        option_subdimension = get_options(list(TREE_TIME_SERIES[dimension].keys()))
+        option_subdimension = get_options_from_list(list(TREE_TIME_SERIES[dimension].keys()))
         value_subdimension = subdimension
-        option_sub_subdimension = get_options(TREE_TIME_SERIES[dimension][subdimension])
+        option_sub_subdimension = get_options_from_list(TREE_TIME_SERIES[dimension][subdimension])
         value_sub_subdimension = TREE_TIME_SERIES[dimension][subdimension][0]
 
     scores_raw = (
@@ -98,7 +90,7 @@ def _change_subdimensions_features(dimension, subdimension, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {ALGORITHMS_RENDERING[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {ALGORITHMS[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
@@ -139,10 +131,10 @@ def get_controls_side_time_series_features(side):
         Input("sub_subdimension_time_series_features", "value"),
     ],
 )
-def _change_channel_features(dimension, subdimension, sub_subdimension):
+def _change_channel_time_series_features(dimension, subdimension, sub_subdimension):
     nb_channel = INFORMATION_TIME_SERIES[dimension][subdimension][sub_subdimension]["nb_channel"]
 
-    return [get_options(range(nb_channel)), 0, get_options(range(nb_channel)), 0]
+    return [get_options_from_list(range(nb_channel)), 0, get_options_from_list(range(nb_channel)), 0]
 
 
 @APP.callback(
@@ -244,8 +236,16 @@ LAYOUT = dbc.Container(
     [
         dcc.Loading(
             [
-                dcc.Store(id="memory_scores_features", data=get_data_scores()),
-                dcc.Store(id="memory_time_series_features", data=get_data_features()),
+                dcc.Store(
+                    id="memory_time_series_features",
+                    data=load_feather("datasets/time_series/information.feather").to_dict(),
+                ),
+                dcc.Store(
+                    id="memory_scores_features",
+                    data=load_feather(
+                        "age_prediction_performances/scores_all_samples_per_participant.feather"
+                    ).to_dict(),
+                ),
             ]
         ),
         html.H1("Model interpretability - Time series"),
