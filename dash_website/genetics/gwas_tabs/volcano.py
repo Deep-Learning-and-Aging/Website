@@ -10,14 +10,16 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down
-from dash_website import DOWNLOAD_CONFIG
-from dash_website.genetics import DIMENSIONS_GWAS_VOLCANO, VOLCANO_TABLE_COLUMNS
+from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG
+from dash_website.genetics import VOLCANO_TABLE_COLUMNS
 
 
 def get_volcano():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_volcano_gwas", data=get_data())),
+            dcc.Loading(
+                dcc.Store(id="memory_volcano_gwas", data=load_feather("genetics/gwas/size_effects.feather").to_dict())
+            ),
             html.H1("Associations - GWAS"),
             html.Br(),
             html.Br(),
@@ -67,14 +69,31 @@ def get_volcano():
     )
 
 
-def get_data():
-    return load_feather(f"genetics/gwas/size_effects.feather").to_dict()
-
-
 def get_controls_volcano_gwas():
     return dbc.Card(
         get_drop_down(
-            "dimension_volcano_gwas", ["All"] + DIMENSIONS_GWAS_VOLCANO, "Select a dimension:", from_dict=False
+            "dimension_volcano_gwas",
+            pd.Index(
+                list(
+                    map(
+                        lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
+                        ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+                    )
+                )
+            ).drop(
+                [
+                    "*",
+                    "*instances01",
+                    "*instances23",
+                    "AbdomenPancreas",
+                    "Arterial",
+                    "ArterialCarotids",
+                    "EyesAll",
+                    "HeartECG",
+                ]
+            ),
+            "Select a dimension:",
+            from_dict=False,
         )
     )
 

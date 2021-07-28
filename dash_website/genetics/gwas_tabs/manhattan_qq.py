@@ -1,14 +1,14 @@
-from os import path
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+import pandas as pd
+
 from dash_website.utils.aws_loader import load_src_image
 from dash_website.utils.controls import get_drop_down
-from dash_website import RENAME_DIMENSIONS
-from dash_website.genetics import DIMENSIONS_GWAS
+from dash_website import RENAME_DIMENSIONS, CUSTOM_DIMENSIONS
 
 
 def get_manhattan_qq():
@@ -27,7 +27,19 @@ def get_manhattan_qq():
 
 def get_controls_manhattan_qq_gwas():
     return dbc.Card(
-        get_drop_down("dimensions_manhattan_qq_gwas", DIMENSIONS_GWAS, "Select a dimension:", from_dict=False)
+        get_drop_down(
+            "dimensions_manhattan_qq_gwas",
+            pd.Index(
+                list(
+                    map(
+                        lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
+                        ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+                    )
+                )
+            ).drop(["*instances01"]),
+            "Select a dimension:",
+            from_dict=False,
+        )
     )
 
 

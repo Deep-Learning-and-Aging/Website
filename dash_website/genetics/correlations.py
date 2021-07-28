@@ -15,55 +15,8 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
-
-
-def get_data():
-    correlations = load_feather("genetics/correlations/correlations.feather").drop(
-        columns=[
-            "r2_1",
-            "r2_std_1",
-            "heritability_1",
-            "heritability_std_1",
-            "r2_2",
-            "r2_std_2",
-            "heritability_2",
-            "heritability_std_2",
-            "h2_1",
-            "h2_std_1",
-            "h2_2",
-            "h2_std_2",
-        ]
-    )
-    for number in [1, 2]:
-        for dimension, subdimension in [
-            ("Hearing", "HearingTest"),
-            ("BloodCells", "BloodCount"),
-            ("Lungs", "Spirometry"),
-        ]:
-            correlations.loc[correlations[f"dimension_{number}"] == dimension, f"subdimension_{number}"] = subdimension
-
-    scores = load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").set_index(
-        ["dimension", "subdimension", "sub_subdimension", "algorithm"]
-    )
-    scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
-    scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
-
-    heritabilities = load_feather(f"genetics/heritability/heritability.feather").set_index(
-        ["dimension", "subdimension"]
-    )
-
-    for number in [1, 2]:
-        correlations.set_index([f"dimension_{number}", f"subdimension_{number}"], inplace=True)
-        correlations[f"r2_{number}"] = scores["r2"]
-        correlations[f"r2_std_{number}"] = scores["r2_std"]
-        correlations[f"h2_{number}"] = heritabilities["h2"]
-        correlations[f"h2_std_{number}"] = heritabilities["h2_std"]
-        correlations.reset_index(inplace=True)
-
-    return correlations.to_dict()
+from dash_website import CUSTOM_DIMENSIONS, ORDER_TYPES, GRAPH_SIZE, DOWNLOAD_CONFIG
+from dash_website.genetics import DIMENSIONS_TO_DROP_CORRELATIONS
 
 
 def get_controls_genetics_correlations():
@@ -74,17 +27,36 @@ def get_controls_genetics_correlations():
     [
         Output("graph_genetics_correlations", "figure"),
         Output("title_genetics_correlations", "children"),
-        Output("histogram_correlations", "figure"),
+        Output("histogram_genetics_correlations", "figure"),
     ],
     [
         Input("order_type_genetics_correlations", "value"),
         Input("memory_genetics_correlations", "data"),
+        Input("memory_scores_genetics_correlations", "data"),
+        Input("memory_heritability_genetics_correlations", "data"),
     ],
 )
-def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
+def _fill_graph_genetics_correlations(order_by, data_genetics_correlations, data_scores, data_heritability):
     correlations = pd.DataFrame(data_genetics_correlations)
 
-    custom_dimensions = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]).drop(("Eyes", "All"))
+    scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
+    scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
+    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
+    scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
+
+    heritabilities = pd.DataFrame(data_heritability).set_index(["dimension", "subdimension"])
+
+    for number in [1, 2]:
+        correlations.set_index([f"dimension_{number}", f"subdimension_{number}"], inplace=True)
+        correlations[f"r2_{number}"] = scores["r2"]
+        correlations[f"r2_std_{number}"] = scores["r2_std"]
+        correlations[f"h2_{number}"] = heritabilities["h2"]
+        correlations[f"h2_std_{number}"] = heritabilities["h2_std"]
+        correlations.reset_index(inplace=True)
+
+    custom_dimensions = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]).drop(
+        DIMENSIONS_TO_DROP_CORRELATIONS
+    )
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],
@@ -164,7 +136,24 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations):
 
 LAYOUT = dbc.Container(
     [
-        dcc.Loading(dcc.Store(id="memory_genetics_correlations", data=get_data())),
+        dcc.Loading(
+            [
+                dcc.Store(
+                    id="memory_genetics_correlations",
+                    data=load_feather("genetics/correlations/correlations.feather").to_dict(),
+                ),
+                dcc.Store(
+                    id="memory_scores_genetics_correlations",
+                    data=load_feather(
+                        "age_prediction_performances/scores_all_samples_per_participant.feather"
+                    ).to_dict(),
+                ),
+                dcc.Store(
+                    id="memory_heritability_genetics_correlations",
+                    data=load_feather(f"genetics/heritability/heritability.feather").to_dict(),
+                ),
+            ]
+        ),
         html.H1("Genetics - Correlations"),
         html.Br(),
         html.Br(),
@@ -198,7 +187,7 @@ LAYOUT = dbc.Container(
                         dcc.Loading(
                             [
                                 html.H4("Histogram of the above correlations"),
-                                dcc.Graph(id="histogram_correlations", config=DOWNLOAD_CONFIG),
+                                dcc.Graph(id="histogram_genetics_correlations", config=DOWNLOAD_CONFIG),
                             ]
                         )
                     ],
