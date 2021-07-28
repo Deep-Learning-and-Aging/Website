@@ -15,8 +15,7 @@ from dash_website.utils.graphs import (
     add_line_and_annotation,
     histogram_correlation,
 )
-from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
+from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 

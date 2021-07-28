@@ -15,8 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
+from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -116,7 +115,10 @@ def get_controls_tab_custom_dimensions():
     return dbc.Card(
         [
             get_item_radio_items(
-                "sample_definition_custom_dimensions", SAMPLE_DEFINITION, "Select the way we define a sample: ", value_idx=2
+                "sample_definition_custom_dimensions",
+                SAMPLE_DEFINITION,
+                "Select the way we define a sample: ",
+                value_idx=2,
             ),
             get_item_radio_items("order_type_custom_dimensions", ORDER_TYPES, "Order by:"),
         ]
