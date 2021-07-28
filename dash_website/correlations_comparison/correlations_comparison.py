@@ -15,9 +15,8 @@ from dash_website import (
     DOWNLOAD_CONFIG,
     CORRELATION_TYPES,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    ORDER_DIMENSIONS,
-    CUSTOM_ORDER,
-    ALGORITHMS_RENDERING,
+    CUSTOM_DIMENSIONS,
+    ALGORITHMS,
     GRAPH_SIZE,
 )
 from dash_website.xwas import SUBSET_METHODS, UNIVARIATE_OR_MULTIVARIATE
@@ -28,9 +27,14 @@ from dash_website.xwas import SUBSET_METHODS, UNIVARIATE_OR_MULTIVARIATE
     [Input("first_uni_or_multi_comparison", "value"), Input("first_category_comparison", "value")],
 )
 def _modify_store_upper_comparison(uni_or_multi, category):
-    return load_feather(
+    correlations = load_feather(
         f"xwas/{uni_or_multi}_correlations/correlations/categories/correlations_{category}.feather"
-    ).to_dict()
+    )
+    for dimension, subdimension in [("Lungs", "Spirometry"), ("Hearing", "HearingTest"), ("BloodCells", "BloodCount")]:
+        for i in [1, 2]:
+            correlations.loc[correlations[f"dimension_{i}"] == dimension, f"subdimension_{i}"] = subdimension
+
+    return correlations.to_dict()
 
 
 @APP.callback(
@@ -38,9 +42,14 @@ def _modify_store_upper_comparison(uni_or_multi, category):
     [Input("second_uni_or_multi_comparison", "value"), Input("second_category_comparison", "value")],
 )
 def _modify_store_lower_comparison(uni_or_multi, category):
-    return load_feather(
+    correlations = load_feather(
         f"xwas/{uni_or_multi}_correlations/correlations/categories/correlations_{category}.feather"
-    ).to_dict()
+    )
+    for dimension, subdimension in [("Lungs", "Spirometry"), ("Hearing", "HearingTest"), ("BloodCells", "BloodCount")]:
+        for i in [1, 2]:
+            correlations.loc[correlations[f"dimension_{i}"] == dimension, f"subdimension_{i}"] = subdimension
+
+    return correlations.to_dict()
 
 
 def get_controls_comparison(order, default_category):
@@ -133,9 +142,9 @@ def change_method(uni_or_mutli, category):
         return (
             get_options_from_dict(
                 {
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 }
             ),
             "elastic_net",
@@ -245,7 +254,9 @@ def _fill_graph_tab_comparison(
     )
 
     sorted_dimensions = (
-        correlations_upper.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
+        correlations_upper.set_index(["dimension_1", "subdimension_1"])
+        .loc[CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates()]
+        .index.drop_duplicates()
     )
     if first_category in ["Genetics", "Phenotypic"] and second_category in ["Genetics", "Phenotypic"]:
         sorted_dimensions = sorted_dimensions.drop(("Eyes", "All"))
@@ -338,7 +349,10 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+    ).loc[
+        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+    ]
 
     customdata_list = []
     for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", sample_nature]:
@@ -348,13 +362,20 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
             )
-            .loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+            .loc[
+                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+            ]
             .values
         )
 
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(np.nan, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
+    customdata = pd.DataFrame(
+        np.nan,
+        index=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        columns=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+    )
     customdata[customdata.columns] = stacked_customdata
 
     # Need to get rid of the Nones to be abble to perform addition elementwise
