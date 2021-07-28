@@ -11,7 +11,7 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website import DOWNLOAD_CONFIG, ALGORITHMS_RENDERING, CUSTOM_DIMENSIONS
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS, CUSTOM_DIMENSIONS
 from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
 
 
@@ -60,7 +60,10 @@ def get_controls_age_prediction_performances():
 )
 def _change_dimensions_age_prediction_performances(dimensions_selection):
     if dimensions_selection != "without_ensemble_models":
-        return get_options_from_list(["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist()), "all"
+        return (
+            get_options_from_list(["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist()),
+            "all",
+        )
     else:
         return (
             get_options_from_list(
@@ -144,7 +147,7 @@ def _fill_graph_age_prediction_performances(
             x=x_positions.loc[scores_algorithm.index].values.flatten(),
             y=scores_algorithm[metric],
             error_y={"array": scores_algorithm[f"{metric}_std"], "type": "data"},
-            name=ALGORITHMS_RENDERING[algorithm],
+            name=ALGORITHMS[algorithm],
             hovertemplate=hovertemplate,
             customdata=customdata,
         )
