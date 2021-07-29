@@ -196,3 +196,4 @@ DIMENSIONS_SUBDIMENSIONS = dict(
         [" - ".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
     )
 )
+DIMENSIONS_SUBDIMENSIONS_INDEXES = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"])
