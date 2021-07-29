@@ -1,5 +1,3 @@
-import pandas as pd
-
 SAMPLE_DEFINITION = {
     "all_samples_per_participant": "Participant and time of examination",
     "average_per_participant": "Participant (average across samples)",
@@ -9,5 +7,3 @@ DIMENSIONS_SELECTION = {
     "all_dimensions": "All dimensions",
     "without_ensemble_models": "Without ensemble models",
 }
-
-SCORES = {"r2": "R²", "rmse": "RMSE", "c_index": "C-index", "c_index_difference": "C-index difference"}
