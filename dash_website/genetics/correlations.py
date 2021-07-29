@@ -41,7 +41,6 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations, data
 
     scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
     scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
     scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
 
     heritabilities = pd.DataFrame(data_heritability).set_index(["dimension", "subdimension"])
@@ -54,9 +53,7 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations, data
         correlations[f"h2_std_{number}"] = heritabilities["h2_std"]
         correlations.reset_index(inplace=True)
 
-    custom_dimensions = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]).drop(
-        DIMENSIONS_TO_DROP_CORRELATIONS
-    )
+    custom_dimensions = DIMENSIONS_SUBDIMENSIONS_INDEXES.drop(DIMENSIONS_TO_DROP_CORRELATIONS)
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],

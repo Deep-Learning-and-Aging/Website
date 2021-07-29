@@ -28,9 +28,7 @@ def get_controls_heritability():
 def _fill_graph_heritability(order_by, data_heritability):
     import plotly.graph_objs as go
 
-    custom_dimensions = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]).drop(
-        [("*", "*"), ("*instances01", "*"), ("Eyes", "All")]
-    )
+    custom_dimensions = DIMENSIONS_SUBDIMENSIONS_INDEXES.drop([("*", "*"), ("*instances01", "*"), ("Eyes", "All")])
 
     heritability = pd.DataFrame(data_heritability).set_index(["dimension", "subdimension"]).loc[custom_dimensions]
 
