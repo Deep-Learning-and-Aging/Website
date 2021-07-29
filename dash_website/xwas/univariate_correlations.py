@@ -4,8 +4,8 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from dash_website.xwas.univariate_correlations_tabs.category_heatmap import get_heatmap_univariate_category
-from dash_website.xwas.univariate_correlations_tabs.dimension_heatmap import get_dimension_heatmap
-from dash_website.xwas.univariate_correlations_tabs.average_bars import get_average_bars
+from dash_website.xwas.univariate_correlations_tabs.dimension_heatmap import get_heatmap_univariate_dimension
+from dash_website.xwas.univariate_correlations_tabs.average_bars import get_univariate_average_bars
 
 
 @APP.callback(
@@ -18,9 +18,9 @@ def _get_tab_univariate_correlations(
     if active_tab == "tab_univariate_category":
         return get_heatmap_univariate_category()
     elif active_tab == "tab_univariate_dimension":
-        return get_dimension_heatmap()
+        return get_heatmap_univariate_dimension()
     else:  # active_tab == "tab_average"
-        return get_average_bars()
+        return get_univariate_average_bars()
 
 
 LAYOUT = html.Div(

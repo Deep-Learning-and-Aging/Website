@@ -8,15 +8,15 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, RENAME_DIMENSIONS, CORRELATION_TYPES, CUSTOM_DIMENSIONS
+from dash_website import DIMENSIONS_SUBDIMENSIONS, DOWNLOAD_CONFIG, RENAME_DIMENSIONS, CORRELATION_TYPES
 from dash_website.utils import BLUE_WHITE_RED
 from dash_website.xwas import SUBSET_METHODS
 
 
-def get_dimension_heatmap():
+def get_heatmap_univariate_dimension():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_dimension")),
+            dcc.Loading(dcc.Store(id="memory_univariate_dimension")),
             html.H1("Univariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
@@ -24,7 +24,7 @@ def get_dimension_heatmap():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_dimension(),
+                            get_controls_tab_univariate_dimension(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -34,8 +34,8 @@ def get_dimension_heatmap():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_dimension"),
-                                    dcc.Graph(id="graph_dimension", config=DOWNLOAD_CONFIG),
+                                    html.H2(id="title_univariate_dimension"),
+                                    dcc.Graph(id="graph_univariate_dimension", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -49,34 +49,35 @@ def get_dimension_heatmap():
     )
 
 
-@APP.callback(Output("memory_dimension", "data"), Input("dimension_dimension", "value"))
-def _modify_store_dimension(dimension):
+@APP.callback(
+    Output("memory_univariate_dimension", "data"), Input("dimension_subdimension_univariate_dimension", "value")
+)
+def _modify_store_dimension(dimension_subdimension):
     return load_feather(
-        f"xwas/univariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
+        f"xwas/univariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_subdimension, dimension_subdimension)}.feather"
     ).to_dict()
 
 
-def get_controls_tab_dimension():
+def get_controls_tab_univariate_dimension():
     return dbc.Card(
         [
             get_drop_down(
-                "dimension_dimension",
-                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
-                "Select an aging dimension: ",
-                from_dict=False,
+                "dimension_subdimension_univariate_dimension", DIMENSIONS_SUBDIMENSIONS, "Select an aging dimension: "
             ),
-            get_item_radio_items("subset_method_dimension", SUBSET_METHODS, "Select subset method :"),
-            get_item_radio_items("correlation_type_dimension", CORRELATION_TYPES, "Select correlation type :"),
+            get_item_radio_items("subset_method_univariate_dimension", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items(
+                "correlation_type_univariate_dimension", CORRELATION_TYPES, "Select correlation type :"
+            ),
         ]
     )
 
 
 @APP.callback(
-    [Output("graph_dimension", "figure"), Output("title_dimension", "children")],
+    [Output("graph_univariate_dimension", "figure"), Output("title_univariate_dimension", "children")],
     [
-        Input("subset_method_dimension", "value"),
-        Input("correlation_type_dimension", "value"),
-        Input("memory_dimension", "data"),
+        Input("subset_method_univariate_dimension", "value"),
+        Input("correlation_type_univariate_dimension", "value"),
+        Input("memory_univariate_dimension", "data"),
     ],
 )
 def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
@@ -91,6 +92,7 @@ def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
     correlations["dimension_subdimension"] = (
         correlations.index.get_level_values("dimension") + " - " + correlations.index.get_level_values("subdimension")
     )
+    print(correlations.index.get_level_values("subdimension").drop_duplicates())
     numbers_variables = correlations_raw[[(subset_method, "number_variables")]]
     numbers_variables.columns = ["number_variables"]
     numbers_variables["dimension_subdimension"] = (
@@ -109,6 +111,7 @@ def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
 
     hovertemplate = "Correlation: %{z:.3f} <br>X subcategory: %{x} <br>Aging dimension: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
 
+    print(correlations_2d.index)
     heatmap = go.Heatmap(
         x=correlations_2d.columns,
         y=correlations_2d.index,
