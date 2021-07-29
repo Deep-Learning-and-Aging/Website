@@ -22,6 +22,7 @@ from dash_website import (
     MAIN_CATEGORIES_TO_CATEGORIES,
     ORDER_TYPES,
     CUSTOM_DIMENSIONS,
+    DIMENSIONS_SUBDIMENSIONS_INDEXES,
     GRAPH_SIZE,
 )
 from dash_website.xwas import SUBSET_METHODS
@@ -97,22 +98,9 @@ def _modify_store_univariate_category(main_category, category):
     if category == "All":
         category = f"All_{main_category}"
 
-    correlations = load_feather(
+    return load_feather(
         f"xwas/univariate_correlations/correlations/categories/correlations_{category}.feather"
-    ).drop(
-        columns=[
-            "r2_1",
-            "r2_std_1",
-            "r2_2",
-            "r2_std_2",
-        ]
-    )
-
-    for dimension, subdimension in [("Lungs", "Spirometry"), ("Hearing", "HearingTest"), ("BloodCells", "BloodCount")]:
-        for i in [1, 2]:
-            correlations.loc[correlations[f"dimension_{i}"] == dimension, f"subdimension_{i}"] = subdimension
-
-    return correlations.to_dict()
+    ).to_dict()
 
 
 def get_controls_tab_univariate_category():
@@ -169,7 +157,6 @@ def _fill_graph_tab_univariate_category(order_by, subset_method, correlation_typ
 
     scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
     scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
     scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
 
     for number in [1, 2]:
@@ -182,10 +169,7 @@ def _fill_graph_tab_univariate_category(order_by, subset_method, correlation_typ
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    ).loc[
-        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-    ]
+    ).loc[DIMENSIONS_SUBDIMENSIONS_INDEXES, DIMENSIONS_SUBDIMENSIONS_INDEXES]
     np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
@@ -196,19 +180,12 @@ def _fill_graph_tab_univariate_category(order_by, subset_method, correlation_typ
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
             )
-            .loc[
-                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-            ]
+            .loc[DIMENSIONS_SUBDIMENSIONS_INDEXES, DIMENSIONS_SUBDIMENSIONS_INDEXES]
             .values
         )
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(
-        None,
-        index=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-        columns=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-    )
+    customdata = pd.DataFrame(None, index=DIMENSIONS_SUBDIMENSIONS_INDEXES, columns=DIMENSIONS_SUBDIMENSIONS_INDEXES)
     customdata[customdata.columns] = stacked_customdata
 
     hovertemplate = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
@@ -228,18 +205,10 @@ def _fill_graph_tab_univariate_category(order_by, subset_method, correlation_typ
         fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
     else:  # order_by == "custom"
-        sorted_dimensions = (
-            correlations.set_index(["dimension_1", "subdimension_1"])
-            .loc[CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates()]
-            .index.drop_duplicates()
-        )
+        fig = heatmap_by_sorted_dimensions(table_correlations, hovertemplate, customdata)
 
-        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
-        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
-        sorted_table_correlations.index.names = ["dimension", "subdimension"]
-        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
-
-        fig = add_custom_legend_axis(fig, sorted_table_correlations)
+        fig = add_custom_legend_axis(fig, table_correlations.index)
+        fig = add_custom_legend_axis(fig, table_correlations.index, horizontal=False)
 
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
