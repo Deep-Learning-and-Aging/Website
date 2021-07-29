@@ -184,3 +184,15 @@ CUSTOM_DIMENSIONS = pd.MultiIndex.from_tuples(
     ],
     names=["dimension", "subdimension", "sub_subdimension", "algorithm"],
 )
+
+DIMENSIONS_SUBDIMENSIONS = dict(
+    zip(
+        list(
+            map(
+                lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
+                ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+            )
+        ),
+        [" - ".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+    )
+)
