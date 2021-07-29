@@ -15,7 +15,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import CUSTOM_DIMENSIONS, ORDER_TYPES, GRAPH_SIZE, DOWNLOAD_CONFIG
+from dash_website import CUSTOM_DIMENSIONS, ORDER_TYPES, GRAPH_SIZE, DOWNLOAD_CONFIG, DIMENSIONS_SUBDIMENSIONS_INDEXES
 from dash_website.genetics import DIMENSIONS_TO_DROP_CORRELATIONS
 
 
@@ -111,7 +111,8 @@ def _fill_graph_genetics_correlations(order_by, data_genetics_correlations, data
 
     else:  # order_by == "custom"
         fig = heatmap_by_sorted_dimensions(table_correlations, hovertemplate, customdata)
-        fig = add_custom_legend_axis(fig, table_correlations)
+        fig = add_custom_legend_axis(fig, table_correlations.index)
+        fig = add_custom_legend_axis(fig, table_correlations.index, horizontal=False)
 
     if order_by != "custom":
         fig.update_layout(font={"size": 8})

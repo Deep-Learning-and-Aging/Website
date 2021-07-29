@@ -11,8 +11,8 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website import DOWNLOAD_CONFIG, ALGORITHMS, CUSTOM_DIMENSIONS
-from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS, CUSTOM_DIMENSIONS, SCORES
+from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION
 
 
 @APP.callback(
@@ -199,14 +199,12 @@ def _fill_graph_age_prediction_performances(
 
         line, annotation = add_line_and_annotation(
             dimension,
-            "x",
-            "y",
             min_position,
             max_position,
             dimension_inner_margin,
             dimension_outer_margin,
-            90,
             size_dimension,
+            True
         )
 
         lines.append(line)
@@ -218,14 +216,12 @@ def _fill_graph_age_prediction_performances(
 
             line, annotation = add_line_and_annotation(
                 subdimension,
-                "x",
-                "y",
                 submin_position,
                 submax_position,
                 subdimension_margin,
                 dimension_inner_margin,
-                90,
                 size_subdimension,
+                True,
             )
 
             lines.append(line)
@@ -242,14 +238,12 @@ def _fill_graph_age_prediction_performances(
 
                 line, annotation = add_line_and_annotation(
                     sub_subdimension,
-                    "x",
-                    "y",
                     sub_submin_position,
                     sub_submax_position,
                     sub_subdimension_margin,
                     subdimension_margin,
-                    90,
                     size_sub_subdimension,
+                    True,
                 )
 
                 lines.append(line)
@@ -258,14 +252,12 @@ def _fill_graph_age_prediction_performances(
     # The final top/right line
     line, _ = add_line_and_annotation(
         dimension,
-        "x",
-        "y",
         min_position,
         max_position,
         sub_subdimension_margin,
         dimension_outer_margin,
-        0,
         10,
+        True,
         final=True,
     )
 

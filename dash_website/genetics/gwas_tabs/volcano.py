@@ -71,14 +71,13 @@ def get_volcano():
 
 
 def get_controls_volcano_gwas():
-    return dbc.Card(
-        get_drop_down(
-            "dimension_volcano_gwas",
-            pd.Index(DIMENSIONS_SUBDIMENSIONS).drop(DIMENSIONS_TO_DROP_VOLCANO),
-            "Select a dimension:",
-            from_dict=False,
-        )
-    )
+    dimensions_subdimensions = {"All": "All"}
+    dimensions_subdimensions.update(DIMENSIONS_SUBDIMENSIONS)
+
+    for dimension_subdimension in DIMENSIONS_TO_DROP_VOLCANO:
+        del dimensions_subdimensions[dimension_subdimension]
+
+    return dbc.Card(get_drop_down("dimension_volcano_gwas", dimensions_subdimensions, "Select a dimension:"))
 
 
 @APP.callback(
