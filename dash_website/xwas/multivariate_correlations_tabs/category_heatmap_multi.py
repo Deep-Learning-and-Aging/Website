@@ -25,6 +25,7 @@ from dash_website import (
     CUSTOM_DIMENSIONS,
     ORDER_TYPES,
     GRAPH_SIZE,
+    DIMENSIONS_SUBDIMENSIONS_INDEXES,
 )
 
 
@@ -178,8 +179,8 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
     ).loc[
-        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        DIMENSIONS_SUBDIMENSIONS_INDEXES,
+        DIMENSIONS_SUBDIMENSIONS_INDEXES,
     ]
     np.fill_diagonal(table_correlations.values, np.nan)
 
@@ -192,8 +193,8 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
                 values=customdata_item,
             )
             .loc[
-                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+                DIMENSIONS_SUBDIMENSIONS_INDEXES,
+                DIMENSIONS_SUBDIMENSIONS_INDEXES,
             ]
             .values
         )
@@ -201,8 +202,8 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
 
     customdata = pd.DataFrame(
         None,
-        index=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-        columns=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        index=DIMENSIONS_SUBDIMENSIONS_INDEXES,
+        columns=DIMENSIONS_SUBDIMENSIONS_INDEXES,
     )
     customdata[customdata.columns] = stacked_customdata
 
@@ -235,7 +236,8 @@ def _fill_graph_tab_category_multi(order_by, algorithm, correlation_type, data_c
 
         fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
-        fig = add_custom_legend_axis(fig, sorted_table_correlations)
+        fig = add_custom_legend_axis(fig, sorted_table_correlations.index)
+        fig = add_custom_legend_axis(fig, sorted_table_correlations.index, horizontal=False)
 
     fig.update_layout(
         yaxis={"showgrid": False, "zeroline": False},

@@ -9,7 +9,12 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list, get_options_from_dict
+from dash_website.utils.controls import (
+    get_drop_down,
+    get_item_radio_items,
+    get_options_from_list,
+    get_options_from_dict,
+)
 from dash_website import (
     DOWNLOAD_CONFIG,
     DIMENSIONS_SUBDIMENSIONS,
@@ -17,7 +22,8 @@ from dash_website import (
     CORRELATION_TYPES,
     RENAME_DIMENSIONS,
 )
-from dash_website.xwas import SUBSET_METHODS, DISPLAY_MODE
+from dash_website.xwas import SUBSET_METHODS
+from dash_website.xwas.univariate_correlations_tabs import DISPLAY_MODE
 
 
 def get_univariate_average_bars():
@@ -239,7 +245,7 @@ def _fill_graph_tab_univariate_average(
             (subset_method, correlation_type),
         ].sort_values(ascending=False)
 
-        if display_mode == "view_all":
+        if display_mode == "view_decreasing":
             bars = go.Bar(
                 x=sorted_correlations.index.get_level_values("category"),
                 y=sorted_correlations,
