@@ -197,3 +197,5 @@ DIMENSIONS_SUBDIMENSIONS = dict(
     )
 )
 DIMENSIONS_SUBDIMENSIONS_INDEXES = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"])
+
+SCORES = {"r2": "R²", "rmse": "RMSE", "c_index": "C-index", "c_index_difference": "C-index difference"}

@@ -21,6 +21,4 @@ FEATURES_CORRELATIONS_TABLE_COLUMNS = {
     "percentage_neural_network": "Percentage Neural Network",
 }
 
-DISPLAY_MODE = {"view_per_main_category": "X main category", "view_all": "Decreasing correlation"}
-
 UNIVARIATE_OR_MULTIVARIATE = {"univariate": "Univariate", "multivariate": "Multivariate"}
