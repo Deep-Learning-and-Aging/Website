@@ -10,7 +10,7 @@ import numpy as np
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG
+from dash_website import DIMENSIONS_SUBDIMENSIONS_INDEXES, DOWNLOAD_CONFIG
 from dash_website.genetics import ORDER_TYPES_HERITABILITY
 
 
@@ -81,15 +81,7 @@ def _fill_graph_heritability(order_by, data_heritability):
             max_position = dimensions.loc[dimension].max()
 
             line, annotation = add_line_and_annotation(
-                dimension,
-                "x",
-                "y",
-                min_position,
-                max_position,
-                dimension_inner_margin,
-                dimension_outer_margin,
-                90,
-                18,
+                dimension, min_position, max_position, dimension_inner_margin, dimension_outer_margin, 18, True
             )
 
             lines.append(line)
@@ -103,14 +95,12 @@ def _fill_graph_heritability(order_by, data_heritability):
 
                 line, annotation = add_line_and_annotation(
                     subdimension,
-                    "x",
-                    "y",
                     submin_position,
                     submax_position,
                     subdimension_margin,
                     dimension_inner_margin,
-                    90,
                     15,
+                    True,
                 )
 
                 lines.append(line)
@@ -119,14 +109,12 @@ def _fill_graph_heritability(order_by, data_heritability):
         # The final top/right line
         line, _ = add_line_and_annotation(
             dimension,
-            "x",
-            "y",
             min_position,
             max_position,
             0,
             dimension_outer_margin,
-            0,
             10,
+            True,
             final=True,
         )
 

@@ -1,3 +1,4 @@
+from dash_website.xwas.multivariate_results import _fill_tab_multivariate_results
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -15,7 +16,7 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
+from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE, DIMENSIONS_SUBDIMENSIONS_INDEXES
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
@@ -187,7 +188,8 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
 
     else:  # order_by == "custom"
         fig = heatmap_by_sorted_dimensions(table_correlations, hovertemplate, customdata)
-        fig = add_custom_legend_axis(fig, table_correlations)
+        fig = add_custom_legend_axis(fig, table_correlations.index)
+        fig = add_custom_legend_axis(fig, table_correlations.index, horizontal=_fill_tab_multivariate_results)
 
     if order_by != "custom":
         fig.update_layout(font={"size": 8})
