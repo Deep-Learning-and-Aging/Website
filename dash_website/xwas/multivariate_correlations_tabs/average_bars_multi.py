@@ -15,9 +15,9 @@ from dash_website import (
     MAIN_CATEGORIES_TO_CATEGORIES,
     ALGORITHMS,
     CORRELATION_TYPES,
-    CUSTOM_DIMENSIONS
+    CUSTOM_DIMENSIONS,
 )
-from dash_website.xwas import DISPLAY_MODE
+from dash_website.xwas.univariate_correlations_tabs import DISPLAY_MODE
 
 
 def get_average_bars():
@@ -86,7 +86,8 @@ def get_controls_tab_average_multi():
             ),
             get_drop_down(
                 "dimension_1_average_multi",
-                ["MainDimensions", "SubDimensions"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().to_list(),
+                ["MainDimensions", "SubDimensions"]
+                + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().to_list(),
                 "Select an aging dimension 1: ",
                 from_dict=False,
             ),
@@ -135,7 +136,10 @@ def _change_controls_average(dimension_1):
     else:
         return (
             {"display": "block"},
-            get_options_from_list(["average"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().drop(dimension_1).tolist()),
+            get_options_from_list(
+                ["average"]
+                + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().drop(dimension_1).tolist()
+            ),
             "average",
         )
 
