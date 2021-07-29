@@ -12,10 +12,17 @@ from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES
 from dash_website.xwas.univariate_results_tabs import ITEMS_LEGEND, ITEMS_COLORSCALE, ITEMS_TITLES
 
 
-def get_summary():
+def get_univariate_summary():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_summary", data=get_data())]),
+            dcc.Loading(
+                [
+                    dcc.Store(
+                        id="memory_univariate_summary",
+                        data=load_feather("xwas/univariate_results/summary.feather").to_dict(),
+                    )
+                ]
+            ),
             html.H1("Univariate associations - XWAS"),
             html.Br(),
             html.Br(),
@@ -23,7 +30,10 @@ def get_summary():
                 [
                     dbc.Col([get_controls_tab(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
-                        [html.H2(id="title_summary"), dcc.Graph(id="graph_summary", config=DOWNLOAD_CONFIG)],
+                        [
+                            html.H2(id="title_univariate_summary"),
+                            dcc.Graph(id="graph_univariate_summary", config=DOWNLOAD_CONFIG),
+                        ],
                         width={"size": 9},
                     ),
                 ]
@@ -33,29 +43,29 @@ def get_summary():
     )
 
 
-def get_data():
-    return load_feather("xwas/univariate_results/summary.feather").to_dict()
-
-
 def get_controls_tab():
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_summary",
+                "main_category_univariate_summary",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
-            get_item_radio_items("item_summary", ITEMS_LEGEND, "Select :"),
+            get_item_radio_items("item_univariate_summary", ITEMS_LEGEND, "Select :"),
         ]
     )
 
 
 @APP.callback(
-    [Output("graph_summary", "figure"), Output("title_summary", "children")],
-    [Input("item_summary", "value"), Input("main_category_summary", "value"), Input("memory_summary", "data")],
+    [Output("graph_univariate_summary", "figure"), Output("title_univariate_summary", "children")],
+    [
+        Input("item_univariate_summary", "value"),
+        Input("main_category_univariate_summary", "value"),
+        Input("memory_univariate_summary", "data"),
+    ],
 )
-def _fill_summary_heatmap(item, main_category, data):
+def _fill_heatmap_univariate_summary(item, main_category, data):
     import plotly.graph_objects as go
 
     if main_category == "All":

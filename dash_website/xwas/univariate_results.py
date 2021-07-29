@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 
 from dash_website.app import APP
 from dash_website.xwas.univariate_results_tabs.volcano import get_univariate_volcano
-from dash_website.xwas.univariate_results_tabs.summary import get_summary
+from dash_website.xwas.univariate_results_tabs.summary import get_univariate_summary
 
 
 @APP.callback(Output("tab_content_results", "children"), Input("tab_manager_results", "active_tab"))
@@ -12,7 +12,7 @@ def _get_tab(active_tab):
     if active_tab == "tab_volcano":
         return get_univariate_volcano()
     else:  # active_tab == "tab_summary"
-        return get_summary()
+        return get_univariate_summary()
 
 
 LAYOUT = html.Div(

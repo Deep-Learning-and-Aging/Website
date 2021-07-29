@@ -10,7 +10,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down
-from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG
+from dash_website import DIMENSIONS_SUBDIMENSIONS, DOWNLOAD_CONFIG
 from dash_website.genetics import VOLCANO_TABLE_COLUMNS
 from dash_website.genetics.gwas_tabs import DIMENSIONS_TO_DROP_VOLCANO
 
@@ -74,16 +74,7 @@ def get_controls_volcano_gwas():
     return dbc.Card(
         get_drop_down(
             "dimension_volcano_gwas",
-            pd.Index(
-                list(
-                    map(
-                        lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
-                        ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
-                    )
-                )
-            ).drop(
-                DIMENSIONS_TO_DROP_VOLCANO
-            ),
+            pd.Index(DIMENSIONS_SUBDIMENSIONS).drop(DIMENSIONS_TO_DROP_VOLCANO),
             "Select a dimension:",
             from_dict=False,
         )
