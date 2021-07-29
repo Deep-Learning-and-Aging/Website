@@ -27,10 +27,22 @@ from dash_website import (
 from dash_website.xwas import SUBSET_METHODS
 
 
-def get_category_heatmap():
+def get_heatmap_univariate_category():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_category")),
+            dcc.Loading(
+                [
+                    dcc.Store(
+                        id="memory_univariate_category",
+                    ),
+                    dcc.Store(
+                        id="memory_scores_univariate_category",
+                        data=load_feather(
+                            "age_prediction_performances/scores_all_samples_per_participant.feather"
+                        ).to_dict(),
+                    ),
+                ]
+            ),
             html.H1("Univariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
@@ -38,7 +50,7 @@ def get_category_heatmap():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_category(),
+                            get_controls_tab_univariate_category(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -48,8 +60,8 @@ def get_category_heatmap():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_category"),
-                                    dcc.Graph(id="graph_category", config=DOWNLOAD_CONFIG),
+                                    html.H2(id="title_univariate_category"),
+                                    dcc.Graph(id="graph_univariate_category", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -64,7 +76,7 @@ def get_category_heatmap():
                             dcc.Loading(
                                 [
                                     html.H4("Histogram of the above correlations"),
-                                    dcc.Graph(id="histogram_category", config=DOWNLOAD_CONFIG),
+                                    dcc.Graph(id="histogram_univariate_category", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -78,13 +90,23 @@ def get_category_heatmap():
 
 
 @APP.callback(
-    Output("memory_category", "data"), [Input("main_category_category", "value"), Input("category_category", "value")]
+    Output("memory_univariate_category", "data"),
+    [Input("main_category_univariate_category", "value"), Input("category_univariate_category", "value")],
 )
-def _modify_store_category(main_category, category):
+def _modify_store_univariate_category(main_category, category):
     if category == "All":
         category = f"All_{main_category}"
 
-    correlations = load_feather(f"xwas/univariate_correlations/correlations/categories/correlations_{category}.feather")
+    correlations = load_feather(
+        f"xwas/univariate_correlations/correlations/categories/correlations_{category}.feather"
+    ).drop(
+        columns=[
+            "r2_1",
+            "r2_std_1",
+            "r2_2",
+            "r2_std_2",
+        ]
+    )
 
     for dimension, subdimension in [("Lungs", "Spirometry"), ("Hearing", "HearingTest"), ("BloodCells", "BloodCount")]:
         for i in [1, 2]:
@@ -93,43 +115,50 @@ def _modify_store_category(main_category, category):
     return correlations.to_dict()
 
 
-def get_controls_tab_category():
+def get_controls_tab_univariate_category():
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_category",
+                "main_category_univariate_category",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
-            get_drop_down("category_category", ["All"], "Select X subcategory: ", from_dict=False),
-            get_item_radio_items("order_type_category", ORDER_TYPES, "Order by:"),
-            get_item_radio_items("subset_method_category", SUBSET_METHODS, "Select subset method :"),
-            get_item_radio_items("correlation_type_category", CORRELATION_TYPES, "Select correlation type :"),
+            get_drop_down("category_univariate_category", ["All"], "Select X subcategory: ", from_dict=False),
+            get_item_radio_items("order_type_univariate_category", ORDER_TYPES, "Order by:"),
+            get_item_radio_items("subset_method_univariate_category", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items(
+                "correlation_type_univariate_category", CORRELATION_TYPES, "Select correlation type :"
+            ),
         ]
     )
 
 
 @APP.callback(
-    [Output("category_category", "options"), Output("category_category", "value")],
-    Input("main_category_category", "value"),
+    [Output("category_univariate_category", "options"), Output("category_univariate_category", "value")],
+    Input("main_category_univariate_category", "value"),
 )
 def _change_category_category(main_category):
     return get_options_from_list(["All"] + MAIN_CATEGORIES_TO_CATEGORIES[main_category]), "All"
 
 
 @APP.callback(
-    [Output("graph_category", "figure"), Output("title_category", "children"), Output("histogram_category", "figure")],
     [
-        Input("order_type_category", "value"),
-        Input("subset_method_category", "value"),
-        Input("correlation_type_category", "value"),
-        Input("memory_category", "data"),
+        Output("graph_univariate_category", "figure"),
+        Output("title_univariate_category", "children"),
+        Output("histogram_univariate_category", "figure"),
+    ],
+    [
+        Input("order_type_univariate_category", "value"),
+        Input("subset_method_univariate_category", "value"),
+        Input("correlation_type_univariate_category", "value"),
+        Input("memory_univariate_category", "data"),
+        Input("memory_scores_univariate_category", "data"),
     ],
 )
-def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_category):
+def _fill_graph_tab_univariate_category(order_by, subset_method, correlation_type, data_category, data_scores):
     correlations_raw = pd.DataFrame(data_category).set_index(
-        ["dimension_1", "subdimension_1", "r2_1", "r2_std_1", "dimension_2", "subdimension_2", "r2_2", "r2_std_2"]
+        ["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"]
     )
     correlations_raw.columns = pd.MultiIndex.from_tuples(
         list(map(eval, correlations_raw.columns.tolist())), names=["subset_method", "correlation_type"]
@@ -137,6 +166,17 @@ def _fill_graph_tab_category(order_by, subset_method, correlation_type, data_cat
     correlations = correlations_raw[[(subset_method, correlation_type), (subset_method, "number_variables")]]
     correlations.columns = ["correlation", "number_variables"]
     correlations.reset_index(inplace=True)
+
+    scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
+    scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
+    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
+    scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
+
+    for number in [1, 2]:
+        correlations.set_index([f"dimension_{number}", f"subdimension_{number}"], inplace=True)
+        correlations[f"r2_{number}"] = scores["r2"]
+        correlations[f"r2_std_{number}"] = scores["r2_std"]
+        correlations.reset_index(inplace=True)
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],
