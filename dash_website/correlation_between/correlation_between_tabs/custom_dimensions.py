@@ -99,7 +99,6 @@ def _modify_store_custom_dimensions(sample_definition):
         ["dimension", "subdimension", "sub_subdimension", "algorithm"]
     )
     scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
     scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
 
     for number in [1, 2]:
@@ -139,7 +138,7 @@ def get_controls_tab_custom_dimensions():
 def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
     correlations = pd.DataFrame(data_custom_dimensions)
 
-    custom_dimensions = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"])
+    custom_dimensions = DIMENSIONS_SUBDIMENSIONS_INDEXES
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],

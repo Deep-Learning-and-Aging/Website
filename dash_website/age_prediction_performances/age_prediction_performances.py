@@ -96,7 +96,6 @@ def _fill_graph_age_prediction_performances(
     if dimensions_selection == "custom_dimensions":
         scores.set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"], inplace=True)
         scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-        scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
         scores.reset_index(inplace=True)
     elif dimensions_selection == "without_ensemble_models":
         scores.drop(

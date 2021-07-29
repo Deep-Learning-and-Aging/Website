@@ -350,8 +350,8 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
     ).loc[
-        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-        CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        DIMENSIONS_SUBDIMENSIONS_INDEXES,
+        DIMENSIONS_SUBDIMENSIONS_INDEXES,
     ]
 
     customdata_list = []
@@ -363,8 +363,8 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
                 values=customdata_item,
             )
             .loc[
-                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-                CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+                DIMENSIONS_SUBDIMENSIONS_INDEXES,
+                DIMENSIONS_SUBDIMENSIONS_INDEXES,
             ]
             .values
         )
@@ -373,8 +373,8 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
 
     customdata = pd.DataFrame(
         np.nan,
-        index=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
-        columns=CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"]),
+        index=DIMENSIONS_SUBDIMENSIONS_INDEXES,
+        columns=DIMENSIONS_SUBDIMENSIONS_INDEXES,
     )
     customdata[customdata.columns] = stacked_customdata
 
