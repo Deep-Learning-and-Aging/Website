@@ -8,7 +8,7 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_src_image
 from dash_website.utils.controls import get_drop_down
-from dash_website import RENAME_DIMENSIONS, CUSTOM_DIMENSIONS
+from dash_website import RENAME_DIMENSIONS, DIMENSIONS_SUBDIMENSIONS
 from dash_website.genetics.gwas_tabs import DIMENSIONS_TO_DROP_MANHATTAN_QQ
 
 
@@ -30,14 +30,7 @@ def get_controls_manhattan_qq_gwas():
     return dbc.Card(
         get_drop_down(
             "dimensions_manhattan_qq_gwas",
-            pd.Index(
-                list(
-                    map(
-                        lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
-                        ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
-                    )
-                )
-            ).drop(DIMENSIONS_TO_DROP_MANHATTAN_QQ),
+            pd.Index(DIMENSIONS_SUBDIMENSIONS).drop(DIMENSIONS_TO_DROP_MANHATTAN_QQ),
             "Select a dimension:",
             from_dict=False,
         )
