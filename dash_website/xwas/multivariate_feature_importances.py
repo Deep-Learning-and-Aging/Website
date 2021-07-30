@@ -10,76 +10,72 @@ import pandas as pd
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options_from_list
 from dash_website import (
+    DIMENSIONS_SUBDIMENSIONS,
     DOWNLOAD_CONFIG,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    CUSTOM_DIMENSIONS,
     RENAME_DIMENSIONS,
     ALGORITHMS,
     CORRELATION_TYPES,
 )
-from dash_website.xwas import FEATURES_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
-
-
-def get_data():
-    return load_feather(
-        f"xwas/multivariate_results/scores.feather", columns=["category", "dimension", "r2", "std", "algorithm"]
-    ).to_dict()
+from dash_website.xwas import (
+    FEATURES_TABLE_COLUMNS,
+    FEATURES_CORRELATIONS_TABLE_COLUMNS,
+    MULTIVARIATE_CATEGORIES_TO_REMOVE,
+)
 
 
 @APP.callback(
-    Output("memory_features_xwas", "data"), [Input("dimension_features", "value"), Input("category_features", "value")]
+    Output("memory_features_multivariate", "data"),
+    [Input("dimension_subdimension_features_multivariate", "value"), Input("category_features_multivariate", "value")],
 )
-def _modify_store_features(dimension, category):
+def _modify_store_features_multivariate(dimension_subdimension, category):
     return load_feather(
-        f"xwas/multivariate_feature_importances/dimension_category/features_{RENAME_DIMENSIONS.get(dimension, dimension)}_{category}.feather"
+        f"xwas/multivariate_feature_importances/dimension_category/features_{RENAME_DIMENSIONS.get(dimension_subdimension, dimension_subdimension)}_{category}.feather"
     ).to_dict()
 
 
-def get_controls_features():
+def get_controls_features_multivariate():
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_features",
+                "main_category_features_multivariate",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
-            get_drop_down("category_features", ["..."], "Select X subcategory: ", from_dict=False),
+            get_drop_down("category_features_multivariate", ["..."], "Select X subcategory: ", from_dict=False),
             get_drop_down(
-                "dimension_features",
-                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
-                "Select an aging dimension: ",
-                from_dict=False,
+                "dimension_subdimension_features_multivariate", DIMENSIONS_SUBDIMENSIONS, "Select an aging dimension: "
             ),
         ]
     )
 
 
 @APP.callback(
-    [Output("category_features", "options"), Output("category_features", "value")],
-    Input("main_category_features", "value"),
+    [Output("category_features_multivariate", "options"), Output("category_features_multivariate", "value")],
+    Input("main_category_features_multivariate", "value"),
 )
-def _change_controls_category(main_category):
-    if main_category == "All":
-        list_categories = list(
-            pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic", "PhysicalActivity"])
-        )
-    elif main_category == "Biomarkers":
-        list_categories = list(pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["PhysicalActivity"]))
-    else:
-        list_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    return get_options_from_list(list_categories), list_categories[0]
+def _change_controls_category_features_multivariate(main_category):
+    categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
+
+    for category_to_remove in MULTIVARIATE_CATEGORIES_TO_REMOVE:
+        if category_to_remove in categories:
+            categories.remove(category_to_remove)
+
+    return get_options_from_list(categories), categories[0]
 
 
-def get_controls_table_features():
+def get_controls_table_features_multivariate():
     return dbc.Card(
         [
-            get_item_radio_items("correlation_type_features", CORRELATION_TYPES, "Select correlation type :"),
+            get_item_radio_items(
+                "correlation_type_features_multivariate", CORRELATION_TYPES, "Select correlation type :"
+            ),
             dbc.FormGroup(
                 [
                     html.P("Correlation between feature importances/correlation : "),
                     dash_table.DataTable(
-                        id="table_correlation_features_xwas",
+                        id="table_correlation_features_multivariate",
                         columns=[
                             {"id": key, "name": name} for key, name in FEATURES_CORRELATIONS_TABLE_COLUMNS.items()
                         ],
@@ -95,12 +91,12 @@ def get_controls_table_features():
 
 
 @APP.callback(
-    [Output("bar_plot_features", "figure"), Output("title_feature_importances", "children")],
+    [Output("bar_plot_features_multivariate", "figure"), Output("title_features_multivariate", "children")],
     [
-        Input("dimension_features", "value"),
-        Input("category_features", "value"),
-        Input("memory_features_xwas", "data"),
-        Input("memory_scores_xwas", "data"),
+        Input("dimension_subdimension_features_multivariate", "value"),
+        Input("category_features_multivariate", "value"),
+        Input("memory_features_multivariate", "data"),
+        Input("memory_scores_features_multivariate", "data"),
     ],
 )
 def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
@@ -169,18 +165,18 @@ def _fill_bar_plot_feature(dimension, category, data_features, data_scores):
 
 
 @APP.callback(
-    [Output("table_features_xwas", "data"), Output("table_correlation_features_xwas", "data")],
+    [Output("table_features_multivariate", "data"), Output("table_correlation_features_multivariate", "data")],
     [
-        Input("dimension_features", "value"),
-        Input("category_features", "value"),
-        Input("correlation_type_features", "value"),
-        Input("memory_scores_xwas", "data"),
-        Input("memory_features_xwas", "data"),
-        Input("table_features_xwas", "sort_by"),
-        Input("table_correlation_features_xwas", "sort_by"),
+        Input("dimension_subdimension_features_multivariate", "value"),
+        Input("category_features_multivariate", "value"),
+        Input("correlation_type_features_multivariate", "value"),
+        Input("memory_scores_features_multivariate", "data"),
+        Input("memory_features_multivariate", "data"),
+        Input("table_features_multivariate", "sort_by"),
+        Input("table_correlation_features_multivariate", "sort_by"),
     ],
 )
-def _sort_tables(
+def _sort_tables_features_multivariate(
     dimension, category, correlation_type, data_scores, data_features, sort_by_col_features, sort_by_col_correlations
 ):
     scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "category"])
@@ -243,21 +239,37 @@ def _sort_tables(
 
 LAYOUT = dbc.Container(
     [
-        dcc.Loading([dcc.Store(id="memory_features_xwas"), dcc.Store(id="memory_scores_xwas", data=get_data())]),
+        dcc.Loading(
+            [
+                dcc.Store(id="memory_features_multivariate"),
+                dcc.Store(
+                    id="memory_scores_features_multivariate",
+                    data=load_feather(
+                        f"xwas/multivariate_results/scores.feather",
+                        columns=["category", "dimension", "r2", "std", "algorithm"],
+                    ).to_dict(),
+                ),
+            ]
+        ),
         html.H1("Accelerated aging prediction interpretability - XWAS"),
         html.Br(),
         html.Br(),
         dbc.Row(
             [
                 dbc.Col(
-                    [get_controls_features(), html.Br(), html.Br(), get_controls_table_features()],
+                    [
+                        get_controls_features_multivariate(),
+                        html.Br(),
+                        html.Br(),
+                        get_controls_table_features_multivariate(),
+                    ],
                     width={"size": 5},
                 ),
                 dbc.Col(
                     dcc.Loading(
                         [
-                            html.H2(id="title_feature_importances"),
-                            dcc.Graph(id="bar_plot_features", config=DOWNLOAD_CONFIG),
+                            html.H2(id="title_features_multivariate"),
+                            dcc.Graph(id="bar_plot_features_multivariate", config=DOWNLOAD_CONFIG),
                         ]
                     ),
                     width={"size": 7},
@@ -270,7 +282,7 @@ LAYOUT = dbc.Container(
                     dcc.Loading(
                         [
                             dash_table.DataTable(
-                                id="table_features_xwas",
+                                id="table_features_multivariate",
                                 columns=[{"id": key, "name": name} for key, name in FEATURES_TABLE_COLUMNS.items()],
                                 style_cell={"textAlign": "left"},
                                 sort_action="custom",

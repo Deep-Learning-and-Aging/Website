@@ -131,10 +131,13 @@ def get_controls_tab_category_multivariate():
     Input("main_category_category_multivariate", "value"),
 )
 def _change_category_category_multivariate(main_category):
-    return (
-        get_options_from_list(MAIN_CATEGORIES_TO_CATEGORIES[main_category]),
-        MAIN_CATEGORIES_TO_CATEGORIES[main_category][0],
-    )
+    categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
+
+    for category_to_remove in MULTIVARIATE_CATEGORIES_TO_REMOVE:
+        if category_to_remove in categories:
+            categories.remove(category_to_remove)
+
+    return get_options_from_list(categories), categories[0]
 
 
 @APP.callback(
