@@ -92,7 +92,6 @@ def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
     correlations["dimension_subdimension"] = (
         correlations.index.get_level_values("dimension") + " - " + correlations.index.get_level_values("subdimension")
     )
-    print(correlations.index.get_level_values("subdimension").drop_duplicates())
     numbers_variables = correlations_raw[[(subset_method, "number_variables")]]
     numbers_variables.columns = ["number_variables"]
     numbers_variables["dimension_subdimension"] = (
@@ -111,7 +110,6 @@ def _fill_graph_tab_dimension(subset_method, correlation_type, data_dimension):
 
     hovertemplate = "Correlation: %{z:.3f} <br>X subcategory: %{x} <br>Aging dimension: %{y} <br>Number variables: %{customdata} <br><extra></extra>"
 
-    print(correlations_2d.index)
     heatmap = go.Heatmap(
         x=correlations_2d.columns,
         y=correlations_2d.index,
