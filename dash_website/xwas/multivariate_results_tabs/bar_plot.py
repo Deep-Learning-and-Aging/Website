@@ -8,6 +8,7 @@ import pandas as pd
 
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
 from dash_website import DIMENSIONS_SUBDIMENSIONS, DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, ALGORITHMS, SCORES
+from dash_website.xwas import MULTIVARIATE_CATEGORIES_TO_REMOVE
 from dash_website.xwas.multivariate_results_tabs import DISPLAY_MODE
 
 
@@ -110,7 +111,7 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, display_mode, 
         )
 
     multivariate_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    for to_remove in ["Genetics", "Phenotypic", "PhysicalActivity"]:
+    for to_remove in MULTIVARIATE_CATEGORIES_TO_REMOVE:
         if to_remove in multivariate_categories:
             multivariate_categories.remove(to_remove)
 
