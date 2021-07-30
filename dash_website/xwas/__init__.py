@@ -22,3 +22,5 @@ FEATURES_CORRELATIONS_TABLE_COLUMNS = {
 }
 
 UNIVARIATE_OR_MULTIVARIATE = {"univariate": "Univariate", "multivariate": "Multivariate"}
+
+MULTIVARIATE_CATEGORIES_TO_REMOVE = ["Genetics", "Phenotypic", "PhysicalActivity"]
