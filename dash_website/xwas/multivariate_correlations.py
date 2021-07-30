@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 
 from dash_website.xwas.multivariate_correlations_tabs.category_heatmap_multi import get_heatmap_multivariate_category
 from dash_website.xwas.multivariate_correlations_tabs.dimension_heatmap_multi import get_dimension_heatmap
-from dash_website.xwas.multivariate_correlations_tabs.average_bars_multi import get_average_bars
+from dash_website.xwas.multivariate_correlations_tabs.average_bars_multi import get_average_bars_multivariate
 
 
 @APP.callback(
@@ -20,7 +20,7 @@ def _fill_tab(
     elif active_tab == "tab_dimension_multivariate":
         return get_dimension_heatmap()
     else:  # active_tab == "tab_average_multi"
-        return get_average_bars()
+        return get_average_bars_multivariate()
 
 
 LAYOUT = html.Div(

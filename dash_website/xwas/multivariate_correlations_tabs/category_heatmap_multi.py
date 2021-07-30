@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import numpy as np
 
-from dash_website.utils.aws_loader import load_feather, does_key_exists
+from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website.utils.graphs import (
     heatmap_by_clustering,

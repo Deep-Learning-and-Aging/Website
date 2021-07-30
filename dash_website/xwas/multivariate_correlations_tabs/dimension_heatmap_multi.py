@@ -8,14 +8,14 @@ import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down, get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, CUSTOM_DIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS, CORRELATION_TYPES
+from dash_website import DOWNLOAD_CONFIG, DIMENSIONS_SUBDIMENSIONS, RENAME_DIMENSIONS, ALGORITHMS, CORRELATION_TYPES
 from dash_website.utils import BLUE_WHITE_RED
 
 
 def get_dimension_heatmap():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_dimension_multi")),
+            dcc.Loading(dcc.Store(id="memory_dimension_multivariate")),
             html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
@@ -23,7 +23,7 @@ def get_dimension_heatmap():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_dimension_multi(),
+                            get_controls_tab_dimension_multivariate(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -33,8 +33,8 @@ def get_dimension_heatmap():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_dimension_multi"),
-                                    dcc.Graph(id="graph_dimension_multi", config=DOWNLOAD_CONFIG),
+                                    html.H2(id="title_dimension_multivariate"),
+                                    dcc.Graph(id="graph_dimension_multivariate", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -48,25 +48,24 @@ def get_dimension_heatmap():
     )
 
 
-@APP.callback(Output("memory_dimension_multi", "data"), Input("dimension_dimension_multi", "value"))
-def _modify_store_dimension_multi(dimension):
+@APP.callback(
+    Output("memory_dimension_multivariate", "data"), Input("dimension_subdimension_dimension_multivariate", "value")
+)
+def _modify_store_dimension_multi(dimension_subdimension):
     return load_feather(
-        f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
+        f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_subdimension, dimension_subdimension)}.feather"
     ).to_dict()
 
 
-def get_controls_tab_dimension_multi():
+def get_controls_tab_dimension_multivariate():
 
     return dbc.Card(
         [
             get_drop_down(
-                "dimension_dimension_multi",
-                CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates(),
-                "Select an aging dimension: ",
-                from_dict=False,
+                "dimension_subdimension_dimension_multivariate", DIMENSIONS_SUBDIMENSIONS, "Select an aging dimension: "
             ),
             get_item_radio_items(
-                "algorithm_dimension",
+                "algorithm_dimension_multivariate",
                 {
                     "elastic_net": ALGORITHMS["elastic_net"],
                     "light_gbm": ALGORITHMS["light_gbm"],
@@ -74,17 +73,19 @@ def get_controls_tab_dimension_multi():
                 },
                 "Select an Algorithm :",
             ),
-            get_item_radio_items("correlation_type_category_multi", CORRELATION_TYPES, "Select correlation type :"),
+            get_item_radio_items(
+                "correlation_type_dimension_multivariate", CORRELATION_TYPES, "Select correlation type :"
+            ),
         ]
     )
 
 
 @APP.callback(
-    [Output("graph_dimension_multi", "figure"), Output("title_dimension_multi", "children")],
+    [Output("graph_dimension_multivariate", "figure"), Output("title_dimension_multivariate", "children")],
     [
-        Input("algorithm_dimension", "value"),
-        Input("correlation_type_category_multi", "value"),
-        Input("memory_dimension_multi", "data"),
+        Input("algorithm_dimension_multivariate", "value"),
+        Input("correlation_type_dimension_multivariate", "value"),
+        Input("memory_dimension_multivariate", "data"),
     ],
 )
 def _fill_graph_tab_dimension_multi(algorithm, correlation_type, data_dimension):
