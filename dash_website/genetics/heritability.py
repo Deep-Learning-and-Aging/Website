@@ -9,7 +9,7 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_item_radio_items
-from dash_website.utils.graphs import add_line_and_annotation
+from dash_website.utils.graphs import add_line_and_annotation, add_custom_legend_axis
 from dash_website import DIMENSIONS_SUBDIMENSIONS_INDEXES, DOWNLOAD_CONFIG
 from dash_website.genetics import ORDER_TYPES_HERITABILITY
 
@@ -66,63 +66,14 @@ def _fill_graph_heritability(order_by, data_heritability):
             },
         )
 
-        dimensions = heritability.index.to_frame()[["dimension", "subdimension"]].reset_index(drop=True)
-        dimensions["position"] = fig["layout"]["xaxis"]["tickvals"]
-        dimensions.set_index(["dimension", "subdimension"], inplace=True)
-
-        lines = []
-        annotations = []
-
-        for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
-            dimension_inner_margin = -0.25
-            dimension_outer_margin = -0.5
-
-            min_position = dimensions.loc[dimension].min()
-            max_position = dimensions.loc[dimension].max()
-
-            line, annotation = add_line_and_annotation(
-                dimension, min_position, max_position, dimension_inner_margin, dimension_outer_margin, 18, True
-            )
-
-            lines.append(line)
-            annotations.append(annotation)
-
-            for subdimension in dimensions.loc[dimension].index.get_level_values("subdimension").drop_duplicates():
-                subdimension_margin = 0
-
-                submin_position = dimensions.loc[(dimension, subdimension)].min()
-                submax_position = dimensions.loc[(dimension, subdimension)].max()
-
-                line, annotation = add_line_and_annotation(
-                    subdimension,
-                    submin_position,
-                    submax_position,
-                    subdimension_margin,
-                    dimension_inner_margin,
-                    15,
-                    True,
-                )
-
-                lines.append(line)
-                annotations.append(annotation)
-
-        # The final top/right line
-        line, _ = add_line_and_annotation(
-            dimension,
-            min_position,
-            max_position,
-            0,
-            dimension_outer_margin,
-            10,
-            True,
-            final=True,
+        add_custom_legend_axis(
+            fig,
+            heritability.index,
+            outer_margin_level_1=-0.5,
+            inner_margin_level_1=-0.25,
+            size_level_1=15,
+            size_level_2=10,
         )
-
-        lines.append(line)
-
-        fig["layout"]["shapes"] = lines
-        fig["layout"]["annotations"] = annotations
-        fig.update_layout(xaxis={"showticklabels": False})
 
     fig.update_layout(
         yaxis={"title": "GWAS-based heritability", "showgrid": False, "zeroline": False, "title_font": {"size": 25}},
