@@ -56,7 +56,7 @@ def get_controls_features_multivariate():
     Input("main_category_features_multivariate", "value"),
 )
 def _change_controls_category_features_multivariate(main_category):
-    categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
+    categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category].copy()
 
     for category_to_remove in MULTIVARIATE_CATEGORIES_TO_REMOVE:
         if category_to_remove in categories:

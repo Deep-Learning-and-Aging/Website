@@ -110,7 +110,7 @@ def _fill_graph_tab_bar_plot(main_category, dimension, algorithm, display_mode, 
             .set_index("category")
         )
 
-    multivariate_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
+    multivariate_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category].copy()
     for to_remove in MULTIVARIATE_CATEGORIES_TO_REMOVE:
         if to_remove in multivariate_categories:
             multivariate_categories.remove(to_remove)
