@@ -3,11 +3,83 @@ import dash_html_components as html
 
 TEXT = html.Div(
     [
+        html.Div(
+            html.P(
+                "On this website, we present the results of our different projects in the field of biological age predictors. Nine of these projects take a deep dive to analyze organ-specific age predictors:"
+            ),
+            style={"text-indent": 0},
+        ),
+        html.Div(
+            [
+                html.P(
+                    ["- ", html.A("Heart age", href="https://www.medrxiv.org/content/10.1101/2021.06.09.21258645v1")]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Abdomen age",
+                            href="https://www.medrxiv.org/content/10.1101/2021.06.24.21259492v1",
+                        ),
+                    ]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Musculoskeletal age", href="https://www.medrxiv.org/content/10.1101/2021.06.14.21258896v1"
+                        ),
+                    ]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A("Brain age", href="https://www.medrxiv.org/content/10.1101/2021.06.22.21259280v1"),
+                    ]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Physical activity-based age",
+                            href="https://www.medrxiv.org/content/10.1101/2021.06.21.21259265v1",
+                        ),
+                    ]
+                ),
+                html.P(
+                    ["- ", html.A("Arterial age", href="https://www.medrxiv.org/content/10.1101/2021.06.17.21259120v1")]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Eye age",
+                            href="https://www.medrxiv.org/content/10.1101/2021.06.24.21259471v1",
+                        ),
+                    ]
+                ),
+                html.P(
+                    ["- ", html.A("Hearing age", href="https://www.medrxiv.org/content/10.1101/2021.07.05.21260048v1")]
+                ),
+                html.P(
+                    [
+                        "- ",
+                        html.A(
+                            "Blood and Urine ages", href="https://www.medrxiv.org/content/10.1101/2021.07.05.21260032v1"
+                        ),
+                    ]
+                ),
+            ],
+            style={"line-height": 0.7},
+        ),
         html.P(
             [
-                "This website presents the results of our publication “Analyzing the multidimensionality of biological aging with the tools of deep learning across diverse image-based and physiological indicators yields robust age predictors”, which can be found ",
-                html.A("here", href="https://www.medrxiv.org/content/10.1101/2021.04.25.21255767v1"),
-                ". For a one-hour seminar presentation of our main results, see ",
+                "Finally, our last project analyzes the ",
+                html.A(
+                    "multidimensionality of aging",
+                    href="https://www.medrxiv.org/content/10.1101/2021.04.25.21255767v1",
+                ),
+                " by comparing and correlating the different aforementioned biological age predictors, and others. For a one-hour seminar presentation of our main results, see ",
                 html.A("here", href="https://www.youtube.com/watch?v=VqQtQxkwzNo"),
                 ".",
             ]

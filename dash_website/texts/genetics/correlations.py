@@ -9,12 +9,7 @@ TEXT = html.Div(
         html.P(
             "We computed the genetic correlation between accelerated aging dimensions when the sample size allowed it. The results are displayed on an interactive heatmap. Hovering over an element displays the genetic correlation, as well as the name of the two aging dimensions involved, their associated R-Squared value when used to predict chronological age (R²), and their associated GWAS-based heritability (h²), for context."
         ),
-        html.Div(
-            html.P("Aging dimensions can be ordered by:"),
-            style={
-                "text-indent": 0,
-            },
-        ),
+        html.Div(html.P("Aging dimensions can be ordered by:"), style={"text-indent": 0}),
         html.P(
             "- Custom order - The aging dimensions are ordered by a predefined order, highlighting the biological similarities between aging dimensions."
         ),

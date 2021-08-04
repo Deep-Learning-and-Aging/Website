@@ -1,3 +1,4 @@
+from botocore.exceptions import IncompleteReadError
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -8,23 +9,18 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options_from_list
 from dash_website.utils.graphs import add_line_and_annotation
-from dash_website import DOWNLOAD_CONFIG, CUSTOM_ORDER
-from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION, SCORES
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS, CUSTOM_DIMENSIONS, SCORES
+from dash_website.age_prediction_performances import SAMPLE_DEFINITION, DIMENSIONS_SELECTION
 
 
 @APP.callback(
     Output("memory_age_prediction_performances", "data"),
-    [
-        Input("sample_definition_age_prediction_performances", "value"),
-        Input("dimensions_selection_age_prediction_performances", "value"),
-    ],
+    Input("sample_definition_age_prediction_performances", "value"),
 )
-def _get_data_age_prediction_performances(sample_definition, dimensions_selection):
-    return load_feather(
-        f"age_prediction_performances/scores_withCI_{sample_definition}_{dimensions_selection}.feather"
-    ).to_dict()
+def _get_data_age_prediction_performances(sample_definition):
+    return load_feather(f"age_prediction_performances/scores_{sample_definition}.feather").to_dict()
 
 
 def get_controls_age_prediction_performances():
@@ -42,7 +38,7 @@ def get_controls_age_prediction_performances():
             ),
             get_drop_down(
                 "selected_dimension_age_prediction_performances",
-                ["all"] + CUSTOM_ORDER,
+                ["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist(),
                 "Select an aging dimension: ",
                 from_dict=False,
             ),
@@ -64,11 +60,18 @@ def get_controls_age_prediction_performances():
 )
 def _change_dimensions_age_prediction_performances(dimensions_selection):
     if dimensions_selection != "without_ensemble_models":
-        return get_options(["all"] + CUSTOM_ORDER), "all"
+        return (
+            get_options_from_list(["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist()),
+            "all",
+        )
     else:
         return (
-            get_options(
-                ["all"] + list(pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"]))
+            get_options_from_list(
+                ["all"]
+                + CUSTOM_DIMENSIONS.get_level_values("dimension")
+                .drop_duplicates()
+                .drop(["*", "*instances01", "*instances1.5x", "*instances23"])
+                .tolist()
             ),
             "all",
         )
@@ -91,20 +94,22 @@ def _fill_graph_age_prediction_performances(
     scores = pd.DataFrame(data_age_prediction_performances)
 
     if dimensions_selection == "custom_dimensions":
-        scores.replace("1DCNN", "*", inplace=True)  # since it is the only one that is different
-
+        scores.set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"], inplace=True)
+        scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
+        scores.reset_index(inplace=True)
+    elif dimensions_selection == "without_ensemble_models":
+        scores.drop(
+            index=scores.index[
+                (scores["dimension"] == "*") | (scores["subdimension"] == "*") | (scores["sub_subdimension"] == "*")
+            ],
+            inplace=True,
+        )
     scores.set_index(["dimension", "subdimension", "sub_subdimension"], inplace=True)
 
     if selected_dimension != "all":
         scores = scores.loc[[selected_dimension]]
-        sorted_dimensions = scores.loc[[selected_dimension]].index.drop_duplicates()
-    else:
-        if dimensions_selection != "without_ensemble_models":
-            sorted_dimensions = scores.loc[CUSTOM_ORDER].index.drop_duplicates()
-        else:
-            sorted_dimensions = scores.loc[
-                pd.Index(CUSTOM_ORDER).drop(["*", "*instances01", "*instances1.5x", "*instances23"])
-            ].index.drop_duplicates()
+
+    sorted_dimensions = scores.index.drop_duplicates()
 
     x_positions = pd.DataFrame(
         np.arange(5, 10 * len(sorted_dimensions) + 5, 10), index=sorted_dimensions, columns=["x_position"]
@@ -115,7 +120,7 @@ def _fill_graph_age_prediction_performances(
         xaxis={
             "tickvals": np.arange(5, 10 * len(sorted_dimensions) + 5, 10),
             "ticktext": [" - ".join(elem) for elem in sorted_dimensions.values],
-        },
+        }
     )
 
     algorithms = scores["algorithm"].drop_duplicates()
@@ -141,7 +146,7 @@ def _fill_graph_age_prediction_performances(
             x=x_positions.loc[scores_algorithm.index].values.flatten(),
             y=scores_algorithm[metric],
             error_y={"array": scores_algorithm[f"{metric}_std"], "type": "data"},
-            name=algorithm,
+            name=ALGORITHMS[algorithm],
             hovertemplate=hovertemplate,
             customdata=customdata,
         )
@@ -194,14 +199,12 @@ def _fill_graph_age_prediction_performances(
 
         line, annotation = add_line_and_annotation(
             dimension,
-            "x",
-            "y",
             min_position,
             max_position,
             dimension_inner_margin,
             dimension_outer_margin,
-            90,
             size_dimension,
+            True
         )
 
         lines.append(line)
@@ -213,14 +216,12 @@ def _fill_graph_age_prediction_performances(
 
             line, annotation = add_line_and_annotation(
                 subdimension,
-                "x",
-                "y",
                 submin_position,
                 submax_position,
                 subdimension_margin,
                 dimension_inner_margin,
-                90,
                 size_subdimension,
+                True,
             )
 
             lines.append(line)
@@ -237,14 +238,12 @@ def _fill_graph_age_prediction_performances(
 
                 line, annotation = add_line_and_annotation(
                     sub_subdimension,
-                    "x",
-                    "y",
                     sub_submin_position,
                     sub_submax_position,
                     sub_subdimension_margin,
                     subdimension_margin,
-                    90,
                     size_sub_subdimension,
+                    True,
                 )
 
                 lines.append(line)
@@ -253,14 +252,12 @@ def _fill_graph_age_prediction_performances(
     # The final top/right line
     line, _ = add_line_and_annotation(
         dimension,
-        "x",
-        "y",
         min_position,
         max_position,
         sub_subdimension_margin,
         dimension_outer_margin,
-        0,
         10,
+        True,
         final=True,
     )
 

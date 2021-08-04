@@ -9,11 +9,11 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.controls import get_item_radio_items
-from dash_website import DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, ALGORITHMS_RENDERING
-from dash_website.utils import BLUE_WHITE_RED
+from dash_website import DIMENSIONS_SUBDIMENSIONS, DOWNLOAD_CONFIG, MAIN_CATEGORIES_TO_CATEGORIES, ALGORITHMS
+from dash_website.utils import BLUE_WHITE
 
 
-def get_heatmap():
+def get_heatmap_multivariate_results():
     return dbc.Container(
         [
             html.H1("Accelerated aging prediction performance - XWAS"),
@@ -21,11 +21,14 @@ def get_heatmap():
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab_heatmap(), html.Br(), html.Br()], width={"size": 3}),
+                    dbc.Col([get_controls_tab_heatmap_multivariate_results(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
                         [
                             dcc.Loading(
-                                [html.H2(id="title_heatmap"), dcc.Graph(id="heatmap_heatmap", config=DOWNLOAD_CONFIG)]
+                                [
+                                    html.H2(id="title_heatmap_multivariate_results"),
+                                    dcc.Graph(id="heatmap_multivariate_results", config=DOWNLOAD_CONFIG),
+                                ]
                             )
                         ],
                         width={"size": 9},
@@ -37,29 +40,31 @@ def get_heatmap():
     )
 
 
-def get_controls_tab_heatmap():
-
+def get_controls_tab_heatmap_multivariate_results():
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_heatmap",
+                "main_category_heatmap_multivariate_results",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
             get_item_radio_items(
-                "algorithm_heatmap",
+                "algorithm_heatmap_multivariate_results",
                 {
-                    "best_algorithm": ALGORITHMS_RENDERING["best_algorithm"],
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "best_algorithm": ALGORITHMS["best_algorithm"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an Algorithm :",
             ),
             html.Div(
-                [dcc.Loading(dcc.Graph(id="pie_chart_heatmap", config=DOWNLOAD_CONFIG))],
-                id="div_pie_chart_heatmap",
+                [
+                    html.H5("Composition of the best algorithm"),
+                    dcc.Loading(dcc.Graph(id="pie_chart_heatmap_multivariate_results", config=DOWNLOAD_CONFIG)),
+                ],
+                id="div_pie_chart_heatmap_multivariate_results",
                 style={"display": "none"},
             ),
         ]
@@ -68,12 +73,16 @@ def get_controls_tab_heatmap():
 
 @APP.callback(
     [
-        Output("heatmap_heatmap", "figure"),
-        Output("title_heatmap", "children"),
-        Output("div_pie_chart_heatmap", component_property="style"),
-        Output("pie_chart_heatmap", "figure"),
+        Output("heatmap_multivariate_results", "figure"),
+        Output("title_heatmap_multivariate_results", "children"),
+        Output("div_pie_chart_heatmap_multivariate_results", component_property="style"),
+        Output("pie_chart_heatmap_multivariate_results", "figure"),
     ],
-    [Input("main_category_heatmap", "value"), Input("algorithm_heatmap", "value"), Input("memory_scores", "data")],
+    [
+        Input("main_category_heatmap_multivariate_results", "value"),
+        Input("algorithm_heatmap_multivariate_results", "value"),
+        Input("memory_scores_multivariate_results", "data"),
+    ],
 )
 def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
     import plotly.graph_objs as go
@@ -91,7 +100,7 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         every_score = pd.DataFrame(data_scores).set_index("algorithm").loc[algorithm].reset_index()
     scores = every_score.loc[every_score["category"].isin(MAIN_CATEGORIES_TO_CATEGORIES[main_category])]
 
-    r2_2d = pd.pivot(scores, index="category", columns="dimension", values="r2").rename(columns=RENAME_DIMENSIONS)
+    r2_2d = pd.pivot(scores, index="category", columns="dimension", values="r2").rename(columns=DIMENSIONS_SUBDIMENSIONS)
     overall_mean = r2_2d.values.flatten().mean()
     overall_std = r2_2d.values.flatten().std()
     r2_2d["average"] = r2_2d.T.mean()
@@ -112,22 +121,20 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         index=np.roll(sample_size_2d.index, 1), columns=np.roll(sample_size_2d.columns, 1)
     )
 
-    algorithm_2d = pd.pivot(scores, index="category", columns="dimension", values="algorithm").replace(
-        ALGORITHMS_RENDERING
-    )
+    algorithm_2d = pd.pivot(scores, index="category", columns="dimension", values="algorithm").replace(ALGORITHMS)
     algorithm_2d["average"] = "No algorithm"
     algorithm_2d.loc["average"] = "No algorithm"
     algorithm_2d = algorithm_2d.reindex(index=np.roll(algorithm_2d.index, 1), columns=np.roll(algorithm_2d.columns, 1))
 
     customdata = np.dstack((std_2d, sample_size_2d, algorithm_2d))
 
-    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>R²: %{z:.3f} <br>Standard deviation: %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
+    hovertemplate = "Aging dimension: %{x} <br>X subcategory: %{y} <br>R²: %{z:.3f} +- %{customdata[0]:.3f} <br>Sample size: %{customdata[1]} <br>Algorithm: %{customdata[2]} <br><extra></extra>"
 
     heatmap = go.Heatmap(
         x=r2_2d.columns,
         y=r2_2d.index,
         z=r2_2d,
-        colorscale=BLUE_WHITE_RED,
+        colorscale=BLUE_WHITE,
         customdata=customdata,
         hovertemplate=hovertemplate,
         zmax=1,
@@ -151,13 +158,11 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         )
         percentages.index.name = "algorithm"
         for algorithm in ["elastic_net", "light_gbm", "neural_network"]:
-            percentages.loc[algorithm, "percentage"] = (algorithm_2d == ALGORITHMS_RENDERING[algorithm]).sum().sum()
-            percentages.loc[algorithm, "max_percentage"] = r2_2d.values[
-                algorithm_2d == ALGORITHMS_RENDERING[algorithm]
-            ].max()
+            percentages.loc[algorithm, "percentage"] = (algorithm_2d == ALGORITHMS[algorithm]).sum().sum()
+            percentages.loc[algorithm, "max_percentage"] = r2_2d.values[algorithm_2d == ALGORITHMS[algorithm]].max()
 
         percentages.reset_index(inplace=True)
-        percentages.replace(ALGORITHMS_RENDERING, inplace=True)
+        percentages.replace(ALGORITHMS, inplace=True)
 
         hovertemplate = "Algorithm: %{label} <br>Number of best algorithm: %{value} <br>Max percentage: %{customdata:.3f} <br><extra></extra>"
 
@@ -171,7 +176,6 @@ def _fill_graph_tab_heatmap(main_category, algorithm, data_scores):
         fig_pie_chart = go.Figure(pie_chart)
 
         fig_pie_chart.update_layout(
-            title="Composition of the best algorithms",
             margin={"l": 0, "r": 0, "b": 0, "t": 0},
         )
 

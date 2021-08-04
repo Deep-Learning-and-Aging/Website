@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_src_image, does_key_exists
-from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options_from_list
 from dash_website.datasets import (
     AGE_RANGES,
     TREE_IMAGES,
@@ -63,16 +63,16 @@ def _change_subdimensions(dimension, subdimension):
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_images":
         first_subdimension = list(TREE_IMAGES[dimension].keys())[0]
         return (
-            get_options(list(TREE_IMAGES[dimension].keys())),
+            get_options_from_list(list(TREE_IMAGES[dimension].keys())),
             list(TREE_IMAGES[dimension].keys())[0],
-            get_options(TREE_IMAGES[dimension][first_subdimension]),
+            get_options_from_list(TREE_IMAGES[dimension][first_subdimension]),
             TREE_IMAGES[dimension][first_subdimension][0],
         )
     else:
         return (
-            get_options(list(TREE_IMAGES[dimension].keys())),
+            get_options_from_list(list(TREE_IMAGES[dimension].keys())),
             subdimension,
-            get_options(TREE_IMAGES[dimension][subdimension]),
+            get_options_from_list(TREE_IMAGES[dimension][subdimension]),
             TREE_IMAGES[dimension][subdimension][0],
         )
 

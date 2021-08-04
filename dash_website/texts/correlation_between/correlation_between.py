@@ -9,12 +9,7 @@ TEXT = html.Div(
         html.P(
             "The page displays an interactive heatmap. Hovering over an element will display the correlation between accelerated aging in the two aging dimensions, along with the R-Squared values obtained when predicting chronological age for the two aging dimensions."
         ),
-        html.Div(
-            html.P("Samples can be defined in three ways:"),
-            style={
-                "text-indent": 0,
-            },
-        ),
+        html.Div(html.P("Samples can be defined in three ways:"), style={"text-indent": 0}),
         html.P(
             "- Participant and time of examination: If several samples were collected from the same participant, each is treated as sample for the models. This maximizes the sample size."
         ),
@@ -24,12 +19,7 @@ TEXT = html.Div(
         html.P(
             "- Participant and time when possible, otherwise average - The definition of “Participant and time of examination” is applied when it is possible, to maximize sample size. When two datasets were not simultaneously collected and would result in an intersection of sample size 0, the second definition is used instead."
         ),
-        html.Div(
-            html.P("Aging dimensions can be ordered by:"),
-            style={
-                "text-indent": 0,
-            },
-        ),
+        html.Div(html.P("Aging dimensions can be ordered by:"), style={"text-indent": 0}),
         html.P(
             "- Custom order - The aging dimensions are ordered by a predefined order, highlighting the biological similarities between aging dimensions."
         ),
