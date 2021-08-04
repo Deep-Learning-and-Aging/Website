@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, ALGORITHMS_RENDERING
+from dash_website import DOWNLOAD_CONFIG, ALGORITHMS
 from dash_website.age_prediction_performances import SCORES
 
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
             x=x_positions.loc[scores_algorithm.index].values.flatten(),
             y=scores_algorithm[metric],
             error_y={"array": scores_algorithm[f"{metric}_std"], "type": "data"},
-            name=ALGORITHMS_RENDERING[algorithm],
+            name=ALGORITHMS[algorithm],
             hovertemplate=hovertemplate,
             customdata=customdata,
         )

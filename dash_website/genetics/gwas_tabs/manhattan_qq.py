@@ -1,14 +1,15 @@
-from os import path
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+import pandas as pd
+
 from dash_website.utils.aws_loader import load_src_image
 from dash_website.utils.controls import get_drop_down
-from dash_website import RENAME_DIMENSIONS
-from dash_website.genetics import DIMENSIONS_GWAS
+from dash_website import RENAME_DIMENSIONS, DIMENSIONS_SUBDIMENSIONS
+from dash_website.genetics.gwas_tabs import DIMENSIONS_TO_DROP_MANHATTAN_QQ
 
 
 def get_manhattan_qq():
@@ -26,20 +27,27 @@ def get_manhattan_qq():
 
 
 def get_controls_manhattan_qq_gwas():
+    dimensions_subdimensions = DIMENSIONS_SUBDIMENSIONS.copy()
+
+    for dimension_subdimension in DIMENSIONS_TO_DROP_MANHATTAN_QQ:
+        del dimensions_subdimensions[dimension_subdimension]
+
     return dbc.Card(
-        get_drop_down("dimensions_manhattan_qq_gwas", DIMENSIONS_GWAS, "Select a dimension:", from_dict=False)
+        get_drop_down("dimension_subdimension_manhattan_qq_gwas", dimensions_subdimensions, "Select a dimension:")
     )
 
 
 @APP.callback(
     [Output("image_manhattan_gwas", "children"), Output("image_qq_gwas", "children")],
-    Input("dimensions_manhattan_qq_gwas", "value"),
+    Input("dimension_subdimension_manhattan_qq_gwas", "value"),
 )
-def _display_image_(dimension):
+def _display_image_(dimension_subdimension):
     plots = []
 
     for plot in ["manhattan", "qq"]:
-        path_to_plot = f"genetics/gwas/{plot}/{RENAME_DIMENSIONS.get(dimension, dimension)}.png"
+        path_to_plot = (
+            f"genetics/gwas/{plot}/{RENAME_DIMENSIONS.get(dimension_subdimension, dimension_subdimension)}.png"
+        )
         if plot == "manhattan":
             style = {"height": "100%", "width": "100%"}
         else:  # plot == "qq"

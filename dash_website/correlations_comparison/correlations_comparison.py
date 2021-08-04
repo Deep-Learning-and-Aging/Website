@@ -1,3 +1,4 @@
+from re import M
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -15,12 +16,12 @@ from dash_website import (
     DOWNLOAD_CONFIG,
     CORRELATION_TYPES,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    ORDER_DIMENSIONS,
-    CUSTOM_ORDER,
-    ALGORITHMS_RENDERING,
+    CUSTOM_DIMENSIONS,
+    DIMENSIONS_SUBDIMENSIONS_INDEXES,
+    ALGORITHMS,
     GRAPH_SIZE,
 )
-from dash_website.xwas import SUBSET_METHODS, UNIVARIATE_OR_MULTIVARIATE
+from dash_website.xwas import MULTIVARIATE_CATEGORIES_TO_REMOVE, SUBSET_METHODS, UNIVARIATE_OR_MULTIVARIATE
 
 
 @APP.callback(
@@ -96,9 +97,12 @@ def _change_controls_second_hidden_settings(second_category):
 
 
 def display_settings(category):
-    if category in ["Genetics", "Phenotypic"]:
+    multivariate_to_remove_without_physical_activity = MULTIVARIATE_CATEGORIES_TO_REMOVE.copy()
+    multivariate_to_remove_without_physical_activity.remove("PhysicalActivity")
+
+    if category in multivariate_to_remove_without_physical_activity:
         return {"display": "none"}, get_options_from_dict(UNIVARIATE_OR_MULTIVARIATE), "univariate"
-    elif "All" in category:
+    elif "All" in category or category in MULTIVARIATE_CATEGORIES_TO_REMOVE:
         return {"display": "block"}, get_options_from_dict({"univariate": "Univariate"}), "univariate"
     else:
         return {"display": "block"}, get_options_from_dict(UNIVARIATE_OR_MULTIVARIATE), "univariate"
@@ -127,15 +131,15 @@ def _change_controls_second_method(second_uni_or_multi, second_category):
 
 
 def change_method(uni_or_mutli, category):
-    if uni_or_mutli == "univariate" or category in ["Genetics", "Phenotypic"]:
+    if uni_or_mutli == "univariate":
         return get_options_from_dict(SUBSET_METHODS), "union"
     else:  # uni_or_multi == "multivariate"
         return (
             get_options_from_dict(
                 {
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 }
             ),
             "elastic_net",
@@ -162,6 +166,7 @@ def change_method(uni_or_mutli, category):
         Input("second_category_comparison", "value"),
         Input("memory_comparison_upper", "data"),
         Input("memory_comparison_lower", "data"),
+        Input("memory_scores_comparison", "data"),
     ],
 )
 def _fill_graph_tab_comparison(
@@ -175,16 +180,17 @@ def _fill_graph_tab_comparison(
     second_category,
     data_comparison_upper,
     data_comparison_lower,
+    data_scores,
 ):
     import plotly.graph_objs as go
 
     table_correlations_upper, customdata_upper, correlations_upper = get_table_and_customdata(
-        first_uni_or_multi, data_comparison_upper, first_method, first_correlation_type
+        first_uni_or_multi, data_comparison_upper, data_scores, first_method, first_correlation_type
     )
     np.fill_diagonal(table_correlations_upper.values, np.nan)
 
     table_correlations_lower, customdata_lower, correlations_lower = get_table_and_customdata(
-        second_uni_or_multi, data_comparison_lower, second_method, second_correlation_type
+        second_uni_or_multi, data_comparison_lower, data_scores, second_method, second_correlation_type
     )
     np.fill_diagonal(table_correlations_lower.values, np.nan)
 
@@ -244,36 +250,26 @@ def _fill_graph_tab_comparison(
         margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
-    sorted_dimensions = (
-        correlations_upper.set_index(["dimension_1", "subdimension_1"]).loc[CUSTOM_ORDER].index.drop_duplicates()
-    )
-    if first_category in ["Genetics", "Phenotypic"] and second_category in ["Genetics", "Phenotypic"]:
-        sorted_dimensions = sorted_dimensions.drop(("Eyes", "All"))
-
-    sorted_table_correlations_upper = table_correlations_upper.loc[sorted_dimensions, sorted_dimensions]
-    sorted_table_correlations_lower = table_correlations_lower.loc[sorted_dimensions, sorted_dimensions]
-    sorted_customdata_upper = customdata_upper.loc[sorted_dimensions, sorted_dimensions]
-    sorted_customdata_lower = customdata_lower.loc[sorted_dimensions, sorted_dimensions]
-
-    triangular_heatmap_values = np.triu(sorted_table_correlations_upper)
-    triangular_heatmap_values += np.tril(sorted_table_correlations_lower, k=-1)
+    triangular_heatmap_values = np.triu(table_correlations_upper)
+    triangular_heatmap_values += np.tril(table_correlations_lower, k=-1)
     triangular_heatmap = pd.DataFrame(
         triangular_heatmap_values,
-        index=sorted_table_correlations_upper.index,
-        columns=sorted_table_correlations_upper.columns,
+        index=table_correlations_upper.index,
+        columns=table_correlations_upper.columns,
     )
 
-    customdata_triangular_values = np.triu(sorted_customdata_upper)
-    customdata_triangular_values += np.tril(sorted_customdata_lower, k=-1)
+    customdata_triangular_values = np.triu(customdata_upper)
+    customdata_triangular_values += np.tril(customdata_lower, k=-1)
     customdata_triangular = pd.DataFrame(
-        customdata_triangular_values, index=sorted_customdata_upper.index, columns=sorted_customdata_upper.columns
+        customdata_triangular_values, index=customdata_upper.index, columns=customdata_upper.columns
     )
 
     hovertemplate_triangular = "Correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f} <br>Number variables: %{customdata[4]}<br><extra></extra>"
 
     fig_triangular = heatmap_by_sorted_dimensions(triangular_heatmap, hovertemplate_triangular, customdata_triangular)
     triangular_heatmap.index.names = ["dimension", "subdimension"]
-    fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap)
+    fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap.index)
+    fig_triangular = add_custom_legend_axis(fig_triangular, triangular_heatmap.index, horizontal=False)
     fig_triangular.update_layout(
         yaxis={
             "title": f"{second_category} correlation",
@@ -292,15 +288,16 @@ def _fill_graph_tab_comparison(
         margin={"l": 0, "r": 0, "b": 0, "t": 0},
     )
 
-    difference_heatmap = sorted_table_correlations_upper - sorted_table_correlations_lower
+    difference_heatmap = table_correlations_upper - table_correlations_lower
 
     hovertemplate_difference = "Difference in correlation: %{z:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[0]:.3f} +- %{customdata[1]:.3f} <br>Dimensions 2: %{y}<br>R²: %{customdata[2]:.3f} +- %{customdata[3]:.3f}<br><extra></extra>"
 
     fig_difference = heatmap_by_sorted_dimensions(
-        difference_heatmap, hovertemplate_difference, sorted_customdata_upper, zmin=-2, zmax=2
+        difference_heatmap, hovertemplate_difference, customdata_upper, zmin=-2, zmax=2
     )
     difference_heatmap.index.names = ["dimension", "subdimension"]
-    fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap)
+    fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap.index)
+    fig_difference = add_custom_legend_axis(fig_difference, difference_heatmap.index, horizontal=False)
     fig_difference.update_layout(
         yaxis={"showgrid": False, "zeroline": False},
         xaxis={"showgrid": False, "zeroline": False},
@@ -319,13 +316,13 @@ def _fill_graph_tab_comparison(
     )
 
 
-def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_type):
+def get_table_and_customdata(uni_or_multi, data_comparison, data_scores, method, correlation_type):
     if uni_or_multi == "univariate":
         sample_nature = "number_variables"
     else:  # uni_or_multi == "multivariate"
         sample_nature = "number_features"
     correlations_raw = pd.DataFrame(data_comparison).set_index(
-        ["dimension_1", "subdimension_1", "r2_1", "r2_std_1", "dimension_2", "subdimension_2", "r2_2", "r2_std_2"]
+        ["dimension_1", "subdimension_1", "dimension_2", "subdimension_2"]
     )
     correlations_raw.columns = pd.MultiIndex.from_tuples(
         list(map(eval, correlations_raw.columns.tolist())), names=["method", "correlation_type"]
@@ -334,11 +331,21 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
     correlations.columns = ["correlation", sample_nature]
     correlations.reset_index(inplace=True)
 
+    scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
+    scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
+    scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
+
+    for number in [1, 2]:
+        correlations.set_index([f"dimension_{number}", f"subdimension_{number}"], inplace=True)
+        correlations[f"r2_{number}"] = scores["r2"]
+        correlations[f"r2_std_{number}"] = scores["r2_std"]
+        correlations.reset_index(inplace=True)
+
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    ).loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+    ).loc[DIMENSIONS_SUBDIMENSIONS_INDEXES, DIMENSIONS_SUBDIMENSIONS_INDEXES]
 
     customdata_list = []
     for customdata_item in ["r2_1", "r2_std_1", "r2_2", "r2_std_2", sample_nature]:
@@ -348,13 +355,13 @@ def get_table_and_customdata(uni_or_multi, data_comparison, method, correlation_
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
             )
-            .loc[ORDER_DIMENSIONS, ORDER_DIMENSIONS]
+            .loc[DIMENSIONS_SUBDIMENSIONS_INDEXES, DIMENSIONS_SUBDIMENSIONS_INDEXES]
             .values
         )
 
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(np.nan, index=ORDER_DIMENSIONS, columns=ORDER_DIMENSIONS)
+    customdata = pd.DataFrame(np.nan, index=DIMENSIONS_SUBDIMENSIONS_INDEXES, columns=DIMENSIONS_SUBDIMENSIONS_INDEXES)
     customdata[customdata.columns] = stacked_customdata
 
     # Need to get rid of the Nones to be abble to perform addition elementwise
@@ -370,8 +377,18 @@ def filter_none_to_nan(customdata_element):
 
 LAYOUT = dbc.Container(
     [
-        dcc.Loading(dcc.Store(id="memory_comparison_upper")),
-        dcc.Loading(dcc.Store(id="memory_comparison_lower")),
+        dcc.Loading(
+            [
+                dcc.Store(id="memory_comparison_upper"),
+                dcc.Store(id="memory_comparison_lower"),
+                dcc.Store(
+                    id="memory_scores_comparison",
+                    data=load_feather(
+                        "age_prediction_performances/scores_all_samples_per_participant.feather"
+                    ).to_dict(),
+                ),
+            ]
+        ),
         html.H1("Correlations comparison"),
         html.Br(),
         html.Br(),
