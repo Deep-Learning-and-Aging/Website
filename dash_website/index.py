@@ -22,6 +22,7 @@ import dash_website.feature_importances.videos as feature_importances_videos
 import dash_website.correlation_between.correlation_between as correlation_between
 
 import dash_website.genetics.gwas as genetics_gwas
+
 import dash_website.genetics.correlations as genetics_correlations
 import dash_website.genetics.heritability as genetics_heritability
 
@@ -77,6 +78,7 @@ def launch_local_website():
 def add_layout(app):
     app.layout = html.Div(
         [
+            html.Div(id="blank-output"),
             dcc.Location(id="url", refresh=False),
             get_top_bar(),
             html.Hr(),
@@ -229,9 +231,76 @@ def get_top_bar():
     )
 
 
+APP.clientside_callback(
+    """
+    function(pathname) {
+        document.title = "Error on Multidimensionality of aging"
+        if ("correlation_between_aging_dimensions" === pathname.split("/")[1]) {
+            if ("phenotypic" === pathname.split("/")[2]) {
+                document.title = "Phenotype correlations"
+            } else if ("genetics" === pathname.split("/")[2]) {
+                document.title = "Genetics correlations"
+            } else if ("xwas_univariate" === pathname.split("/")[2]) {
+                document.title = "XWAS univariate correlations"
+            } else if ("xwas_multivariate" === pathname.split("/")[2]) {
+                document.title = "XWAS multivariate correlations"
+            } else if ("comparison" === pathname.split("/")[2]) {
+                document.title = "Correlations comparison"
+            }
+        } else if ("age_prediction_performances" === pathname.split("/")[1]) {
+            document.title = "Age prediction performances"
+        } else if ("model_interpretability" === pathname.split("/")[1]) {
+            if ("scalars" === pathname.split("/")[2]) {
+                document.title = "Model interpretability scalars"
+            } else if ("time_series" === pathname.split("/")[2]) {
+                document.title = "Model interpretability time series"
+            } else if ("images" === pathname.split("/")[2]) {
+                document.title = "Model interpretability images"
+            } else if ("videos" === pathname.split("/")[2]) {
+                document.title = "Model interpretability videos"
+            }
+        } else if ("gwas" === pathname.split("/")[1]) {
+            if ("associations" === pathname.split("/")[2]) {
+                document.title = "GWAS associations"
+            } else if ("heritability" === pathname.split("/")[2]) {
+                document.title = "GWAS heritability"
+            }
+        } else if ("xwas" === pathname.split("/")[1]) {
+            if ("univariate_associations" === pathname.split("/")[2]) {
+                document.title = "XWAS univariate associations"
+            } else if ("accelerated_aging_prediction_performance" === pathname.split("/")[2]) {
+                document.title = "XWAS multivariate performance"
+            } else if ("accelerated_aging_prediction_interpretability" === pathname.split("/")[2]) {
+                document.title = "XWAS multivariate interpretability"
+            }
+        } else if ("datasets" === pathname.split("/")[1]) {
+            if ("scalars" === pathname.split("/")[2]) {
+                document.title = "Datasets scalars"
+            }
+            else if ("time_series" === pathname.split("/")[2]) {
+                document.title = "Datasets time series"
+            }
+            else if ("images" === pathname.split("/")[2]) {
+                document.title = "Datasets images"
+            }
+            else if ("videos" === pathname.split("/")[2]) {
+                document.title = "Datasets videos"
+            }
+        } else if ("/" === pathname) {
+            document.title = "Multidimensionality of aging"
+        }
+    }
+    """,
+    Output("blank-output", "children"),
+    Input("url", "pathname"),
+)
+
+
 # THIS CALLBACK MAPS THE WEBSITE PAGE ORGANISATION TO THE CODE PAGE ORGANISATION
 @APP.callback(Output("page_content", "children"), Input("url", "pathname"))
 def _display_page(pathname):
+    layout = "404"
+
     if "correlation_between_aging_dimensions" == pathname.split("/")[1]:
         if "phenotypic" == pathname.split("/")[2]:
             layout = correlation_between.LAYOUT
@@ -274,7 +343,6 @@ def _display_page(pathname):
     elif "datasets" == pathname.split("/")[1]:
         if "scalars" == pathname.split("/")[2]:
             layout = datasets_scalars.LAYOUT
-
         elif "time_series" == pathname.split("/")[2]:
             layout = datasets_time_series.LAYOUT
         elif "images" == pathname.split("/")[2]:
@@ -284,9 +352,6 @@ def _display_page(pathname):
 
     elif "/" == pathname:
         layout = introduction.LAYOUT
-
-    else:
-        layout = "404"
 
     return layout
 
@@ -404,6 +469,8 @@ def _toggle_modal(open_button_clicks, close_button_clicks, is_open):
 
 @APP.callback([Output("info_header", "children"), Output("info_text", "children")], Input("url", "pathname"))
 def _fill_info(pathname):
+    header, text = None, None
+
     if "correlation_between_aging_dimensions" == pathname.split("/")[1]:
         if "phenotypic" == pathname.split("/")[2]:
             header = "Correlation between aging dimensions - Phenotypic"
@@ -471,8 +538,5 @@ def _fill_info(pathname):
         elif "videos" == pathname.split("/")[2]:
             header = "Datasets - Videos"
             text = info_datasets_videos.TEXT
-
-    else:
-        header, text = None, None
 
     return header, text
