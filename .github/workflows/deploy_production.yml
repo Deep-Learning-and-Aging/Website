@@ -5,7 +5,7 @@ on:
 
 jobs:
 
-  deploy_app_in_dev:
+  deploy_app_in_prod:
     runs-on: ubuntu-latest
 
     steps:
