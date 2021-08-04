@@ -6,12 +6,12 @@
 
 The website is coded in Python, using the framework Dash. The data is stored on AWS s3. We use Cloud Run from Google Cloud Platform to host our website.
 
-## Contribute to the project 
+## Contribute to the project
 
-The fact that you cannot have access to the data stored on AWS (since we don't share the credentials) makes it harder to contribute to the project. However, you can still propose the some changes with a pull request. 
+The fact that you cannot have access to the data stored on AWS (since we don't share the credentials) makes it harder to contribute to the project. However, you can still propose the some changes with a pull request.
 
 Once you have forked the repository and cloned it, you can install the package with its development dependencies using:
-```
+```bash
 pip install -e .[env]
 ```
 
@@ -22,10 +22,10 @@ If you are using Visual Studio Code, a [.devcontainer](.devcontainer) folder is 
 Feel free to discuss about you ideas in the [discussion section](https://github.com/Deep-Learning-and-Aging/Website/discussions).
 
 
-## Structure of the website 
+## Structure of the website
 The website is constructed as follows :
 
-```
+```bash
 📜Dockerfile (calls index.py)
 📦dash_website
  ┣ 📂age_prediction_performances
@@ -46,7 +46,7 @@ There are two different organisations of the pages :
 
 Each page has the same structure : a layout python object, and some attributes of this layout can be modified using callbacks.
 
-## How to deploy 
+## How to deploy
 
-A CI / CD workflow has been created with Git Actions in order to deploy the website automatically on demand. 
+A CI / CD workflow has been created with Git Actions in order to deploy the website automatically on demand.
 You can find the development version of the website [here](https://dev---website-4mfjnp4fjq-uc.a.run.app).
