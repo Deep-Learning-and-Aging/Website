@@ -12,7 +12,8 @@ from io import BytesIO
 import base64
 
 from dash_website.utils.aws_loader import load_feather, load_npy, load_jpg, does_key_exists
-from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_check_list, get_options
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_check_list, get_options_from_list
+from dash_website import ALGORITHMS
 from dash_website.datasets import (
     TREE_IMAGES,
     SIDES_DIMENSION,
@@ -22,14 +23,6 @@ from dash_website.datasets import (
     SAMPLE_LEGEND,
 )
 from dash_website.feature_importances import AGING_RATE_LEGEND, DISPLAY_MODE
-
-
-def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
-
-
-def get_data_features():
-    return load_feather("datasets/images/information.feather").to_dict()
 
 
 def get_controls_images_features():
@@ -52,7 +45,7 @@ def get_controls_images_features():
             "Select sub-subdimension :",
             from_dict=False,
         ),
-        get_check_list("display_mode_images_features", DISPLAY_MODE, "Select a display mode"),
+        get_check_list("display_mode_images_features", DISPLAY_MODE, "Select a display mode", from_dict=False),
     ]
 
 
@@ -70,32 +63,35 @@ def get_controls_images_features():
         Input("memory_scores_features", "data"),
     ],
 )
-def _change_subdimensions_features(dimension, subdimension, data_scores):
+def _change_subdimensions_images_features(dimension, subdimension, data_scores):
     context = dash.callback_context.triggered
 
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_images_features":
         first_subdimension = list(TREE_IMAGES[dimension].keys())[0]
 
-        option_subdimension = get_options(list(TREE_IMAGES[dimension].keys()))
+        option_subdimension = get_options_from_list(list(TREE_IMAGES[dimension].keys()))
         value_subdimension = list(TREE_IMAGES[dimension].keys())[0]
-        option_sub_subdimension = get_options(TREE_IMAGES[dimension][first_subdimension])
+        option_sub_subdimension = get_options_from_list(TREE_IMAGES[dimension][first_subdimension])
         value_sub_subdimension = TREE_IMAGES[dimension][first_subdimension][0]
     else:
-        option_subdimension = get_options(list(TREE_IMAGES[dimension].keys()))
+        option_subdimension = get_options_from_list(list(TREE_IMAGES[dimension].keys()))
         value_subdimension = subdimension
-        option_sub_subdimension = get_options(TREE_IMAGES[dimension][subdimension])
+        option_sub_subdimension = get_options_from_list(TREE_IMAGES[dimension][subdimension])
         value_sub_subdimension = TREE_IMAGES[dimension][subdimension][0]
 
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, value_subdimension, value_sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, value_subdimension, value_sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {algorithm} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {ALGORITHMS[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return option_subdimension, value_subdimension, option_sub_subdimension, value_sub_subdimension, title
 
@@ -222,7 +218,13 @@ def display_image_features(
 
                 right_image = html.Img(
                     src=right_source_image,
-                    style={"height": "35%", "width": "35%", "margin-right": "5%", "-webkit-transform": "scaleX(-1)", "transform": "scaleX(-1)"},
+                    style={
+                        "height": "35%",
+                        "width": "35%",
+                        "margin-right": "5%",
+                        "-webkit-transform": "scaleX(-1)",
+                        "transform": "scaleX(-1)",
+                    },
                 )
             else:
                 right_image = html.Div()
@@ -301,8 +303,15 @@ LAYOUT = dbc.Container(
     [
         dcc.Loading(
             [
-                dcc.Store(id="memory_scores_features", data=get_data_scores()),
-                dcc.Store(id="memory_images_features", data=get_data_features()),
+                dcc.Store(
+                    id="memory_images_features", data=load_feather("datasets/images/information.feather").to_dict()
+                ),
+                dcc.Store(
+                    id="memory_scores_features",
+                    data=load_feather(
+                        "age_prediction_performances/scores_all_samples_per_participant.feather"
+                    ).to_dict(),
+                ),
             ]
         ),
         html.H1("Model interpretability - Images"),

@@ -1,3 +1,4 @@
+from types import DynamicClassAttribute
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -7,16 +8,12 @@ import dash_table
 import dash
 
 import pandas as pd
+import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_item_radio_items, get_options
-from dash_website import DOWNLOAD_CONFIG
-from dash_website import CORRELATION_TYPES, ALGORITHMS_RENDERING
+from dash_website.utils.controls import get_item_radio_items, get_options_from_list
+from dash_website import DOWNLOAD_CONFIG, CORRELATION_TYPES, ALGORITHMS
 from dash_website.feature_importances import TREE_SCALARS, FEATURES_TABLE_COLUMNS, FEATURES_CORRELATIONS_TABLE_COLUMNS
-
-
-def get_data_scores():
-    return load_feather("feature_importances/scores_all_samples_per_participant.feather").to_dict()
 
 
 @APP.callback(
@@ -27,7 +24,7 @@ def get_data_scores():
         Input("sub_subdimension_scalars_features", "value"),
     ],
 )
-def _modify_store_features(dimension, subdimension, sub_subdimension):
+def _modify_memory_scalars_features(dimension, subdimension, sub_subdimension):
     return load_feather(f"feature_importances/scalars/{dimension}_{subdimension}_{sub_subdimension}.feather").to_dict()
 
 
@@ -63,22 +60,22 @@ def get_controls_scalars_features():
     ],
     [Input("dimension_scalars_features", "value"), Input("subdimension_scalars_features", "value")],
 )
-def _change_subdimensions_features(dimension, subdimension):
+def _change_subdimensions_scalars_features(dimension, subdimension):
     context = dash.callback_context.triggered
 
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_scalars_features":
         first_subdimension = list(TREE_SCALARS[dimension].keys())[0]
         return (
-            get_options(list(TREE_SCALARS[dimension].keys())),
+            get_options_from_list(list(TREE_SCALARS[dimension].keys())),
             list(TREE_SCALARS[dimension].keys())[0],
-            get_options(TREE_SCALARS[dimension][first_subdimension]),
+            get_options_from_list(TREE_SCALARS[dimension][first_subdimension]),
             TREE_SCALARS[dimension][first_subdimension][0],
         )
     else:
         return (
-            get_options(list(TREE_SCALARS[dimension].keys())),
+            get_options_from_list(list(TREE_SCALARS[dimension].keys())),
             subdimension,
-            get_options(TREE_SCALARS[dimension][subdimension]),
+            get_options_from_list(TREE_SCALARS[dimension][subdimension]),
             TREE_SCALARS[dimension][subdimension][0],
         )
 
@@ -120,27 +117,30 @@ def get_controls_table_scalars_features():
         Input("memory_features", "data"),
     ],
 )
-def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_scores, data_features):
+def _fill_bar_plot_scalars_features(dimension, subdimension, sub_subdimension, data_scores, data_features):
     import plotly.graph_objects as go
 
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, subdimension, sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, subdimension, sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     best_algorithm = scores.index[0]
     best_score = scores.loc[best_algorithm]
 
-    title = f"The best algorithm is the {ALGORITHMS_RENDERING[best_algorithm]}. The R² is {best_score['r2']} +- {best_score['r2_std']} with a RMSE of {best_score['rmse']} +- {best_score['rmse_std']} for a sample size of {int(best_score['sample_size'])} participants"
+    title = f"The best algorithm is the {ALGORITHMS[best_algorithm]}. The R² is {best_score['r2']} +- {best_score['r2_std']} with a RMSE of {best_score['rmse']} +- {best_score['rmse_std']} for a sample size of {int(best_score['sample_size'])} participants"
 
     other_scores = scores.drop(index=best_algorithm)
     subtitle = ""
     for other_algorithm in other_scores.index:
-        subtitle += f"The {ALGORITHMS_RENDERING[other_algorithm]} has a R² of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
+        subtitle += f"The {ALGORITHMS[other_algorithm]} has a R² of {other_scores.loc[other_algorithm, 'r2']} +- {other_scores.loc[other_algorithm, 'r2_std']}. "
 
-    features = pd.DataFrame(data_features).set_index("feature")
+    features = pd.DataFrame(data_features, dtype=np.float32).set_index("feature")
     features.columns = pd.MultiIndex.from_tuples(
         list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
     )
@@ -164,7 +164,7 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
 
     for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
         fig.add_bar(
-            name=ALGORITHMS_RENDERING[algorithm],
+            name=ALGORITHMS[algorithm],
             x=features.loc[sorted_features, (algorithm, "mean")].abs().values[::-1],
             y=sorted_features[::-1],
             error_x={
@@ -206,7 +206,7 @@ def _fill_bar_plot_feature(dimension, subdimension, sub_subdimension, data_score
         Input("table_correlation_scalars_features", "sort_by"),
     ],
 )
-def _sort_tables(
+def _sort_tables_scalars_features(
     dimension,
     subdimension,
     sub_subdimension,
@@ -216,16 +216,19 @@ def _sort_tables(
     sort_by_col_features,
     sort_by_col_correlations,
 ):
-    scores_raw = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension"]).round(3)
-    scores = (
-        scores_raw.loc[(dimension, subdimension, sub_subdimension)]
+    scores_raw = (
+        pd.DataFrame(data_scores)
+        .set_index(["dimension", "subdimension", "sub_subdimension"])
+        .loc[(dimension, subdimension, sub_subdimension)]
         .set_index("algorithm")
-        .sort_values("r2", ascending=False)
+    )
+    scores = (
+        scores_raw.drop(index=scores_raw.index[scores_raw.index == "*"]).sort_values("r2", ascending=False).round(3)
     )
 
     best_algorithm = scores.index[0]
 
-    features = pd.DataFrame(data_features).set_index("feature")
+    features = pd.DataFrame(data_features, dtype=np.float32).set_index("feature")
     features.columns = pd.MultiIndex.from_tuples(
         list(map(eval, features.columns.tolist())), names=["algorithm", "observation"]
     )
@@ -247,7 +250,7 @@ def _sort_tables(
     )
 
     for algorithm in ["correlation", "elastic_net", "light_gbm", "neural_network"]:
-        table_correlations_raw[f"percentage_{algorithm}"] = features[(algorithm, "mean")]
+        table_correlations_raw[f"percentage_{algorithm}"] = features[(algorithm, "mean")].abs()
 
     table_correlations = (
         table_correlations_raw.corr(method=correlation_type)
@@ -260,7 +263,7 @@ def _sort_tables(
         is_ascending = sort_by_col_features[0]["direction"] == "asc"
         table_features.sort_values(sort_by_col_features[0]["column_id"], ascending=is_ascending, inplace=True)
     else:
-        table_features.sort_values("percentage_light_gbm", inplace=True)
+        table_features.sort_values("percentage_light_gbm", ascending=False, inplace=True)
 
     if sort_by_col_correlations is not None and len(sort_by_col_correlations) > 0:
         is_ascending = sort_by_col_correlations[0]["direction"] == "asc"
@@ -273,7 +276,17 @@ def _sort_tables(
 
 LAYOUT = dbc.Container(
     [
-        dcc.Loading([dcc.Store(id="memory_features"), dcc.Store(id="memory_scores", data=get_data_scores())]),
+        dcc.Loading(
+            [
+                dcc.Store(id="memory_features"),
+                dcc.Store(
+                    id="memory_scores",
+                    data=load_feather(
+                        "age_prediction_performances/scores_all_samples_per_participant.feather"
+                    ).to_dict(),
+                ),
+            ]
+        ),
         html.H1("Model interpretability - Scalars"),
         html.Br(),
         html.Br(),

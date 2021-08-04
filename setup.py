@@ -1,10 +1,10 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="dash_website",
     version="0.1",
     description="Website that shows the results on multi-dimensionality of aging.",
-    packages=find_packages(),
+    packages=["dash_website"],
     requires=["setuptools", "wheel"],
     install_requires=[
         "gunicorn",

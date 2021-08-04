@@ -10,14 +10,17 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_drop_down
-from dash_website import DOWNLOAD_CONFIG
-from dash_website.genetics import DIMENSIONS_GWAS_VOLCANO, VOLCANO_TABLE_COLUMNS
+from dash_website import DIMENSIONS_SUBDIMENSIONS, DOWNLOAD_CONFIG
+from dash_website.genetics import VOLCANO_TABLE_COLUMNS
+from dash_website.genetics.gwas_tabs import DIMENSIONS_TO_DROP_VOLCANO
 
 
 def get_volcano():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_volcano_gwas", data=get_data())),
+            dcc.Loading(
+                dcc.Store(id="memory_volcano_gwas", data=load_feather("genetics/gwas/size_effects.feather").to_dict())
+            ),
             html.H1("Associations - GWAS"),
             html.Br(),
             html.Br(),
@@ -67,16 +70,14 @@ def get_volcano():
     )
 
 
-def get_data():
-    return load_feather(f"genetics/gwas/size_effects.feather").to_dict()
-
-
 def get_controls_volcano_gwas():
-    return dbc.Card(
-        get_drop_down(
-            "dimension_volcano_gwas", ["All"] + DIMENSIONS_GWAS_VOLCANO, "Select a dimension:", from_dict=False
-        )
-    )
+    dimensions_subdimensions = {"All": "All"}
+    dimensions_subdimensions.update(DIMENSIONS_SUBDIMENSIONS)
+
+    for dimension_subdimension in DIMENSIONS_TO_DROP_VOLCANO:
+        del dimensions_subdimensions[dimension_subdimension]
+
+    return dbc.Card(get_drop_down("dimension_volcano_gwas", dimensions_subdimensions, "Select a dimension:"))
 
 
 @APP.callback(

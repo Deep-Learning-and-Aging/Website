@@ -7,7 +7,7 @@ TREE_SCALARS = {
         "All": ["Scalars"],
         "BloodPressure": ["Scalars"],
         "Carotids": ["Scalars"],
-        "PWA": ["Scalars"],
+        "PulseWaveAnalysis": ["Scalars"],
     },
     "Biochemistry": {"All": ["Scalars"], "Blood": ["Scalars"], "Urine": ["Scalars"]},
     "BloodCells": {"BloodCount": ["Scalars"]},
@@ -35,7 +35,7 @@ TREE_SCALARS = {
         "IntraocularPressure": ["Scalars"],
     },
     "Hearing": {"HearingTest": ["Scalars"]},
-    "Heart": {"All": ["Scalars"], "ECG": ["Scalars"], "MRI": ["Size", "PWA", "AllScalars"]},
+    "Heart": {"All": ["Scalars"], "ECG": ["Scalars"], "MRI": ["Size", "PulseWaveAnalysis", "AllScalars"]},
     "Lungs": {"Spirometry": ["Scalars"]},
     "Musculoskeletal": {
         "Scalars": ["AllScalars", "Anthropometry", "Impedance", "HeelBoneDensitometry", "HandGripStrength"]
