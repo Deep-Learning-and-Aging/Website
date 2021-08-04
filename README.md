@@ -2,6 +2,7 @@
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fmultidimensionality-of-aging.net%2F)](https://multidimensionality-of-aging.net/)
 [![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCEUEAd-MoVx30rbQfluDxmg?label=seminar%20presentation)](https://www.youtube.com/watch?v=VqQtQxkwzNo&t=1178s)
+[![GitHub Super-Linter](https://github.com/Deep-Learning-and-Aging/Website/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/Deep-Learning-and-Aging/Website/actions/workflows/linter.yml)
 
 The website is coded in Python, using the framework Dash. The data is stored on AWS s3. We use Cloud Run from Google Cloud Platform to host our website.
 
