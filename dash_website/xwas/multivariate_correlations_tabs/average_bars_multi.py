@@ -261,7 +261,7 @@ def _fill_graph_tab_average_multivariate(
         if sorted_correlations.shape[0] == 0:
             return go.Figure(), "The data for this X main category is not provided :("
 
-        if display_mode == "view_all":
+        if display_mode == "view_decreasing":
             bars = go.Bar(
                 x=sorted_correlations.index.get_level_values("category"),
                 y=sorted_correlations,
