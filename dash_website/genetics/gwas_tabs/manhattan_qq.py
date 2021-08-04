@@ -27,25 +27,27 @@ def get_manhattan_qq():
 
 
 def get_controls_manhattan_qq_gwas():
+    dimensions_subdimensions = DIMENSIONS_SUBDIMENSIONS.copy()
+
+    for dimension_subdimension in DIMENSIONS_TO_DROP_MANHATTAN_QQ:
+        del dimensions_subdimensions[dimension_subdimension]
+
     return dbc.Card(
-        get_drop_down(
-            "dimensions_manhattan_qq_gwas",
-            pd.Index(DIMENSIONS_SUBDIMENSIONS).drop(DIMENSIONS_TO_DROP_MANHATTAN_QQ),
-            "Select a dimension:",
-            from_dict=False,
-        )
+        get_drop_down("dimension_subdimension_manhattan_qq_gwas", dimensions_subdimensions, "Select a dimension:")
     )
 
 
 @APP.callback(
     [Output("image_manhattan_gwas", "children"), Output("image_qq_gwas", "children")],
-    Input("dimensions_manhattan_qq_gwas", "value"),
+    Input("dimension_subdimension_manhattan_qq_gwas", "value"),
 )
-def _display_image_(dimension):
+def _display_image_(dimension_subdimension):
     plots = []
 
     for plot in ["manhattan", "qq"]:
-        path_to_plot = f"genetics/gwas/{plot}/{RENAME_DIMENSIONS.get(dimension, dimension)}.png"
+        path_to_plot = (
+            f"genetics/gwas/{plot}/{RENAME_DIMENSIONS.get(dimension_subdimension, dimension_subdimension)}.png"
+        )
         if plot == "manhattan":
             style = {"height": "100%", "width": "100%"}
         else:  # plot == "qq"
