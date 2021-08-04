@@ -8,23 +8,34 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.controls import (
+    get_drop_down,
+    get_item_radio_items,
+    get_options_from_dict,
+    get_options_from_list,
+)
 from dash_website import (
     DOWNLOAD_CONFIG,
-    DIMENSIONS,
     RENAME_DIMENSIONS,
+    DIMENSIONS_SUBDIMENSIONS,
     MAIN_CATEGORIES_TO_CATEGORIES,
-    ALGORITHMS_RENDERING,
+    ALGORITHMS,
     CORRELATION_TYPES,
 )
-from dash_website.xwas import DISPLAY_MODE
+from dash_website.xwas.univariate_correlations_tabs import DISPLAY_MODE
 
 
-def get_average_bars():
+def get_average_bars_multivariate():
     return dbc.Container(
         [
             dcc.Loading(
-                [dcc.Store(id="memory_average_multi", data=get_data_multi()), dcc.Store(id="memory_correlations_multi")]
+                [
+                    dcc.Store(
+                        id="memory_average_multivariate",
+                        data=load_feather("xwas/multivariate_correlations/averages_correlations.feather").to_dict(),
+                    ),
+                    dcc.Store(id="memory_correlations_multivariate"),
+                ]
             ),
             html.H1("Multivariate XWAS - Correlations"),
             html.Br(),
@@ -33,7 +44,7 @@ def get_average_bars():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_average_multi(),
+                            get_controls_tab_average_multivariate(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -43,8 +54,8 @@ def get_average_bars():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_average_multi"),
-                                    dcc.Graph(id="graph_average_multi", config=DOWNLOAD_CONFIG),
+                                    html.H2(id="title_average_multivariate"),
+                                    dcc.Graph(id="graph_average_multivariate", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -58,128 +69,136 @@ def get_average_bars():
     )
 
 
-def get_data_multi():
-    return load_feather(f"xwas/multivariate_correlations/averages_correlations.feather").to_dict()
-
-
 @APP.callback(
-    Output("memory_correlations_multi", "data"),
-    [Input("dimension_1_average_multi", "value"), Input("dimension_2_average_multi", "value")],
+    Output("memory_correlations_multivariate", "data"),
+    [
+        Input("dimension_subdimension_1_average_multivariate", "value"),
+        Input("dimension_subdimension_2_average_multivariate", "value"),
+    ],
 )
-def _modify_store_correlations(dimension_1, dimension_2):
-    if dimension_2 == "average":
+def _modify_store_correlations_multivariate(dimension_subdimension_1, dimension_subdimension_2):
+    if dimension_subdimension_2 == "average":
         raise PreventUpdate
     else:
         return load_feather(
-            f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_1, dimension_1)}.feather"
+            f"xwas/multivariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_subdimension_1, dimension_subdimension_1)}.feather"
         ).to_dict()
 
 
-def get_controls_tab_average_multi():
+def get_controls_tab_average_multivariate():
+    main_dimensions_subdimension = {"MainDimensions": "MainDimensions", "SubDimensions": "SubDimensions"}
+    main_dimensions_subdimension.update(DIMENSIONS_SUBDIMENSIONS)
+
+    average_dimensions_subdimension = {"average": "average"}
+    average_dimensions_subdimension.update(DIMENSIONS_SUBDIMENSIONS)
+
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_average_multi",
+                "main_category_average_multivariate",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
             get_drop_down(
-                "dimension_1_average_multi",
-                ["MainDimensions", "SubDimensions"] + DIMENSIONS,
+                "dimension_subdimension_1_average_multivariate",
+                main_dimensions_subdimension,
                 "Select an aging dimension 1: ",
-                from_dict=False,
             ),
             html.Div(
                 [
                     get_drop_down(
-                        "dimension_2_average_multi",
-                        ["average"] + DIMENSIONS,
+                        "dimension_subdimension_2_average_multivariate",
+                        average_dimensions_subdimension,
                         "Select an aging dimension 2: ",
-                        from_dict=False,
                     )
                 ],
-                id="hiden_dimension_2_average_multi",
+                id="hiden_dimension_subdimension_2_average_multivariate",
                 style={"display": "none"},
             ),
             get_item_radio_items(
-                "display_mode_average_multi",
+                "display_mode_average_multivariate",
                 DISPLAY_MODE,
                 "Rank by : ",
             ),
             get_item_radio_items(
-                "algorithm_average",
+                "algorithm_average_multivariate",
                 {
-                    "elastic_net": ALGORITHMS_RENDERING["elastic_net"],
-                    "light_gbm": ALGORITHMS_RENDERING["light_gbm"],
-                    "neural_network": ALGORITHMS_RENDERING["neural_network"],
+                    "elastic_net": ALGORITHMS["elastic_net"],
+                    "light_gbm": ALGORITHMS["light_gbm"],
+                    "neural_network": ALGORITHMS["neural_network"],
                 },
                 "Select an algorithm :",
             ),
-            get_item_radio_items("correlation_type_average_multi", CORRELATION_TYPES, "Select correlation type :"),
+            get_item_radio_items(
+                "correlation_type_average_multivariate", CORRELATION_TYPES, "Select correlation type :"
+            ),
         ]
     )
 
 
 @APP.callback(
     [
-        Output("hiden_dimension_2_average_multi", component_property="style"),
-        Output("dimension_2_average_multi", "options"),
-        Output("dimension_2_average_multi", "value"),
+        Output("hiden_dimension_subdimension_2_average_multivariate", component_property="style"),
+        Output("dimension_subdimension_2_average_multivariate", "options"),
+        Output("dimension_subdimension_2_average_multivariate", "value"),
     ],
-    Input("dimension_1_average_multi", "value"),
+    Input("dimension_subdimension_1_average_multivariate", "value"),
 )
-def _change_controls_average(dimension_1):
-    if dimension_1 in ["MainDimensions", "SubDimensions"]:
-        return {"display": "none"}, get_options(["average"]), "average"
+def _change_controls_average(dimension_subdimension_1):
+    if dimension_subdimension_1 in ["MainDimensions", "SubDimensions"]:
+        return {"display": "none"}, get_options_from_list(["average"]), "average"
     else:
+        average_dimensions_subdimension = {"average": "average"}
+        average_dimensions_subdimension.update(DIMENSIONS_SUBDIMENSIONS)
+        del average_dimensions_subdimension[dimension_subdimension_1]
         return (
             {"display": "block"},
-            get_options(["average"] + pd.Index(DIMENSIONS).drop(dimension_1).tolist()),
+            get_options_from_dict(average_dimensions_subdimension),
             "average",
         )
 
 
 @APP.callback(
-    [Output("graph_average_multi", "figure"), Output("title_average_multi", "children")],
+    [Output("graph_average_multivariate", "figure"), Output("title_average_multivariate", "children")],
     [
-        Input("algorithm_average", "value"),
-        Input("correlation_type_average_multi", "value"),
-        Input("main_category_average_multi", "value"),
-        Input("dimension_1_average_multi", "value"),
-        Input("dimension_2_average_multi", "value"),
-        Input("display_mode_average_multi", "value"),
-        Input("memory_correlations_multi", "data"),
-        Input("memory_average_multi", "data"),
+        Input("algorithm_average_multivariate", "value"),
+        Input("correlation_type_average_multivariate", "value"),
+        Input("main_category_average_multivariate", "value"),
+        Input("dimension_subdimension_1_average_multivariate", "value"),
+        Input("dimension_subdimension_2_average_multivariate", "value"),
+        Input("display_mode_average_multivariate", "value"),
+        Input("memory_correlations_multivariate", "data"),
+        Input("memory_average_multivariate", "data"),
     ],
 )
-def _fill_graph_tab_average(
+def _fill_graph_tab_average_multivariate(
     algorithm,
     correlation_type,
     main_category,
-    dimension_1,
-    dimension_2,
+    dimension_subdimension_1,
+    dimension_subdimension_2,
     display_mode,
     data_correlations,
     data_averages,
 ):
     import plotly.graph_objs as go
 
-    if dimension_2 == "average":
+    if dimension_subdimension_2 == "average":
         averages = pd.DataFrame(data_averages).set_index(["dimension", "category"])
         averages.columns = pd.MultiIndex.from_tuples(
             list(map(eval, averages.columns.tolist())), names=["algorithm", "correlation_type", "observation"]
         )
 
         sorted_averages = averages.loc[
-            (dimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + [f"All_{main_category}"]),
+            (dimension_subdimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + [f"All_{main_category}"]),
             (algorithm, correlation_type),
         ].sort_values(by=["mean"], ascending=False)
 
         if sorted_averages.shape[0] == 0:
             return go.Figure(), "The data for this X main category is not provided :("
 
-        if display_mode == "view_all":
+        if display_mode == "view_decreasing":
             bars = go.Bar(
                 x=sorted_averages.index.get_level_values("category"),
                 y=sorted_averages["mean"],
@@ -235,14 +254,14 @@ def _fill_graph_tab_average(
         )
 
         sorted_correlations = correlations_raw.loc[
-            (dimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + [f"All_{main_category}"]),
+            (dimension_subdimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + [f"All_{main_category}"]),
             (algorithm, correlation_type),
         ].sort_values(ascending=False)
 
         if sorted_correlations.shape[0] == 0:
             return go.Figure(), "The data for this X main category is not provided :("
 
-        if display_mode == "view_all":
+        if display_mode == "view_decreasing":
             bars = go.Bar(
                 x=sorted_correlations.index.get_level_values("category"),
                 y=sorted_correlations,

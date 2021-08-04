@@ -1,44 +1,6 @@
 import pandas as pd
 
 
-DIMENSIONS = sorted(
-    [
-        "*",
-        "*instances01",
-        "*instances1.5x",
-        "*instances23",
-        "Abdomen",
-        "AbdomenLiver",
-        "AbdomenPancreas",
-        "Arterial",
-        "ArterialPulseWaveAnalysis",
-        "ArterialCarotids",
-        "Biochemistry",
-        "BiochemistryUrine",
-        "BiochemistryBlood",
-        "Brain",
-        "BrainCognitive",
-        "BrainMRI",
-        "Eyes",
-        "EyesAll",
-        "EyesFundus",
-        "EyesOCT",
-        "Hearing",
-        "HeartMRI",
-        "Heart",
-        "HeartECG",
-        "BloodCells",
-        "Lungs",
-        "Musculoskeletal",
-        "MusculoskeletalSpine",
-        "MusculoskeletalHips",
-        "MusculoskeletalKnees",
-        "MusculoskeletalFullBody",
-        "MusculoskeletalScalars",
-        "PhysicalActivity",
-    ]
-)
-
 RENAME_DIMENSIONS = {
     "*": "set",
     "*instances01": "set_instances01",
@@ -164,7 +126,7 @@ MAIN_CATEGORIES_TO_CATEGORIES = {
     "Socioeconomics": ALL_SOCIOECONOMICS,
 }
 
-ALGORITHMS_RENDERING = {
+ALGORITHMS = {
     "correlation": "Correlation",
     "best_algorithm": "Best Algorithm",
     "elastic_net": "Elastic Net",
@@ -184,58 +146,56 @@ GRAPH_SIZE = 1200
 
 ORDER_TYPES = {"custom": "Custom", "clustering": "Clustering", "r2": "R²"}
 
-CUSTOM_ORDER = [
-    "*",
-    "*instances01",
-    "*instances1.5x",
-    "*instances23",
-    "Brain",
-    "Eyes",
-    "Hearing",
-    "Lungs",
-    "Arterial",
-    "Heart",
-    "Abdomen",
-    "Musculoskeletal",
-    "PhysicalActivity",
-    "Biochemistry",
-    "BloodCells",
-]
-
-ORDER_DIMENSIONS = pd.MultiIndex.from_tuples(
+CUSTOM_DIMENSIONS = pd.MultiIndex.from_tuples(
     [
-        ("*", "*"),
-        ("*instances01", "*"),
-        ("*instances1.5x", "*"),
-        ("*instances23", "*"),
-        ("Abdomen", "*"),
-        ("Abdomen", "Liver"),
-        ("Abdomen", "Pancreas"),
-        ("Arterial", "*"),
-        ("Arterial", "Carotids"),
-        ("Arterial", "PulseWaveAnalysis"),
-        ("Biochemistry", "*"),
-        ("Biochemistry", "Blood"),
-        ("Biochemistry", "Urine"),
-        ("BloodCells", "*"),
-        ("Brain", "*"),
-        ("Brain", "Cognitive"),
-        ("Brain", "MRI"),
-        ("Eyes", "*"),
-        ("Eyes", "All"),
-        ("Eyes", "Fundus"),
-        ("Eyes", "OCT"),
-        ("Hearing", "*"),
-        ("Heart", "*"),
-        ("Heart", "ECG"),
-        ("Heart", "MRI"),
-        ("Lungs", "*"),
-        ("Musculoskeletal", "*"),
-        ("Musculoskeletal", "FullBody"),
-        ("Musculoskeletal", "Hips"),
-        ("Musculoskeletal", "Knees"),
-        ("Musculoskeletal", "Scalars"),
-        ("Musculoskeletal", "Spine"),
-        ("PhysicalActivity", "*"),
-    ]
+        ("*", "*", "*", "*"),
+        ("*instances01", "*", "*", "*"),
+        ("*instances1.5x", "*", "*", "*"),
+        ("*instances23", "*", "*", "*"),
+        ("Brain", "*", "*", "*"),
+        ("Brain", "Cognitive", "*", "*"),
+        ("Brain", "MRI", "*", "*"),
+        ("Eyes", "*", "*", "*"),
+        ("Eyes", "All", "*", "*"),
+        ("Eyes", "Fundus", "*", "*"),
+        ("Eyes", "OCT", "*", "*"),
+        ("Hearing", "HearingTest", "Scalars", "*"),
+        ("Lungs", "Spirometry", "*", "*"),
+        ("Arterial", "*", "*", "*"),
+        ("Arterial", "Carotids", "*", "*"),
+        ("Arterial", "PulseWaveAnalysis", "*", "*"),
+        ("Heart", "*", "*", "*"),
+        ("Heart", "ECG", "*", "*"),
+        ("Heart", "MRI", "*", "*"),
+        ("Abdomen", "*", "*", "*"),
+        ("Abdomen", "Liver", "*", "*"),
+        ("Abdomen", "Pancreas", "*", "*"),
+        ("Musculoskeletal", "*", "*", "*"),
+        ("Musculoskeletal", "FullBody", "*", "*"),
+        ("Musculoskeletal", "Hips", "*", "*"),
+        ("Musculoskeletal", "Knees", "DXA", "*"),
+        ("Musculoskeletal", "Scalars", "*", "*"),
+        ("Musculoskeletal", "Spine", "*", "*"),
+        ("PhysicalActivity", "*", "*", "*"),
+        ("Biochemistry", "*", "*", "*"),
+        ("Biochemistry", "Blood", "*", "*"),
+        ("Biochemistry", "Urine", "*", "*"),
+        ("BloodCells", "BloodCount", "*", "*"),
+    ],
+    names=["dimension", "subdimension", "sub_subdimension", "algorithm"],
 )
+
+DIMENSIONS_SUBDIMENSIONS = dict(
+    zip(
+        list(
+            map(
+                lambda dimension: dimension.split("*")[0] if dimension[0] != "*" else dimension[:-1],
+                ["".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+            )
+        ),
+        [" - ".join(dimensions[:2]) for dimensions in CUSTOM_DIMENSIONS],
+    )
+)
+DIMENSIONS_SUBDIMENSIONS_INDEXES = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"])
+
+SCORES = {"r2": "R²", "rmse": "RMSE", "c_index": "C-index", "c_index_difference": "C-index difference"}

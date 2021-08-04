@@ -11,25 +11,33 @@ from dash_website.app import APP
 from dash_website.utils.controls import (
     get_item_radio_items,
     get_drop_down,
-    get_options,
+    get_options_from_list,
 )
 from dash_website.utils.aws_loader import load_feather
-from dash_website import DOWNLOAD_CONFIG, DIMENSIONS, MAIN_CATEGORIES_TO_CATEGORIES, RENAME_DIMENSIONS, GRAPH_SIZE
+from dash_website import (
+    DOWNLOAD_CONFIG,
+    MAIN_CATEGORIES_TO_CATEGORIES,
+    RENAME_DIMENSIONS,
+    GRAPH_SIZE,
+    DIMENSIONS_SUBDIMENSIONS,
+)
 from dash_website.xwas.univariate_results_tabs import VOLCANO_TABLE_COLUMNS
 
 
-def get_volcano():
+def get_univariate_volcano():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_volcano")]),
+            dcc.Loading([dcc.Store(id="memory_univariate_volcano")]),
             html.H1("Univariate associations - XWAS"),
             html.Br(),
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col([get_controls_tab(), html.Br(), html.Br()], width={"size": 3}),
+                    dbc.Col([get_controls_tab_univariate_volcano(), html.Br(), html.Br()], width={"size": 3}),
                     dbc.Col(
-                        dcc.Loading([html.H2("Volcano plot"), dcc.Graph(id="graph_volcano", config=DOWNLOAD_CONFIG)]),
+                        dcc.Loading(
+                            [html.H2("Volcano plot"), dcc.Graph(id="graph_univariate_volcano", config=DOWNLOAD_CONFIG)]
+                        ),
                         width={"size": 9},
                     ),
                 ]
@@ -40,7 +48,7 @@ def get_volcano():
                         dcc.Loading(
                             [
                                 dash_table.DataTable(
-                                    id="table_volcano",
+                                    id="table_univariate_volcano",
                                     columns=[{"id": key, "name": name} for key, name in VOLCANO_TABLE_COLUMNS.items()],
                                     style_cell={"textAlign": "left"},
                                     sort_action="custom",
@@ -57,47 +65,53 @@ def get_volcano():
     )
 
 
-def get_controls_tab():
+def get_controls_tab_univariate_volcano():
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_volcano",
+                "main_category_univariate_volcano",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
-            get_drop_down("category_volcano", ["All"], "Select X subcategory: ", from_dict=False),
-            get_drop_down("dimension_volcano", DIMENSIONS, "Select an aging dimension: ", from_dict=False),
+            get_drop_down("category_univariate_volcano", ["All"], "Select X subcategory: ", from_dict=False),
+            get_drop_down(
+                "dimension_univariate_volcano",
+                DIMENSIONS_SUBDIMENSIONS,
+                "Select an aging dimension: ",
+            ),
         ]
     )
 
 
 @APP.callback(
-    [Output("category_volcano", "options"), Output("category_volcano", "value")],
-    Input("main_category_volcano", "value"),
+    [Output("category_univariate_volcano", "options"), Output("category_univariate_volcano", "value")],
+    Input("main_category_univariate_volcano", "value"),
 )
 def _change_controls_category(main_category):
     if main_category == "All":
         list_categories = list(pd.Index(MAIN_CATEGORIES_TO_CATEGORIES[main_category]).drop(["Genetics", "Phenotypic"]))
     else:
         list_categories = MAIN_CATEGORIES_TO_CATEGORIES[main_category]
-    return get_options(["All"] + list_categories), "All"
+    return get_options_from_list(["All"] + list_categories), "All"
 
 
-@APP.callback(Output("memory_volcano", "data"), Input("dimension_volcano", "value"))
-def _modify_store_volcano(dimension):
-    correlations = load_feather(
+@APP.callback(Output("memory_univariate_volcano", "data"), Input("dimension_univariate_volcano", "value"))
+def _modify_store_univariate_volcano(dimension):
+    return load_feather(
         f"xwas/univariate_results/linear_correlations_{RENAME_DIMENSIONS.get(dimension, dimension)}.feather"
-    )
-
-    return correlations.drop(index=correlations.index[correlations["sample_size"] < 10]).to_dict()
+    ).to_dict()
 
 
 @APP.callback(
-    Output("graph_volcano", "figure"),
-    [Input("main_category_volcano", "value"), Input("category_volcano", "value"), Input("memory_volcano", "data")],
+    Output("graph_univariate_volcano", "figure"),
+    [
+        Input("main_category_univariate_volcano", "value"),
+        Input("category_univariate_volcano", "value"),
+        Input("memory_univariate_volcano", "data"),
+    ],
 )
-def _fill_volcano_plot(main_category, category, dict_correlations):
+def _fill_volcano_plot_univariate_volcano(main_category, category, dict_correlations):
     import plotly.express as px
     import plotly.graph_objects as go
 
@@ -110,7 +124,9 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
     else:
         correlations_category = correlations.loc[correlations.index.get_level_values("category").isin([category])]
 
-    correlations_category["neg_log_p_value"] = -np.log10(correlations_category["p_value"])
+    correlations_category["neg_log_p_value"] = -np.log10(
+        correlations_category["p_value"] + np.nextafter(np.float64(0), np.float64(1))
+    )
     correlations_category["category"] = correlations_category.index.get_level_values("category")
     correlations_category["variable"] = correlations_category.index.get_level_values("variable")
 
@@ -167,15 +183,15 @@ def _fill_volcano_plot(main_category, category, dict_correlations):
 
 
 @APP.callback(
-    Output("table_volcano", "data"),
+    Output("table_univariate_volcano", "data"),
     [
-        Input("memory_volcano", "data"),
-        Input("main_category_volcano", "value"),
-        Input("category_volcano", "value"),
-        Input("table_volcano", "sort_by"),
+        Input("memory_univariate_volcano", "data"),
+        Input("main_category_univariate_volcano", "value"),
+        Input("category_univariate_volcano", "value"),
+        Input("table_univariate_volcano", "sort_by"),
     ],
 )
-def _sort_table(dict_correlations, main_category, category, sort_by_col):
+def _sort_table_univariate_volcano(dict_correlations, main_category, category, sort_by_col):
     correlations = pd.DataFrame(dict_correlations).set_index(["category", "variable"])
 
     if category == "All":

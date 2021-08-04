@@ -1,3 +1,4 @@
+from numpy import average
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -8,21 +9,35 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_drop_down, get_item_radio_items, get_options
+from dash_website.utils.controls import (
+    get_drop_down,
+    get_item_radio_items,
+    get_options_from_list,
+    get_options_from_dict,
+)
 from dash_website import (
     DOWNLOAD_CONFIG,
-    DIMENSIONS,
+    DIMENSIONS_SUBDIMENSIONS,
     MAIN_CATEGORIES_TO_CATEGORIES,
     CORRELATION_TYPES,
     RENAME_DIMENSIONS,
 )
-from dash_website.xwas import SUBSET_METHODS, DISPLAY_MODE
+from dash_website.xwas import SUBSET_METHODS
+from dash_website.xwas.univariate_correlations_tabs import DISPLAY_MODE
 
 
-def get_average_bars():
+def get_univariate_average_bars():
     return dbc.Container(
         [
-            dcc.Loading([dcc.Store(id="memory_average", data=get_data()), dcc.Store(id="memory_correlations")]),
+            dcc.Loading(
+                [
+                    dcc.Store(
+                        id="memory_univariate_average",
+                        data=load_feather("xwas/univariate_correlations/averages_correlations.feather").to_dict(),
+                    ),
+                    dcc.Store(id="memory_correlations_univariate_average"),
+                ]
+            ),
             html.H1("Univariate XWAS - Correlations"),
             html.Br(),
             html.Br(),
@@ -30,7 +45,7 @@ def get_average_bars():
                 [
                     dbc.Col(
                         [
-                            get_controls_tab_average(),
+                            get_controls_tab_univariate_average(),
                             html.Br(),
                             html.Br(),
                         ],
@@ -40,8 +55,8 @@ def get_average_bars():
                         [
                             dcc.Loading(
                                 [
-                                    html.H2(id="title_average_test"),
-                                    dcc.Graph(id="graph_average", config=DOWNLOAD_CONFIG),
+                                    html.H2(id="title_univariate_average"),
+                                    dcc.Graph(id="graph_univariate_average", config=DOWNLOAD_CONFIG),
                                 ]
                             )
                         ],
@@ -55,99 +70,101 @@ def get_average_bars():
     )
 
 
-def get_data():
-    return load_feather(f"xwas/univariate_correlations/averages_correlations.feather").to_dict()
-
-
 @APP.callback(
-    Output("memory_correlations", "data"),
-    [Input("dimension_1_average", "value"), Input("dimension_2_average", "value")],
+    Output("memory_correlations_univariate_average", "data"),
+    [
+        Input("dimension_subdimension_1_univariate_average", "value"),
+        Input("dimension_subdimension_2_univariate_average", "value"),
+    ],
 )
-def _modify_store_correlations(dimension_1, dimension_2):
-    if dimension_2 == "average":
+def _modify_store_correlations(dimension_subdimension_1, dimension_subdimension_2):
+    if dimension_subdimension_2 == "average":
         raise PreventUpdate
     else:
         return load_feather(
-            f"xwas/univariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_1, dimension_1)}.feather"
+            f"xwas/univariate_correlations/correlations/dimensions/correlations_{RENAME_DIMENSIONS.get(dimension_subdimension_1, dimension_subdimension_1)}.feather"
         ).to_dict()
 
 
-def get_controls_tab_average():
+def get_controls_tab_univariate_average():
+    main_dimensions_subdimension = {"MainDimensions": "MainDimensions", "SubDimensions": "SubDimensions"}
+    main_dimensions_subdimension.update(DIMENSIONS_SUBDIMENSIONS)
+
+    average_dimensions_subdimension = {"average": "average"}
+    average_dimensions_subdimension.update(DIMENSIONS_SUBDIMENSIONS)
+
     return dbc.Card(
         [
             get_item_radio_items(
-                "main_category_average",
+                "main_category_univariate_average",
                 list(MAIN_CATEGORIES_TO_CATEGORIES.keys()),
                 "Select X main category: ",
                 from_dict=False,
             ),
             get_drop_down(
-                "dimension_1_average",
-                ["MainDimensions", "SubDimensions"] + DIMENSIONS,
+                "dimension_subdimension_1_univariate_average",
+                main_dimensions_subdimension,
                 "Select an aging dimension 1: ",
-                from_dict=False,
             ),
             html.Div(
                 [
                     get_drop_down(
-                        "dimension_2_average",
-                        ["average"] + DIMENSIONS,
+                        "dimension_subdimension_2_univariate_average",
+                        average_dimensions_subdimension,
                         "Select an aging dimension 2: ",
-                        from_dict=False,
                     )
                 ],
-                id="hiden_dimension_2_average",
+                id="hiden_dimension_subdimension_2_univariate_average",
                 style={"display": "none"},
             ),
             get_item_radio_items(
-                "display_mode_average",
+                "display_mode_univariate_average",
                 DISPLAY_MODE,
                 "Rank by : ",
             ),
-            get_item_radio_items("subset_method_average", SUBSET_METHODS, "Select subset method :"),
-            get_item_radio_items("correlation_type_average", CORRELATION_TYPES, "Select correlation type :"),
+            get_item_radio_items("subset_method_univariate_average", SUBSET_METHODS, "Select subset method :"),
+            get_item_radio_items("correlation_type_univariate_average", CORRELATION_TYPES, "Select correlation type :"),
         ]
     )
 
 
 @APP.callback(
     [
-        Output("hiden_dimension_2_average", component_property="style"),
-        Output("dimension_2_average", "options"),
-        Output("dimension_2_average", "value"),
+        Output("hiden_dimension_subdimension_2_univariate_average", component_property="style"),
+        Output("dimension_subdimension_2_univariate_average", "options"),
+        Output("dimension_subdimension_2_univariate_average", "value"),
     ],
-    Input("dimension_1_average", "value"),
+    Input("dimension_subdimension_1_univariate_average", "value"),
 )
-def _change_controls_average(dimension_1):
-    if dimension_1 in ["MainDimensions", "SubDimensions"]:
-        return {"display": "none"}, get_options(["average"]), "average"
+def _change_controls_average(dimension_subdimension_1):
+    if dimension_subdimension_1 in ["MainDimensions", "SubDimensions"]:
+        return {"display": "none"}, get_options_from_list(["average"]), "average"
     else:
-        return (
-            {"display": "block"},
-            get_options(["average"] + pd.Index(DIMENSIONS).drop(dimension_1).tolist()),
-            "average",
-        )
+        average_dimensions_subdimension = {"average": "average"}
+        average_dimensions_subdimension.update(DIMENSIONS_SUBDIMENSIONS)
+        del average_dimensions_subdimension[dimension_subdimension_1]
+        return ({"display": "block"}, get_options_from_dict(average_dimensions_subdimension), "average")
 
 
 @APP.callback(
-    [Output("graph_average", "figure"), Output("title_average_test", "children")],
+    [Output("graph_univariate_average", "figure"), Output("title_univariate_average", "children")],
     [
-        Input("subset_method_average", "value"),
-        Input("correlation_type_average", "value"),
-        Input("main_category_average", "value"),
-        Input("dimension_1_average", "value"),
-        Input("dimension_2_average", "value"),
-        Input("display_mode_average", "value"),
-        Input("memory_correlations", "data"),
-        Input("memory_average", "data"),
+        Input("subset_method_univariate_average", "value"),
+        Input("correlation_type_univariate_average", "value"),
+        Input("main_category_univariate_average", "value"),
+        Input("dimension_subdimension_1_univariate_average", "value"),
+        Input("dimension_subdimension_2_univariate_average", "value"),
+        Input("display_mode_univariate_average", "value"),
+        Input("memory_correlations_univariate_average", "data"),
+        Input("memory_univariate_average", "data"),
     ],
 )
-def _fill_graph_tab_average(
+def _fill_graph_tab_univariate_average(
     subset_method,
     correlation_type,
     main_category,
-    dimension_1,
-    dimension_2,
+    dimension_subdimension_1,
+    dimension_subdimension_2,
     display_mode,
     data_correlations,
     data_averages,
@@ -159,14 +176,14 @@ def _fill_graph_tab_average(
     else:
         all_main_categories = [f"All_{main_category}"]
 
-    if dimension_2 == "average":
+    if dimension_subdimension_2 == "average":
         averages = pd.DataFrame(data_averages).set_index(["dimension", "category"])
         averages.columns = pd.MultiIndex.from_tuples(
             list(map(eval, averages.columns.tolist())), names=["subset_method", "correlation_type", "observation"]
         )
 
         sorted_averages = averages.loc[
-            (dimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + all_main_categories),
+            (dimension_subdimension_1, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + all_main_categories),
             (subset_method, correlation_type),
         ].sort_values(by=["mean"], ascending=False)
 
@@ -224,11 +241,11 @@ def _fill_graph_tab_average(
         )
 
         sorted_correlations = correlations_raw.loc[
-            (dimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + all_main_categories),
+            (dimension_subdimension_2, MAIN_CATEGORIES_TO_CATEGORIES[main_category] + all_main_categories),
             (subset_method, correlation_type),
         ].sort_values(ascending=False)
 
-        if display_mode == "view_all":
+        if display_mode == "view_decreasing":
             bars = go.Bar(
                 x=sorted_correlations.index.get_level_values("category"),
                 y=sorted_correlations,

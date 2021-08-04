@@ -1,3 +1,4 @@
+from botocore.exceptions import AliasConflictParameterError
 from dash_website.app import APP
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -15,15 +16,14 @@ from dash_website.utils.graphs import (
     add_line_and_annotation,
     histogram_correlation,
 )
-from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
+from dash_website import CUSTOM_DIMENSIONS, ALGORITHMS, DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
 def get_all_dimensions():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_all_dimensions")),
+            dcc.Loading([dcc.Store(id="memory_all_dimensions"), dcc.Store(id="memory_scores_all_dimensions")]),
             html.H1("Phenotype - Correlations"),
             html.Br(),
             html.Br(),
@@ -74,35 +74,21 @@ def get_all_dimensions():
     Output("memory_all_dimensions", "data"),
     Input("sample_definition_all_dimensions", "value"),
 )
-def _modify_store_all_dimensions(sample_definition):
-    correlations = load_feather(
+def _get_memory_all_dimensions(sample_definition):
+    return load_feather(
         f"correlation_between_accelerated_aging_dimensions/all_dimensions_{sample_definition}.feather"
-    ).drop(
-        columns=[
-            "r2_1",
-            "r2_std_1",
-            "r2_2",
-            "r2_std_2",
-        ]
-    )
+    ).to_dict()
 
+
+@APP.callback(
+    Output("memory_scores_all_dimensions", "data"),
+    Input("sample_definition_all_dimensions", "value"),
+)
+def _get_scores_all_dimensions(sample_definition):
     score_sample_definition = sample_definition
     if sample_definition == "all_samples_when_possible_otherwise_average":
         score_sample_definition = "all_samples_per_participant"
-    scores = load_feather(f"age_prediction_performances/scores_{score_sample_definition}.feather").set_index(
-        ["dimension", "subdimension", "sub_subdimension", "algorithm"]
-    )
-
-    for number in [1, 2]:
-        correlations.set_index(
-            [f"dimension_{number}", f"subdimension_{number}", f"sub_subdimension_{number}", f"algorithm_{number}"],
-            inplace=True,
-        )
-        correlations[f"r2_{number}"] = scores["r2"]
-        correlations[f"r2_std_{number}"] = scores["r2_std"]
-        correlations.reset_index(inplace=True)
-
-    return correlations.to_dict()
+    return load_feather(f"age_prediction_performances/scores_{score_sample_definition}.feather").to_dict()
 
 
 def get_controls_tab_all_dimensions():
@@ -117,7 +103,7 @@ def get_controls_tab_all_dimensions():
             get_item_radio_items("order_type_all_dimensions", ORDER_TYPES, "Order by:"),
             get_drop_down(
                 "dimension_all_dimensions",
-                ["all"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist(),
+                ["All"] + CUSTOM_DIMENSIONS.get_level_values("dimension").drop_duplicates().tolist(),
                 "Select an aging dimension: ",
                 from_dict=False,
             ),
@@ -135,20 +121,35 @@ def get_controls_tab_all_dimensions():
         Input("order_type_all_dimensions", "value"),
         Input("dimension_all_dimensions", "value"),
         Input("memory_all_dimensions", "data"),
+        Input("memory_scores_all_dimensions", "data"),
     ],
 )
-def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimensions):
+def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimensions, data_scores):
     correlations = pd.DataFrame(data_all_dimensions)
-    if selected_dimension != "all":
+    scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
+
+    for number in [1, 2]:
+        correlations.set_index(
+            [f"dimension_{number}", f"subdimension_{number}", f"sub_subdimension_{number}", f"algorithm_{number}"],
+            inplace=True,
+        )
+        correlations[f"r2_{number}"] = scores["r2"]
+        correlations[f"r2_std_{number}"] = scores["r2_std"]
+        correlations.reset_index(inplace=True)
+
+    if selected_dimension != "All":
         correlations = correlations[
             (correlations["dimension_1"] == selected_dimension) & (correlations["dimension_2"] == selected_dimension)
         ]
+
+    correlations.replace(ALGORITHMS, inplace=True)
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1", "sub_subdimension_1", "algorithm_1"],
         columns=["dimension_2", "subdimension_2", "sub_subdimension_2", "algorithm_2"],
         values="correlation",
     )
+
     order_dimensions = table_correlations.index
     table_correlations = table_correlations.loc[order_dimensions, order_dimensions]
     np.fill_diagonal(table_correlations.values, np.nan)
@@ -187,23 +188,15 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
         fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
 
     else:  # order_by == "custom"
-        if selected_dimension == "all":
-            sorted_dimensions = order_dimensions
-        else:
-            sorted_dimensions = [selected_dimension]
-
-        sorted_table_correlations = table_correlations.loc[sorted_dimensions, sorted_dimensions]
-        sorted_customdata = customdata.loc[sorted_dimensions, sorted_dimensions]
-
-        fig = heatmap_by_sorted_dimensions(sorted_table_correlations, hovertemplate, sorted_customdata)
+        fig = heatmap_by_sorted_dimensions(table_correlations, hovertemplate, customdata)
 
         fig.update_layout(
-            xaxis={"tickvals": np.arange(5, 10 * sorted_table_correlations.shape[1] + 5, 10)},
-            yaxis={"tickvals": np.arange(5, 10 * sorted_table_correlations.shape[0] + 5, 10)},
+            xaxis={"tickvals": np.arange(5, 10 * table_correlations.shape[1] + 5, 10)},
+            yaxis={"tickvals": np.arange(5, 10 * table_correlations.shape[0] + 5, 10)},
         )
 
         dimensions = (
-            sorted_table_correlations.index.to_frame()[["dimension_1", "subdimension_1", "sub_subdimension_1"]]
+            table_correlations.index.to_frame()[["dimension_1", "subdimension_1", "sub_subdimension_1"]]
             .reset_index(drop=True)
             .rename(
                 columns={
@@ -229,23 +222,19 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
             subdimension_margin = -200
             sub_subdimension_margin = 0
 
-        textangles = {"x": 90, "y": 0}
-
         for dimension in dimensions.index.get_level_values("dimension").drop_duplicates():
             min_position = dimensions.loc[dimension].min()
             max_position = dimensions.loc[dimension].max()
 
-            for first_axis, second_axis in [("x", "y"), ("y", "x")]:
+            for direction in [True, False]:
                 line, annotation = add_line_and_annotation(
                     dimension,
-                    first_axis,
-                    second_axis,
                     min_position,
                     max_position,
                     dimension_inner_margin,
                     dimension_outer_margin,
-                    textangles[first_axis],
                     12,
+                    direction,
                 )
 
                 lines.append(line)
@@ -255,17 +244,15 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                     submin_position = dimensions.loc[(dimension, subdimension)].min()
                     submax_position = dimensions.loc[(dimension, subdimension)].max()
 
-                    for first_axis, second_axis in [("x", "y"), ("y", "x")]:
+                    for direction in [True, False]:
                         line, annotation = add_line_and_annotation(
                             subdimension,
-                            first_axis,
-                            second_axis,
                             submin_position,
                             submax_position,
                             subdimension_margin,
                             dimension_inner_margin,
-                            textangles[first_axis],
                             10,
+                            direction,
                         )
 
                         lines.append(line)
@@ -282,34 +269,30 @@ def _fill_graph_tab_all_dimensions(order_by, selected_dimension, data_all_dimens
                             sub_submin_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].min()
                             sub_submax_position = dimensions.loc[(dimension, subdimension, sub_subdimension)].max()
 
-                            for first_axis, second_axis in [("x", "y"), ("y", "x")]:
+                            for direction in [True, False]:
                                 line, annotation = add_line_and_annotation(
                                     sub_subdimension,
-                                    first_axis,
-                                    second_axis,
                                     sub_submin_position,
                                     sub_submax_position,
                                     sub_subdimension_margin,
                                     subdimension_margin,
-                                    textangles[first_axis],
                                     9,
+                                    direction,
                                 )
 
                                 lines.append(line)
                                 annotations.append(annotation)
 
         # The final top/right line
-        for first_axis, second_axis in [("x", "y"), ("y", "x")]:
+        for direction in [True, False]:
             line, _ = add_line_and_annotation(
                 dimension,
-                first_axis,
-                second_axis,
                 min_position,
                 max_position,
                 0,
                 dimension_outer_margin,
-                0,
                 10,
+                direction,
                 final=True,
             )
 

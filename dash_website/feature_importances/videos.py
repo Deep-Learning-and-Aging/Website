@@ -10,20 +10,12 @@ import numpy as np
 
 from dash_website.utils.aws_loader import load_feather
 from dash_website.utils.controls import get_options_from_dict, get_item_radio_items
-from dash_website import ALGORITHMS_RENDERING
+from dash_website import ALGORITHMS
 from dash_website.datasets import CHAMBERS_LEGEND, SEX_LEGEND, AGE_GROUP_LEGEND
 from dash_website.feature_importances import AGING_RATE_LEGEND
 
 
-def get_data_scores():
-    return load_feather("age_prediction_performances/scores_all_samples_per_participant.feather").to_dict()
-
-
-def get_data_features():
-    return load_feather("feature_importances/videos/information.feather").to_dict()
-
-
-def get_controls_videos():
+def get_controls_videos_features():
     return [
         dbc.Col(html.H4("Heart MRI with :"), width="auto"),
         dbc.Col(
@@ -44,7 +36,7 @@ def get_controls_videos():
         Input("memory_scores_features", "data"),
     ],
 )
-def _display_score(chamber_type, data_scores):
+def _display_score_videos_features(chamber_type, data_scores):
     scores_raw = (
         pd.DataFrame(data_scores)
         .set_index(["dimension", "subdimension", "sub_subdimension"])
@@ -57,12 +49,12 @@ def _display_score(chamber_type, data_scores):
 
     title = ""
     for algorithm in scores.index:
-        title += f"The {ALGORITHMS_RENDERING[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
+        title += f"The {ALGORITHMS[algorithm]} has a R² of {scores.loc[algorithm, 'r2']} +- {scores.loc[algorithm, 'r2_std']}. "
 
     return title
 
 
-def get_controls_side_video(side):
+def get_controls_side_video_features(side):
     if side == "left":
         value_idx = 0
     else:  # side == "right":
@@ -87,8 +79,8 @@ def get_controls_side_video(side):
         Input("memory_videos_features", "data"),
     ],
 )
-def _display_left_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
-    return display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos)
+def _display_left_video_features(chamber_type, sex, age_group, aging_rate, data_videos):
+    return display_video_features(chamber_type, sex, age_group, aging_rate, data_videos)
 
 
 @APP.callback(
@@ -101,11 +93,11 @@ def _display_left_gif_features(chamber_type, sex, age_group, aging_rate, data_vi
         Input("memory_videos_features", "data"),
     ],
 )
-def _display_right_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
-    return display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos)
+def _display_right_video_features(chamber_type, sex, age_group, aging_rate, data_videos):
+    return display_video_features(chamber_type, sex, age_group, aging_rate, data_videos)
 
 
-def display_gif_features(chamber_type, sex, age_group, aging_rate, data_videos):
+def display_video_features(chamber_type, sex, age_group, aging_rate, data_videos):
     chronological_age, biological_age = (
         pd.DataFrame(data_videos)
         .set_index(["chamber", "sex", "age_group", "aging_rate"])
@@ -128,21 +120,29 @@ LAYOUT = dbc.Container(
     [
         dcc.Loading(
             [
-                dcc.Store(id="memory_scores_features", data=get_data_scores()),
-                dcc.Store(id="memory_videos_features", data=get_data_features()),
+                dcc.Store(
+                    id="memory_videos_features",
+                    data=load_feather("feature_importances/videos/information.feather").to_dict(),
+                ),
+                dcc.Store(
+                    id="memory_scores_features",
+                    data=load_feather(
+                        "age_prediction_performances/scores_all_samples_per_participant.feather"
+                    ).to_dict(),
+                ),
             ]
         ),
         html.H1("Model interpretability - Videos"),
         html.Br(),
         html.Br(),
-        dbc.Row(get_controls_videos(), justify="center"),
+        dbc.Row(get_controls_videos_features(), justify="center"),
         dbc.Row(html.Br()),
         dbc.Row(html.H2(id="title_videos_features"), justify="center"),
         dbc.Row(html.Br()),
         dbc.Row(
             [
-                dbc.Col(dbc.Card(get_controls_side_video("left")), width={"size": 6}),
-                dbc.Col(dbc.Card(get_controls_side_video("right")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_video_features("left")), width={"size": 6}),
+                dbc.Col(dbc.Card(get_controls_side_video_features("right")), width={"size": 6}),
             ]
         ),
         dbc.Row(

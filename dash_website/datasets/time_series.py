@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 
 from dash_website.utils.aws_loader import load_feather, load_npy
-from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_options_from_list
 from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import (
     TREE_TIME_SERIES,
@@ -63,16 +63,16 @@ def _change_subdimensions(dimension, subdimension):
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_time_series":
         first_subdimension = list(TREE_TIME_SERIES[dimension].keys())[0]
         return (
-            get_options(list(TREE_TIME_SERIES[dimension].keys())),
+            get_options_from_list(list(TREE_TIME_SERIES[dimension].keys())),
             list(TREE_TIME_SERIES[dimension].keys())[0],
-            get_options(TREE_TIME_SERIES[dimension][first_subdimension]),
+            get_options_from_list(TREE_TIME_SERIES[dimension][first_subdimension]),
             TREE_TIME_SERIES[dimension][first_subdimension][0],
         )
     else:
         return (
-            get_options(list(TREE_TIME_SERIES[dimension].keys())),
+            get_options_from_list(list(TREE_TIME_SERIES[dimension].keys())),
             subdimension,
-            get_options(TREE_TIME_SERIES[dimension][subdimension]),
+            get_options_from_list(TREE_TIME_SERIES[dimension][subdimension]),
             TREE_TIME_SERIES[dimension][subdimension][0],
         )
 
@@ -112,7 +112,7 @@ def get_controls_side_time_series(side):
 def _change_channel(dimension, subdimension, sub_subdimension):
     nb_channel = INFORMATION_TIME_SERIES[dimension][subdimension][sub_subdimension]["nb_channel"]
 
-    return [get_options(range(nb_channel)), 0, get_options(range(nb_channel)), 0]
+    return [get_options_from_list(range(nb_channel)), 0, get_options_from_list(range(nb_channel)), 0]
 
 
 @APP.callback(

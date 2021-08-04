@@ -15,15 +15,14 @@ from dash_website.utils.graphs import (
     add_custom_legend_axis,
     histogram_correlation,
 )
-from dash_website.age_prediction_performances import CUSTOM_DIMENSIONS
-from dash_website import DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE
+from dash_website import CUSTOM_DIMENSIONS, DOWNLOAD_CONFIG, ORDER_TYPES, GRAPH_SIZE, DIMENSIONS_SUBDIMENSIONS_INDEXES
 from dash_website.correlation_between import SAMPLE_DEFINITION
 
 
 def get_custom_dimensions():
     return dbc.Container(
         [
-            dcc.Loading(dcc.Store(id="memory_custom_dimensions")),
+            dcc.Loading([dcc.Store(id="memory_custom_dimensions"), dcc.Store(id="memory_scores_custom_dimensions")]),
             html.H1("Phenotype - Correlations"),
             html.Br(),
             html.Br(),
@@ -74,49 +73,31 @@ def get_custom_dimensions():
     Output("memory_custom_dimensions", "data"),
     Input("sample_definition_custom_dimensions", "value"),
 )
-def _modify_store_custom_dimensions(sample_definition):
-    correlations = load_feather(
+def _get_memory_custom_dimensions(sample_definition):
+    return load_feather(
         f"correlation_between_accelerated_aging_dimensions/custom_dimensions_{sample_definition}.feather"
-    ).drop(
-        columns=[
-            "r2_1",
-            "r2_std_1",
-            "r2_2",
-            "r2_std_2",
-        ]
-    )
-    for number in [1, 2]:
-        for dimension, subdimension in [
-            ("Hearing", "HearingTest"),
-            ("BloodCells", "BloodCount"),
-            ("Lungs", "Spirometry"),
-        ]:
-            correlations.loc[correlations[f"dimension_{number}"] == dimension, f"subdimension_{number}"] = subdimension
+    ).to_dict()
 
+
+@APP.callback(
+    Output("memory_scores_custom_dimensions", "data"),
+    Input("sample_definition_custom_dimensions", "value"),
+)
+def _modify_store_custom_dimensions(sample_definition):
     score_sample_definition = sample_definition
     if sample_definition == "all_samples_when_possible_otherwise_average":
         score_sample_definition = "all_samples_per_participant"
-    scores = load_feather(f"age_prediction_performances/scores_{score_sample_definition}.feather").set_index(
-        ["dimension", "subdimension", "sub_subdimension", "algorithm"]
-    )
-    scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
-    scores.drop(index=scores.index[scores.index.get_level_values("algorithm") != "*"], inplace=True)
-    scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
-
-    for number in [1, 2]:
-        correlations.set_index([f"dimension_{number}", f"subdimension_{number}"], inplace=True)
-        correlations[f"r2_{number}"] = scores["r2"]
-        correlations[f"r2_std_{number}"] = scores["r2_std"]
-        correlations.reset_index(inplace=True)
-
-    return correlations.to_dict()
+    return load_feather(f"age_prediction_performances/scores_{score_sample_definition}.feather").to_dict()
 
 
 def get_controls_tab_custom_dimensions():
     return dbc.Card(
         [
             get_item_radio_items(
-                "sample_definition_custom_dimensions", SAMPLE_DEFINITION, "Select the way we define a sample: ", value_idx=2
+                "sample_definition_custom_dimensions",
+                SAMPLE_DEFINITION,
+                "Select the way we define a sample: ",
+                value_idx=2,
             ),
             get_item_radio_items("order_type_custom_dimensions", ORDER_TYPES, "Order by:"),
         ]
@@ -132,18 +113,27 @@ def get_controls_tab_custom_dimensions():
     [
         Input("order_type_custom_dimensions", "value"),
         Input("memory_custom_dimensions", "data"),
+        Input("memory_scores_custom_dimensions", "data"),
     ],
 )
-def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
+def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions, data_scores):
     correlations = pd.DataFrame(data_custom_dimensions)
 
-    custom_dimensions = CUSTOM_DIMENSIONS.droplevel(["sub_subdimension", "algorithm"])
+    scores = pd.DataFrame(data_scores).set_index(["dimension", "subdimension", "sub_subdimension", "algorithm"])
+    scores.drop(index=scores.index[~scores.index.isin(CUSTOM_DIMENSIONS)], inplace=True)
+    scores.reset_index(["sub_subdimension", "algorithm"], drop=True, inplace=True)
+
+    for number in [1, 2]:
+        correlations.set_index([f"dimension_{number}", f"subdimension_{number}"], inplace=True)
+        correlations[f"r2_{number}"] = scores["r2"]
+        correlations[f"r2_std_{number}"] = scores["r2_std"]
+        correlations.reset_index(inplace=True)
 
     table_correlations = correlations.pivot(
         index=["dimension_1", "subdimension_1"],
         columns=["dimension_2", "subdimension_2"],
         values="correlation",
-    ).loc[custom_dimensions, custom_dimensions]
+    ).loc[DIMENSIONS_SUBDIMENSIONS_INDEXES, DIMENSIONS_SUBDIMENSIONS_INDEXES]
     np.fill_diagonal(table_correlations.values, np.nan)
 
     customdata_list = []
@@ -154,7 +144,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
                 columns=["dimension_2", "subdimension_2"],
                 values=customdata_item,
             )
-            .loc[custom_dimensions, custom_dimensions]
+            .loc[DIMENSIONS_SUBDIMENSIONS_INDEXES, DIMENSIONS_SUBDIMENSIONS_INDEXES]
             .values
         )
 
@@ -165,7 +155,7 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
 
     stacked_customdata = list(map(list, np.dstack(customdata_list)))
 
-    customdata = pd.DataFrame(None, index=custom_dimensions, columns=custom_dimensions)
+    customdata = pd.DataFrame(None, index=DIMENSIONS_SUBDIMENSIONS_INDEXES, columns=DIMENSIONS_SUBDIMENSIONS_INDEXES)
     customdata[customdata.columns] = stacked_customdata
 
     hovertemplate = "Correlation: %{z:.3f} +- %{customdata[0]:.3f} <br><br>Dimensions 1: %{x} <br>R²: %{customdata[1]:.3f} +- %{customdata[2]:.3f} <br>Dimensions 2: %{y} <br>R²: %{customdata[3]:.3f} +- %{customdata[4]:.3f}<br><extra></extra>"
@@ -186,7 +176,8 @@ def _fill_graph_tab_custom_dimensions(order_by, data_custom_dimensions):
 
     else:  # order_by == "custom"
         fig = heatmap_by_sorted_dimensions(table_correlations, hovertemplate, customdata)
-        fig = add_custom_legend_axis(fig, table_correlations)
+        fig = add_custom_legend_axis(fig, table_correlations.index)
+        fig = add_custom_legend_axis(fig, table_correlations.index, horizontal=False)
 
     if order_by != "custom":
         fig.update_layout(font={"size": 8})

@@ -11,7 +11,7 @@ from scipy.stats import linregress
 from sklearn.linear_model import LinearRegression
 
 from dash_website.utils.aws_loader import load_feather
-from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_range_slider, get_options
+from dash_website.utils.controls import get_item_radio_items, get_drop_down, get_range_slider, get_options_from_list
 from dash_website import DOWNLOAD_CONFIG
 from dash_website.datasets import TREE_SCALARS, ETHNICITIES, SEX_VALUE, SEX_COLOR
 
@@ -146,16 +146,16 @@ def _change_subdimensions(dimension, subdimension):
     if not context or context[0]["prop_id"].split(".")[0] == "dimension_scalars":
         first_subdimension = list(TREE_SCALARS[dimension].keys())[0]
         return (
-            get_options(list(TREE_SCALARS[dimension].keys())),
+            get_options_from_list(list(TREE_SCALARS[dimension].keys())),
             list(TREE_SCALARS[dimension].keys())[0],
-            get_options(TREE_SCALARS[dimension][first_subdimension]),
+            get_options_from_list(TREE_SCALARS[dimension][first_subdimension]),
             TREE_SCALARS[dimension][first_subdimension][0],
         )
     else:
         return (
-            get_options(list(TREE_SCALARS[dimension].keys())),
+            get_options_from_list(list(TREE_SCALARS[dimension].keys())),
             subdimension,
-            get_options(TREE_SCALARS[dimension][subdimension]),
+            get_options_from_list(TREE_SCALARS[dimension][subdimension]),
             TREE_SCALARS[dimension][subdimension][0],
         )
 
@@ -170,7 +170,7 @@ def get_subcontrols_scalars():
 def _change_feature(scalars_data):
     features = pd.DataFrame(scalars_data).columns.drop(["id", "sex", "chronological_age"] + ETHNICITIES)
 
-    return get_options(features), features[0]
+    return get_options_from_list(features), features[0]
 
 
 @APP.callback(
