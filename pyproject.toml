@@ -1,0 +1,21 @@
+[tool.black]
+exclude = '''
+/(
+    \.devcontainer
+    | \.dockerignore
+    | \.gcloudignore
+    | \.git
+    | \.github
+    | \.gitignore
+    | \.vscode
+    | Dockerfile
+    | LICENSE
+    | README.md
+    | /all_data
+    | dash_website.egg-info
+    | /data
+    | /env_container
+)/
+'''
+line-length = 120
+target-version = ['py39']
