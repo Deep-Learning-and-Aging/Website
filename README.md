@@ -22,7 +22,6 @@ If you are using Visual Studio Code, a [.devcontainer](.devcontainer) folder is 
 
 Feel free to discuss about you ideas in the [discussion section](https://github.com/Deep-Learning-and-Aging/Website/discussions).
 
-
 ## Structure of the website
 The website is constructed as follows :
 
