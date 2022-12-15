@@ -1,7 +1,6 @@
 # Welcome to the repository of the [Website](https://www.multidimensionality-of-aging.net/) that shows the paper's results
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fmultidimensionality-of-aging.net%2F)](https://multidimensionality-of-aging.net/)
-[![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCEUEAd-MoVx30rbQfluDxmg?label=seminar%20presentation)](https://www.youtube.com/watch?v=VqQtQxkwzNo&t=1178s)
 [![Super linter](https://github.com/Deep-Learning-and-Aging/Website/actions/workflows/linter.yml/badge.svg)](https://github.com/Deep-Learning-and-Aging/Website/actions/workflows/linter.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/a23507ac9d9b47feaf9ed05306d0a71c)](https://www.codacy.com/gh/Deep-Learning-and-Aging/Website/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Deep-Learning-and-Aging/Website&amp;utm_campaign=Badge_Grade)
 
