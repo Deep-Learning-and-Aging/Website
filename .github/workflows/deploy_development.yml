@@ -13,7 +13,7 @@ jobs:
 
       - name: Get the AWS credentials from Google Secret Manager
         id: gcp_secrets
-        uses: google-github-actions/get-secretmanager-secrets@main
+        uses: google-github-actions/get-secretmanager-secrets@v0.3.1
         with:
           credentials: ${{ secrets.GCP_SA_KEY }}
           secrets: |-
