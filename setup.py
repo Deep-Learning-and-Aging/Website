@@ -5,7 +5,7 @@ setup(
     version="0.1",
     description="Website that shows the results on multi-dimensionality of aging.",
     packages=["dash_website"],
-    requires=["setuptools==57.0.0", "wheel==0.36.2"],
+    requires=["setuptools", "wheel"],
     install_requires=[
         "gunicorn==20.1.0",
         "dash_bootstrap_components==0.13.0",
