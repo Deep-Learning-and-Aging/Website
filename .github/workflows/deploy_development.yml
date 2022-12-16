@@ -55,11 +55,15 @@ jobs:
           creds: ${{ secrets.GCP_SA_KEY }}
           src: local_gcr.io/age-prediction-306519/website:dev
           dst: gcr.io/age-prediction-306519/website:dev
+          
+      - name: Authenticate to GCP
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Deploy on cloud Run
-        uses: google-github-actions/deploy-cloudrun@v0.7.0
+        uses: google-github-actions/deploy-cloudrun@v1.0.0
         with:
-          credentials: ${{ secrets.GCP_SA_KEY }}
           service: website
           image: gcr.io/age-prediction-306519/website:dev
           tag: dev
