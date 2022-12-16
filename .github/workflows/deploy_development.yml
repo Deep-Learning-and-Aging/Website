@@ -57,7 +57,7 @@ jobs:
           dst: gcr.io/age-prediction-306519/website:dev
 
       - name: Deploy on cloud Run
-        uses: google-github-actions/deploy-cloudrun@main
+        uses: google-github-actions/deploy-cloudrun@v0.7.0
         with:
           credentials: ${{ secrets.GCP_SA_KEY }}
           service: website
