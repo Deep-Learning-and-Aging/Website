@@ -29,7 +29,7 @@ setup(
         "kiwisolver==1.3.1",
         "MarkupSafe==2.0.1",
         "matplotlib==3.4.2",
-        "numpy==1.21.1",
+        "numpy==1.22.0",
         "pandas==1.3.1",
         "Pillow==8.3.1",
         "pip==21.1.3",
