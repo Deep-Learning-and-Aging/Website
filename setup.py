@@ -45,7 +45,7 @@ setup(
         "sklearn==0.0",
         "tenacity==8.0.1",
         "threadpoolctl==2.2.0",
-        "urllib3==1.26.6",
+        "urllib3==2.6.0",
         "Werkzeug==2.0.1",
     ],
     extras_require={
