@@ -46,7 +46,7 @@ setup(
         "tenacity==8.0.1",
         "threadpoolctl==2.2.0",
         "urllib3==1.26.6",
-        "Werkzeug==2.0.1",
+        "Werkzeug==3.1.5",
     ],
     extras_require={
         "dev": ["tqdm", "openpyxl", "ipykernel", "nbformat", "black", "pyyaml"],
