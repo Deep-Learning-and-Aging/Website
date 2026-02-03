@@ -32,7 +32,7 @@ setup(
         "numpy==1.21.1",
         "pandas==1.3.1",
         "Pillow==8.3.1",
-        "pip==21.1.3",
+        "pip==26.0",
         "plotly==5.1.0",
         "pyarrow==5.0.0",
         "pyparsing==2.4.7",
