@@ -18,7 +18,7 @@ setup(
         "dash-gif-component==1.1.0",
         "dash-html-components==1.1.4",
         "dash-table==4.12.0",
-        "Flask==2.0.1",
+        "Flask==3.1.3",
         "Flask-Compress==1.10.1",
         "future==0.18.2",
         "gunicorn==20.1.0",
